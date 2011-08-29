@@ -1,4 +1,4 @@
-<application id="unnamed">
+<application id="BsxCuBE">
     <properties id="CalibrationDiamondBrick1">
      <property name="flex" value="0"/>
      <property name="caption" value="Calibration diamond"/>
@@ -294,7 +294,7 @@
      <property name="show_button" value="True"/>
      <property name="show_state" value="True"/>
   </properties>
-  <properties id="unnamed">
+  <properties id="BsxCuBE">
      <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value=""/>
@@ -744,7 +744,7 @@
     </connection>
   </connections>
 
-  <connections id="unnamed">
+  <connections id="BsxCuBE">
   </connections>
 
   <connections id="MachineCurrentBrick1">
