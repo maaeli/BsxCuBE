@@ -16,12 +16,10 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                                             [Signal("calibrationStatusChanged", "calibrationStatusChanged"),
                                              Signal("newPositionChanged", "newPositionChanged")],
                                             [Slot("executeCalibration")],
-                                            "connectionStatusChanged"),
+                                            "calibrationObjectConnected"),
                     "login": Connection("Login object",
                                             [Signal("expertModeChanged", "expertModeChanged")],
-                                             [],
-                                             "connectionStatusChanged")}
-    
+                                             [])}
   
     signals = []
     slots = []
@@ -101,7 +99,5 @@ class CalibrationDiamondBrick(Core.BaseBrick):
           self.brick_widget.setEnabled(False)
         else:
           self.brick_widget.setEnabled(True)
-    def connectionStatusChanged(self, pPeer):        
-        pass
 
 
