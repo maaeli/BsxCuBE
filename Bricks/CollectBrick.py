@@ -1,22 +1,3 @@
-# 
-#  Filename :  CollectBrick.py
-#
-#  Description:    For the moment it includes classes for the BsxCuBE collection.
-#                 Bricks, widget and control are all mixed together
-#--------------------------------------------------------------------------
-# Version:        2.0
-# Date:           26 January 2011
-# Author:         Vicente Rey Bakaikoa
-# Original:       Ricardo Nogueira, Thomas Boeglin
-# Copyright:      (c) ESRF - 2011
-#--------------------------------------------------------------------------
-# History:
-#     26/Jan/2011  Undergoing severe rewriting
-#
-#     CollectRobotDialog, CollectRobotObject and other small classes taken out
-#
-#===========================================================================
-
 import sys, os, time, logging, exceptions
 
 from Framework4.GUI      import Core
@@ -139,13 +120,7 @@ class DisplayCurve:
                     # this is just for adding 1 s. more before really trying to open the file
                     self.do_display = True
                     
-######################
-#  Collect Brick in main  panel (not dialog)
-######################
 class CollectBrick(Core.BaseBrick):
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================        
     properties = {}
     connections = {"collect": Connection("Collect object",
                                              [Signal("collectDirectoryChanged",     "collectDirectoryChanged"),
@@ -171,7 +146,7 @@ class CollectBrick(Core.BaseBrick):
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort")],
-                                            "connectionStatusChanged"),
+                                            "collectObjectConnected"),
                     "login": Connection("Login object",
                                             [Signal("expertModeChanged", "expertModeChanged")],
                                              [],
@@ -741,6 +716,11 @@ class CollectBrick(Core.BaseBrick):
     def doShowMessage(self, argdict=None):
         r = self.showMessage(*argdict['args']) 
         argdict['returned'] = r
+
+    def collectObjectConnected(self, collect_obj):
+        self.collectObj = collect_obj
+        if self.collectObj is not None:
+          self.collectObj.updateChannels() 
 
     #
     #  Other
