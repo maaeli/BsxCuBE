@@ -25,14 +25,7 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
 import logging
 
-
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class Collect(CObjectBase):
-    
-
-
     __CHANNEL_LIST = ["collectDirectoryChanged",
                      "collectPrefixChanged",
                      "collectRunNumberChanged",
@@ -54,12 +47,6 @@ class Collect(CObjectBase):
                      "checkBeamChanged",
                      "beamLostChanged",
                      "abortCollectChanged"]
-    
-
-
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================
     signals = [Signal(channel) for channel in __CHANNEL_LIST]                   
     
     slots = [Slot("testCollect"),
@@ -67,25 +54,9 @@ class Collect(CObjectBase):
              Slot("collectAbort"),
              Slot("setCheckBeam")]
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================    
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
 
-    def init(self):
-        for channel in self.__CHANNEL_LIST:
-            try:
-                value = self.channels.get(channel[:-7])
-                setattr(self, channel[:-7], value)
-                if value is not None:
-                    getattr(self, channel[:-7]).connect("update", getattr(self, channel))
-            except:
-                pass
-              
-    # =============================================
-    #  COMMANDS
-    # =============================================      
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
@@ -138,72 +109,14 @@ class Collect(CObjectBase):
     def setCheckBeam(self, flag):
         logging.info("changing check beam in spec to %s" % flag) 
         if flag:
-           self.checkBeam.set_value(1)
+            self.channels["checkBeam"].set_value(1)
         else:
-           self.checkBeam.set_value(0)
+            self.channels["checkBeam"].set_value(0)
 
-    # =============================================
-    #  CHANNELS
-    # =============================================
-    def abortCollectChanged(self, pValue):
-        self.emit("abortCollectChanged", pValue)
+    # overwrite connectNotify ; first values will be read by brick
+    def connectNotify(self, signal_name):
+        pass
 
-    def checkBeamChanged(self, pValue):
-        self.emit("checkBeamChanged", pValue)
-
-    def collectDirectoryChanged(self, pValue):
-        self.emit("collectDirectoryChanged", pValue)
-      
-    def collectPrefixChanged(self, pValue):
-        self.emit("collectPrefixChanged", pValue)
-        
-    def collectRunNumberChanged(self, pValue):
-        self.emit("collectRunNumberChanged", pValue)
-        
-    def collectNumberFramesChanged(self, pValue):
-        self.emit("collectNumberFramesChanged", pValue)
-
-    def collectTimePerFrameChanged(self, pValue):
-        self.emit("collectTimePerFrameChanged", pValue)        
-
-    def collectConcentrationChanged(self, pValue):
-        self.emit("collectConcentrationChanged", pValue)        
-
-    def collectCommentsChanged(self, pValue):
-        self.emit("collectCommentsChanged", pValue)        
-                
-    def collectCodeChanged(self, pValue):
-        self.emit("collectCodeChanged", pValue)        
-
-    def collectMaskFileChanged(self, pValue):
-        self.emit("collectMaskFileChanged", pValue)
-
-    def collectDetectorDistanceChanged(self, pValue):
-        self.emit("collectDetectorDistanceChanged", pValue)        
-
-    def collectWaveLengthChanged(self, pValue):
-        self.emit("collectWaveLengthChanged", pValue)
-
-    def collectPixelSizeXChanged(self, pValue):
-        self.emit("collectPixelSizeXChanged", pValue)        
-
-    def collectPixelSizeYChanged(self, pValue):
-        self.emit("collectPixelSizeYChanged", pValue)        
-                                
-    def collectBeamCenterXChanged(self, pValue):
-        self.emit("collectBeamCenterXChanged", pValue)        
-
-    def collectBeamCenterYChanged(self, pValue):
-        self.emit("collectBeamCenterYChanged", pValue)
-        
-    def collectNormalisationChanged(self, pValue):
-        self.emit("collectNormalisationChanged", pValue)        
-
-    def collectProcessDataChanged(self, pValue):
-        self.emit("collectProcessDataChanged", pValue)        
-                                                      
-    def collectNewFrameChanged(self, pValue):
-        self.emit("collectNewFrameChanged", pValue)
-
-    def beamLostChanged(self, pValue):
-        self.emit("beamLostChanged", pValue)
+    def updateChannels(self):
+        for channel_name, channel in self.channels.iteritems():
+            channel.update(channel.value())
