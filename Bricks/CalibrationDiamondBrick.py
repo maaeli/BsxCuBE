@@ -1,55 +1,11 @@
-"""
-=============================================
-  NAME       : Calibration Diamond Brick (CalibrationDiamondBrick.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
+import logging
+from Framework4.GUI import Core
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot       
+from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
 
-  REVISION   : 0
-
-  RELEASE    : 2010/ABR/14
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
-
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    import logging
-    from Framework4.GUI import Core
-    from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot       
-    from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-# =============================================
-#  BLISS FRAMEWORK CATEGORY
-# =============================================
 __category__ = "General"
 
-
-
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class CalibrationDiamondBrick(Core.BaseBrick):
-    
-    
-
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================            
     properties = {"caption": Property("string", "Caption", "", "captionChanged"),
                   "parameter": Property("string", "Parameter", "", "parameterChanged"),                  
                   "toolTip": Property("string", "Tool tip", "", "toolTipChanged"),
@@ -67,30 +23,13 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                                              "connectionStatusChanged")}
     
   
-
-    
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================      
     signals = []
     slots = []
-    
-    
 
-
-
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
-            
-           
-        
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
+
     def init(self):
         self.__parameter = ""
         self.__toolTip = ""
@@ -98,18 +37,14 @@ class CalibrationDiamondBrick(Core.BaseBrick):
         self.__expertMode = False
         self.__setPosition = False
         self.__newPosition = 0
-        
+        self.calibration_object = None
+
         self.brick_widget.setLayout(Qt.QVBoxLayout())
         self.commandPushButton = Qt.QPushButton(self.brick_widget)
         Qt.QObject.connect(self.commandPushButton, Qt.SIGNAL("clicked()"), self.commandPushButtonClicked)
         self.brick_widget.layout().addWidget(self.commandPushButton)
-        
 
 
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
     def captionChanged(self, pValue):
         self.commandPushButton.setText(pValue)
 
@@ -128,14 +63,9 @@ class CalibrationDiamondBrick(Core.BaseBrick):
         self.expertModeChanged(self.__expertMode)
 
 
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================
     def commandPushButtonClicked(self):
         self.__setPosition = True
-        self.getObject("calibration").executeCalibration(self.__parameter)
-
+        self.calibration_object.executeCalibration(self.__parameter)
 
 
     def calibrationStatusChanged(self, pValue): 
@@ -149,7 +79,6 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                 logging.getLogger().error(messageList[1])
                 
                 
-                
     def newPositionChanged(self, pValue):        
         self.__newPosition = pValue          
         if self.__setPosition:
@@ -160,14 +89,18 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                 if Qt.QMessageBox.question(self.brick_widget, "Info", "Do you accept '%s' as the inflexion point?" % self.__newPosition, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:    
                     self.getObject("calibration").setPosition(self.__newPosition)
                 
-                
    
     def expertModeChanged(self, pValue):
         self.__expertMode = pValue
         self.commandPushButton.setEnabled(not self.__expertModeOnly or self.__expertMode)
-                    
    
    
+    def calibrationObjectConnected(self, peer):        
+        self.calibration_object = peer 
+        if self.calibration_object is None:
+          self.brick_widget.setEnabled(False)
+        else:
+          self.brick_widget.setEnabled(True)
     def connectionStatusChanged(self, pPeer):        
         pass
 
