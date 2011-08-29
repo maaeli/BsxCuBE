@@ -1,0 +1,819 @@
+<application id="unnamed">
+    <properties id="CalibrationDiamondBrick1">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Calibration diamond"/>
+     <property name="parameter" value="1"/>
+     <property name="toolTip" value="Execute calibration of diamond"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="MotorAlignmentBrick1">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Mini-hutch slit alignment"/>
+     <property name="toolTip" value="Execute mini-hutch slit alignment"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="tabbox1">
+     <property name="flex" value="1"/>
+     <property name="notification" value="switch to tab"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="vgroupbox1">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Log"/>
+  </properties>
+  <properties id="vgroupbox2">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Operation"/>
+  </properties>
+  <properties id="vgroupbox3">
+     <property name="flex" value="2"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Display"/>
+  </properties>
+  <properties id="vgroupbox4">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Misc"/>
+  </properties>
+  <properties id="BsxSCBrick1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="BsxFrameBrick1">
+     <property name="flex" value="1"/>
+  </properties>
+  <properties id="MotorAlignmentBrick4">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Beam stop alignment"/>
+     <property name="toolTip" value="Execute beam stop alignment"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="MotorAlignmentBrick3">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Experimental hutch 2 slit alignment"/>
+     <property name="toolTip" value="Execute experimental hutch 2 slit alignment"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="MotorAlignmentBrick2">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Experimental hutch 1 slit alignment"/>
+     <property name="toolTip" value="Execute experimental hutch 1 slit alignment"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="BrowseBrick1">
+     <property name="flex" value="0"/>
+     <property name="enableType" value="True"/>
+  </properties>
+  <properties id="CommandBrick3">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Sample changer air"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute sample changer air"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="CommandBrick2">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Sample alignment"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute sample alignment"/>
+     <property name="expertModeOnly" value="False"/>
+  </properties>
+  <properties id="CommandBrick1">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Quick realignment"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute quick realignment"/>
+     <property name="expertModeOnly" value="False"/>
+  </properties>
+  <properties id="vbox5">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Beamline"/>
+  </properties>
+  <properties id="CommandBrick6">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Flight tube vacuum"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute flight tube vacuum"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="CommandBrick5">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Flight tube air"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute flight tube air"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="CommandBrick4">
+     <property name="flex" value="0"/>
+     <property name="caption" value="Sample changer vacuum"/>
+     <property name="parameter" value=""/>
+     <property name="toolTip" value="Execute sample changer vacuum"/>
+     <property name="expertModeOnly" value="True"/>
+  </properties>
+  <properties id="vbox8">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="2D"/>
+  </properties>
+  <properties id="vbox9">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Robot"/>
+  </properties>
+  <properties id="hbox1">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="vbox2">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Collect"/>
+  </properties>
+  <properties id="vbox3">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Reprocess"/>
+  </properties>
+  <properties id="window1">
+     <property name="minwidth" value="100"/>
+     <property name="width" value="100"/>
+     <property name="height" value="100"/>
+     <property name="minheight" value="100"/>
+     <property name="title" value="BsxCuBE"/>
+  </properties>
+  <properties id="vbox1">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="vbox6">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="EH Scan"/>
+  </properties>
+  <properties id="vbox7">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="1D"/>
+  </properties>
+  <properties id="vbox4">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Browse"/>
+  </properties>
+  <properties id="CollectBrick1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="vbox10">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="OH Scan"/>
+  </properties>
+  <properties id="splitter1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="tabbox2">
+     <property name="flex" value="1"/>
+     <property name="notification" value="switch to tab"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="AttenuatorsBrick1">
+     <property name="flex" value="0"/>
+     <property name="maskFormat" value="%3.5f"/>
+     <property name="suffix" value=" %"/>
+     <property name="maximumValue" value="100.0"/>
+     <property name="maximumHistory" value="10"/>
+     <property name="minimumValue" value="0.0"/>
+     <property name="orientation" value="Landscape"/>
+  </properties>
+  <properties id="HutchTrigger1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="GraphBrick2">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="EH"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="14"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
+  <properties id="GraphBrick3">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Process Graph"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="14"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
+  <properties id="GraphBrick1">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Optics"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="15"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
+  <properties id="ShutterBrick3">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="ms"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
+  </properties>
+  <properties id="ShutterBrick2">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="guillotine"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
+  </properties>
+  <properties id="ShutterBrick1">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="sh"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
+  </properties>
+  <properties id="unnamed">
+     <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
+     <property name="objects_server" value="localhost:6667"/>
+     <property name="expert_password" value=""/>
+  </properties>
+  <properties id="MachineCurrentBrick1">
+     <property name="flex" value="0"/>
+     <property name="maskFormat" value="%3.2f"/>
+     <property name="suffix" value=" mA"/>
+     <property name="showFillMode" value="True"/>
+     <property name="currentThreshold" value="1.0"/>
+     <property name="fontSize" value="24"/>
+  </properties>
+  <properties id="ReadingBrick1">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in up-stream tube"/>
+     <property name="fontSize" value="24"/>
+  </properties>
+  <properties id="ReadingBrick2">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in sample changer expose unit"/>
+     <property name="fontSize" value="24"/>
+  </properties>
+  <properties id="ReadingBrick3">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in flight tube"/>
+     <property name="fontSize" value="24"/>
+  </properties>
+  <properties id="LoginBrick1">
+     <property name="flex" value="0"/>
+     <property name="password" value="tonic14"/>
+     <property name="orientation" value="Landscape"/>
+  </properties>
+  <properties id="BsxVideoBrick1">
+     <property name="flex" value="1"/>
+  </properties>
+  <properties id="ReprocessBrick1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="LogBrick1">
+     <property name="flex" value="0"/>
+     <property name="minimum_level" value="INFO"/>
+  </properties>
+    <connections id="CalibrationDiamondBrick1">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="calibration">
+      <signal name="calibrationStatusChanged"/>
+      <signal name="newPositionChanged"/>
+      <slot name="executeCalibration"/>
+      <peer name="CalibrationDiamond"/>
+    </connection>
+  </connections>
+
+  <connections id="MotorAlignmentBrick1">
+    <connection role="motoralignment">
+      <signal name="motorPositionChanged"/>
+      <slot name="moveMotor"/>
+      <peer name="MotorAlignmentSM"/>
+    </connection>
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="tabbox1">
+  </connections>
+
+  <connections id="vgroupbox1">
+  </connections>
+
+  <connections id="vgroupbox2">
+  </connections>
+
+  <connections id="vgroupbox3">
+  </connections>
+
+  <connections id="vgroupbox4">
+  </connections>
+
+  <connections id="BsxSCBrick1">
+    <connection role="samplechanger">
+      <signal name="seuTemperatureChanged"/>
+      <signal name="storageTemperatureChanged"/>
+      <signal name="stateChanged"/>
+      <peer name="SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="BsxFrameBrick1">
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <peer name="BrowseBrick1"/>
+      <peer name="ReprocessBrick1"/>
+      <peer name="CollectBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="MotorAlignmentBrick4">
+    <connection role="motoralignment">
+      <signal name="motorPositionChanged"/>
+      <slot name="moveMotor"/>
+      <peer name="MotorAlignmentBS"/>
+    </connection>
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="MotorAlignmentBrick3">
+    <connection role="motoralignment">
+      <signal name="motorPositionChanged"/>
+      <slot name="moveMotor"/>
+      <peer name="MotorAlignmentS2"/>
+    </connection>
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="MotorAlignmentBrick2">
+    <connection role="motoralignment">
+      <signal name="motorPositionChanged"/>
+      <slot name="moveMotor"/>
+      <peer name="MotorAlignmentS1"/>
+    </connection>
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="BrowseBrick1">
+    <connection role="browse">
+      <signal name="browseTypeChanged"/>
+      <signal name="browseLocationChanged"/>
+      <peer name="Browse"/>
+    </connection>
+    <connection role="image_proxy">
+      <slot name="load_files"/>
+      <peer name="image_proxy"/>
+    </connection>
+  </connections>
+
+  <connections id="CommandBrick3">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandSCAir"/>
+    </connection>
+  </connections>
+
+  <connections id="CommandBrick2">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandSampleAlignment"/>
+    </connection>
+  </connections>
+
+  <connections id="CommandBrick1">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandQuickRealignment"/>
+    </connection>
+  </connections>
+
+  <connections id="vbox5">
+  </connections>
+
+  <connections id="CommandBrick6">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandFTVacuum"/>
+    </connection>
+  </connections>
+
+  <connections id="CommandBrick5">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandFTAir"/>
+    </connection>
+  </connections>
+
+  <connections id="CommandBrick4">
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="command">
+      <signal name="commandStatusChanged"/>
+      <slot name="executeCommand"/>
+      <peer name="CommandSCVacuum"/>
+    </connection>
+  </connections>
+
+  <connections id="vbox8">
+  </connections>
+
+  <connections id="vbox9">
+  </connections>
+
+  <connections id="hbox1">
+  </connections>
+
+  <connections id="vbox2">
+  </connections>
+
+  <connections id="vbox3">
+  </connections>
+
+  <connections id="window1">
+  </connections>
+
+  <connections id="vbox1">
+  </connections>
+
+  <connections id="vbox6">
+  </connections>
+
+  <connections id="vbox7">
+  </connections>
+
+  <connections id="vbox4">
+  </connections>
+
+  <connections id="CollectBrick1">
+    <connection role="motoralignment">
+      <signal name="executeTestCollect"/>
+      <peer name="MotorAlignmentBrick1"/>
+      <peer name="MotorAlignmentBrick2"/>
+      <peer name="MotorAlignmentBrick3"/>
+      <peer name="MotorAlignmentBrick4"/>
+    </connection>
+    <connection role="collect">
+      <signal name="collectDirectoryChanged"/>
+      <signal name="collectPrefixChanged"/>
+      <signal name="collectRunNumberChanged"/>
+      <signal name="collectNumberFramesChanged"/>
+      <signal name="collectTimePerFrameChanged"/>
+      <signal name="collectConcentrationChanged"/>
+      <signal name="collectCommentsChanged"/>
+      <signal name="collectCodeChanged"/>
+      <signal name="collectMaskFileChanged"/>
+      <signal name="collectDetectorDistanceChanged"/>
+      <signal name="collectWaveLengthChanged"/>
+      <signal name="collectPixelSizeXChanged"/>
+      <signal name="collectPixelSizeYChanged"/>
+      <signal name="collectBeamCenterXChanged"/>
+      <signal name="collectBeamCenterYChanged"/>
+      <signal name="collectNormalisationChanged"/>
+      <signal name="collectProcessDataChanged"/>
+      <signal name="collectNewFrameChanged"/>
+      <signal name="checkBeamChanged"/>
+      <signal name="beamLostChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <peer name="Collect"/>
+    </connection>
+    <connection role="login">
+      <signal name="expertModeChanged"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="image_proxy">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+      <peer name="image_proxy"/>
+    </connection>
+    <connection role="sample_changer">
+      <peer name="SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="vbox10">
+  </connections>
+
+  <connections id="splitter1">
+  </connections>
+
+  <connections id="tabbox2">
+  </connections>
+
+  <connections id="AttenuatorsBrick1">
+    <connection role="Collect">
+      <signal name="transmissionChanged"/>
+      <peer name="Attenuators"/>
+      <peer name="CollectBrick1"/>
+    </connection>
+    <connection role="attenuators">
+      <signal name="attenuatorsStateChanged"/>
+      <signal name="attenuatorsFactorChanged"/>
+      <peer name="Attenuators"/>
+    </connection>
+  </connections>
+
+  <connections id="HutchTrigger1">
+    <connection role="hutchtrigger">
+      <signal name="trigger_toggled"/>
+      <signal name="door_state_changed"/>
+      <slot name="toggle_trigger"/>
+      <slot name="trigger_state"/>
+      <slot name="door_state"/>
+      <peer name="hutchtrigger"/>
+    </connection>
+  </connections>
+
+  <connections id="GraphBrick2">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="scan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
+  <connections id="GraphBrick3">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+      <peer name="image_proxy"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
+  <connections id="GraphBrick1">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="optscan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
+  <connections id="ShutterBrick3">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="ShutterMS"/>
+    </connection>
+  </connections>
+
+  <connections id="ShutterBrick2">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="ShutterGuillotine"/>
+    </connection>
+  </connections>
+
+  <connections id="ShutterBrick1">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="ShutterSH"/>
+    </connection>
+  </connections>
+
+  <connections id="unnamed">
+  </connections>
+
+  <connections id="MachineCurrentBrick1">
+    <connection role="machinecurrent">
+      <signal name="machine_info_updated"/>
+      <peer name="ESRFMachinfo"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick1">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="ReadingVacUpStreamTube"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick2">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="ReadingVacSCExposeUnit"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick3">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="ReadingVacFlightTube"/>
+    </connection>
+  </connections>
+
+  <connections id="LoginBrick1">
+  </connections>
+
+  <connections id="BsxVideoBrick1">
+    <connection role="samplechanger">
+      <peer name="SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="ReprocessBrick1">
+    <connection role="reprocess">
+      <signal name="reprocessDetectorChanged"/>
+      <signal name="reprocessOperationChanged"/>
+      <signal name="reprocessDirectoryChanged"/>
+      <signal name="reprocessPrefixChanged"/>
+      <signal name="reprocessRunNumberChanged"/>
+      <signal name="reprocessFrameFirstChanged"/>
+      <signal name="reprocessFrameLastChanged"/>
+      <signal name="reprocessConcentrationChanged"/>
+      <signal name="reprocessCommentsChanged"/>
+      <signal name="reprocessCodeChanged"/>
+      <signal name="reprocessMaskFileChanged"/>
+      <signal name="reprocessDetectorDistanceChanged"/>
+      <signal name="reprocessWaveLengthChanged"/>
+      <signal name="reprocessPixelSizeXChanged"/>
+      <signal name="reprocessPixelSizeYChanged"/>
+      <signal name="reprocessBeamCenterXChanged"/>
+      <signal name="reprocessBeamCenterYChanged"/>
+      <signal name="reprocessNormalisationChanged"/>
+      <signal name="reprocessBeamStopDiodeChanged"/>
+      <signal name="reprocessMachineCurrentChanged"/>
+      <signal name="reprocessKeepOriginalChanged"/>
+      <signal name="reprocessStatusChanged"/>
+      <slot name="reprocess"/>
+      <peer name="Reprocess"/>
+    </connection>
+  </connections>
+
+  <connections id="LogBrick1">
+  </connections>
+
+  </application>

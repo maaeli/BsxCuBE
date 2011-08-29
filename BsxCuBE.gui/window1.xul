@@ -1,0 +1,109 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<window id="window1" xmlns:html="http://www.w3.org/1999/xhtml" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <vbox id="vbox1" orient="vertical">
+  <hbox id="hbox1" orient="horizontal">
+  <vgroupbox id="vgroupbox2" orient="vertical">
+  <caption label="Operation"/>
+  <tabbox id="tabbox1">
+    <tabs>
+      <tab label='Collect'/>
+<tab label='Reprocess'/>
+<tab label='Browse'/>
+<tab label='Beamline'/>
+    </tabs>
+    <tabpanels>
+      <tabpanel id='tab_vbox2'><vbox id="vbox2" orient="vertical">
+  <hbox qwidget="true" id="CollectBrick1" brick="true"><script src="CollectBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ShutterBrick1" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="AttenuatorsBrick1" brick="true"><script src="AttenuatorsBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox3'><vbox id="vbox3" orient="vertical">
+  <hbox qwidget="true" id="ReprocessBrick1" brick="true"><script src="ReprocessBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox4'><vbox id="vbox4" orient="vertical">
+  <hbox qwidget="true" id="BrowseBrick1" brick="true"><script src="BrowseBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox5'><vbox id="vbox5" orient="vertical">
+  <hbox qwidget="true" id="CalibrationDiamondBrick1" brick="true"><script src="CalibrationDiamondBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick1" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ShutterBrick2" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="MotorAlignmentBrick1" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="MotorAlignmentBrick2" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="MotorAlignmentBrick3" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="MotorAlignmentBrick4" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick2" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick3" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick4" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick5" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="CommandBrick6" brick="true"><script src="CommandBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ShutterBrick3" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+    </tabpanels>
+  </tabbox>
+  
+</vgroupbox>
+  
+<vgroupbox id="vgroupbox3" orient="vertical">
+  <caption label="Display"/>
+  <tabbox id="tabbox2">
+    <tabs>
+      <tab label='EH Scan'/>
+<tab label='OH Scan'/>
+<tab label='1D'/>
+<tab label='2D'/>
+<tab label='Robot'/>
+    </tabs>
+    <tabpanels>
+      <tabpanel id='tab_vbox6'><vbox id="vbox6" orient="vertical">
+  <hbox qwidget="true" id="GraphBrick2" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox10'><vbox id="vbox10" orient="vertical">
+  <hbox qwidget="true" id="GraphBrick1" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox7'><vbox id="vbox7" orient="vertical">
+  <hbox qwidget="true" id="GraphBrick3" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox8'><vbox id="vbox8" orient="vertical">
+  <hbox qwidget="true" id="BsxFrameBrick1" brick="true"><script src="BsxFrameBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_vbox9'><vbox id="vbox9" orient="vertical">
+  <hbox qwidget="true" id="BsxVideoBrick1" brick="true"><script src="BsxVideoBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="BsxSCBrick1" brick="true"><script src="BsxSCBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+    </tabpanels>
+  </tabbox>
+  
+</vgroupbox>
+  
+<vgroupbox id="vgroupbox4" orient="vertical">
+  <caption label="Misc"/>
+  <hbox qwidget="true" id="LoginBrick1" brick="true"><script src="LoginBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="MachineCurrentBrick1" brick="true"><script src="MachineCurrentBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ReadingBrick1" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ReadingBrick2" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="ReadingBrick3" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="HutchTrigger1" brick="true"><script src="HutchTrigger" tau="false"/></hbox>
+</vgroupbox>
+  
+</hbox>
+  
+<splitter id="splitter1"/>
+<vgroupbox id="vgroupbox1" orient="vertical">
+  <caption label="Log"/>
+  <hbox qwidget="true" id="LogBrick1" brick="true"><script src="LogBrick" tau="false"/></hbox>
+</vgroupbox>
+  
+</vbox>
+  
+</window>
+  
