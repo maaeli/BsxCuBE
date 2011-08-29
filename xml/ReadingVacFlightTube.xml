@@ -1,0 +1,7 @@
+<object class = "Reading" username = "ReadingVacFlightTube" local="false">
+
+   <uri>id14/pir/71a</uri>
+
+   <channel name="reading" type="taco" call="DevReadSigValues" polling="2000"/>
+
+</object>	

@@ -1,0 +1,5 @@
+<object class = "SpecScan" username = "EH3 scans">
+   <uri>agatha:eh3</uri>
+   <channel name="newscan" type="spec" call="_SC_NEWSCAN"/>
+   <channel name="newscanpoint" type="spec" call="_SC_NEWPLOTDATA"/>
+</object>

@@ -1,0 +1,10 @@
+<object class = "Shutter" username = "ShutterSH" local="false">
+	
+   <uri>id14/bsh/3</uri> 
+
+   <command name="open" type="taco" call="DevOpen"/>
+   <command name="close" type="taco" call="DevClose"/>
+   <channel name="state" type="taco" call="DevState" polling="1000"/>
+   <channel name="status" type="taco" call="DevStatus"/>
+</object>	
+

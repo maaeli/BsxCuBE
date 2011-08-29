@@ -1,0 +1,4 @@
+<object username = "Spec Vicente">
+   <command name="run"   uri="agatha:vicente" slot="run" type="spec" call="mymac"/>
+   <channel name="state" uri="agatha:vicente" signal="specRunStateChanged" type="spec" call="SPEC_STATUS"/>
+</object>

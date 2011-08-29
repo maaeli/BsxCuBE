@@ -1,0 +1,9 @@
+<object class = "Command" username = "CommandSCVacuum">
+	
+   <uri>agatha:eh3</uri> 
+	
+   <command name="command" type="spec" call="SCVacuum"/>
+	
+   <channel name="commandStatus" type="spec" call="BSX_GLOBAL/command/SCVacuumStatus"/>	
+
+</object>	

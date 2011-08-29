@@ -1,0 +1,29 @@
+<object class = "Collect" username = "Collect" local="false">
+	
+   <uri>agatha:eh3</uri>	
+
+   <command name="testCollect"            type="spec" call="testCollect"/>
+   <command name="collect"                type="spec" call="collect"/>	
+
+   <channel name="collectDirectory"       type="spec" call="BSX_GLOBAL/collect/directory"/>
+   <channel name="collectPrefix"          type="spec" call="BSX_GLOBAL/collect/prefix"/>
+   <channel name="collectRunNumber"       type="spec" call="BSX_GLOBAL/collect/runNumber"/>
+   <channel name="collectNumberFrames"   type="spec" call="BSX_GLOBAL/collect/numberFrames"/>
+   <channel name="collectTimePerFrame"   type="spec" call="BSX_GLOBAL/collect/timePerFrame"/>
+   <channel name="collectConcentration"  type="spec" call="BSX_GLOBAL/collect/concentration"/>
+   <channel name="collectComments"       type="spec" call="BSX_GLOBAL/collect/comments"/>	
+   <channel name="collectCode"           type="spec" call="BSX_GLOBAL/collect/code"/>	
+   <channel name="collectMaskFile"       type="spec" call="BSX_GLOBAL/collect/maskFile"/>
+   <channel name="collectDetectorDistance" type="spec" call="BSX_GLOBAL/collect/detectorDistance"/>
+   <channel name="collectWaveLength"     type="spec" call="BSX_GLOBAL/collect/waveLength"/>		
+   <channel name="collectPixelSizeX"     type="spec" call="BSX_GLOBAL/collect/pixelSizeX"/>
+   <channel name="collectPixelSizeY"     type="spec" call="BSX_GLOBAL/collect/pixelSizeY"/>	
+   <channel name="collectBeamCenterX"    type="spec" call="BSX_GLOBAL/collect/beamCenterX"/>
+   <channel name="collectBeamCenterY"    type="spec" call="BSX_GLOBAL/collect/beamCenterY"/>	
+   <channel name="collectNormalisation"  type="spec" call="BSX_GLOBAL/collect/normalisation"/>	
+   <channel name="collectProcessData"    type="spec" call="BSX_GLOBAL/collect/processData"/>
+   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame"/>			
+   <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost"/>			
+   <channel name="checkBeam"             type="spec" call="BSX_CHECKBEAM" />
+   <channel name="abortCollect"          type="spec" call="BSX_ABORT" />
+</object>	

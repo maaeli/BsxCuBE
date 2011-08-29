@@ -1,0 +1,20 @@
+<object class = "MotorAlignment" username = "MotorAlignmentSM">
+	
+   <uri>agatha:eh3</uri>
+	
+   <command name="moveMotor" type="spec" call="moveMotor"/>
+	
+   <command name="getMotorPosition" type="spec" call="getMotorPosition"/>	
+	
+   <channel name="motorPosition" type="spec" call="BSX_GLOBAL/command/motorPosition"/>
+      
+   <data name="Open horizontal aperture" motor="smha" signal="+"/>
+   <data name="Close horizontal aperture" motor="smha" signal="-"/>
+   <data name="Left translation" motor="smht" signal="+"/>
+   <data name="Right translation" motor="smht" signal="-"/>
+   <data name="Open vertical aperture" motor="smva" signal="+"/>
+   <data name="Up translation" motor="smvt" signal="+"/>
+   <data name="Close vertical aperture" motor="smva" signal="-"/>
+   <data name="Down translation" motor="smvt" signal="-"/>
+</object>	
+

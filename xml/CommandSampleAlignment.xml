@@ -1,0 +1,7 @@
+<object class = "Command" username = "CommandSampleAlignment">
+	
+   <uri>agatha:eh3</uri> 
+	
+   <command name="command" type="spec" call="sample_align"/>
+
+</object>	
