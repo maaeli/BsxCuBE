@@ -689,11 +689,15 @@ class CollectBrick(Core.BaseBrick):
     # Proxy actions
     def doSampleChangerAction(self, action_name, argdict=None):
         method = getattr( self._sampleChanger, action_name )
-        r=method(*argdict['args'])
-        argdict['returned'] = r
+        try:
+            r=method(*argdict['args'])
+        except:
+            logging.warning("Lost connection with Sample Changer. Please abort data collection")
+            argdict['returned'] = None
+        else:
+            argdict['returned'] = r
         
     def doRobotCollect(self,argdict=None):
-
         self.startCollection(mode="robot")
 
         r = self.collect(*argdict['args'])
@@ -729,6 +733,8 @@ class CollectBrick(Core.BaseBrick):
 
         #  How to read an attribute?
         self._sampleChanger = sc
+        if sc is None:
+            return
         self.nbPlates       = 3
         self.plateInfos     = [sc.getPlateInfo(i) for i in range(1,self.nbPlates+1)]
         
