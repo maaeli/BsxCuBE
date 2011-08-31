@@ -26,29 +26,6 @@ from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import logging
 
 class Collect(CObjectBase):
-    __CHANNEL_LIST = ["collectDirectoryChanged",
-                     "collectPrefixChanged",
-                     "collectRunNumberChanged",
-                     "collectNumberFramesChanged",
-                     "collectTimePerFrameChanged",
-                     "collectConcentrationChanged",
-                     "collectCommentsChanged",
-                     "collectCodeChanged",
-                     "collectMaskFileChanged",
-                     "collectDetectorDistanceChanged",
-                     "collectWaveLengthChanged",
-                     "collectPixelSizeXChanged",
-                     "collectPixelSizeYChanged",
-                     "collectBeamCenterXChanged",
-                     "collectBeamCenterYChanged",
-                     "collectNormalisationChanged",
-                     "collectProcessDataChanged",
-                     "collectNewFrameChanged",
-                     "checkBeamChanged",
-                     "beamLostChanged",
-                     "abortCollectChanged"]
-    signals = [Signal(channel) for channel in __CHANNEL_LIST]                   
-    
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -56,6 +33,14 @@ class Collect(CObjectBase):
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
+
+    def __getattr__(self, attr):
+        if not attr.startswith("__"):
+          try:
+             return self.channels[attr]
+          except KeyError:
+              pass
+        raise AttributeError, attr
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
