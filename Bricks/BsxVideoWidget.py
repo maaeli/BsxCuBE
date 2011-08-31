@@ -117,30 +117,37 @@ class BsxVideoWidget(Qt.QWidget):
            Qt.QMessageBox.critical(self, "Error", "Error when trying to save image to file '" + fileName + "'!")
 
     def update(self):
-
-
         # update all
         self.updateDate = time.strftime("%Y/%m/%d")
         self.updateTime = time.strftime("%H:%M:%S")
 
         # get beam and liquid position with different update time than image
-        
         timeFromLastBeamUpdate = int( time.time() ) - self.lastBeamUpdate
 
         if timeFromLastBeamUpdate >= self.beamUpdateInterval :  
             self.lastBeamUpdate = int( time.time() ) 
-            self.currentLiquidPositionList = self.getCurrentLiquidPosition()
-
-            # update beam position unless we are drawing it
-            if not self.__isDrawing:
+            try:
+              self.currentLiquidPositionList = self.getCurrentLiquidPosition()
+            
+              # update beam position unless we are drawing it
+              if not self.__isDrawing:
                  self.beamLocation = self.getCurrentBeamLocation()
+            except Exception, e:
+              self.exceptionCallback(e)  
+              return
 
         # get new image
-
-        self.image = self.getNewImage()
-        if self.image is not None:
+        try:
+          self.image = self.getNewImage()
+        except Exception, e:
+          # transmit exception to upper layer (brick)
+          self.exceptionCallback(e)  
+        else:
+          if self.image is not None:
             self.updateFrame()
 
+    def exceptionCallback(self, exception):
+        pass
         
     def displayImage(self, image, format="JPG"):        
         self.image       = image  
@@ -148,7 +155,6 @@ class BsxVideoWidget(Qt.QWidget):
         self.updateFrame()
 
     def updateFrame(self):
-
         self.imagePixmap =  Qt.QPixmap()
         self.imagePixmap.loadFromData( self.image, self.imageFormat )
 

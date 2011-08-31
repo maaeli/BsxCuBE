@@ -29,6 +29,9 @@ class BsxVideoBrick(Core.BaseBrick):
         mainLayout.addWidget( self.videoWidget )
         self.brick_widget.setLayout( mainLayout )
 
+    def exceptionCallback(self, exception):
+        pass #logging.info("EXCEPTION:%r", exception)
+
     def sample_changer_connected(self, sc):        
 
         if sc is not None:
@@ -42,7 +45,9 @@ class BsxVideoBrick(Core.BaseBrick):
            self.videoWidget.getCurrentLiquidPosition = self._sampleChanger.getCurrentLiquidPosition
            self.videoWidget.getCurrentBeamLocation   = self._sampleChanger.getBeamLocation
            self.videoWidget.setBeamLocation          = self._sampleChanger.setBeamLocation
+           self.videoWidget.exceptionCallback        = self.exceptionCallback
         else:
            logging.info("Sample changer VIDEO NOT connected") 
            self.videoWidget.setAutoRefresh(False)
 
+    
