@@ -17,12 +17,6 @@
      <property name="notification" value="switch to tab"/>
      <property name="caption" value=""/>
   </properties>
-  <properties id="vgroupbox1">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Log"/>
-  </properties>
   <properties id="vgroupbox2">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
@@ -135,6 +129,17 @@
      <property name="pack" value="start"/>
      <property name="caption" value=""/>
   </properties>
+  <properties id="tabbox3">
+     <property name="flex" value="1"/>
+     <property name="notification" value="switch to tab"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="hbox3">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Feedback"/>
+  </properties>
   <properties id="vbox2">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
@@ -206,6 +211,12 @@
   </properties>
   <properties id="HutchTrigger1">
      <property name="flex" value="0"/>
+  </properties>
+  <properties id="hbox2">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Log"/>
   </properties>
   <properties id="GraphBrick2">
      <property name="flex" value="1"/>
@@ -343,8 +354,14 @@
      <property name="flex" value="0"/>
   </properties>
   <properties id="LogBrick1">
-     <property name="flex" value="0"/>
+     <property name="flex" value="1"/>
+     <property name="emailAddresses" value="ohlsson@esrf.fr, guijarro@esrf.fr"/>
      <property name="minimum_level" value="INFO"/>
+  </properties>
+  <properties id="FeedbackBrick1">
+     <property name="flex" value="0"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr"/>
+     <property name="send_icon" value=""/>
   </properties>
     <connections id="CalibrationDiamondBrick1">
     <connection role="login">
@@ -372,9 +389,6 @@
   </connections>
 
   <connections id="tabbox1">
-  </connections>
-
-  <connections id="vgroupbox1">
   </connections>
 
   <connections id="vgroupbox2">
@@ -537,6 +551,12 @@
   <connections id="hbox1">
   </connections>
 
+  <connections id="tabbox3">
+  </connections>
+
+  <connections id="hbox3">
+  </connections>
+
   <connections id="vbox2">
   </connections>
 
@@ -637,6 +657,9 @@
       <slot name="door_state"/>
       <peer name="hutchtrigger"/>
     </connection>
+  </connections>
+
+  <connections id="hbox2">
   </connections>
 
   <connections id="GraphBrick2">
@@ -814,6 +837,9 @@
   </connections>
 
   <connections id="LogBrick1">
+  </connections>
+
+  <connections id="FeedbackBrick1">
   </connections>
 
   </application>

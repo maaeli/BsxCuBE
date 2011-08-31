@@ -98,10 +98,22 @@
 </hbox>
   
 <splitter id="splitter1"/>
-<vgroupbox id="vgroupbox1" orient="vertical">
-  <caption label="Log"/>
+<tabbox id="tabbox3">
+    <tabs>
+      <tab label='Log'/>
+<tab label='Feedback'/>
+    </tabs>
+    <tabpanels>
+      <tabpanel id='tab_hbox2'><hbox id="hbox2" orient="horizontal">
   <hbox qwidget="true" id="LogBrick1" brick="true"><script src="LogBrick" tau="false"/></hbox>
-</vgroupbox>
+</hbox>
+  </tabpanel>
+<tabpanel id='tab_hbox3'><hbox id="hbox3" orient="horizontal">
+  <hbox qwidget="true" id="FeedbackBrick1" brick="true"><script src="FeedbackBrick" tau="false"/></hbox>
+</hbox>
+  </tabpanel>
+    </tabpanels>
+  </tabbox>
   
 </vbox>
   
