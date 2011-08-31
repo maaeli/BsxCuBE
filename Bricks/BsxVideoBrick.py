@@ -32,7 +32,7 @@ class BsxVideoBrick(Core.BaseBrick):
     def sample_changer_connected(self, sc):        
 
         if sc is not None:
-           #logging.info("Sample changer VIDEO connected") 
+           logging.info("Sample changer VIDEO connected") 
 
            self._sampleChanger = sc
            self.videoWidget.setAutoRefreshRate(50)
