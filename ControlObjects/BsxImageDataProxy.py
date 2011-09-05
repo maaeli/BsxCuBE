@@ -9,7 +9,7 @@ class BsxImageDataProxy(CObjectBase):
     signals = [Signal('new_curves_data'),
                Signal('erase_curve')]
 
-    slots = []
+    slots = [Slot('load_files')]
 
     def init(self):
         logging.debug("<BsxImageDataProxy> Created")
