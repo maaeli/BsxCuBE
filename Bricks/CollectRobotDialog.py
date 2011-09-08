@@ -140,7 +140,7 @@ class CollectRobotDialog(Qt.QDialog):
         self.storageTemperatureDoubleSpinBox = Qt.QDoubleSpinBox(self)
         self.storageTemperatureDoubleSpinBox.setSuffix(" C")
         self.storageTemperatureDoubleSpinBox.setDecimals(2)        
-        self.storageTemperatureDoubleSpinBox.setRange(5, 40)
+        self.storageTemperatureDoubleSpinBox.setRange(4, 40)
         self.storageTemperatureDoubleSpinBox.setValue(20)
         self.storageTemperatureDoubleSpinBox.setFixedWidth(self.PARAMETERS_WIDTH)
         self.hBoxLayout2.setAlignment(QtCore.Qt.AlignLeft)
@@ -402,7 +402,7 @@ class CollectRobotDialog(Qt.QDialog):
         temperatureSEUDoubleSpinBox = Qt.QDoubleSpinBox(tableWidget)
         temperatureSEUDoubleSpinBox.setSuffix(" C")
         temperatureSEUDoubleSpinBox.setDecimals(2)        
-        temperatureSEUDoubleSpinBox.setRange(5, 60)        
+        temperatureSEUDoubleSpinBox.setRange(4, 60)        
         tableWidget.setCellWidget(row, self.TEMPERATURE_COLUMN, temperatureSEUDoubleSpinBox)
 
         # flow
@@ -922,7 +922,7 @@ class CollectRobotDialog(Qt.QDialog):
             temperatureSEUDoubleSpinBox = Qt.QDoubleSpinBox(self.tableWidget)
             temperatureSEUDoubleSpinBox.setSuffix(" C")
             temperatureSEUDoubleSpinBox.setDecimals(2)        
-            temperatureSEUDoubleSpinBox.setRange(5, 60)        
+            temperatureSEUDoubleSpinBox.setRange(4, 60)        
             self.tableWidget.setCellWidget( index, self.TEMPERATURE_COLUMN, temperatureSEUDoubleSpinBox )
 
             waittimeSpinBox = Qt.QDoubleSpinBox(self.tableWidget)
