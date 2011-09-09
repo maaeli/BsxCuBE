@@ -890,8 +890,10 @@ class CollectRobotDialog(Qt.QDialog):
         if sample.type != 'Buffer':
           waittimeSpinBox = tableWidget.cellWidget(index, self.WAITTIME_COLUMN)
           waittimeSpinBox.setValue(sample.waittime)
-        temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
-        temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
+        # temperature SEU
+        if sample.type != 'Buffer':
+          temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
+          temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
                                       
                                                            
         # final arrangementes
