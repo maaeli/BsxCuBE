@@ -230,6 +230,7 @@ class CollectBrick(Core.BaseBrick):
                             filename0 += "," + filename1                    
                     self.emitDisplayItemChanged(filename0)
                          
+            # Last fram number = We have done a collect
             if self._currentFrame == self._frameNumber:
                 if self._isCollecting:
                     if self.__isTesting:
