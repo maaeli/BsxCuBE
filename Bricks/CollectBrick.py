@@ -246,7 +246,6 @@ class CollectBrick(Core.BaseBrick):
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
                         if feedBackFlag:                
-                            time.sleep(3)
                             logging.getLogger().info("The data collection is done!")
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
