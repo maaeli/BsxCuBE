@@ -1024,7 +1024,7 @@ class CollectBrick(Core.BaseBrick):
 
         self.collect(1,
                       str(self.directoryLineEdit.text()),
-                      str(self.prefixLineEdit.text(),
+                      str(self.prefixLineEdit.text()),
                       self.runNumberSpinBox.value(),
                       self.frameNumberSpinBox.value(),
                       self.timePerFrameSpinBox.value(),
