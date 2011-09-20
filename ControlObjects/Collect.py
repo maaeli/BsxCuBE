@@ -1,8 +1,15 @@
-import os
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
+import os
 import logging
+from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
+        XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
+        XSDataLength, XSDataWavelength, XSDataDouble
+from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
+        XSDataResultBioSaxsProcessOneFilev1_0, XSDataBioSaxsSample, \
+        XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0
 
 class Collect(CObjectBase):
+    signals = [Signal("collectProcessingDone")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -10,6 +17,10 @@ class Collect(CObjectBase):
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
+        self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0(experimentSetup=XSDataBioSaxsExperimentSetup(), sample=XSDataBioSaxsSample())
+        self.xsdout = None
+        self.ednaJob = None
+        self.dat_filenames = {}
 
     def __getattr__(self, attr):
         if not attr.startswith("__"):
@@ -18,6 +29,12 @@ class Collect(CObjectBase):
           except KeyError:
               pass
         raise AttributeError, attr
+
+
+    def init(self):
+        self.collecting = False
+        self.channels["rawFilename"].connect("update", self.newImage)
+        self.channels["jobSuccess"].connect("update", self.processingDone)
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
@@ -37,6 +54,7 @@ class Collect(CObjectBase):
         self.commands["testCollect"]()
 
     def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pProcessData):
+        self.collecting = True
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
         self.collectRunNumber.set_value(pRunNumber)
@@ -54,8 +72,67 @@ class Collect(CObjectBase):
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
         self.collectProcessData.set_value(pProcessData)                  
-        self.commands["collect"]()
+
+        #Prepare EDNA input
+        self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
+        self.xsdin.sample.code = XSDataString(str(pCode))
+        self.xsdin.sample.comments = XSDataString(str(pComments))
+       
+        xsdExperiment = self.xsdin.experimentSetup
+        xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
+        xsdExperiment.detectorDistance = XSDataLength(value=float(pDetectorDistance))  #Check for units !!!!
+        xsdExperiment.pixelSize_1 = XSDataLength(value=float(pPixelSizeX)*1.0e-6)  #Check for units !!!!
+        xsdExperiment.pixelSize_2 = XSDataLength(value=float(pPixelSizeY)*1.0e-6)  #Check for units !!!!
+        xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
+        xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
+        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength)*1.0e-9)     #Check for units !!!! A or m ?
+        xsdExperiment.maskFile = XSDataImage(path=XSDataString(str(pMaskFile)))
+        xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
         
+        sPrefix=str(pPrefix)
+        ave_filename = os.path.join(pDirectory,"1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
+        self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
+                                inputCurves= [XSDataFile(path=XSDataString(os.path.join(pDirectory,"1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames+1)],
+                                #absoluteFidelity= XSDataDouble(),
+                                #relativeFidelity= XSDataDouble(),
+                                mergedCurve= XSDataFile(path=XSDataString(ave_filename)))
+                                
+        self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
+        self.commands["collect"](callback=self.collectDone, error_callback=self.collectFailed)
+
+    def newImage(self, raw_filename):
+        if self.collecting:
+          self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
+          self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
+          #machine_current_object = self.objects["machine_current"]
+          #self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(machine_current_object.machine_current))
+          self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
+          self.xsdin.logFile = XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".log")))
+          self.xsdin.normalizedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/2d/")))
+          self.xsdin.integratedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".ang")))
+          self.xsdin.integratedCurve=XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/1d/").replace(".edf", ".dat")))
+        
+          #print self.xsdin.marshal() 
+        
+          jobId = self.commands["startJob"](["EDPluginBioSaxsProcessOneFilev1_0",self.xsdin.marshal()])
+          self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+          logging.info("Processing job %s started", jobId)
+        else:
+          self.commands["startJob"](["EDPluginBioSaxsProcessOneFilev1_0",self.xsdin.marshal()])
+        
+    def collectDone(self, returned_value):
+        self.collecting = False
+        # start EDNA to calculate average at the end
+        self.commands["startJob"](["EDPluginBioSaxsSmartMergev1_0",self.xsdAverage.marshal()])
+
+    def processingDone(self, jobId):
+        if jobId in self.dat_filenames:
+          self.emit("collectProcessingDone", self.dat_filenames[jobId])
+          del self.dat_filenames[jobId]
+
+    def collectFailed(self):
+        self.collecting = False
+
     def collectAbort(self):
         logging.info("sending abort to stop spec collection")
         self.abortCollect.set_value(1)
@@ -81,4 +158,6 @@ class Collect(CObjectBase):
 
     def updateChannels(self):
         for channel_name, channel in self.channels.iteritems():
+            if channel_name == "jobSuccess":
+                continue
             channel.update(channel.value())
