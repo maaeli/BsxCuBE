@@ -16,51 +16,6 @@ from PyTango import DevState
 
 __category__ = "BsxCuBE"
 
-#
-#  Class to get out graphics out of the DisplayCurve thread.
-#
-class DisplayCurve:
-        lastFilename = ""
-        
-        def __init__(self, parent, timer, curve_filename, timeout):
-            self.t0           = time.time()
-            self.timeout      = timeout
-            self.filename     = curve_filename
-            self.parent       = parent
-            self.timer        = timer
-            self.lastFilename = ""
-            self.do_display   = False
-            
-        def display_curve(self):
-            self.parent.emitDisplayItemChanged(self.filename)
-                        
-        def __call__(self):
-            if time.time() - self.t0 > self.timeout:
-                logging.error("Could not get .dat file within the %d seconds timeout: %s", self.timeout, self.filename)
-                self.timer.stop()
-                del self.parent._curveList[self.parent._curveList.index(self.timer)]
-                return
-
-            if self.do_display:
-                try:
-                    self.display_curve()
-                finally:
-                    self.timer.stop()
-                    del self.parent._curveList[self.parent._curveList.index(self.timer)]
-            else:
-                if os.path.exists(self.filename):
-                    # =============================================
-                    #  CLEAR DISPLAY IF CURVE DON'T BELONG TO PREVIOUS GROUP
-                    # =============================================                                             
-                    prefix0, run0, frame0, extra0, extension0 = self.parent.getFilenameDetails(DisplayCurve.lastFilename)
-                    DisplayCurve.lastFilename = os.path.basename(self.filename)
-                    prefix1, run1, frame1, extra1, extension1 = self.parent.getFilenameDetails(DisplayCurve.lastFilename)
-                    if prefix0 != prefix1 or run0 != run1:
-                        self.parent.displayReset()
-
-                    # this is just for adding 1 s. more before really trying to open the file
-                    self.do_display = True
-                    
 class CollectBrick(Core.BaseBrick):
     properties = {}
     connections = {"collect": Connection("Collect object",
@@ -83,7 +38,8 @@ class CollectBrick(Core.BaseBrick):
                                               Signal("collectProcessDataChanged",   "collectProcessDataChanged"),
                                               Signal("collectNewFrameChanged",      "collectNewFrameChanged"),
                                               Signal("checkBeamChanged",            "checkBeamChanged"),
-                                              Signal("beamLostChanged",             "beamLostChanged")],
+                                              Signal("beamLostChanged",             "beamLostChanged"),
+                                              Signal("collectProcessingDone", "collectProcessingDone") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort")],
@@ -178,13 +134,16 @@ class CollectBrick(Core.BaseBrick):
     def collectProcessDataChanged(self, pValue):
         self.processCheckBox.setChecked(pValue == "1")
 
+    def collectProcessingDone(self, dat_filename):
+        logging.info("processing done, file is %r", dat_filename)
+        self.emitDisplayItemChanged(dat_filename)
+
     def collectNewFrameChanged(self, pValue): 
         filename0 = pValue.split(",")[0]
         if os.path.dirname(filename0)[-4:] == "/raw":
             directory = os.path.dirname(filename0)[:-4] + "/1d/"
         else:
             directory = os.path.dirname(filename0) + "/1d/"
-            
 
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
@@ -200,26 +159,11 @@ class CollectBrick(Core.BaseBrick):
                 self.setCollectionStatus(status="running", progress=[ self._currentFrame, self._frameNumber ] )
 
                 if not self.__isTesting:
-                    if self.processCheckBox.isChecked():
-
-                        def wait_data(datafile, timeout):
-                            new_wait_curve_timer = Qt.QTimer(self.brick_widget)
-                            self._curveList.append(new_wait_curve_timer)
-                            new_wait_curve_timer.display_curve = DisplayCurve(self, new_wait_curve_timer, datafile, timeout)
-                            QtCore.QObject.connect(new_wait_curve_timer, Qt.SIGNAL("timeout()"), new_wait_curve_timer.display_curve)
-                            new_wait_curve_timer.start(1000)
-                            
-                        # have to wait for new .dat file, and display it when possible
-                        wait_data(directory + os.path.basename(filename0).split(".")[0] + ".dat", 30)
-                        
                         if self._currentFrame == self._frameNumber:
                             splitList = os.path.basename(filename0).split("_")                    
-                            for i in range(0, len(splitList) - 1):
-                                if i == 0:
-                                    filename1 = splitList[i]
-                                else:
-                                    filename1 += "_" + splitList[i]
-                            wait_data(directory + filename1 + "_ave.dat", 30)
+                            # Take away last _ piece
+                            filename1 = "_".join(splitList[:-1])
+                            ave_filename = directory + filename1 + "_ave.dat"
                         
                 self.emitDisplayItemChanged(filename0)        
             else:
@@ -230,8 +174,8 @@ class CollectBrick(Core.BaseBrick):
                             filename0 += "," + filename1                    
                     self.emitDisplayItemChanged(filename0)
                          
-            # Last fram number = We have done a collect
             if self._currentFrame == self._frameNumber:
+                # data collection done = Last frame
                 if self._isCollecting:
                     if self.__isTesting:
                         if self.SPECBusyTimer.isActive():
@@ -250,6 +194,7 @@ class CollectBrick(Core.BaseBrick):
                             logging.getLogger().info("The data collection is done!")
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+
     
     def beamLostChanged(self, pValue):
         if pValue != None and pValue != "":
@@ -904,6 +849,7 @@ class CollectBrick(Core.BaseBrick):
     def maskDisplayPushButtonClicked(self):
         self.emitDisplayItemChanged(str(self.maskLineEdit.text()))
                 
+
     def robotCheckBoxToggled(self, pValue):
         if pValue:
             if self._collectRobotDialog.isVisible():
