@@ -32,67 +32,8 @@ class DisplayCurve:
             self.do_display   = False
             
         def display_curve(self):
-            # =============================================
-            #  DISPLAY ORIGINAL CURVE
-            # =============================================
             self.parent.emitDisplayItemChanged(self.filename)
                         
-            # =============================================
-            #  PERFORM RADIATION CALCULATION IF SPECIFIED
-            # =============================================   
-            if self.parent.radiationCheckBox.isChecked():
-                # SPEC is Ricardo's own implementation of specfile module... 
-                spec = SPEC()
-                spec.open(filename)
-                
-                if self.parent._currentCurve == 0:
-                    referenceFilename = filename
-                    referenceHeader   = spec.getHeader()
-                    referenceValues   = spec.getValues()
-                    radiationAdder    = []
-                    radiationCounter  = []        
-                    for x, y, d in referenceValues:
-                        radiationAdder.append(float(y))
-                        radiationCounter.append(1)                       
-                    else:
-                        if self.parent._currentCurve == 1:                                                    
-                            flag, total, count = spec.radiationDamage(referenceValues, radiationAdder, radiationCounter, self.parent.radiationToleranceDoubleSpinBox.value() / 100)
-                            if flag == 0:
-                                if count != 0:
-                                    logging.getLogger().warning("The reference '%s' and the cross-reference '%s' match (in the X axis) but the tolerance is not respected!" % (referenceFilename, filename))
-                                else:
-                                    if flag == -1:
-                                        logging.getLogger().warning("The reference '%s' and the cross-reference '%s' don't match (in the X axis)!" % (referenceFilename, filename))
-                                    else:
-                                        logging.getLogger().error("Error when trying to calculate radiation damage!")                                        
-                            else:
-                                flag, total, count = spec.radiationDamage(referenceValues, radiationAdder, radiationCounter, self.parent.radiationToleranceDoubleSpinBox.value() / 100)
-                                if flag == 0:
-                                    if count > 0:
-                                        damage = float(count) / float(total)
-                                        if damage >= self.parent.radiationWarningDoubleSpinBox.value() / 100:                                
-                                            logging.getLogger().warning("The curve '%s' is %3.2f%s different (tolerance included) from the reference '%s'!" % (filename, damage * 100, "%", referenceFilename))
-                                else:
-                                    if flag == 1:
-                                        logging.getLogger().warning("The reference '%s' and the curve '%s' don't match (in the X axis)!" % (referenceFile, filename))
-                                    else:
-                                        logging.getLogger().error("Error when trying to calculate radiation damage!")
-                        spec.close()
-                        self.parent._currentCurve += 1
-                            
-                        if self.parent._currentCurve == self.parent._frameNumber:
-                            result = []
-                            for j in range(0, len(referenceValues)):
-                                result.append([referenceValues[j][0], radiationAdder[j] / radiationCounter[j], 0])  # check this: recalculate standard deviation?
-                            prefix, run, frame, extra, extension = self.parent.getFilenameDetails(self.filename)
-                            filename = prefix + "_" + run + "_rad." + extension
-                            spec.open(filename, "w")                                     
-                            spec.write(referenceHeader, result)
-                            spec.close()
-                            logging.getLogger().info("The radiation damage was saved in file '%s'..." % filename)
-                            if self.parent.radiationDisplayCheckBox.isChecked():
-                                self.parent.displayItemChanged(filename)
-                                                    
         def __call__(self):
             if time.time() - self.t0 > self.timeout:
                 logging.error("Could not get .dat file within the %d seconds timeout: %s", self.timeout, self.filename)
@@ -561,29 +502,6 @@ class CollectBrick(Core.BaseBrick):
         self.hBoxLayout13.addWidget(self.normalisationDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout13)
         
-        self.hBoxLayout15 = Qt.QHBoxLayout()        
-        self.radiationCheckBox = Qt.QCheckBox("Radiation damage", self.brick_widget)
-        self.radiationCheckBox.setFixedWidth(130)
-        Qt.QObject.connect(self.radiationCheckBox, Qt.SIGNAL("toggled(bool)"), self.radiationCheckBoxToggled)
-        self.hBoxLayout15.addWidget(self.radiationCheckBox)
-        self.radiationToleranceDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.radiationToleranceDoubleSpinBox.setSuffix(" %")
-        self.radiationToleranceDoubleSpinBox.setDecimals(2)        
-        self.radiationToleranceDoubleSpinBox.setRange(0, 100)
-        self.radiationToleranceDoubleSpinBox.setToolTip("Maximum difference of each point intensities between first and second curve in %")
-        self.hBoxLayout15.addWidget(self.radiationToleranceDoubleSpinBox)               
-        self.radiationWarningDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.radiationWarningDoubleSpinBox.setSuffix(" %")
-        self.radiationWarningDoubleSpinBox.setDecimals(2)        
-        self.radiationWarningDoubleSpinBox.setRange(0, 100)
-        self.radiationWarningDoubleSpinBox.setToolTip("Maximum difference of each point intensities between first and remains curves in %")                                
-        self.hBoxLayout15.addWidget(self.radiationWarningDoubleSpinBox)
-        self.radiationDisplayCheckBox = Qt.QCheckBox("Display", self.brick_widget)
-        self.radiationDisplayCheckBox.setFixedWidth(80)
-        self.radiationDisplayCheckBox.setChecked(True)
-        self.hBoxLayout15.addWidget(self.radiationDisplayCheckBox)        
-        self.brick_widget.layout().addLayout(self.hBoxLayout15)
-        
         self.vBoxLayout0 = Qt.QVBoxLayout()
         self.vBoxLayout0.addSpacing(15)
         self.brick_widget.layout().addLayout(self.vBoxLayout0)        
@@ -661,7 +579,6 @@ class CollectBrick(Core.BaseBrick):
         self.directoryLineEditChanged(None)
         self.prefixLineEditChanged(None)
         self.maskLineEditChanged(None)
-        self.radiationCheckBoxToggled(False)
     
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -862,10 +779,6 @@ class CollectBrick(Core.BaseBrick):
              self.beamCenterXSpinBox.hide()
              self.beamCenterYSpinBox.hide()
              self.normalisationDoubleSpinBox.hide()
-             self.radiationCheckBox.hide()
-             self.radiationToleranceDoubleSpinBox.hide()
-             self.radiationWarningDoubleSpinBox.hide()
-             self.radiationDisplayCheckBox.hide()
              self.maskLabel.hide()
              self.detectorDistanceLabel.hide()
              self.pixelSizeLabel.hide()
@@ -885,10 +798,6 @@ class CollectBrick(Core.BaseBrick):
              self.beamCenterXSpinBox.show()
              self.beamCenterYSpinBox.show()
              self.normalisationDoubleSpinBox.show()
-             self.radiationCheckBox.show()
-             self.radiationToleranceDoubleSpinBox.show()
-             self.radiationWarningDoubleSpinBox.show()
-             self.radiationDisplayCheckBox.show()
              self.maskLabel.show()
              self.detectorDistanceLabel.show()
              self.pixelSizeLabel.show()
@@ -914,10 +823,6 @@ class CollectBrick(Core.BaseBrick):
         self.beamCenterXSpinBox.setEnabled            (not pValue and self.__expertMode)
         self.beamCenterYSpinBox.setEnabled            (not pValue and self.__expertMode)
         self.normalisationDoubleSpinBox.setEnabled    (not pValue and self.__expertMode)
-        self.radiationCheckBox.setEnabled             (not pValue)
-        self.radiationToleranceDoubleSpinBox.setEnabled (not pValue and self.radiationCheckBox.isChecked())
-        self.radiationWarningDoubleSpinBox.setEnabled   (not pValue and self.radiationCheckBox.isChecked())
-        self.radiationDisplayCheckBox.setEnabled        (not pValue and self.radiationCheckBox.isChecked())            
 
     def directoryLineEditChanged(self, pValue):
         if self._isCollecting:
@@ -999,11 +904,6 @@ class CollectBrick(Core.BaseBrick):
     def maskDisplayPushButtonClicked(self):
         self.emitDisplayItemChanged(str(self.maskLineEdit.text()))
                 
-    def radiationCheckBoxToggled(self, pValue):            
-        self.radiationToleranceDoubleSpinBox.setEnabled(pValue)
-        self.radiationWarningDoubleSpinBox.setEnabled(pValue)
-        self.radiationDisplayCheckBox.setEnabled(pValue)
-
     def robotCheckBoxToggled(self, pValue):
         if pValue:
             if self._collectRobotDialog.isVisible():
