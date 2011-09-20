@@ -1,27 +1,4 @@
-"""
-=============================================
-  NAME       : Collect Control Object (Collect.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/01
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
+import os
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
 import logging
 
