@@ -21,6 +21,8 @@ class Collect(CObjectBase):
         self.xsdout = None
         self.ednaJob = None
         self.dat_filenames = {}
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_0"
+        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_0"
 
     def __getattr__(self, attr):
         if not attr.startswith("__"):
@@ -35,6 +37,9 @@ class Collect(CObjectBase):
         self.collecting = False
         self.channels["rawFilename"].connect("update", self.newImage)
         self.channels["jobSuccess"].connect("update", self.processingDone)
+        self.commands["initPlugin"](self.pluginIntegrate)
+        self.commands["initPlugin"](self.pluginMerge)
+
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
@@ -102,28 +107,28 @@ class Collect(CObjectBase):
 
     def newImage(self, raw_filename):
         if self.collecting:
-          self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
-          self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
-          #machine_current_object = self.objects["machine_current"]
-          #self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(machine_current_object.machine_current))
-          self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
-          self.xsdin.logFile = XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".log")))
-          self.xsdin.normalizedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/2d/")))
-          self.xsdin.integratedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".ang")))
-          self.xsdin.integratedCurve=XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/1d/").replace(".edf", ".dat")))
+            self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
+            self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
+            #machine_current_object = self.objects["machine_current"]
+            #self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(machine_current_object.machine_current))
+            self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
+            self.xsdin.logFile = XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".log")))
+            self.xsdin.normalizedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/2d/")))
+            self.xsdin.integratedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".ang")))
+            self.xsdin.integratedCurve=XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/1d/").replace(".edf", ".dat")))
         
-          #print self.xsdin.marshal() 
+            #print self.xsdin.marshal() 
         
-          jobId = self.commands["startJob"](["EDPluginBioSaxsProcessOneFilev1_0",self.xsdin.marshal()])
-          self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
-          logging.info("Processing job %s started", jobId)
+            jobId = self.commands["startJob"]([self.pluginIntegrate,self.xsdin.marshal()])
+            self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+            logging.info("Processing job %s started", jobId)
         else:
-          self.commands["startJob"](["EDPluginBioSaxsProcessOneFilev1_0",self.xsdin.marshal()])
+            self.commands["startJob"]([self.pluginIntegrate,self.xsdin.marshal()])
         
     def collectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
-        self.commands["startJob"](["EDPluginBioSaxsSmartMergev1_0",self.xsdAverage.marshal()])
+        self.commands["startJob"]([self.pluginMerge,self.xsdAverage.marshal()])
 
     def processingDone(self, jobId):
         if jobId in self.dat_filenames:

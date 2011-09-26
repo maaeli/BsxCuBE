@@ -2,12 +2,21 @@
 	
    <uri>agatha:eh3</uri>	
 
-   <command name="testCollect"            type="spec" call="testCollect"/>
-   <command name="collect"                type="spec" call="collect"/>	
+   <!-- TO BE DONE LATER (bug in FWK4)
+   <object href="ESRFMachInfo" role="machine_current"/>
+   in the meantime, use the reading done by spec
+   -->
+   <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/>
+   <command name="startJob" type="tango" uri="DAU/edna/1"/>
+   <channel name="jobSuccess" type="tango" uri="DAU/edna/1"/> 
 
-   <channel name="collectDirectory"       type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
-   <channel name="collectPrefix"          type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
-   <channel name="collectRunNumber"       type="spec" call="BSX_GLOBAL/collect/runNumber" signal="collectRunNumberChanged"/>
+   <command name="testCollect"           type="spec" call="testCollect"/>
+   <command name="collect"               type="spec" call="collect"/>	
+   <channel name="rawFilename"           type="spec" call="PILATUS_FILENAME"/>
+   <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode"/>
+   <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
+   <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
+   <channel name="collectRunNumber"      type="spec" call="BSX_GLOBAL/collect/runNumber" signal="collectRunNumberChanged"/>
    <channel name="collectNumberFrames"   type="spec" call="BSX_GLOBAL/collect/numberFrames" signal="collectNumberFramesChanged"/>
    <channel name="collectTimePerFrame"   type="spec" call="BSX_GLOBAL/collect/timePerFrame" signal="collectTimePerFrameChanged"/>
    <channel name="collectConcentration"  type="spec" call="BSX_GLOBAL/collect/concentration" signal="collectConcentrationChanged"/>
