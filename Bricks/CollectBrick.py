@@ -60,17 +60,10 @@ class CollectBrick(Core.BaseBrick):
                                              [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                              [],
                                              "image_proxy_connected"),
-                    #"spec_exp":    Connection("spec exp hutch",
-                                             #[Signal("specStatusChanged","specStatusChanged")],
-                                             #[Slot('abort'), Slot('abort')],
-                                             #"exp_spec_connected")
                     }
                                              
 
     
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged"),
                Signal("transmissionChanged")]    
@@ -134,7 +127,15 @@ class CollectBrick(Core.BaseBrick):
     def collectProcessDataChanged(self, pValue):
         self.processCheckBox.setChecked(pValue == "1")
 
-    def collectProcessingDone(self, dat_filename):
+    def collectProcessingDone(self, dat_filename, last_dat=[]):
+        ### HORRIBLE CODE
+        if last_dat and last_dat[0]==dat_filename:
+          return
+        else:
+          if last_dat:
+             last_dat.pop()
+          last_dat.append(dat_filename)
+        ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
         logging.info("processing done, file is %r", dat_filename)
         self.emitDisplayItemChanged(dat_filename)
 
@@ -148,7 +149,6 @@ class CollectBrick(Core.BaseBrick):
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
             if self._isCollecting:
-                
                 message = "The frame '%s' was collected..." % filename0              
                 logging.getLogger().info(message)
                 if self.robotCheckBox.isChecked():
@@ -164,15 +164,12 @@ class CollectBrick(Core.BaseBrick):
                             # Take away last _ piece
                             filename1 = "_".join(splitList[:-1])
                             ave_filename = directory + filename1 + "_ave.dat"
-                        
-                self.emitDisplayItemChanged(filename0)        
             else:
                 if os.path.exists(filename0):
                     if filename0.split(".")[-1] != "dat":
                         filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"    
                         if os.path.exists(filename1):
                             filename0 += "," + filename1                    
-                    self.emitDisplayItemChanged(filename0)
                          
             if self._currentFrame == self._frameNumber:
                 # data collection done = Last frame
@@ -238,17 +235,10 @@ class CollectBrick(Core.BaseBrick):
     def connectionStatusChanged(self, pPeer):
         pass
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
     def init(self):
-
         self.nbPlates       = 0
         self.platesIDs      = []
         self.plateInfos     = []
