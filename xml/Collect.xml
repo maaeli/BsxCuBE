@@ -8,6 +8,7 @@
    -->
    <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/>
    <command name="startJob" type="tango" uri="DAU/edna/1"/>
+   <command name="initPlugin" type="tango" uri="DAU/edna/1"/>
    <channel name="jobSuccess" type="tango" uri="DAU/edna/1"/> 
 
    <command name="testCollect"           type="spec" call="testCollect"/>

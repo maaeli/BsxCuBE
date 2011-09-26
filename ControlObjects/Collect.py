@@ -127,8 +127,10 @@ class Collect(CObjectBase):
         
     def collectDone(self, returned_value):
         self.collecting = False
+        
         # start EDNA to calculate average at the end
-        self.commands["startJob"]([self.pluginMerge,self.xsdAverage.marshal()])
+        jobId = self.commands["startJob"]([self.pluginMerge,self.xsdAverage.marshal()])
+        self.dat_filenames[jobId]=self.xsdAverage.mergedCurve.path.value
 
     def processingDone(self, jobId):
         if jobId in self.dat_filenames:
