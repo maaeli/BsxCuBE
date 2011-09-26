@@ -13,7 +13,6 @@
 
    <command name="testCollect"           type="spec" call="testCollect"/>
    <command name="collect"               type="spec" call="collect"/>	
-   <channel name="rawFilename"           type="spec" call="PILATUS_FILENAME"/>
    <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode"/>
    <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
    <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>

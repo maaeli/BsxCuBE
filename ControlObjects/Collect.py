@@ -13,7 +13,8 @@ class Collect(CObjectBase):
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
-             Slot("setCheckBeam")]
+             Slot("setCheckBeam"),
+             Slot("triggerEDNA")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
@@ -35,7 +36,6 @@ class Collect(CObjectBase):
 
     def init(self):
         self.collecting = False
-        self.channels["rawFilename"].connect("update", self.newImage)
         self.channels["jobSuccess"].connect("update", self.processingDone)
         self.commands["initPlugin"](self.pluginIntegrate)
         self.commands["initPlugin"](self.pluginMerge)
@@ -105,8 +105,9 @@ class Collect(CObjectBase):
         self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
         self.commands["collect"](callback=self.collectDone, error_callback=self.collectFailed)
 
-    def newImage(self, raw_filename):
+    def triggerEDNA(self, raw_filename):
         if self.collecting:
+            raw_filename=str(raw_filename)
             self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
             self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
             #machine_current_object = self.objects["machine_current"]
