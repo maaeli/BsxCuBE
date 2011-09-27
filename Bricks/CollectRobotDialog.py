@@ -1,9 +1,3 @@
-#
-#  File: CollectRobotDialog.py
-#
-#  Author:  Vicente Rey 
-#
-
 from PyQt4   import Qt, QtCore
 from Samples import *
 
@@ -1090,6 +1084,3 @@ if __name__ == '__main__':
    wid.show()
 
    sys.exit(app.exec_())
-
-
-

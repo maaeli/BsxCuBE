@@ -1,4 +1,3 @@
-
 import sys
 from PyQt4 import Qt
 

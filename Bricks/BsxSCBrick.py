@@ -1,4 +1,3 @@
-
 import logging
 
 from Framework4.GUI      import Core

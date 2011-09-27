@@ -29,7 +29,6 @@ class BsxFrameBrick(Core.BaseBrick):
         filesList = files_string.split(",")
         for f in filesList:
             if f.endswith('.edf'):
-                #logging.debug('BsxFrame loading %s', f)
                 self.frameDisplay.setDataSource(f)
 
     def displayResetChanged(self, *args):

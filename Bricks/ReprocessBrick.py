@@ -1,56 +1,17 @@
-"""
-=============================================
-  NAME       : Reprocess Brick (ReprocessBrick.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/01
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
+import os
+import logging
+from Framework4.GUI import Core
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot           
+from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt        
 
 
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    import os
-    import logging
-    from Framework4.GUI import Core
-    from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot           
-    from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt        
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-# =============================================
-#  BLISS FRAMEWORK CATEGORY
-# =============================================
 __category__ = "BsxCuBE"
 
 
 
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class ReprocessBrick(Core.BaseBrick):
 
      
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================        
     properties = {}
     connections = {"reprocess": Connection("Reprocess object",
                                              [Signal("reprocessDetectorChanged", "reprocessDetectorChanged"),
@@ -80,9 +41,6 @@ class ReprocessBrick(Core.BaseBrick):
 
 
     
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================       
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged")]    
     slots = []
@@ -221,21 +179,10 @@ class ReprocessBrick(Core.BaseBrick):
         pass
 
 
-    
-   
-
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
 
-
-        
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
     def init(self):
         self.__expertMode = False
         self.__isReprocessing = False
@@ -506,27 +453,11 @@ class ReprocessBrick(Core.BaseBrick):
 
 
         
-        
-        
-    # =============================================
-    #  DESTRUCTOR
-    # =============================================        
     def delete(self):
         pass
                 
         
         
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
-
-
-
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================            
     def detectorComboBoxChanged(self, pValue):
         if not self.__isReprocessing:        
             self.populatePrefixComboBox()        
@@ -1015,7 +946,4 @@ class ReprocessBrick(Core.BaseBrick):
                 j += 1
         
         return prefix, run, frame, extra, extension
-
-
-
 

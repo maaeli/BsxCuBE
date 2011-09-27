@@ -1,55 +1,14 @@
-"""
-=============================================
-  NAME       : Browse Brick (BrowseBrick.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
+import os
+from Framework4.GUI import Core
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot           
+from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt        
 
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/12
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
-
-
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    import os
-    from Framework4.GUI import Core
-    from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot           
-    from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt        
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-# =============================================
-#  BLISS FRAMEWORK CATEGORY
-# =============================================
 __category__ = "BsxCuBE"
 
 
 
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class BrowseBrick(Core.BaseBrick):
 
-     
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================        
     properties = {"enableType": Property("boolean", "Enable type", "", "enableTypeChanged", True)}
     connections = {"browse": Connection("Browse object",
                                         [Signal("browseTypeChanged", "browseTypeChanged"),
@@ -64,9 +23,6 @@ class BrowseBrick(Core.BaseBrick):
 
 
     
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================       
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged")]
     slots = []
@@ -85,18 +41,10 @@ class BrowseBrick(Core.BaseBrick):
 
 
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
 
-
-        
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
     def init(self):
         self.__expertMode = False
         self.__formats = [["All", ""], ["Raw EDF  (*.edf)", "edf"], ["Normalised EDF  (*.edf)", "edf"], ["Bruker  (*.gfrm)", "gfrm"], ["ADSC  (*.img)", "img"], ["Mar CCD  (*.mccd)", "mccd"], ["SPEC  (*.dat)", "dat"]]
@@ -189,31 +137,16 @@ class BrowseBrick(Core.BaseBrick):
         self.typeComboBoxChanged(self.typeComboBox.currentIndex())
         self.locationLineEditChanged(None)        
 
-        
-
-    # =============================================
-    #  DESTRUCTOR
-    # =============================================        
     def delete(self):
         pass
                 
         
-        
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
     def enableTypeChanged(self, pValue):
         self.typeComboBox.setVisible(pValue)
         self.typeLabel.setVisible(pValue)
         self.typeComboBox.setCurrentIndex(0)
 
 
-
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================
     def typeComboBoxChanged(self, pValue):
         self.formatComboBox.clear()
         if pValue == 0:
@@ -314,7 +247,6 @@ class BrowseBrick(Core.BaseBrick):
 
     def extraComboBoxChanged(self, pValue):                  
         self.populateItemsListWidget()        
-
 
 
     def itemsListWidgetChanged(self):
@@ -528,7 +460,4 @@ class BrowseBrick(Core.BaseBrick):
                 j += 1
         
         return prefix, run, frame, extra, extension
-
-
-
 

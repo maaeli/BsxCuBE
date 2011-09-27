@@ -1,4 +1,3 @@
-
 from PyQt4               import QtCore, Qt
 import sys, os, time, exceptions
 import traceback
@@ -12,9 +11,6 @@ class CollectRobotObject(QtCore.QThread):
     __TIMEOUT   = 1200
     __TOLERANCE = 0.25    
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, pParent, pBrickWidget):
         self.__parent           = pParent
         self.__brickWidget      = pBrickWidget
@@ -27,10 +23,6 @@ class CollectRobotObject(QtCore.QThread):
         QtCore.QThread.__init__(self, self.__brickWidget)
    
 
-    # =============================================
-    #  CLASS METHODS
-    # =============================================
-    # 
     def abort(self):
         self.abortFlag = True
 

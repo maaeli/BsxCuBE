@@ -135,6 +135,7 @@ class CollectBrick(Core.BaseBrick):
           if last_dat:
              last_dat.pop()
           last_dat.append(dat_filename)
+        # TODO
         ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
         logging.info("processing done, file is %r", dat_filename)
         self.emitDisplayItemChanged(dat_filename)
@@ -689,19 +690,9 @@ class CollectBrick(Core.BaseBrick):
 
          return collectpars         
 
-    # =============================================
-    #  DESTRUCTOR
-    # =============================================        
     def delete(self):
         self._collectRobot.terminate()
 
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================            
     def showHideBeamlineParams(self, pValue=None):
 
         if self.showingBLParams:
@@ -855,7 +846,6 @@ class CollectBrick(Core.BaseBrick):
 
     def checkBeamBoxToggled(self, pValue):
         self.getObject("collect").setCheckBeam(pValue)
-        #self.getObject("collect").toggleCheckBeam()
 
     def testPushButtonClicked(self):
 

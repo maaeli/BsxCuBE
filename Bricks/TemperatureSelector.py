@@ -1,4 +1,3 @@
-
 import sys
 from PyQt4 import Qt
 
@@ -59,4 +58,3 @@ if __name__ == '__main__':
     app = Qt.QApplication( sys.argv )
     print getTemperature()
 
-    

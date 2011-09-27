@@ -1,86 +1,32 @@
-"""
-=============================================
-  NAME       : Login Brick (LoginBrick.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/23
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
+import sip
+from Framework4.GUI import Core
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot       
+from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
 
 
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    import sip
-    from Framework4.GUI import Core
-    from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot       
-    from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-# =============================================
-#  BLISS FRAMEWORK CATEGORY
-# =============================================
 __category__ = "General"
 
 
 
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class LoginBrick(Core.BaseBrick):
     
     
 
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================            
     properties = {"password": Property("string", "Password", "", "passwordChanged"),
                   "orientation": Property("combo", "Orientation", "layout of widgets", "orientationChanged", "Portrait", ["Portrait", "Landscape"])}
     
     connections = {}
     
     
-    
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================      
     signals = [Signal("expertModeChanged")]
     slots = []
     
     
-
-
-
-
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
             
    
-        
-        
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
     def init(self):
         self.__expertMode = False
         self.__password = ""
@@ -93,11 +39,6 @@ class LoginBrick(Core.BaseBrick):
         self.modePushButton.setToolTip("Change to expert mode")
         Qt.QObject.connect(self.modePushButton, Qt.SIGNAL("clicked()"), self.modePushButtonClicked)
         
-
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================                          
     def passwordChanged(self, pValue):
         self.__password = pValue
         
@@ -117,11 +58,6 @@ class LoginBrick(Core.BaseBrick):
         self.brick_widget.layout().addWidget(self.modePushButton)
         
                               
-
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================
     def modePushButtonClicked(self):
         if self.__expertMode:
             self.__expertMode = False
@@ -141,8 +77,6 @@ class LoginBrick(Core.BaseBrick):
                 else:
                     Qt.QMessageBox.critical(self.brick_widget, "Error", "Invalid password. Please, try again!")
         
-   
-   
    
     def connectionStatusChanged(self, pPeer):        
         pass

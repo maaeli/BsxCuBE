@@ -1,6 +1,3 @@
-#
-#    
-
 from PyQt4 import Qt
 
 class LeadingZeroSpinBox(Qt.QSpinBox):

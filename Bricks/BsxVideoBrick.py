@@ -1,4 +1,3 @@
-
 import sys, os, time, logging
     
 from Framework4.GUI      import Core

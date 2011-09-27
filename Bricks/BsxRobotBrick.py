@@ -1,28 +1,3 @@
-"""
-=============================================
-  NAME       : Display Brick (DisplayBrick.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2009/SEP/11
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@yahoo.com
-  
-  HISTORY    :
-=============================================
-"""
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-
 import sys
 import os
 import time
@@ -272,76 +247,6 @@ class BsxRobotBrick(Core.BaseBrick):
             selected_well = dialog.get_selected_well()
             logging.info('filling from [plate, row, column] = %s', selected_well)
             self.getObject('samplechanger').fill(*selected_well)
-#
-#        def cancelPushButtonClicked():
-#            dialog.reject()
-#
-#        def okPushButtonClicked():
-#            dialog.accept()
-#                
-#        dialog = Qt.QDialog(self.brick_widget)
-#        dialog.setWindowTitle("Fill")
-#        dialog.setModal(True)
-#        
-#        vBoxLayout = Qt.QVBoxLayout()
-#        dialog.setLayout(vBoxLayout)
-#        
-#        plateHBoxLayout = Qt.QHBoxLayout(dialog)
-#        plateHBoxLayout.addWidget(Qt.QLabel("Plate", dialog))
-#        plateComboBox = Qt.QComboBox(dialog)
-#        plateComboBox.addItems(["1", "2", '3'])
-#        plateHBoxLayout.addWidget(plateComboBox)
-#        vBoxLayout.addLayout(plateHBoxLayout)        
-#
-#        rowHBoxLayout = Qt.QHBoxLayout(dialog)
-#        rowHBoxLayout.addWidget(Qt.QLabel("Row", dialog))
-#        rowComboBox = Qt.QComboBox(dialog)
-#        rowComboBox.addItems(["1", "2", "3", "4", "5", "6", "7", "8"])
-#        rowHBoxLayout.addWidget(rowComboBox)
-#        vBoxLayout.addLayout(rowHBoxLayout)        
-#        
-#        wellHBoxLayout = Qt.QHBoxLayout(dialog)
-#        wellHBoxLayout.addWidget(Qt.QLabel("Well", dialog))
-#        wellComboBox = Qt.QComboBox(dialog)
-#        wellComboBox.addItems(["1", "2", "3", "4", "5", "6", "7", "8", "A", "B", "C"])
-#	    # Set "A" as the default item
-#        wellComboBox.setCurrentIndex(8)
-#        wellHBoxLayout.addWidget(wellComboBox)
-#        vBoxLayout.addLayout(wellHBoxLayout)
-#        
-#        volumeHBoxLayout = Qt.QHBoxLayout(dialog)
-#        volumeHBoxLayout.addWidget(Qt.QLabel("Volume", dialog))
-#        volumeSpinBox = Qt.QSpinBox(dialog)
-#        volumeSpinBox.setSuffix(" u/l")
-#        volumeSpinBox.setRange(5, 150)
-#        volumeSpinBox.setValue(10)
-#        volumeHBoxLayout.addWidget(volumeSpinBox)
-#        vBoxLayout.addLayout(volumeHBoxLayout)
-#        
-#        buttonHBoxLayout = Qt.QHBoxLayout(dialog)
-#        cancelPushButton = Qt.QPushButton("Cancel", dialog)
-#        Qt.QObject.connect(cancelPushButton, Qt.SIGNAL("clicked()"), cancelPushButtonClicked)
-#        buttonHBoxLayout.addWidget(cancelPushButton)        
-#        okPushButton = Qt.QPushButton("Ok", dialog)
-#        Qt.QObject.connect(okPushButton, Qt.SIGNAL("clicked()"), okPushButtonClicked)
-#        buttonHBoxLayout.addWidget(okPushButton)
-#        vBoxLayout.addLayout(buttonHBoxLayout)
-#
-#        if dialog.exec_():
-#            self.__sampleChangerDisplayFlag = True
-#            self.__sampleChangerDisplayMessage = "Error when trying to fill!"
-#            if wellComboBox.currentText() == "A":
-#                column  = 9
-#            elif wellComboBox.currentText() == "B":
-#                column = 10
-#            elif wellComboBox.currentText() == "C":
-#                column = 11
-#            else:
-#                column = int(wellComboBox.currentText())
-#            logging.getLogger().info("Filling from plate '%s', row '%s' and well '%s'..." % (plateComboBox.currentText(), rowComboBox.currentText(), column))    
-#            self._sampleChanger.fill(plateComboBox.currentText(), rowComboBox.currentText(), column, volumeSpinBox.value())
-            
-            
             
     def robotDryPushButtonClicked(self):
         dryTime, buttonOk = Qt.QInputDialog.getInteger(self.brick_widget, "Dry", "\nPlease, insert time of drying (seconds):", 15, 1, 60, 2)
@@ -438,7 +343,6 @@ class BsxRobotBrick(Core.BaseBrick):
                              
                 
     def robotRecuperatePushButtonClicked(self):
-        # FUCK COPY PASTE CODE
         geometry = [self.getObject('samplechanger').getPlateInfo(i) for i in range(1, 4)]
         logging.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title='Recuperate', parent=self.brick_widget)
@@ -447,63 +351,6 @@ class BsxRobotBrick(Core.BaseBrick):
             selected_well = dialog.get_selected_well()
             logging.info('recuperating from [plate, row, column] = %s', selected_well)
             self.getObject('samplechanger').recuperate(*selected_well)
-#        def cancelPushButtonClicked():
-#            dialog.reject()
-#
-#        def okPushButtonClicked():
-#            dialog.accept()
-#                
-#        dialog = Qt.QDialog(self.brick_widget)
-#        dialog.setWindowTitle("Recuperate")
-#        dialog.setModal(True)
-#        
-#        vBoxLayout = Qt.QVBoxLayout()
-#        dialog.setLayout(vBoxLayout)
-#        
-#        plateHBoxLayout = Qt.QHBoxLayout(dialog)
-#        plateHBoxLayout.addWidget(Qt.QLabel("Plate", dialog))
-#        plateComboBox = Qt.QComboBox(dialog)
-#        plateComboBox.addItems(["1", "2", '3'])
-#        plateHBoxLayout.addWidget(plateComboBox)
-#        vBoxLayout.addLayout(plateHBoxLayout)
-#        
-#        rowHBoxLayout = Qt.QHBoxLayout(dialog)
-#        rowHBoxLayout.addWidget(Qt.QLabel("Row", dialog))
-#        rowComboBox = Qt.QComboBox(dialog)
-#        rowComboBox.addItems(["1"])
-#        rowHBoxLayout.addWidget(rowComboBox)
-#        vBoxLayout.addLayout(rowHBoxLayout)        
-#        
-#        wellHBoxLayout = Qt.QHBoxLayout(dialog)
-#        wellHBoxLayout.addWidget(Qt.QLabel("Well", dialog))
-#        wellComboBox = Qt.QComboBox(dialog)
-#        wellComboBox.addItems(["1", "2", "3", "4", "5", "6", "7", "8", "A", "B", "C"])
-#        wellHBoxLayout.addWidget(wellComboBox)
-#        vBoxLayout.addLayout(wellHBoxLayout)
-#                
-#        buttonHBoxLayout = Qt.QHBoxLayout(dialog)
-#        cancelPushButton = Qt.QPushButton("Cancel", dialog)
-#        Qt.QObject.connect(cancelPushButton, Qt.SIGNAL("clicked()"), cancelPushButtonClicked)
-#        buttonHBoxLayout.addWidget(cancelPushButton)        
-#        okPushButton = Qt.QPushButton("Ok", dialog)
-#        Qt.QObject.connect(okPushButton, Qt.SIGNAL("clicked()"), okPushButtonClicked)
-#        buttonHBoxLayout.addWidget(okPushButton)
-#        vBoxLayout.addLayout(buttonHBoxLayout)
-#
-#        if dialog.exec_():
-#            self.__sampleChangerDisplayFlag = True
-#            self.__sampleChangerDisplayMessage = "Error when trying to recuperate!"
-#            if wellComboBox.currentText() == "A":
-#                column  = 9
-#            elif wellComboBox.currentText() == "B":
-#                column = 10
-#            elif wellComboBox.currentText() == "C":
-#                column = 11
-#            else:
-#                column = int(wellComboBox.currentText())
-#            logging.getLogger().info("Recuperating to plate '%s', row '%s' and well '%s'..." % (plateComboBox.currentText(), rowComboBox.currentText(), column))    
-#            self._sampleChanger.recuperate(int(plateComboBox.currentText()), int(rowComboBox.currentText()), column)
-                                
 
 
     def robotRestartWithHomingActionTriggered(self):
