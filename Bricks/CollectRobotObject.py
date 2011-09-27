@@ -269,7 +269,7 @@ class CollectRobotObject(QtCore.QThread):
             # ==================================================
             self.checkAbort(200) 
             self.showMessage(0, "Start collecting (%s) '%s'..." % (mode,pars.prefix) )
-            
+            self.emit(QtCore.SIGNAL("displayReset"))  
             self.proxyRobot.collect(0,                  pars.directory,    pars.prefix,             filepars.runNumber,
                                     pars.frameNumber,   pars.timePerFrame, tocollect.concentration, tocollect.comments,
                                     tocollect.code,     pars.mask,         pars.detectorDistance,   pars.waveLength,
