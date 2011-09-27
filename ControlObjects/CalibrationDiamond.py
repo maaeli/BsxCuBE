@@ -1,51 +1,9 @@
-"""
-=============================================
-  NAME       : Calibration Diamond Control Object (CalibrationDiamond.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
+from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
-  REVISION   : 0
-
-  RELEASE    : 2010/ABR/14
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
-
-
-
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class CalibrationDiamond(CObjectBase):
+    __CHANNEL_LIST = ["calibrationStatusChanged","newPositionChanged"]
 
 
-    __CHANNEL_LIST = ["calibrationStatusChanged",
-                      "newPositionChanged"]
-    
-
-
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================
     signals = [Signal(channel) for channel in __CHANNEL_LIST]                
         
     slots = [Slot("executeCalibration"),
@@ -53,9 +11,6 @@ class CalibrationDiamond(CObjectBase):
 
 
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================    
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
 
@@ -72,9 +27,6 @@ class CalibrationDiamond(CObjectBase):
             except:
                 pass
 
-    # =============================================
-    #  COMMANDS
-    # =============================================      
     def executeCalibration(self, pValue):
         if pValue == "":
             self.commands["executeCalibration"]()
@@ -87,9 +39,6 @@ class CalibrationDiamond(CObjectBase):
 
 
 
-    # =============================================
-    #  CHANNELS
-    # =============================================
     def calibrationStatusChanged(self, pValue):
         self.emit("calibrationStatusChanged", pValue)
 

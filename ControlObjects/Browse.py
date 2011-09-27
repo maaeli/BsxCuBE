@@ -1,39 +1,7 @@
-"""
-=============================================
-  NAME       : Browse Control Object (Browse.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/19
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
+from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
 
 
 
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
-try:
-    from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
-except ImportError:
-    print "%s.py: error when importing module!" % __name__
-
-
-
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class Browse(CObjectBase):
     
 
@@ -41,9 +9,6 @@ class Browse(CObjectBase):
                      "browseLocationChanged"]
     
 
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================
     signals = [Signal(channel) for channel in __CHANNEL_LIST]
     
     slots = []
@@ -51,9 +16,6 @@ class Browse(CObjectBase):
 
 
 
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================    
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
         
@@ -69,14 +31,6 @@ class Browse(CObjectBase):
             except:
                 pass
                                            
-    # =============================================
-    #  COMMANDS
-    # =============================================      
-
-
-    # =============================================
-    #  CHANNELS
-    # =============================================
     def browseTypeChanged(self, pValue):
         print "emitting"
         self.emit("browseTypeChanged", pValue)

@@ -1,65 +1,32 @@
-"""
-=============================================
-  NAME       : Reprocess Control Object (Reprocess.py)
-  
-  DESCRIPTION:
-    
-  VERSION    : 1
-
-  REVISION   : 0
-
-  RELEASE    : 2010/MAR/01
-
-  PLATFORM   : Bliss Framework 4
-
-  EMAIL      : ricardo.fernandes@esrf.fr
-  
-  HISTORY    :
-=============================================
-"""
-
-# =============================================
-#  IMPORT MODULES
-# =============================================
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
 
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class Reprocess(CObjectBase):
-    
     __CHANNEL_LIST = ["reprocessDetectorChanged",
-              "reprocessOperationChanged",
-              "reprocessDirectoryChanged",
-              "reprocessPrefixChanged",                                                                                                         
-              "reprocessRunNumberChanged",
-              "reprocessFrameFirstChanged",
-              "reprocessFrameLastChanged",
-              "reprocessConcentrationChanged",
-              "reprocessCommentsChanged",
-              "reprocessCodeChanged",                                             
-              "reprocessMaskFileChanged",
-              "reprocessDetectorDistanceChanged",
-              "reprocessWaveLengthChanged",
-              "reprocessPixelSizeXChanged",
-              "reprocessPixelSizeYChanged",
-              "reprocessBeamCenterXChanged",
-              "reprocessBeamCenterYChanged",
-              "reprocessNormalisationChanged",
-              "reprocessBeamStopDiodeChanged",
-              "reprocessMachineCurrentChanged",
-              "reprocessKeepOriginalChanged",
-              "reprocessStatusChanged"]                                                         
+                      "reprocessOperationChanged",
+                      "reprocessDirectoryChanged",
+                      "reprocessPrefixChanged",
+                      "reprocessRunNumberChanged",
+                      "reprocessFrameFirstChanged",
+                      "reprocessFrameLastChanged",
+                      "reprocessConcentrationChanged",
+                      "reprocessCommentsChanged",
+                      "reprocessCodeChanged",
+                      "reprocessMaskFileChanged",
+                      "reprocessDetectorDistanceChanged",
+                      "reprocessWaveLengthChanged",
+                      "reprocessPixelSizeXChanged",
+                      "reprocessPixelSizeYChanged",
+                      "reprocessBeamCenterXChanged",
+                      "reprocessBeamCenterYChanged",
+                      "reprocessNormalisationChanged",
+                      "reprocessBeamStopDiodeChanged",
+                      "reprocessMachineCurrentChanged",
+                      "reprocessKeepOriginalChanged",
+                      "reprocessStatusChanged"]
 
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================
     signals = [Signal(channel) for channel in __CHANNEL_LIST]
     slots   = [Slot("reprocess")]
-    
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================    
+
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
 
@@ -73,9 +40,6 @@ class Reprocess(CObjectBase):
             except:
                 pass
                                            
-    # =============================================
-    #  COMMANDS
-    # =============================================      
     def reprocess(self, pDetector, pOperation, pDirectory, pPrefix, pRunNumber, pFrameFirst, pFrameLast, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pBeamStopDiode, pMachineCurrent, pKeepOriginal, pTimeOut, pFeedback):
         self.reprocessDetector.set_value(pDetector)
         self.reprocessOperation.set_value(pOperation)
@@ -203,9 +167,6 @@ class Reprocess(CObjectBase):
     def reprocessAbort(self):
         self.commands["reprocess"].abort()
 
-    # =============================================
-    #  CHANNELS
-    # =============================================
     def reprocessDetectorChanged(self, pValue):
         self.emit("reprocessDetectorChanged", pValue)        
 
