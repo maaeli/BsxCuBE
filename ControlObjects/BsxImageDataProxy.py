@@ -29,6 +29,7 @@ class BsxImageDataProxy(CObjectBase):
 
         data = numpy.loadtxt(filename)
 
+        self.emit('erase_curve', filename)
         self.emit('new_curves_data', { filename: [list(data[:,0]), list(data[:,1])] })
 
     def erase_curves(self):
