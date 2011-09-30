@@ -1,5 +1,11 @@
 <application id="BsxCuBE">
-    <properties id="CalibrationDiamondBrick1">
+    <properties id="CollectTab">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Collect"/>
+  </properties>
+  <properties id="CalibrationDiamondBrick1">
      <property name="flex" value="0"/>
      <property name="caption" value="Calibration diamond"/>
      <property name="parameter" value="1"/>
@@ -17,26 +23,28 @@
      <property name="notification" value="switch to tab"/>
      <property name="caption" value=""/>
   </properties>
-  <properties id="vgroupbox2">
+  <properties id="BeamlineTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Operation"/>
+     <property name="caption" value="Beamline"/>
   </properties>
-  <properties id="vgroupbox3">
-     <property name="flex" value="2"/>
+  <properties id="ReprocessTab">
+     <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Display"/>
-  </properties>
-  <properties id="vgroupbox4">
-     <property name="flex" value="0"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Misc"/>
+     <property name="caption" value="Reprocess"/>
   </properties>
   <properties id="BsxSCBrick1">
      <property name="flex" value="0"/>
+  </properties>
+  <properties id="ReadingBrick3">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in flight tube"/>
+     <property name="fontSize" value="24"/>
   </properties>
   <properties id="BsxFrameBrick1">
      <property name="flex" value="1"/>
@@ -84,11 +92,10 @@
      <property name="toolTip" value="Execute quick realignment"/>
      <property name="expertModeOnly" value="False"/>
   </properties>
-  <properties id="vbox5">
+  <properties id="LogBrick1">
      <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Beamline"/>
+     <property name="emailAddresses" value="ohlsson@esrf.fr, guijarro@esrf.fr"/>
+     <property name="minimum_level" value="INFO"/>
   </properties>
   <properties id="CommandBrick6">
      <property name="flex" value="0"/>
@@ -111,18 +118,6 @@
      <property name="toolTip" value="Execute sample changer vacuum"/>
      <property name="expertModeOnly" value="True"/>
   </properties>
-  <properties id="vbox8">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="2D"/>
-  </properties>
-  <properties id="vbox9">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Robot"/>
-  </properties>
   <properties id="hbox1">
      <property name="flex" value="0"/>
      <property name="align" value="stretch"/>
@@ -140,18 +135,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Feedback"/>
   </properties>
-  <properties id="vbox2">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Collect"/>
-  </properties>
-  <properties id="vbox3">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Reprocess"/>
-  </properties>
   <properties id="window1">
      <property name="minwidth" value="100"/>
      <property name="width" value="100"/>
@@ -165,32 +148,47 @@
      <property name="pack" value="start"/>
      <property name="caption" value=""/>
   </properties>
-  <properties id="vbox6">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="EH Scan"/>
+  <properties id="MachineCurrentBrick1">
+     <property name="flex" value="0"/>
+     <property name="maskFormat" value="%3.2f"/>
+     <property name="suffix" value=" mA"/>
+     <property name="showFillMode" value="True"/>
+     <property name="currentThreshold" value="1.0"/>
+     <property name="fontSize" value="24"/>
   </properties>
-  <properties id="vbox7">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="1D"/>
+  <properties id="CollectBrick1">
+     <property name="flex" value="0"/>
   </properties>
-  <properties id="vbox4">
+  <properties id="BrowseTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Browse"/>
   </properties>
-  <properties id="CollectBrick1">
-     <property name="flex" value="0"/>
-  </properties>
-  <properties id="vbox10">
+  <properties id="EH">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="OH Scan"/>
+     <property name="caption" value="EH Scan"/>
+  </properties>
+  <properties id="OHScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Optics"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="15"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
   </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
@@ -209,6 +207,12 @@
      <property name="minimumValue" value="0.0"/>
      <property name="orientation" value="Landscape"/>
   </properties>
+  <properties id="Robot">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Robot"/>
+  </properties>
   <properties id="HutchTrigger1">
      <property name="flex" value="0"/>
   </properties>
@@ -218,59 +222,11 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Log"/>
   </properties>
-  <properties id="GraphBrick2">
+  <properties id="2D">
      <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="EH"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="14"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
-  </properties>
-  <properties id="GraphBrick3">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="Process Graph"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="14"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
-  </properties>
-  <properties id="GraphBrick1">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="Optics"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="15"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="2D"/>
   </properties>
   <properties id="ShutterBrick3">
      <property name="flex" value="0"/>
@@ -310,13 +266,11 @@
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value=""/>
   </properties>
-  <properties id="MachineCurrentBrick1">
-     <property name="flex" value="0"/>
-     <property name="maskFormat" value="%3.2f"/>
-     <property name="suffix" value=" mA"/>
-     <property name="showFillMode" value="True"/>
-     <property name="currentThreshold" value="1.0"/>
-     <property name="fontSize" value="24"/>
+  <properties id="Display">
+     <property name="flex" value="2"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Display"/>
   </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
@@ -334,13 +288,11 @@
      <property name="toolTip" value="Vacuum in sample changer expose unit"/>
      <property name="fontSize" value="24"/>
   </properties>
-  <properties id="ReadingBrick3">
-     <property name="flex" value="0"/>
-     <property name="valueThreshold" value="0.80000000000000004"/>
-     <property name="maskFormat" value="%1.1e"/>
-     <property name="suffix" value=" mbar"/>
-     <property name="toolTip" value="Vacuum in flight tube"/>
-     <property name="fontSize" value="24"/>
+  <properties id="OH">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="OH Scan"/>
   </properties>
   <properties id="LoginBrick1">
      <property name="flex" value="0"/>
@@ -350,20 +302,74 @@
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
   </properties>
+  <properties id="Misc">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Misc"/>
+  </properties>
+  <properties id="1DScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Process Graph"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="logarithmic"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="14"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="LogBrick1">
+  <properties id="Operation">
      <property name="flex" value="1"/>
-     <property name="emailAddresses" value="ohlsson@esrf.fr, guijarro@esrf.fr"/>
-     <property name="minimum_level" value="INFO"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Operation"/>
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
      <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr"/>
      <property name="send_icon" value=""/>
   </properties>
-    <connections id="CalibrationDiamondBrick1">
+  <properties id="EHScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="EH"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="14"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
+  <properties id="1D">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="1D"/>
+  </properties>
+    <connections id="CollectTab">
+  </connections>
+
+  <connections id="CalibrationDiamondBrick1">
     <connection role="login">
       <signal name="expertModeChanged"/>
       <peer name="LoginBrick1"/>
@@ -391,13 +397,10 @@
   <connections id="tabbox1">
   </connections>
 
-  <connections id="vgroupbox2">
+  <connections id="BeamlineTab">
   </connections>
 
-  <connections id="vgroupbox3">
-  </connections>
-
-  <connections id="vgroupbox4">
+  <connections id="ReprocessTab">
   </connections>
 
   <connections id="BsxSCBrick1">
@@ -406,6 +409,13 @@
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
       <peer name="SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick3">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="ReadingVacFlightTube"/>
     </connection>
   </connections>
 
@@ -503,7 +513,7 @@
     </connection>
   </connections>
 
-  <connections id="vbox5">
+  <connections id="LogBrick1">
   </connections>
 
   <connections id="CommandBrick6">
@@ -542,12 +552,6 @@
     </connection>
   </connections>
 
-  <connections id="vbox8">
-  </connections>
-
-  <connections id="vbox9">
-  </connections>
-
   <connections id="hbox1">
   </connections>
 
@@ -557,25 +561,17 @@
   <connections id="hbox3">
   </connections>
 
-  <connections id="vbox2">
-  </connections>
-
-  <connections id="vbox3">
-  </connections>
-
   <connections id="window1">
   </connections>
 
   <connections id="vbox1">
   </connections>
 
-  <connections id="vbox6">
-  </connections>
-
-  <connections id="vbox7">
-  </connections>
-
-  <connections id="vbox4">
+  <connections id="MachineCurrentBrick1">
+    <connection role="machinecurrent">
+      <signal name="machine_info_updated"/>
+      <peer name="ESRFMachinfo"/>
+    </connection>
   </connections>
 
   <connections id="CollectBrick1">
@@ -607,9 +603,11 @@
       <signal name="collectNewFrameChanged"/>
       <signal name="checkBeamChanged"/>
       <signal name="beamLostChanged"/>
+      <signal name="collectProcessingDone"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
+      <slot name="triggerEDNA"/>
       <peer name="Collect"/>
     </connection>
     <connection role="login">
@@ -626,95 +624,13 @@
     </connection>
   </connections>
 
-  <connections id="vbox10">
+  <connections id="BrowseTab">
   </connections>
 
-  <connections id="splitter1">
+  <connections id="EH">
   </connections>
 
-  <connections id="tabbox2">
-  </connections>
-
-  <connections id="AttenuatorsBrick1">
-    <connection role="Collect">
-      <signal name="transmissionChanged"/>
-      <peer name="Attenuators"/>
-      <peer name="CollectBrick1"/>
-    </connection>
-    <connection role="attenuators">
-      <signal name="attenuatorsStateChanged"/>
-      <signal name="attenuatorsFactorChanged"/>
-      <peer name="Attenuators"/>
-    </connection>
-  </connections>
-
-  <connections id="HutchTrigger1">
-    <connection role="hutchtrigger">
-      <signal name="trigger_toggled"/>
-      <signal name="door_state_changed"/>
-      <slot name="toggle_trigger"/>
-      <slot name="trigger_state"/>
-      <slot name="door_state"/>
-      <peer name="hutchtrigger"/>
-    </connection>
-  </connections>
-
-  <connections id="hbox2">
-  </connections>
-
-  <connections id="GraphBrick2">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-      <peer name="scan"/>
-    </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
-    </connection>
-  </connections>
-
-  <connections id="GraphBrick3">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-      <peer name="image_proxy"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
-    </connection>
-  </connections>
-
-  <connections id="GraphBrick1">
+  <connections id="OHScan">
     <connection role="y2_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
@@ -738,6 +654,45 @@
     <connection role="Y2">
       <signal name="update"/>
     </connection>
+  </connections>
+
+  <connections id="splitter1">
+  </connections>
+
+  <connections id="tabbox2">
+  </connections>
+
+  <connections id="AttenuatorsBrick1">
+    <connection role="Collect">
+      <signal name="transmissionChanged"/>
+      <peer name="Attenuators"/>
+      <peer name="CollectBrick1"/>
+    </connection>
+    <connection role="attenuators">
+      <signal name="attenuatorsStateChanged"/>
+      <signal name="attenuatorsFactorChanged"/>
+      <peer name="Attenuators"/>
+    </connection>
+  </connections>
+
+  <connections id="Robot">
+  </connections>
+
+  <connections id="HutchTrigger1">
+    <connection role="hutchtrigger">
+      <signal name="trigger_toggled"/>
+      <signal name="door_state_changed"/>
+      <slot name="toggle_trigger"/>
+      <slot name="trigger_state"/>
+      <slot name="door_state"/>
+      <peer name="hutchtrigger"/>
+    </connection>
+  </connections>
+
+  <connections id="hbox2">
+  </connections>
+
+  <connections id="2D">
   </connections>
 
   <connections id="ShutterBrick3">
@@ -770,11 +725,7 @@
   <connections id="BsxCuBE">
   </connections>
 
-  <connections id="MachineCurrentBrick1">
-    <connection role="machinecurrent">
-      <signal name="machine_info_updated"/>
-      <peer name="ESRFMachinfo"/>
-    </connection>
+  <connections id="Display">
   </connections>
 
   <connections id="ReadingBrick1">
@@ -791,11 +742,7 @@
     </connection>
   </connections>
 
-  <connections id="ReadingBrick3">
-    <connection role="reading">
-      <signal name="readingChanged"/>
-      <peer name="ReadingVacFlightTube"/>
-    </connection>
+  <connections id="OH">
   </connections>
 
   <connections id="LoginBrick1">
@@ -804,6 +751,35 @@
   <connections id="BsxVideoBrick1">
     <connection role="samplechanger">
       <peer name="SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="Misc">
+  </connections>
+
+  <connections id="1DScan">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+      <peer name="image_proxy"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
     </connection>
   </connections>
 
@@ -836,10 +812,39 @@
     </connection>
   </connections>
 
-  <connections id="LogBrick1">
+  <connections id="Operation">
   </connections>
 
   <connections id="FeedbackBrick1">
+  </connections>
+
+  <connections id="EHScan">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="scan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
+  <connections id="1D">
   </connections>
 
   </application>

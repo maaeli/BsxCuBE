@@ -3,7 +3,7 @@
 <window id="window1" xmlns:html="http://www.w3.org/1999/xhtml" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <vbox id="vbox1" orient="vertical">
   <hbox id="hbox1" orient="horizontal">
-  <vgroupbox id="vgroupbox2" orient="vertical">
+  <vgroupbox id="Operation" orient="vertical">
   <caption label="Operation"/>
   <tabbox id="tabbox1">
     <tabs>
@@ -13,21 +13,21 @@
 <tab label='Beamline'/>
     </tabs>
     <tabpanels>
-      <tabpanel id='tab_vbox2'><vbox id="vbox2" orient="vertical">
+      <tabpanel id='tab_CollectTab'><vbox id="CollectTab" orient="vertical">
   <hbox qwidget="true" id="CollectBrick1" brick="true"><script src="CollectBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ShutterBrick1" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="AttenuatorsBrick1" brick="true"><script src="AttenuatorsBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox3'><vbox id="vbox3" orient="vertical">
+<tabpanel id='tab_ReprocessTab'><vbox id="ReprocessTab" orient="vertical">
   <hbox qwidget="true" id="ReprocessBrick1" brick="true"><script src="ReprocessBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox4'><vbox id="vbox4" orient="vertical">
+<tabpanel id='tab_BrowseTab'><vbox id="BrowseTab" orient="vertical">
   <hbox qwidget="true" id="BrowseBrick1" brick="true"><script src="BrowseBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox5'><vbox id="vbox5" orient="vertical">
+<tabpanel id='tab_BeamlineTab'><vbox id="BeamlineTab" orient="vertical">
   <hbox qwidget="true" id="CalibrationDiamondBrick1" brick="true"><script src="CalibrationDiamondBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="CommandBrick1" brick="true"><script src="CommandBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ShutterBrick2" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
@@ -48,7 +48,7 @@
   
 </vgroupbox>
   
-<vgroupbox id="vgroupbox3" orient="vertical">
+<vgroupbox id="Display" orient="vertical">
   <caption label="Display"/>
   <tabbox id="tabbox2">
     <tabs>
@@ -59,23 +59,23 @@
 <tab label='Robot'/>
     </tabs>
     <tabpanels>
-      <tabpanel id='tab_vbox6'><vbox id="vbox6" orient="vertical">
-  <hbox qwidget="true" id="GraphBrick2" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+      <tabpanel id='tab_EH'><vbox id="EH" orient="vertical">
+  <hbox qwidget="true" id="EHScan" brick="true"><script src="GraphBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox10'><vbox id="vbox10" orient="vertical">
-  <hbox qwidget="true" id="GraphBrick1" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+<tabpanel id='tab_OH'><vbox id="OH" orient="vertical">
+  <hbox qwidget="true" id="OHScan" brick="true"><script src="GraphBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox7'><vbox id="vbox7" orient="vertical">
-  <hbox qwidget="true" id="GraphBrick3" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+<tabpanel id='tab_1D'><vbox id="1D" orient="vertical">
+  <hbox qwidget="true" id="1DScan" brick="true"><script src="GraphBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox8'><vbox id="vbox8" orient="vertical">
+<tabpanel id='tab_2D'><vbox id="2D" orient="vertical">
   <hbox qwidget="true" id="BsxFrameBrick1" brick="true"><script src="BsxFrameBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
-<tabpanel id='tab_vbox9'><vbox id="vbox9" orient="vertical">
+<tabpanel id='tab_Robot'><vbox id="Robot" orient="vertical">
   <hbox qwidget="true" id="BsxVideoBrick1" brick="true"><script src="BsxVideoBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="BsxSCBrick1" brick="true"><script src="BsxSCBrick" tau="false"/></hbox>
 </vbox>
@@ -85,7 +85,7 @@
   
 </vgroupbox>
   
-<vgroupbox id="vgroupbox4" orient="vertical">
+<vgroupbox id="Misc" orient="vertical">
   <caption label="Misc"/>
   <hbox qwidget="true" id="LoginBrick1" brick="true"><script src="LoginBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="MachineCurrentBrick1" brick="true"><script src="MachineCurrentBrick" tau="false"/></hbox>
