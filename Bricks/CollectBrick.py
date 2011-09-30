@@ -738,22 +738,22 @@ class CollectBrick(Core.BaseBrick):
 
     def readOnlyCheckBoxToggled(self, pValue):
 
-        self.directoryLineEdit.setEnabled             (not pValue)
-        self.directoryPushButton.setEnabled           (not pValue)
-        self.prefixLineEdit.setEnabled                (not pValue)
-        self.runNumberSpinBox.setEnabled              (not pValue)        
-        self.frameNumberSpinBox.setEnabled            (not pValue)
-        self.timePerFrameSpinBox.setEnabled           (not pValue)
-        self.maskLineEdit.setEnabled                  (not pValue and self.__expertMode)
-        self.maskDirectoryPushButton.setEnabled       (not pValue and self.__expertMode)
-        self.maskDisplayPushButton.setEnabled         (not pValue and self.__expertMode)
-        self.detectorDistanceDoubleSpinBox.setEnabled (not pValue and self.__expertMode)
-        self.waveLengthDoubleSpinBox.setEnabled       (not pValue and self.__expertMode)                        
-        self.pixelSizeXDoubleSpinBox.setEnabled       (not pValue and self.__expertMode)
-        self.pixelSizeYDoubleSpinBox.setEnabled       (not pValue and self.__expertMode)            
-        self.beamCenterXSpinBox.setEnabled            (not pValue and self.__expertMode)
-        self.beamCenterYSpinBox.setEnabled            (not pValue and self.__expertMode)
-        self.normalisationDoubleSpinBox.setEnabled    (not pValue and self.__expertMode)
+        self.directoryLineEdit.setEnabled(not pValue)
+        self.directoryPushButton.setEnabled(not pValue)
+        self.prefixLineEdit.setEnabled(not pValue)
+        self.runNumberSpinBox.setEnabled(not pValue)        
+        self.frameNumberSpinBox.setEnabled(not pValue)
+        self.timePerFrameSpinBox.setEnabled(not pValue)
+        self.maskLineEdit.setEnabled(not pValue and self.__expertMode)
+        self.maskDirectoryPushButton.setEnabled(not pValue and self.__expertMode)
+        self.maskDisplayPushButton.setEnabled(not pValue and self.__expertMode)
+        self.detectorDistanceDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.waveLengthDoubleSpinBox.setEnabled(not pValue and self.__expertMode)                        
+        self.pixelSizeXDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.pixelSizeYDoubleSpinBox.setEnabled(not pValue and self.__expertMode)            
+        self.beamCenterXSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.beamCenterYSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.normalisationDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
 
     def directoryLineEditChanged(self, pValue):
         if self._isCollecting:
@@ -933,7 +933,6 @@ class CollectBrick(Core.BaseBrick):
         #  blocks widget or whatever during the time of the collection
         self.setButtonState(1)
         self._abortFlag = False                
-        self.displayReset()
         self._collectRobotDialog.clearHistory()
         self._collectRobot.robotStartCollection()
 
@@ -1079,42 +1078,35 @@ class CollectBrick(Core.BaseBrick):
 
         enabled = self.__expertMode and not self.readOnlyCheckBox.isChecked()
 
-        self.maskLineEdit.setEnabled                   (enabled)
-        self.maskDirectoryPushButton.setEnabled        (enabled)
-        self.maskDisplayPushButton.setEnabled          (enabled and self.__validParameters[2])        
-        self.detectorDistanceDoubleSpinBox.setEnabled  (enabled)
-        self.waveLengthDoubleSpinBox.setEnabled        (enabled)
-        self.pixelSizeXDoubleSpinBox.setEnabled        (enabled)
-        self.pixelSizeYDoubleSpinBox.setEnabled        (enabled)
-        self.beamCenterXSpinBox.setEnabled             (enabled)
-        self.beamCenterYSpinBox.setEnabled             (enabled)
-        self.normalisationDoubleSpinBox.setEnabled     (enabled)
+        self.maskLineEdit.setEnabled(enabled)
+        self.maskDirectoryPushButton.setEnabled(enabled)
+        self.maskDisplayPushButton.setEnabled(enabled and self.__validParameters[2])        
+        self.detectorDistanceDoubleSpinBox.setEnabled(enabled)
+        self.waveLengthDoubleSpinBox.setEnabled(enabled)
+        self.pixelSizeXDoubleSpinBox.setEnabled(enabled)
+        self.pixelSizeYDoubleSpinBox.setEnabled(enabled)
+        self.beamCenterXSpinBox.setEnabled(enabled)
+        self.beamCenterYSpinBox.setEnabled(enabled)
+        self.normalisationDoubleSpinBox.setEnabled(enabled)
 
     def setButtonState(self, pOption):
-        if pOption == 0:     # normal            
-            self.processCheckBox.setEnabled   (True)
-            self.notifyCheckBox.setEnabled    (True)
-            self.robotCheckBox.setEnabled     (True)
-            self.hdfCheckBox.setEnabled       (True)
-            self.testPushButton.setEnabled    (True)
-            self.collectPushButton.setEnabled (True)
-            self.abortPushButton.setEnabled   (False)
+        buttons = (self.processCheckBox,
+                   self.notifyCheckBox, self.robotCheckBox, self.hdfCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
+        def enable_buttons(*args):
+            if len(args)==1:
+              for button in buttons:
+                button.setEnabled(args[0])
+            else:
+                for i in range(len(buttons)):
+                    buttons[i].setEnabled(args[i])
+        if pOption == 0:     # normal      
+            enable_buttons(True)
+            self.abortPushButton.setEnabled(False)
         elif pOption == 1:   # collecting
-            self.processCheckBox.setEnabled   (False)
-            self.notifyCheckBox.setEnabled    (False)
-            self.robotCheckBox.setEnabled     (False)
-            self.hdfCheckBox.setEnabled       (False)                        
-            self.testPushButton.setEnabled    (False)
-            self.collectPushButton.setEnabled (False)
-            self.abortPushButton.setEnabled   (True)
-        elif pOption == 2:   # invalid parameters 
-            self.processCheckBox.setEnabled   (True)
-            self.notifyCheckBox.setEnabled    (True)
-            self.robotCheckBox.setEnabled     (True)
-            self.hdfCheckBox.setEnabled       (True)            
-            self.testPushButton.setEnabled    (False)
-            self.collectPushButton.setEnabled (False)
-            self.abortPushButton.setEnabled   (False)        
+            enable_buttons(False)
+            self.abortPushButton.setEnabled(True)
+        elif pOption == 2:   # invalid parameters
+            enable_buttons(True, True, True, True, False,False,False)
 
         if self.abortPushButton.isEnabled():
             self.abortPushButton.setProperty("abortactive","true")
