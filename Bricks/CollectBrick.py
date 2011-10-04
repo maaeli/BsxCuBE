@@ -152,7 +152,7 @@ class CollectBrick(Core.BaseBrick):
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
             if self._isCollecting:
-                self.getObject("collect").triggerEDNA(filename0)
+                self.getObject("collect").triggerEDNA(filename0,oneway=True)
                 message = "The frame '%s' was collected..." % filename0              
                 logging.getLogger().info(message)
                 if self.robotCheckBox.isChecked():
