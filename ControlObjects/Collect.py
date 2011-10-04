@@ -106,25 +106,20 @@ class Collect(CObjectBase):
         self.commands["collect"](callback=self.collectDone, error_callback=self.collectFailed)
 
     def triggerEDNA(self, raw_filename):
-        if self.collecting:
-            raw_filename=str(raw_filename)
-            self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
-            self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
-            #machine_current_object = self.objects["machine_current"]
-            #self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(machine_current_object.machine_current))
-            self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
-            self.xsdin.logFile = XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".log")))
-            self.xsdin.normalizedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/2d/")))
-            self.xsdin.integratedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".ang")))
-            self.xsdin.integratedCurve=XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/1d/").replace(".edf", ".dat")))
-        
-            #print self.xsdin.marshal() 
-        
-            jobId = self.commands["startJob"]([self.pluginIntegrate,self.xsdin.marshal()])
-            self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
-            logging.info("Processing job %s started", jobId)
-        else:
-            self.commands["startJob"]([self.pluginIntegrate,self.xsdin.marshal()])
+        raw_filename=str(raw_filename)
+        self.xsdin.rawImage = XSDataImage(path=XSDataString(raw_filename))
+        self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
+        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
+        self.xsdin.logFile = XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".log")))
+        self.xsdin.normalizedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/2d/")))
+        self.xsdin.integratedImage = XSDataImage(path=XSDataString(raw_filename.replace("/raw/", "/misc/").replace(".edf", ".ang")))
+        self.xsdin.integratedCurve=XSDataFile(path=XSDataString(raw_filename.replace("/raw/", "/1d/").replace(".edf", ".dat")))
+        #For debugging
+        #open("/tmp/ednaTrigger.log","a").write(self.xsdin.marshal() )
+            
+        jobId = self.commands["startJob"]([self.pluginIntegrate,self.xsdin.marshal()])
+        self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+        logging.info("Processing job %s started", jobId)
         
     def collectDone(self, returned_value):
         self.collecting = False
