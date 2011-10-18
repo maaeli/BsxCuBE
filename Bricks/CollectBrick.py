@@ -443,6 +443,30 @@ class CollectBrick(Core.BaseBrick):
         self.hBoxLayout13.addWidget(self.normalisationDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout13)
         
+        
+        # Radiation Damage 
+        self.hBoxLayout15 = Qt.QHBoxLayout()        
+        self.radiationCheckBox = Qt.QCheckBox("Radiation damage", self.brick_widget)
+        self.radiationCheckBox.setFixedWidth(130)
+        Qt.QObject.connect(self.radiationCheckBox, Qt.SIGNAL("toggled(bool)"), self.radiationCheckBoxToggled)
+        self.hBoxLayout15.addWidget(self.radiationCheckBox)
+        self.radiationRelativeDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
+        self.radiationRelativeDoubleSpinBox.setRange(0.0,1.0)
+        self.radiationRelativeDoubleSpinBox.setDecimals(10)        
+        self.radiationRelativeDoubleSpinBox.setToolTip("Relative Similarity")
+        self.hBoxLayout15.addWidget(self.radiationRelativeDoubleSpinBox)               
+        self.radiationAbsoluteDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
+        self.radiationAbsoluteDoubleSpinBox.setRange(0.0,1.0)
+        self.radiationAbsoluteDoubleSpinBox.setDecimals(10)        
+        self.radiationAbsoluteDoubleSpinBox.setToolTip("Absolute Similarity")                                
+        self.hBoxLayout15.addWidget(self.radiationAbsoluteDoubleSpinBox)
+        #self.radiationDisplayCheckBox = Qt.QCheckBox("Display", self.brick_widget)
+        #self.radiationDisplayCheckBox.setFixedWidth(80)
+        #self.radiationDisplayCheckBox.setChecked(True)
+        #self.hBoxLayout15.addWidget(self.radiationDisplayCheckBox)        
+        self.brick_widget.layout().addLayout(self.hBoxLayout15)
+
+        
         self.vBoxLayout0 = Qt.QVBoxLayout()
         self.vBoxLayout0.addSpacing(15)
         self.brick_widget.layout().addLayout(self.vBoxLayout0)        
@@ -520,6 +544,7 @@ class CollectBrick(Core.BaseBrick):
         self.directoryLineEditChanged(None)
         self.prefixLineEditChanged(None)
         self.maskLineEditChanged(None)
+        self.radiationCheckBoxToggled(False)
     
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -668,6 +693,11 @@ class CollectBrick(Core.BaseBrick):
          collectpars.beamCenterX          = generalParsWidget.beamCenterXSpinBox.value()
          collectpars.beamCenterY          = generalParsWidget.beamCenterYSpinBox.value()
          collectpars.normalisation        = generalParsWidget.normalisationDoubleSpinBox.value()
+         collectpars.radiationChecked     = generalParsWidget.radiationCheckBox.isChecked()
+         collectpars.radiationRelative    = generalParsWidget.radiationRelativeDoubleSpinBox.value()
+         collectpars.radiationAbsolute    = generalParsWidget.radiationAbsoluteDoubleSpinBox.value()
+         collectpars.SEUTemperature       = self._sampleChanger.getSEUTemperature()
+         collectpars.storageTemperature   = self._sampleChanger.getSampleStorageTemperature()
 
          if robot:
              logging.info("   - getting robot parameters") 
@@ -710,6 +740,9 @@ class CollectBrick(Core.BaseBrick):
              self.beamCenterXSpinBox.hide()
              self.beamCenterYSpinBox.hide()
              self.normalisationDoubleSpinBox.hide()
+             self.radiationCheckBox.hide()
+             self.radiationRelativeDoubleSpinBox.hide()
+             self.radiationAbsoluteDoubleSpinBox.hide()
              self.maskLabel.hide()
              self.detectorDistanceLabel.hide()
              self.pixelSizeLabel.hide()
@@ -729,6 +762,9 @@ class CollectBrick(Core.BaseBrick):
              self.beamCenterXSpinBox.show()
              self.beamCenterYSpinBox.show()
              self.normalisationDoubleSpinBox.show()
+             self.radiationCheckBox.show()
+             self.radiationRelativeDoubleSpinBox.show()
+             self.radiationAbsoluteDoubleSpinBox.show()
              self.maskLabel.show()
              self.detectorDistanceLabel.show()
              self.pixelSizeLabel.show()
@@ -754,6 +790,9 @@ class CollectBrick(Core.BaseBrick):
         self.beamCenterXSpinBox.setEnabled(not pValue and self.__expertMode)
         self.beamCenterYSpinBox.setEnabled(not pValue and self.__expertMode)
         self.normalisationDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.radiationCheckBox.setEnabled(not pValue)
+        self.radiationRelativeDoubleSpinBox.setEnabled(not pValue and self.radiationCheckBox.isChecked())
+        self.radiationAbsoluteDoubleSpinBox.setEnabled(not pValue and self.radiationCheckBox.isChecked())
 
     def directoryLineEditChanged(self, pValue):
         if self._isCollecting:
@@ -835,6 +874,10 @@ class CollectBrick(Core.BaseBrick):
     def maskDisplayPushButtonClicked(self):
         self.emitDisplayItemChanged(str(self.maskLineEdit.text()))
                 
+    def radiationCheckBoxToggled(self, pValue):            
+        self.radiationRelativeDoubleSpinBox.setEnabled(pValue)
+        self.radiationAbsoluteDoubleSpinBox.setEnabled(pValue)
+        #self.radiationDisplayCheckBox.setEnabled(pValue)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
@@ -970,7 +1013,12 @@ class CollectBrick(Core.BaseBrick):
                       self.beamCenterXSpinBox.value(),
                       self.beamCenterYSpinBox.value(),
                       self.normalisationDoubleSpinBox.value(),
-                      processData)                    
+                      self.radiationCheckBox.isChecked(),
+                      self.radiationAbsoluteDoubleSpinBox.value(),
+                      self.radiationRelativeDoubleSpinBox.value(),
+                      processData,
+                      self._sampleChanger.getSEUTemperature(),
+                      self._sampleChanger.getSampleStorageTemperature())                    
 
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
@@ -984,7 +1032,7 @@ class CollectBrick(Core.BaseBrick):
 
         logging.info("   - collection started (mode: %s)" % mode)
         
-    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pProcessData):
+    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative,  pProcessData, pSEUTemperature, pStorageTemperature):
 
         if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000  + 12000)
@@ -1010,7 +1058,12 @@ class CollectBrick(Core.BaseBrick):
                                           pBeamCenterX,
                                           pBeamCenterY,
                                           pNormalisation,                                               
-                                          pProcessData)
+                                          pRadiationChecked,
+                                          pRadiationAbsolute,
+                                          pRadiationRelative,
+                                          pProcessData,
+                                          pSEUTemperature,
+                                          pStorageTemperature)
     
     
     def displayReset(self):

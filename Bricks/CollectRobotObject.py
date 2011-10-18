@@ -274,7 +274,9 @@ class CollectRobotObject(QtCore.QThread):
                                     pars.frameNumber,   pars.timePerFrame, tocollect.concentration, tocollect.comments,
                                     tocollect.code,     pars.mask,         pars.detectorDistance,   pars.waveLength,
                                     pars.pixelSizeX,    pars.pixelSizeY,   pars.beamCenterX,        pars.beamCenterY,
-                                    pars.normalisation, pars.processData) 
+                                    pars.normalisation, pars.radiationChecked, pars.radiationAbsolute, 
+                                    pars.radiationRelative,
+                                    pars.processData,   pars.SEUTemperature, pars.storageTemperature)
 
             while self.__parent._isCollecting:
                 if self.abortFlag:

@@ -22,8 +22,8 @@ class Collect(CObjectBase):
         self.xsdout = None
         self.ednaJob = None
         self.dat_filenames = {}
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_0"
-        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_0"
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_1"
+        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_1"
 
     def __getattr__(self, attr):
         if not attr.startswith("__"):
@@ -58,7 +58,7 @@ class Collect(CObjectBase):
         self.collectNormalisation.set_value(pNormalisation)                       
         self.commands["testCollect"]()
 
-    def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pProcessData):
+    def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
         self.collecting = True
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
@@ -85,22 +85,30 @@ class Collect(CObjectBase):
        
         xsdExperiment = self.xsdin.experimentSetup
         xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
-        xsdExperiment.detectorDistance = XSDataLength(value=float(pDetectorDistance))  #Check for units !!!!
-        xsdExperiment.pixelSize_1 = XSDataLength(value=float(pPixelSizeX)*1.0e-6)  #Check for units !!!!
-        xsdExperiment.pixelSize_2 = XSDataLength(value=float(pPixelSizeY)*1.0e-6)  #Check for units !!!!
+        xsdExperiment.detectorDistance = XSDataLength(value=float(pDetectorDistance))  
+        xsdExperiment.pixelSize_1 = XSDataLength(value=float(pPixelSizeX)*1.0e-6)  
+        xsdExperiment.pixelSize_2 = XSDataLength(value=float(pPixelSizeY)*1.0e-6)  
         xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
         xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
-        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength)*1.0e-9)     #Check for units !!!! A or m ?
+        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength)*1.0e-9)     
         xsdExperiment.maskFile = XSDataImage(path=XSDataString(str(pMaskFile)))
         xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
+        xsdExperiment.storageTemperature = XSDataDouble(pStorageTemperature)
+        xsdExperiment.exposureTemperature = XSDataDouble(pSEUTemperature)
+        #xsdExperiment.exposureTime = XSDataTime()
+        #xsdExperiment.frameNumber = XSDataInteger()
+        #xsdExperiment.frameMax = XSDataInteger()
         
         sPrefix=str(pPrefix)
         ave_filename = os.path.join(pDirectory,"1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
                                 inputCurves= [XSDataFile(path=XSDataString(os.path.join(pDirectory,"1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames+1)],
-                                #absoluteFidelity= XSDataDouble(),
-                                #relativeFidelity= XSDataDouble(),
                                 mergedCurve= XSDataFile(path=XSDataString(ave_filename)))
+        
+        if pRadiationChecked:
+            self.xsdAverage.absoluteFidelity = XSDataDouble(float(pRadiationAbsolute))
+            self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
+        #logging.warning("DEBUG 3 %s %s %s %s %s",pRadiationChecked,pRadiationAbsolute,pRadiationRelative,pSEUTemperature,pStorageTemperature)
                                 
         self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
         self.commands["collect"](callback=self.collectDone, error_callback=self.collectFailed)
