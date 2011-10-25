@@ -460,10 +460,6 @@ class CollectBrick(Core.BaseBrick):
         self.radiationAbsoluteDoubleSpinBox.setDecimals(10)        
         self.radiationAbsoluteDoubleSpinBox.setToolTip("Absolute Similarity")                                
         self.hBoxLayout15.addWidget(self.radiationAbsoluteDoubleSpinBox)
-        #self.radiationDisplayCheckBox = Qt.QCheckBox("Display", self.brick_widget)
-        #self.radiationDisplayCheckBox.setFixedWidth(80)
-        #self.radiationDisplayCheckBox.setChecked(True)
-        #self.hBoxLayout15.addWidget(self.radiationDisplayCheckBox)        
         self.brick_widget.layout().addLayout(self.hBoxLayout15)
 
         
@@ -554,14 +550,13 @@ class CollectBrick(Core.BaseBrick):
         
         self._collectRobot = CollectRobotObject(self, self.brick_widget)
 
-        QtCore.QObject.connect(self._collectRobot.proxySampleChanger ,QtCore.SIGNAL("doSampleChangerAction"), self.doSampleChangerAction, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot         ,QtCore.SIGNAL("robotCollect"),          self.doRobotCollect,        Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot         ,QtCore.SIGNAL("robotCollectEnd"),       self.doRobotCollectEnd,     Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot         ,QtCore.SIGNAL("getCollectPars"),        self.doGetCollectPars,      Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot         ,QtCore.SIGNAL("getFileInfo"),           self.doGetFileInfo,         Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot         ,QtCore.SIGNAL("showMessage"),           self.doShowMessage,         Qt.Qt.BlockingQueuedConnection)
-
-        QtCore.QObject.connect(self._collectRobot, QtCore.SIGNAL("displayReset"),   self.displayReset,   Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxySampleChanger,QtCore.SIGNAL("doSampleChangerAction"),self.doSampleChangerAction,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxyRobot,QtCore.SIGNAL("robotCollect"),self.doRobotCollect,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxyRobot,QtCore.SIGNAL("robotCollectEnd"),self.doRobotCollectEnd,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxyRobot,QtCore.SIGNAL("getCollectPars"),self.doGetCollectPars,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxyRobot,QtCore.SIGNAL("getFileInfo"),self.doGetFileInfo,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot.proxyRobot,QtCore.SIGNAL("showMessage"),self.doShowMessage,Qt.Qt.BlockingQueuedConnection)
+        QtCore.QObject.connect(self._collectRobot, QtCore.SIGNAL("displayReset"),self.displayReset,Qt.Qt.BlockingQueuedConnection)
 
         # start robot thread
         self._collectRobot.start()
@@ -877,7 +872,6 @@ class CollectBrick(Core.BaseBrick):
     def radiationCheckBoxToggled(self, pValue):            
         self.radiationRelativeDoubleSpinBox.setEnabled(pValue)
         self.radiationAbsoluteDoubleSpinBox.setEnabled(pValue)
-        #self.radiationDisplayCheckBox.setEnabled(pValue)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
@@ -890,7 +884,7 @@ class CollectBrick(Core.BaseBrick):
             self._collectRobotDialog.hide()
 
     def checkBeamBoxToggled(self, pValue):
-        self.getObject("collect").setCheckBeam(pValue)
+        self.collectObj.setCheckBeam(pValue)
 
     def testPushButtonClicked(self):
 
@@ -1032,7 +1026,7 @@ class CollectBrick(Core.BaseBrick):
 
         logging.info("   - collection started (mode: %s)" % mode)
         
-    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative,  pProcessData, pSEUTemperature, pStorageTemperature):
+    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative,  pProcessData, pSEUTemperature, pStorageTemperature):
 
         if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000  + 12000)
