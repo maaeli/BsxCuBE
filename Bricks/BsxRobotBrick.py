@@ -239,7 +239,6 @@ class BsxRobotBrick(Core.BaseBrick):
             self._sampleChanger.setSEUTemperature(temperatureDoubleSpinBox.value())
     
     def robotFillPushButtonClicked(self):
-        # FUCK COPY PASTE CODE
         geometry = [self.getObject('samplechanger').getPlateInfo(i) for i in range(1, 4)]
         dialog = WellPickerDialog(geometry, title='Fill', display_volume=True, parent=self.brick_widget)
         ret = dialog.exec_()
@@ -525,7 +524,7 @@ class WellPickerWidget(QtGui.QWidget):
         # fill the row and colum combos with acceptable values
         # select the first one by default
 
-        # Yeah, sucks
+        # Shifted by one 
         selected_plate = int(selected_plate) - 1
 
         # XXX see with the beamline scientist since visitors tend to
