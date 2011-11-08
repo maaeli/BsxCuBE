@@ -80,18 +80,16 @@ class CollectRobotObject(QtCore.QThread):
                     # ==================================================                                                
                     self.checkAbort(1) 
                     self.showMessage(0, "Setting sample type to '%s'..." % pars.sampleType)
+                    # Synchronous - no exception handling
                     self.proxySampleChanger.setSampleType(str( pars.sampleType).lower())
-                    self.waitSampleChanger()
-                    self.checkSCException('sampleType', pars.sampleType)
 
                     # 
                     #  Setting storage temperature
                     # ==================================================
                     self.checkAbort(1) 
                     self.showMessage(0, "Setting storage temperature to '%s' C..." % pars.storageTemperature )
+                    # Synchronous - no exception handling
                     self.proxySampleChanger.setStorageTemperature( pars.storageTemperature )
-                    self.waitSampleChanger()
-                    self.checkSCException('storageTemperature', pars.storageTemperature)
 
                     # ==================================================
                     #  INITIAL CLEANING
@@ -325,50 +323,39 @@ class CollectRobotObject(QtCore.QThread):
     def clean(self): 
         i = 0                                        
         while i < self.__ATTEMPTS: 
+            # asynchronous - need to wait
             self.proxySampleChanger.clean()
             self.waitSampleChanger()
             if self.proxySampleChanger.getCommandException() is not None and self.proxySampleChanger.getCommandException() != "":
                 i += 1
             else:
                 return 0    
+        # timeout
         return -1
 
     def setLiquidPositionFixed(self):
-        i = 0                                        
-        while i < self.__ATTEMPTS: 
-            self.showMessage(0, "   . trying...")
-            self.proxySampleChanger.setLiquidPositionFixed(True)
-            self.waitSampleChanger()
-            self.showMessage(0, "   . checking...")
-            if self.proxySampleChanger.getCommandException() is not None and self.proxySampleChanger.getCommandException() != "":
-                self.showMessage(0, "   . error...")
-                i += 1
-            else:
-                self.showMessage(0, "   . ok...")
-                return 0    
-        return -1
+        # synchronous - no error treatment
+        self.proxySampleChanger.setLiquidPositionFixed(True)
+        return 0
     
     def flow(self, pVolume, pTime):    
         i = 0                                        
         while i < self.__ATTEMPTS: 
+            # asynchronous - need to wait
             self.proxySampleChanger.flow(pVolume, pTime)
-            #self.waitSampleChanger()
-            if self.proxySampleChanger.getCommandException() is not None and self.proxySampleChanger.getCommandException() != "":
-                i += 1
-            else:
-                return 0    
-        return -1
-    
-    def setViscosityLevel(self, pValue): 
-        i = 0                                        
-        while i < self.__ATTEMPTS: 
-            self.proxySampleChanger.setViscosityLevel(pValue)
+            # SO uncommented next line 8/11 2011 - Why was it commented out ?
             self.waitSampleChanger()
             if self.proxySampleChanger.getCommandException() is not None and self.proxySampleChanger.getCommandException() != "":
                 i += 1
             else:
                 return 0    
+        # timeout    
         return -1
+    
+    def setViscosityLevel(self, pValue): 
+        # synchronous - no error treatment
+        self.proxySampleChanger.setViscosityLevel(pValue)
+        return 0
     
 
     def fill(self, pPlate, pRow, pColumn, pVolume):
