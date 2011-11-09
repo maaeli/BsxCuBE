@@ -341,10 +341,9 @@ class CollectRobotObject(QtCore.QThread):
     def flow(self, pVolume, pTime):    
         i = 0                                        
         while i < self.__ATTEMPTS: 
-            # asynchronous - need to wait
+            # asynchronous - But need to collect
             self.proxySampleChanger.flow(pVolume, pTime)
-            # SO uncommented next line 8/11 2011 - Why was it commented out ?
-            self.waitSampleChanger()
+            # SO 9/11 - No self.waitSampleChanger() since we collect at the same time
             if self.proxySampleChanger.getCommandException() is not None and self.proxySampleChanger.getCommandException() != "":
                 i += 1
             else:
