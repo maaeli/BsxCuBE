@@ -7,11 +7,18 @@
    in the meantime, use the reading done by spec
    -->
    <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/>
-   <command name="startJob" type="tango" uri="DAU/edna/1"/>
-   <command name="initPlugin" type="tango" uri="DAU/edna/1"/>
-   <command name="getJobOutput" type="tango" uri="DAU/edna/1"/>
-   <channel name="jobSuccess" type="tango" uri="DAU/edna/1"/> 
-   <channel name="jobFailure" type="tango" uri="DAU/edna/1"/> 
+   
+   <command name="startJob_chris" type="tango" uri="DAU/edna/1" call="startJob"/>
+   <command name="initPlugin_chris" type="tango" uri="DAU/edna/1" call="initPlugin" />
+   <command name="getJobOutput_chris" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
+   <!--<channel name="jobSuccess_chris" type="tango" uri="DAU/edna/1" signal="jobSuccess"/> 
+   <channel name="jobFailure_chris" type="tango" uri="DAU/edna/1" signal="jobFailure"/> -->
+   
+   <command name="startJob_slavia" type="tango" uri="DAU/edna/2" call="startJob" />
+   <command name="initPlugin_slavia" type="tango" uri="DAU/edna/2" call="initPlugin" />
+   <command name="getJobOutput_slavia" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
+   <channel name="jobSuccess" type="tango" uri="DAU/edna/2" signal="jobSuccess"/> 
+   <channel name="jobFailure" type="tango" uri="DAU/edna/2" signal="jobFailure"/> 
 
    <command name="testCollect"           type="spec" call="testCollect"/>
    <command name="collect"               type="spec" call="collect"/>	
