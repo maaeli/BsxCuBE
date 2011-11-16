@@ -604,6 +604,7 @@
       <signal name="checkBeamChanged"/>
       <signal name="beamLostChanged"/>
       <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>

@@ -39,7 +39,8 @@ class CollectBrick(Core.BaseBrick):
                                               Signal("collectNewFrameChanged",      "collectNewFrameChanged"),
                                               Signal("checkBeamChanged",            "checkBeamChanged"),
                                               Signal("beamLostChanged",             "beamLostChanged"),
-                                              Signal("collectProcessingDone", "collectProcessingDone") ],
+                                              Signal("collectProcessingDone", "collectProcessingDone"),
+                                              Signal("collectProcessingLog", "collectProcessingLog") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -141,7 +142,13 @@ class CollectBrick(Core.BaseBrick):
         ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
         logging.info("processing done, file is %r", dat_filename)
         self.emitDisplayItemChanged(dat_filename)
-
+    
+    def collectProcessingLog(self, log):
+        if log != self.lastCollectProcessingLog:
+            for line in log.split(os.linesep):
+                logging.info(line.rstrip())
+        self.lastCollectProcessingLog=log
+        
     def collectNewFrameChanged(self, pValue): 
         filename0 = pValue.split(",")[0]
         if os.path.dirname(filename0)[-4:] == "/raw":
@@ -243,6 +250,7 @@ class CollectBrick(Core.BaseBrick):
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
+        self.lastCollectProcessingLog = None
 
     def init(self):
         self.nbPlates       = 0
