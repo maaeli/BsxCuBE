@@ -239,6 +239,7 @@ class CollectBrick(Core.BaseBrick):
             logging.info(str(pValue))
             self.image_proxy.load_files(str(pValue))
         except Exception, e:
+            logging.error("Could not read file "+str(pValue))
             logging.exception(e)
         
     def y_curves_data(self,pPeer):
