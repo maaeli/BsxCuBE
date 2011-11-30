@@ -16,12 +16,12 @@ class BsxImageDataProxy(CObjectBase):
                 try:
                    self.load_single_file(filename)
                 except:    
-                   logging.debug("problem opening file %s" % filename)  
+                   logging.debug("Problem opening file %s",filename)  
         else:
             try:
                 self.load_single_file(filenames)
             except:    
-                logging.debug("problem opening files %s" % filenames)  
+                logging.debug("Problem opening files %s",filenames)  
             
     def load_single_file(self, filename):
         if not os.path.exists(filename):
