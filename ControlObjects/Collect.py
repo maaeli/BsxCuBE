@@ -185,7 +185,7 @@ class Collect(CObjectBase):
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
                     self.emit("collectProcessingLog", log)
-                    #if autoRG has been used, launch the SAS pipeline (very time consuming)
+                    # If autoRG has been used, launch the SAS pipeline (very time consuming)
                     if xsd.autoRg is not None:
                         rgOut =  xsd.autoRg
                         filename = rgOut.filename.path.value
@@ -197,13 +197,13 @@ class Collect(CObjectBase):
                         s=datapoint[:,2][startPoint:]
                         mask=(q<3)
                         xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                                                            #iNbThreads=XSDataInteger(4))
+                        #NbThreads=XSDataInteger(4))
                         xsdin.experimentalDataQ = [ XSDataDouble(i/10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
                         xsdin.experimentalDataValues =[ XSDataDouble(i) for i in I[mask]]
                         xsdin.experimentalDataStdDev =[ XSDataDouble(i) for i in s[mask]]
                         logging.info("Starting SAS pipeline for file %s",filename)
                         sasJobId = self.commands["startJob_slavia"]([self.pluginSAS,xsdin.marshal()])
-            #            self.dat_filenames[sasJobId] = filename
+                        # self.dat_filenames[sasJobId] = filename
         else:
             logging.warning("processing Done from EDNA: %s -X-> None",jobId)
 
