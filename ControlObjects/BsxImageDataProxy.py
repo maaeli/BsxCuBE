@@ -1,5 +1,6 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import logging, os, types
+import traceback
 import numpy
 
 class BsxImageDataProxy(CObjectBase):
@@ -21,7 +22,8 @@ class BsxImageDataProxy(CObjectBase):
             try:
                 self.load_single_file(filenames)
             except:    
-                logging.debug("Problem opening files %s",filenames)  
+                logging.debug(traceback.format_exc())
+                logging.debug("Problem opening file %s",filenames)  
             
     def load_single_file(self, filename):
         if not os.path.exists(filename):
