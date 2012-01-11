@@ -11,7 +11,6 @@ from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
 
-from SPEC    import SPEC
 from PyTango import DevState
 
 __category__ = "BsxCuBE"
