@@ -1,9 +1,0 @@
-<object class = "Command" username = "CommandFTAir">
-	
-   <uri>agatha:eh3</uri> 
-	
-   <command name="command" type="spec" call="FTAir"/>
-	
-   <channel name="commandStatus" type="spec" call="BSX_GLOBAL/command/FTAirStatus"/>	
-
-</object>	

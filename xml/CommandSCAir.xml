@@ -1,9 +1,0 @@
-<object class = "Command" username = "CommandSCAir">
-	
-   <uri>agatha:eh3</uri> 
-	
-   <command name="command" type="spec" call="SCAir"/>
-	
-   <channel name="commandStatus" type="spec" call="BSX_GLOBAL/command/SCAirStatus"/>	
-
-</object>	

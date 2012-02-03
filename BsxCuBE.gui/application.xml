@@ -378,7 +378,7 @@
       <signal name="calibrationStatusChanged"/>
       <signal name="newPositionChanged"/>
       <slot name="executeCalibration"/>
-      <peer name="CalibrationDiamond"/>
+      <peer name="BsxCuBE/CalibrationDiamond"/>
     </connection>
   </connections>
 
@@ -386,7 +386,7 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
-      <peer name="MotorAlignmentSM"/>
+      <peer name="BsxCuBE/MotorAlignmentSM"/>
     </connection>
     <connection role="login">
       <signal name="expertModeChanged"/>
@@ -408,14 +408,14 @@
       <signal name="seuTemperatureChanged"/>
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
-      <peer name="SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger"/>
     </connection>
   </connections>
 
   <connections id="ReadingBrick3">
     <connection role="reading">
       <signal name="readingChanged"/>
-      <peer name="ReadingVacFlightTube"/>
+      <peer name="BsxCuBE/ReadingVacFlightTube"/>
     </connection>
   </connections>
 
@@ -433,7 +433,7 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
-      <peer name="MotorAlignmentBS"/>
+      <peer name="BsxCuBE/MotorAlignmentBS"/>
     </connection>
     <connection role="login">
       <signal name="expertModeChanged"/>
@@ -445,7 +445,7 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
-      <peer name="MotorAlignmentS2"/>
+      <peer name="BsxCuBE/MotorAlignmentS2"/>
     </connection>
     <connection role="login">
       <signal name="expertModeChanged"/>
@@ -457,7 +457,7 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
-      <peer name="MotorAlignmentS1"/>
+      <peer name="BsxCuBE/MotorAlignmentS1"/>
     </connection>
     <connection role="login">
       <signal name="expertModeChanged"/>
@@ -469,11 +469,11 @@
     <connection role="browse">
       <signal name="browseTypeChanged"/>
       <signal name="browseLocationChanged"/>
-      <peer name="Browse"/>
+      <peer name="BsxCuBE/Browse"/>
     </connection>
     <connection role="image_proxy">
       <slot name="load_files"/>
-      <peer name="image_proxy"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
   </connections>
 
@@ -485,7 +485,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandSCAir"/>
+      <peer name="BsxCuBE/CommandSCAir"/>
     </connection>
   </connections>
 
@@ -497,7 +497,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandSampleAlignment"/>
+      <peer name="BsxCuBE/CommandSampleAlignment"/>
     </connection>
   </connections>
 
@@ -509,7 +509,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandQuickRealignment"/>
+      <peer name="BsxCuBE/CommandQuickRealignment"/>
     </connection>
   </connections>
 
@@ -524,7 +524,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandFTVacuum"/>
+      <peer name="BsxCuBE/CommandFTVacuum"/>
     </connection>
   </connections>
 
@@ -536,7 +536,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandFTAir"/>
+      <peer name="BsxCuBE/CommandFTAir"/>
     </connection>
   </connections>
 
@@ -548,7 +548,7 @@
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
-      <peer name="CommandSCVacuum"/>
+      <peer name="BsxCuBE/CommandSCVacuum"/>
     </connection>
   </connections>
 
@@ -570,7 +570,7 @@
   <connections id="MachineCurrentBrick1">
     <connection role="machinecurrent">
       <signal name="machine_info_updated"/>
-      <peer name="ESRFMachinfo"/>
+      <peer name="BsxCuBE/ESRFMachinfo"/>
     </connection>
   </connections>
 
@@ -609,7 +609,7 @@
       <slot name="collect"/>
       <slot name="collectAbort"/>
       <slot name="triggerEDNA"/>
-      <peer name="Collect"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
       <signal name="expertModeChanged"/>
@@ -618,10 +618,10 @@
     <connection role="image_proxy">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-      <peer name="image_proxy"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="sample_changer">
-      <peer name="SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger"/>
     </connection>
   </connections>
 
@@ -639,7 +639,7 @@
     <connection role="y_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
-      <peer name="optscan"/>
+      <peer name="BsxCuBE/optscan"/>
     </connection>
     <connection role="y_curves">
       <signal name="new_curves_data"/>
@@ -666,13 +666,13 @@
   <connections id="AttenuatorsBrick1">
     <connection role="Collect">
       <signal name="transmissionChanged"/>
-      <peer name="Attenuators"/>
+      <peer name="BsxCuBE/Attenuators"/>
       <peer name="CollectBrick1"/>
     </connection>
     <connection role="attenuators">
       <signal name="attenuatorsStateChanged"/>
       <signal name="attenuatorsFactorChanged"/>
-      <peer name="Attenuators"/>
+      <peer name="BsxCuBE/Attenuators"/>
     </connection>
   </connections>
 
@@ -686,7 +686,7 @@
       <slot name="toggle_trigger"/>
       <slot name="trigger_state"/>
       <slot name="door_state"/>
-      <peer name="hutchtrigger"/>
+      <peer name="BsxCuBE/hutchtrigger"/>
     </connection>
   </connections>
 
@@ -701,7 +701,7 @@
       <signal name="stateChanged"/>
       <slot name="open"/>
       <slot name="close"/>
-      <peer name="ShutterMS"/>
+      <peer name="BsxCuBE/ShutterMS"/>
     </connection>
   </connections>
 
@@ -710,7 +710,7 @@
       <signal name="stateChanged"/>
       <slot name="open"/>
       <slot name="close"/>
-      <peer name="ShutterGuillotine"/>
+      <peer name="BsxCuBE/ShutterGuillotine"/>
     </connection>
   </connections>
 
@@ -719,7 +719,7 @@
       <signal name="stateChanged"/>
       <slot name="open"/>
       <slot name="close"/>
-      <peer name="ShutterSH"/>
+      <peer name="BsxCuBE/ShutterSH"/>
     </connection>
   </connections>
 
@@ -732,14 +732,14 @@
   <connections id="ReadingBrick1">
     <connection role="reading">
       <signal name="readingChanged"/>
-      <peer name="ReadingVacUpStreamTube"/>
+      <peer name="BsxCuBE/ReadingVacUpStreamTube"/>
     </connection>
   </connections>
 
   <connections id="ReadingBrick2">
     <connection role="reading">
       <signal name="readingChanged"/>
-      <peer name="ReadingVacSCExposeUnit"/>
+      <peer name="BsxCuBE/ReadingVacSCExposeUnit"/>
     </connection>
   </connections>
 
@@ -751,7 +751,7 @@
 
   <connections id="BsxVideoBrick1">
     <connection role="samplechanger">
-      <peer name="SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger"/>
     </connection>
   </connections>
 
@@ -770,7 +770,7 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-      <peer name="image_proxy"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="y2_curves">
       <signal name="new_curves_data"/>
@@ -809,7 +809,7 @@
       <signal name="reprocessKeepOriginalChanged"/>
       <signal name="reprocessStatusChanged"/>
       <slot name="reprocess"/>
-      <peer name="Reprocess"/>
+      <peer name="BsxCuBE/Reprocess"/>
     </connection>
   </connections>
 
@@ -827,7 +827,7 @@
     <connection role="y_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
-      <peer name="scan"/>
+      <peer name="BsxCuBE/scan"/>
     </connection>
     <connection role="y_curves">
       <signal name="new_curves_data"/>

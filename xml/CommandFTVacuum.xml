@@ -1,9 +1,0 @@
-<object class = "Command" username = "CommandFTVacuum">
-	
-   <uri>agatha:eh3</uri> 
-	
-   <command name="command" type="spec" call="FTVacuum"/>
-	
-   <channel name="commandStatus" type="spec" call="BSX_GLOBAL/command/FTVacuumStatus"/>	
-
-</object>	

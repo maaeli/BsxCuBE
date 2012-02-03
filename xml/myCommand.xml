@@ -1,9 +1,0 @@
-<object class = "Command" username = "My Command">
-	
-   <uri>agatha:vicente</uri> 
-	
-   <command name="command" type="spec" call="mymac"/>
-	
-   <channel name="commandStatus" type="spec" call="mymacstatus"/>	
-
-</object>	
