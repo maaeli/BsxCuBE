@@ -1,11 +1,11 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 class CalibrationDiamond(CObjectBase):
-    __CHANNEL_LIST = ["calibrationStatusChanged","newPositionChanged"]
+    __CHANNEL_LIST = ["calibrationStatusChanged", "newPositionChanged"]
 
 
-    signals = [Signal(channel) for channel in __CHANNEL_LIST]                
-        
+    signals = [Signal(channel) for channel in __CHANNEL_LIST]
+
     slots = [Slot("executeCalibration"),
              Slot("setPosition")]
 
@@ -42,8 +42,8 @@ class CalibrationDiamond(CObjectBase):
     def calibrationStatusChanged(self, pValue):
         self.emit("calibrationStatusChanged", pValue)
 
-                
+
     def newPositionChanged(self, pValue):
         self.emit("newPositionChanged", pValue)
-      
+
 

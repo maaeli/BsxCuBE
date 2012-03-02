@@ -7,30 +7,30 @@ class WellPickerWidget(Qt.QWidget):
 
     # geometry is a list of 3 lists (one per plate)
     # each sublist should contain the num. of rows, colums and deep well columns
-    rowletters = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+    rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-    def __init__(self, geometry, title, default_well=None, display_volume=False, display_cycles=False,parent=None):
+    def __init__(self, geometry, title, default_well = None, display_volume = False, display_cycles = False, parent = None):
 
         Qt.QWidget.__init__(self, parent)
         self._geometry = geometry
         self._display_volume = display_volume
         self._display_cycles = display_cycles
-        
+
         #Build the GUI according to geometry
         self.setLayout(Qt.QGridLayout(self))
         # add the 3 labels
-        self.layout().addWidget(Qt.QLabel('<b><u>'+title+'</u></b>', self),    0, 0,1,2)
-        self.layout().addWidget(Qt.QLabel('Plate', self),  1, 0)
-        self.layout().addWidget(Qt.QLabel('Row', self),    2, 0)
+        self.layout().addWidget(Qt.QLabel('<b><u>' + title + '</u></b>', self), 0, 0, 1, 2)
+        self.layout().addWidget(Qt.QLabel('Plate', self), 1, 0)
+        self.layout().addWidget(Qt.QLabel('Row', self), 2, 0)
         self.layout().addWidget(Qt.QLabel('Column', self), 3, 0)
 
         # Add the 3 combo boxes
-        self.plate_combo  = Qt.QComboBox(self)
-        self.row_combo    = Qt.QComboBox(self)
+        self.plate_combo = Qt.QComboBox(self)
+        self.row_combo = Qt.QComboBox(self)
         self.column_combo = Qt.QComboBox(self)
 
-        self.layout().addWidget(self.plate_combo,  1, 1)
-        self.layout().addWidget(self.row_combo,    2, 1)
+        self.layout().addWidget(self.plate_combo, 1, 1)
+        self.layout().addWidget(self.row_combo, 2, 1)
         self.layout().addWidget(self.column_combo, 3, 1)
 
         # the optional volume spinbox
@@ -60,11 +60,11 @@ class WellPickerWidget(Qt.QWidget):
         if default_well != None:
             plate, row, column = default_well
             self.plate_changed(str(plate))
-            self.setRow( row )
-            self.setColumn( column )
+            self.setRow(row)
+            self.setColumn(column)
         else:
             self.plate_changed('1')
-        
+
     @QtCore.pyqtSlot(str)
     def plate_changed(self, selected_plate):
         # fill the row and colum combos with acceptable values
@@ -82,24 +82,24 @@ class WellPickerWidget(Qt.QWidget):
         num_cols = int(self._geometry[selected_plate][1])
 
         # rows are letters
-        self.row_combo.addItems( self.rowletters[:num_rows] )
+        self.row_combo.addItems(self.rowletters[:num_rows])
 
-        self.column_combo.addItems(['%d' % (x+1) for x in range(0, num_cols)])
+        self.column_combo.addItems(['%d' % (x + 1) for x in range(0, num_cols)])
 
     def setRow(self, row):
-        self.row_combo.setCurrentIndex( int(row) - 1 )
+        self.row_combo.setCurrentIndex(int(row) - 1)
 
     def setColumn(self, column):
-        self.column_combo.setCurrentIndex( int(column) - 1 )
+        self.column_combo.setCurrentIndex(int(column) - 1)
 
 
     def get_selected_well(self):
-        
-        plate  = self.plate_combo.currentText()
-        row    = self.row_combo.currentText()
+
+        plate = self.plate_combo.currentText()
+        row = self.row_combo.currentText()
         column = self.column_combo.currentText()
 
-        row    = self.rowletters.index( row ) + 1
+        row = self.rowletters.index(row) + 1
 
         selected_well = [int(plate), int(row), int(column)]
 
@@ -114,25 +114,25 @@ class WellPickerWidget(Qt.QWidget):
         return selected_well
 
 class WellPickerDialog(Qt.QDialog):
-    
-    def __init__(self, geometry, title='Well Selection', default_well=None,  display_volume=False, display_cycles=False,parent=None):
+
+    def __init__(self, geometry, title = 'Well Selection', default_well = None, display_volume = False, display_cycles = False, parent = None):
 
         Qt.QDialog.__init__(self, parent)
         self.setLayout(Qt.QVBoxLayout())
         self.setWindowTitle(title)
-        self.well_picker   = WellPickerWidget(geometry, title, default_well=default_well, display_volume=display_volume, display_cycles=display_cycles)
-        
+        self.well_picker = WellPickerWidget(geometry, title, default_well = default_well, display_volume = display_volume, display_cycles = display_cycles)
+
         self.button_layout = Qt.QHBoxLayout()
 
-        self.ok_button     = Qt.QPushButton('Ok')
+        self.ok_button = Qt.QPushButton('Ok')
         self.cancel_button = Qt.QPushButton('Cancel')
 
         self.ok_button.clicked.connect(self.ok_clicked)
         self.cancel_button.clicked.connect(self.cancel_clicked)
-        
+
         self.button_layout.addWidget(self.ok_button)
         self.button_layout.addWidget(self.cancel_button)
-        
+
         self.layout().addWidget(self.well_picker)
         self.layout().addLayout(self.button_layout)
 
@@ -146,7 +146,7 @@ class WellPickerDialog(Qt.QDialog):
         return self.well_picker.get_selected_well()
 
 class Well2PickerDialog(Qt.QDialog):
-    def __init__(self, geometry, title1='', title2='', default_well=None,  display_volume=False, display_cycles=False,parent=None):
+    def __init__(self, geometry, title1 = '', title2 = '', default_well = None, display_volume = False, display_cycles = False, parent = None):
 
         Qt.QDialog.__init__(self, parent)
         self.setLayout(Qt.QVBoxLayout())
@@ -155,14 +155,14 @@ class Well2PickerDialog(Qt.QDialog):
 
         self.setWindowTitle("Two Well Selection")
 
-        self.well_layout    = Qt.QHBoxLayout()
-        self.well1_picker   = WellPickerWidget(geometry, title1, default_well=default_well)
-        self.well2_picker   = WellPickerWidget(geometry, title2, default_well=default_well)
-        
+        self.well_layout = Qt.QHBoxLayout()
+        self.well1_picker = WellPickerWidget(geometry, title1, default_well = default_well)
+        self.well2_picker = WellPickerWidget(geometry, title2, default_well = default_well)
+
         if self.display_volume:
            self.volume_layout = Qt.QHBoxLayout()
            volume_label = Qt.QLabel('<b><u>Volume:</u></b>')
-           volume_label.setAlignment( QtCore.Qt.AlignLeft )
+           volume_label.setAlignment(QtCore.Qt.AlignLeft)
            self.volume_layout.addWidget(volume_label)
            self.volume_spinbox = Qt.QSpinBox(self)
            self.volume_spinbox.setSuffix(" u/l")
@@ -172,15 +172,15 @@ class Well2PickerDialog(Qt.QDialog):
 
         self.button_layout = Qt.QHBoxLayout()
 
-        self.ok_button     = Qt.QPushButton('Ok')
+        self.ok_button = Qt.QPushButton('Ok')
         self.cancel_button = Qt.QPushButton('Cancel')
 
         self.ok_button.clicked.connect(self.ok_clicked)
         self.cancel_button.clicked.connect(self.cancel_clicked)
-        
+
         self.button_layout.addWidget(self.ok_button)
         self.button_layout.addWidget(self.cancel_button)
-        
+
         self.well_layout.setAlignment(QtCore.Qt.AlignTop)
         self.well_layout.addWidget(self.well1_picker)
         self.well_layout.addWidget(self.well2_picker)
@@ -199,64 +199,64 @@ class Well2PickerDialog(Qt.QDialog):
         # proxy to get the value after ok has been clicked
         well1 = self.well1_picker.get_selected_well()
         well2 = self.well2_picker.get_selected_well()
-        rwell = well1 + well2 
+        rwell = well1 + well2
         if self.display_volume:
            volume = self.volume_spinbox.value()
-           rwell +=  [volume,]
+           rwell += [volume, ]
         return  rwell
 
-        
-def getWell(geometry, title, default_well=None):
-    dialog = WellPickerDialog( geometry, title , default_well=default_well)
+
+def getWell(geometry, title, default_well = None):
+    dialog = WellPickerDialog(geometry, title , default_well = default_well)
     retvalue = dialog.exec_()
     if retvalue == Qt.QDialog.Accepted:
        return dialog.get_selected_well()
     else:
        return None
 
-def getWellAndVolume(geometry,title, default_well=None):
-    dialog = WellPickerDialog( geometry, title=title, default_well=default_well, display_volume=True )
+def getWellAndVolume(geometry, title, default_well = None):
+    dialog = WellPickerDialog(geometry, title = title, default_well = default_well, display_volume = True)
     retvalue = dialog.exec_()
     if retvalue == Qt.QDialog.Accepted:
        return dialog.get_selected_well()
     else:
        return None
 
-def getWellVolumeAndCycles(geometry,title, default_well=None):
-    dialog = WellPickerDialog( geometry, title=title, default_well=default_well, display_volume=True,display_cycles=True )
+def getWellVolumeAndCycles(geometry, title, default_well = None):
+    dialog = WellPickerDialog(geometry, title = title, default_well = default_well, display_volume = True, display_cycles = True)
     retvalue = dialog.exec_()
     if retvalue == Qt.QDialog.Accepted:
        return dialog.get_selected_well()
     else:
        return None
 
-def getTwoWell(geometry, title1, title2, default_well=None):
-    dialog = Well2PickerDialog( geometry, title1, title2 , default_well=default_well)
+def getTwoWell(geometry, title1, title2, default_well = None):
+    dialog = Well2PickerDialog(geometry, title1, title2 , default_well = default_well)
     retvalue = dialog.exec_()
     if retvalue == Qt.QDialog.Accepted:
        return dialog.get_selected_well()
     else:
        return None
 
-def getTwoWellsAndVolume(geometry, title1, title2, default_well=None):
-    dialog = Well2PickerDialog( geometry, title1, title2 , default_well=default_well, display_volume=True)
+def getTwoWellsAndVolume(geometry, title1, title2, default_well = None):
+    dialog = Well2PickerDialog(geometry, title1, title2 , default_well = default_well, display_volume = True)
     retvalue = dialog.exec_()
     if retvalue == Qt.QDialog.Accepted:
        return dialog.get_selected_well()
     else:
        return None
 
-    
+
 if __name__ == '__main__':
-     
+
      from PyTango import DeviceProxy
      import sys
 
-     sc       = DeviceProxy("//deino:20000/id14/bssc/1")
-     geometry =  [ sc.getPlateInfo(i) for i in range(1,4) ]
- 
-     app    = Qt.QApplication(sys.argv)
+     sc = DeviceProxy("//deino:20000/id14/bssc/1")
+     geometry = [ sc.getPlateInfo(i) for i in range(1, 4) ]
+
+     app = Qt.QApplication(sys.argv)
 
      #print getWellVolumeAndCycles( geometry ,"Vol and Cycles", default_well=[2,3,4] ) 
      #print getWell( geometry ,"Select Well", default_well=[2,3,4] ) 
-     print getTwoWellsAndVolume( geometry ,"From", "To", default_well=[2,3,4] ) 
+     print getTwoWellsAndVolume(geometry , "From", "To", default_well = [2, 3, 4])

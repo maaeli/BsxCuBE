@@ -13,12 +13,12 @@ import os, sys
 class SPEC:
 
     def __init__(self):
-        self.__handler  = None        
+        self.__handler = None
         self.__filename = None
 
     def getFilename(self):
         return self.__filename
-    
+
     def open(self, pFilename, pMode = "r+"):
         try:
             self.__filename = str(pFilename)
@@ -34,20 +34,20 @@ class SPEC:
         except:
             return -1
 
-    def isValid(self):            
+    def isValid(self):
         try:
             self.__handler.seek(0)
             if self.__handler.read(2) == "#F":
                 return 0
             else:
-                return -1                                              
+                return -1
         except:
             return -1
 
     def getHeader(self, pSplit = False):
         header = []
         try:
-            self.__handler.seek(0)                
+            self.__handler.seek(0)
             for line in self.__handler:
                 # skip empty lines
                 if len(line.strip()) == 0: continue
@@ -57,18 +57,18 @@ class SPEC:
                         i = line.find("=")
                         if i != -1:
                             header.append([line[1:i].strip(), line[i + 1:-2].strip()])
-                    else:                 
+                    else:
                         header.append(line[1:-2])
                 else:
                     break
         except:
             pass
         return header
-        
-    def getValues(self):        
+
+    def getValues(self):
         result = []
         try:
-            self.__handler.seek(0)                
+            self.__handler.seek(0)
             for line in self.__handler:
                 if line[:1] != "#":
                     valueList = line.split(" ")
@@ -78,17 +78,17 @@ class SPEC:
                             tmp.append(float(value))
                         except:
                             pass
-                    result.append(tmp)                            
+                    result.append(tmp)
         except:
-            pass            
-        return result       
+            pass
+        return result
 
-    def write(self, pHeader, pValues):    
+    def write(self, pHeader, pValues):
         try:
             for header in pHeader:
                 self.__handler.write("#" + header + "\r\n")
             for value0 in pValues:
-                tmp = ""                    
+                tmp = ""
                 count = len(value0)
                 for i in range(0, count):
                     if i < count - 1:
@@ -96,24 +96,24 @@ class SPEC:
                     else:
                         tmp += str(value0[i]) + " \n"
                 self.__handler.write(tmp)
-            return 0                         
+            return 0
         except:
             return -1
-    
+
     def radiationDamage(self, pValues, pAdder, pCounter, pTolerance = 0):
         flag = 0
         total = 0
-        count = 0        
+        count = 0
         try:
             values = self.getValues()
             total = len(values)
             if total == len(pValues):
-                pTolerance = float(pTolerance) 
+                pTolerance = float(pTolerance)
                 for i in range(0, total):
                     if float(values[i][0]) == float(pValues[i][0]):
                         y0 = float(pValues[i][1])
                         y1 = float(values[i][1])
-                        tolerance = y0 * pTolerance 
+                        tolerance = y0 * pTolerance
                         if y1 < y0 - tolerance or y1 > y0 + tolerance:
                             count += 1
                         else:
@@ -126,22 +126,22 @@ class SPEC:
             else:
                 flag = -1    # different x values
         except:
-            flag = -2        
+            flag = -2
         return flag, total, count
 
 if __name__ == "__main__":
 
     spec = SPEC()
-    
+
     print spec.open("/bliss/users/nogueira/workspace/data/processed/test_001_01.dat")
     print spec.isValid()
-    print spec.getHeader()        
-    
+    print spec.getHeader()
+
     spec0 = SPEC()
-    
+
     print spec0.open("/bliss/users/nogueira/workspace/data/processed/big_test.dat", "w")
     print spec0.write(spec.getHeader(), spec.getValues())
-    print spec0.close() 
-    
+    print spec0.close()
+
     print spec.close()
-    
+

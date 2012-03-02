@@ -16,15 +16,15 @@ class BsxImageDataProxy(CObjectBase):
             for filename in filenames:
                 try:
                    self.load_single_file(filename)
-                except:    
-                   logging.debug("Problem opening file %s",filename)  
+                except:
+                   logging.debug("Problem opening file %s", filename)
         else:
             try:
                 self.load_single_file(filenames)
-            except:    
+            except:
                 logging.debug(traceback.format_exc())
-                logging.debug("Problem opening file %s",filenames)  
-            
+                logging.debug("Problem opening file %s", filenames)
+
     def load_single_file(self, filename):
         if not os.path.exists(filename):
             return
@@ -32,7 +32,7 @@ class BsxImageDataProxy(CObjectBase):
         data = numpy.loadtxt(filename)
 
         self.emit('erase_curve', filename)
-        self.emit('new_curves_data', { filename: [list(data[:,0]), list(data[:,1])] })
+        self.emit('new_curves_data', { filename: [list(data[:, 0]), list(data[:, 1])] })
 
     def erase_curves(self):
-        self.emit('erase_curve', None) 
+        self.emit('erase_curve', None)

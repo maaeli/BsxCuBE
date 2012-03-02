@@ -1,17 +1,17 @@
 import logging
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot       
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
 
 __category__ = "General"
 
 class CalibrationDiamondBrick(Core.BaseBrick):
     properties = {"caption": Property("string", "Caption", "", "captionChanged"),
-                  "parameter": Property("string", "Parameter", "", "parameterChanged"),                  
+                  "parameter": Property("string", "Parameter", "", "parameterChanged"),
                   "toolTip": Property("string", "Tool tip", "", "toolTipChanged"),
                   "expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
-    
-        
+
+
     connections = {"calibration": Connection("Calibration object",
                                             [Signal("calibrationStatusChanged", "calibrationStatusChanged"),
                                              Signal("newPositionChanged", "newPositionChanged")],
@@ -20,7 +20,7 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                     "login": Connection("Login object",
                                             [Signal("expertModeChanged", "expertModeChanged")],
                                              [])}
-  
+
     signals = []
     slots = []
 
@@ -66,7 +66,7 @@ class CalibrationDiamondBrick(Core.BaseBrick):
         self.calibration_object.executeCalibration(self.__parameter)
 
 
-    def calibrationStatusChanged(self, pValue): 
+    def calibrationStatusChanged(self, pValue):
         messageList = pValue.split(",", 2)
         if len(messageList) == 2:
             if messageList[0] == "0":   # command info
@@ -75,26 +75,26 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                 logging.getLogger().warning(messageList[1])
             elif messageList[0] == "2":     # command error
                 logging.getLogger().error(messageList[1])
-                
-                
-    def newPositionChanged(self, pValue):        
-        self.__newPosition = pValue          
+
+
+    def newPositionChanged(self, pValue):
+        self.__newPosition = pValue
         if self.__setPosition:
             self.__setPosition = False
             if self.__newPosition == -1:
                 Qt.QMessageBox.information(self.brick_widget, "Info", "Not enough counts to calculate the inflexion point of the diamond!")
             elif self.__newPosition > 0:
-                if Qt.QMessageBox.question(self.brick_widget, "Info", "Do you accept '%s' as the inflexion point?" % self.__newPosition, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:    
+                if Qt.QMessageBox.question(self.brick_widget, "Info", "Do you accept '%s' as the inflexion point?" % self.__newPosition, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
                     self.getObject("calibration").setPosition(self.__newPosition)
-                
-   
+
+
     def expertModeChanged(self, pValue):
         self.__expertMode = pValue
         self.commandPushButton.setEnabled(not self.__expertModeOnly or self.__expertMode)
-   
-   
-    def calibrationObjectConnected(self, peer):        
-        self.calibration_object = peer 
+
+
+    def calibrationObjectConnected(self, peer):
+        self.calibration_object = peer
         if self.calibration_object is None:
           self.brick_widget.setEnabled(False)
         else:

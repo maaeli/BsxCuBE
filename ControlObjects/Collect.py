@@ -1,4 +1,4 @@
-from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
+from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import os
 import logging
 import numpy
@@ -21,7 +21,7 @@ class Collect(CObjectBase):
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
-        self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0(experimentSetup=XSDataBioSaxsExperimentSetup(), sample=XSDataBioSaxsSample())
+        self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0(experimentSetup = XSDataBioSaxsExperimentSetup(), sample = XSDataBioSaxsSample())
         self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
         self.xsdout = None
         self.lastPrefixRun = None
@@ -50,7 +50,7 @@ class Collect(CObjectBase):
         self.commands["initPlugin_chris"](self.pluginIntegrate)
         self.commands["initPlugin_chris"](self.pluginMerge)
         self.commands["initPlugin_slavia"](self.pluginSAS)
-        
+
 
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
@@ -64,10 +64,10 @@ class Collect(CObjectBase):
         self.collectDetectorDistance.set_value(pDetectorDistance)
         self.collectWaveLength.set_value(pWaveLength)
         self.collectPixelSizeX.set_value(pPixelSizeX)
-        self.collectPixelSizeY.set_value(pPixelSizeY)        
+        self.collectPixelSizeY.set_value(pPixelSizeY)
         self.collectBeamCenterX.set_value(pBeamCenterX)
         self.collectBeamCenterY.set_value(pBeamCenterY)
-        self.collectNormalisation.set_value(pNormalisation)                       
+        self.collectNormalisation.set_value(pNormalisation)
         self.commands["testCollect"]()
 
 
@@ -87,97 +87,97 @@ class Collect(CObjectBase):
         self.collectDetectorDistance.set_value(pDetectorDistance)
         self.collectWaveLength.set_value(pWaveLength)
         self.collectPixelSizeX.set_value(pPixelSizeX)
-        self.collectPixelSizeY.set_value(pPixelSizeY)        
+        self.collectPixelSizeY.set_value(pPixelSizeY)
         self.collectBeamCenterX.set_value(pBeamCenterX)
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
-        self.collectProcessData.set_value(pProcessData)                  
+        self.collectProcessData.set_value(pProcessData)
 
         #Prepare EDNA input
         self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
         self.xsdin.sample.code = XSDataString(str(pCode))
         self.xsdin.sample.comments = XSDataString(str(pComments))
-       
+
         xsdExperiment = self.xsdin.experimentSetup
         xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
-        xsdExperiment.detectorDistance = XSDataLength(value=float(pDetectorDistance))  
-        xsdExperiment.pixelSize_1 = XSDataLength(value=float(pPixelSizeX)*1.0e-6)  
-        xsdExperiment.pixelSize_2 = XSDataLength(value=float(pPixelSizeY)*1.0e-6)  
+        xsdExperiment.detectorDistance = XSDataLength(value = float(pDetectorDistance))
+        xsdExperiment.pixelSize_1 = XSDataLength(value = float(pPixelSizeX) * 1.0e-6)
+        xsdExperiment.pixelSize_2 = XSDataLength(value = float(pPixelSizeY) * 1.0e-6)
         xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
         xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
-        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength)*1.0e-9)     
-        xsdExperiment.maskFile = XSDataImage(path=XSDataString(str(pMaskFile)))
+        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength) * 1.0e-9)
+        xsdExperiment.maskFile = XSDataImage(path = XSDataString(str(pMaskFile)))
         xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
         xsdExperiment.frameMax = XSDataInteger(int(pNumberFrames))
         xsdExperiment.exposureTime = XSDataTime(float(pTimePerFrame))
-        
-        sPrefix=str(pPrefix)
-        ave_filename = os.path.join(pDirectory,"1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
-        sub_filename = os.path.join(pDirectory,"ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
+
+        sPrefix = str(pPrefix)
+        ave_filename = os.path.join(pDirectory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
+        sub_filename = os.path.join(pDirectory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
-                                inputCurves= [XSDataFile(path=XSDataString(os.path.join(pDirectory,"1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames+1)],
-                                mergedCurve=XSDataFile(path=XSDataString(ave_filename)),
-                                subtractedCurve=XSDataFile(path=XSDataString(sub_filename)))
+                                inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
+                                mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
+                                subtractedCurve = XSDataFile(path = XSDataString(sub_filename)))
         if pRadiationChecked:
             self.xsdAverage.absoluteFidelity = XSDataDouble(float(pRadiationAbsolute))
             self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
-        prefixRun = "%s_%03d" % (sPrefix,pRunNumber)
-        if ( self.lastPrefixRun == prefixRun ):
-            logging.error("Collecting the same run again %s_%03d",sPrefix,pRunNumber)
+        prefixRun = "%s_%03d" % (sPrefix, pRunNumber)
+        if (self.lastPrefixRun == prefixRun):
+            logging.error("Collecting the same run again %s_%03d", sPrefix, pRunNumber)
         else:
             self.lastPrefixRun = prefixRun
-            logging.info("Starting collect of run %s_%03d ",sPrefix,pRunNumber)
-        self.commands["collect"](callback=self.collectDone, error_callback=self.collectFailed)
+            logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
+        self.commands["collect"](callback = self.collectDone, error_callback = self.collectFailed)
 
 
     def triggerEDNA(self, raw_filename):
-        raw_filename=str(raw_filename)
+        raw_filename = str(raw_filename)
         tmp, suffix = os.path.splitext(raw_filename)
         tmp, base = os.path.split(tmp)
-        directory, local = os.path.split(tmp) 
+        directory, local = os.path.split(tmp)
         frame = ""
         for c in base[-1::-1]:
             if c.isdigit():
-                frame=c+frame
+                frame = c + frame
             else:
                 break
-        
+
         self.xsdin.experimentSetup.storageTemperature = XSDataDouble(self.storageTemperature)
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
-        self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value())) 
+        self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
         self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
         xsdin1d = self.xsdin.copy()
-        
-        xsdin1d.rawImage = XSDataImage(path=XSDataString(raw_filename))
-        xsdin1d.logFile = XSDataFile(path=XSDataString(os.path.join(directory, "misc", base+".log")))
-        xsdin1d.normalizedImage = XSDataImage(path=XSDataString(os.path.join(directory, "2d", base+".edf")))
-        xsdin1d.integratedImage = XSDataImage(path=XSDataString(os.path.join(directory, "misc", base+".ang")))
-        xsdin1d.integratedCurve = XSDataFile(path=XSDataString(os.path.join(directory, "1d", base+".dat")))
 
-        jobId = self.commands["startJob_chris"]([self.pluginIntegrate,xsdin1d.marshal()])
+        xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))
+        xsdin1d.logFile = XSDataFile(path = XSDataString(os.path.join(directory, "misc", base + ".log")))
+        xsdin1d.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
+        xsdin1d.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
+        xsdin1d.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
+
+        jobId = self.commands["startJob_chris"]([self.pluginIntegrate, xsdin1d.marshal()])
         self.dat_filenames[jobId] = xsdin1d.integratedCurve.path.value
         logging.info("Processing job %s started", jobId)
         #For debugging
-        xmlFilename = os.path.splitext(raw_filename)[0]+".xml"
-        logging.info("Saving XML data to %s",xmlFilename)
+        xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
+        logging.info("Saving XML data to %s", xmlFilename)
         xsdin1d.exportToFile(xmlFilename)
-        
+
     def collectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
-        jobId = self.commands["startJob_chris"]([self.pluginMerge,self.xsdAverage.marshal()])
-        self.dat_filenames[jobId]=self.xsdAverage.mergedCurve.path.value
+        jobId = self.commands["startJob_chris"]([self.pluginMerge, self.xsdAverage.marshal()])
+        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
 
-        
+
     def processingDone(self, jobId):
         if jobId in self.dat_filenames:
             filename = self.dat_filenames.pop(jobId)
-            logging.info("processing Done from EDNA: %s -> %s",jobId, filename)
+            logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
                 strXsdout = self.commands["getJobOutput_chris"](jobId)
-                try: 
+                try:
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
                 except:
                     logging.error("Unable to parse string from Tango/EDNA")
@@ -187,25 +187,25 @@ class Collect(CObjectBase):
                     self.emit("collectProcessingLog", log)
                     # If autoRG has been used, launch the SAS pipeline (very time consuming)
                     if xsd.autoRg is not None:
-                        rgOut =  xsd.autoRg
+                        rgOut = xsd.autoRg
                         filename = rgOut.filename.path.value
-                        logging.info("filename as input for SAS %s",filename)
+                        logging.info("filename as input for SAS %s", filename)
                         datapoint = numpy.loadtxt(filename)
                         startPoint = rgOut.firstPointUsed.value
-                        q=datapoint[:,0][startPoint:]
-                        I=datapoint[:,1][startPoint:]
-                        s=datapoint[:,2][startPoint:]
-                        mask=(q<3)
+                        q = datapoint[:, 0][startPoint:]
+                        I = datapoint[:, 1][startPoint:]
+                        s = datapoint[:, 2][startPoint:]
+                        mask = (q < 3)
                         xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
                         #NbThreads=XSDataInteger(4))
-                        xsdin.experimentalDataQ = [ XSDataDouble(i/10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                        xsdin.experimentalDataValues =[ XSDataDouble(i) for i in I[mask]]
-                        xsdin.experimentalDataStdDev =[ XSDataDouble(i) for i in s[mask]]
-                        logging.info("Starting SAS pipeline for file %s",filename)
-                        sasJobId = self.commands["startJob_slavia"]([self.pluginSAS,xsdin.marshal()])
+                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                        logging.info("Starting SAS pipeline for file %s", filename)
+                        sasJobId = self.commands["startJob_slavia"]([self.pluginSAS, xsdin.marshal()])
                         # self.dat_filenames[sasJobId] = filename
         else:
-            logging.warning("processing Done from EDNA: %s -X-> None",jobId)
+            logging.warning("processing Done from EDNA: %s -X-> None", jobId)
 
     def collectFailed(self):
         self.collecting = False
@@ -225,7 +225,7 @@ class Collect(CObjectBase):
         #self.commands["testCollect"].abort()
 
     def setCheckBeam(self, flag):
-        logging.info("changing check beam in spec to %s" % flag) 
+        logging.info("changing check beam in spec to %s" % flag)
         if flag:
             self.channels["checkBeam"].set_value(1)
         else:

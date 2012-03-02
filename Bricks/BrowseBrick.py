@@ -1,7 +1,7 @@
 import os
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot           
-from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt        
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
+from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
 
 __category__ = "BsxCuBE"
 
@@ -22,18 +22,18 @@ class BrowseBrick(Core.BaseBrick):
 
 
 
-    
+
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged")]
     slots = []
 
 
     def browseTypeChanged(self, pValue):
-        if pValue is not None: 
+        if pValue is not None:
            self.typeComboBox.setCurrentIndex(int(pValue))
 
     def browseLocationChanged(self, pValue):
-        if pValue is not None: 
+        if pValue is not None:
            self.locationLineEdit.setText(pValue)
 
     def connectionStatusChanged(self, pPeer):
@@ -53,16 +53,16 @@ class BrowseBrick(Core.BaseBrick):
         self.brick_widget.setLayout(Qt.QVBoxLayout())
         self.brick_widget.layout().setAlignment(QtCore.Qt.AlignTop)
         self.brick_widget.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-                
+
         self.hBoxLayout0 = Qt.QHBoxLayout()
         self.typeLabel = Qt.QLabel("Type", self.brick_widget)
         self.typeLabel.setFixedWidth(130)
-        self.hBoxLayout0.addWidget(self.typeLabel)        
+        self.hBoxLayout0.addWidget(self.typeLabel)
         self.typeComboBox = Qt.QComboBox(self.brick_widget)
-        self.typeComboBox.addItems(["Normal", "HDF"])        
-        Qt.QObject.connect(self.typeComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.typeComboBoxChanged)            
+        self.typeComboBox.addItems(["Normal", "HDF"])
+        Qt.QObject.connect(self.typeComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.typeComboBoxChanged)
         self.hBoxLayout0.addWidget(self.typeComboBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout0)                
+        self.brick_widget.layout().addLayout(self.hBoxLayout0)
 
         self.hBoxLayout1 = Qt.QHBoxLayout()
         self.locationLabel = Qt.QLabel(self.brick_widget)
@@ -70,9 +70,9 @@ class BrowseBrick(Core.BaseBrick):
         self.hBoxLayout1.addWidget(self.locationLabel)
         self.locationLineEdit = Qt.QLineEdit(self.brick_widget)
         self.locationLineEdit.setMaxLength(100)
-        Qt.QObject.connect(self.locationLineEdit, Qt.SIGNAL("textChanged(const QString &)"), self.locationLineEditChanged)        
+        Qt.QObject.connect(self.locationLineEdit, Qt.SIGNAL("textChanged(const QString &)"), self.locationLineEditChanged)
         self.hBoxLayout1.addWidget(self.locationLineEdit)
-        self.locationPushButton = Qt.QPushButton("...", self.brick_widget)        
+        self.locationPushButton = Qt.QPushButton("...", self.brick_widget)
         self.locationPushButton.setFixedWidth(25)
         Qt.QObject.connect(self.locationPushButton, Qt.SIGNAL("clicked()"), self.locationPushButtonClicked)
         self.hBoxLayout1.addWidget(self.locationPushButton)
@@ -81,31 +81,31 @@ class BrowseBrick(Core.BaseBrick):
         self.hBoxLayout2 = Qt.QHBoxLayout()
         self.formatLabel = Qt.QLabel("Format", self.brick_widget)
         self.formatLabel.setFixedWidth(130)
-        self.hBoxLayout2.addWidget(self.formatLabel)        
-        self.formatComboBox = Qt.QComboBox(self.brick_widget)        
-        Qt.QObject.connect(self.formatComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.formatComboBoxChanged)            
+        self.hBoxLayout2.addWidget(self.formatLabel)
+        self.formatComboBox = Qt.QComboBox(self.brick_widget)
+        Qt.QObject.connect(self.formatComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.formatComboBoxChanged)
         self.hBoxLayout2.addWidget(self.formatComboBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout2)
 
         self.hBoxLayout3 = Qt.QHBoxLayout()
         self.prefixLabel = Qt.QLabel("Prefix", self.brick_widget)
         self.prefixLabel.setFixedWidth(130)
-        self.hBoxLayout3.addWidget(self.prefixLabel)        
+        self.hBoxLayout3.addWidget(self.prefixLabel)
         self.prefixComboBox = Qt.QComboBox(self.brick_widget)
         Qt.QObject.connect(self.prefixComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.prefixComboBoxChanged)
         self.hBoxLayout3.addWidget(self.prefixComboBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout3)
 
-        self.hBoxLayout4 = Qt.QHBoxLayout()        
+        self.hBoxLayout4 = Qt.QHBoxLayout()
         self.runNumberLabel = Qt.QLabel("Run #", self.brick_widget)
         self.runNumberLabel.setFixedWidth(130)
-        self.hBoxLayout4.addWidget(self.runNumberLabel)        
-        self.runNumberComboBox = Qt.QComboBox(self.brick_widget)        
+        self.hBoxLayout4.addWidget(self.runNumberLabel)
+        self.runNumberComboBox = Qt.QComboBox(self.brick_widget)
         Qt.QObject.connect(self.runNumberComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.runNumberComboBoxChanged)
         self.hBoxLayout4.addWidget(self.runNumberComboBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout4)
-        
-        self.hBoxLayout5 = Qt.QHBoxLayout()        
+
+        self.hBoxLayout5 = Qt.QHBoxLayout()
         self.extraLabel = Qt.QLabel("Extra", self.brick_widget)
         self.extraLabel.setFixedWidth(130)
         self.hBoxLayout5.addWidget(self.extraLabel)
@@ -113,8 +113,8 @@ class BrowseBrick(Core.BaseBrick):
         Qt.QObject.connect(self.extraComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.extraComboBoxChanged)
         self.hBoxLayout5.addWidget(self.extraComboBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout5)
-        
-        self.hBoxLayout6 = Qt.QHBoxLayout()        
+
+        self.hBoxLayout6 = Qt.QHBoxLayout()
         self.itemsLabel = Qt.QLabel("Items (0)", self.brick_widget)
         self.itemsLabel.setFixedWidth(130)
         self.hBoxLayout6.addWidget(self.itemsLabel)
@@ -125,22 +125,22 @@ class BrowseBrick(Core.BaseBrick):
 
         self.vBoxLayout0 = Qt.QVBoxLayout()
         self.vBoxLayout0.addSpacing(20)
-        self.brick_widget.layout().addLayout(self.vBoxLayout0)        
-                
+        self.brick_widget.layout().addLayout(self.vBoxLayout0)
+
         self.hBoxLayout7 = Qt.QHBoxLayout()
         self.refreshPushButton = Qt.QPushButton("Refresh", self.brick_widget)
         self.refreshPushButton.setToolTip("Refresh item list with the specified parameters")
         self.hBoxLayout7.addWidget(self.refreshPushButton)
         Qt.QObject.connect(self.refreshPushButton, Qt.SIGNAL("clicked()"), self.refreshPushButtonClicked)
         self.brick_widget.layout().addLayout(self.hBoxLayout7)
-        
+
         self.typeComboBoxChanged(self.typeComboBox.currentIndex())
-        self.locationLineEditChanged(None)        
+        self.locationLineEditChanged(None)
 
     def delete(self):
         pass
-                
-        
+
+
     def enableTypeChanged(self, pValue):
         self.typeComboBox.setVisible(pValue)
         self.typeLabel.setVisible(pValue)
@@ -152,14 +152,14 @@ class BrowseBrick(Core.BaseBrick):
         if pValue == 0:
             self.locationLabel.setText("Directory")
             for description, extension in self.__formats:
-                self.formatComboBox.addItem(description)                       
+                self.formatComboBox.addItem(description)
         else:
             self.locationLabel.setText("File")
             self.formatComboBox.addItems(["Raw EDF  (frame)", "Normalised EDF  (frame)", "SPEC  (curve)"])
         self.locationChanged(self.locationLineEdit.text(), pValue)
-        
-        
-            
+
+
+
     def locationLineEditChanged(self, pValue):
         self.locationChanged(pValue, self.typeComboBox.currentIndex())
 
@@ -171,7 +171,7 @@ class BrowseBrick(Core.BaseBrick):
                 if str(pValue).find(" ") == -1:
                     self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 255, 255))
                 else:
-                    self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 255, 0))    
+                    self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 255, 0))
             else:
                 self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 0, 0))
         else:   # HDF file
@@ -179,14 +179,14 @@ class BrowseBrick(Core.BaseBrick):
                 self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 255, 255))
             else:
                 self.locationLineEdit.palette().setColor(QtGui.QPalette.Base, QtGui.QColor(255, 0, 0))
-        self.locationLineEdit.update()                        
-        self.populatePrefixComboBox()        
+        self.locationLineEdit.update()
+        self.populatePrefixComboBox()
         self.populateRunNumberComboBox()
         self.populateExtraComboBox()
-        self.populateItemsListWidget()        
-        
-        
-            
+        self.populateItemsListWidget()
+
+
+
     def locationPushButtonClicked(self):
         if self.typeComboBox.currentIndex() == 0:
             qFileDialog = QtGui.QFileDialog(self.brick_widget, "Choose a directory", self.locationLineEdit.text())
@@ -194,16 +194,16 @@ class BrowseBrick(Core.BaseBrick):
         else:
             qFileDialog = QtGui.QFileDialog(self.brick_widget, "Choose a HDF file", self.locationLineEdit.text())
             qFileDialog.setAcceptMode(QtGui.QFileDialog.AcceptOpen)
-            qFileDialog.setFilters(["Hierarchical Data Format (*.h5; *.hdf5)"])            
+            qFileDialog.setFilters(["Hierarchical Data Format (*.h5; *.hdf5)"])
         if qFileDialog.exec_():
             self.locationLineEdit.setText(str(qFileDialog.selectedFiles()[0]))
-            
+
 
 
 
     def formatComboBoxChanged(self, pValue):
         if self.typeComboBox.currentIndex() == 0:
-            directory = ("", "raw", "2d", "raw", "raw", "raw", "1d")[self.formatComboBox.currentIndex()]                             
+            directory = ("", "raw", "2d", "raw", "raw", "raw", "1d")[self.formatComboBox.currentIndex()]
             if directory != "":
                 directoryList = str(self.locationLineEdit.text()).split("/")
                 for i in range(len(directoryList) - 1, -1, -1):
@@ -219,34 +219,34 @@ class BrowseBrick(Core.BaseBrick):
                         directory += "/" + directoryList[i]
                 if os.path.exists(directory):
                     self.locationLineEdit.setText(directory)
-            
-            if self.formatComboBox.currentIndex() == 6:                  
+
+            if self.formatComboBox.currentIndex() == 6:
                 self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
             else:
                 self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
         else:
             pass    # implement HDF
 
-        self.populatePrefixComboBox()        
-        self.populateRunNumberComboBox()                                
+        self.populatePrefixComboBox()
+        self.populateRunNumberComboBox()
         self.populateExtraComboBox()
         self.populateItemsListWidget()
 
 
     def prefixComboBoxChanged(self, pValue):
-        self.populateRunNumberComboBox()                          
+        self.populateRunNumberComboBox()
         self.populateExtraComboBox()
-        self.populateItemsListWidget()        
-             
+        self.populateItemsListWidget()
+
 
     def runNumberComboBoxChanged(self, pValue):
-        self.populateExtraComboBox()                  
+        self.populateExtraComboBox()
         self.populateItemsListWidget()
 
 
 
-    def extraComboBoxChanged(self, pValue):                  
-        self.populateItemsListWidget()        
+    def extraComboBoxChanged(self, pValue):
+        self.populateItemsListWidget()
 
 
     def itemsListWidgetChanged(self):
@@ -255,8 +255,8 @@ class BrowseBrick(Core.BaseBrick):
         else:
             directory0 = self.locationLineEdit.text() + "/"
         items = ""
-        for item in self.itemsListWidget.selectedItems():            
-            if items == "": 
+        for item in self.itemsListWidget.selectedItems():
+            if items == "":
                 items = str(directory0 + item.text())
             else:
                 items += "," + str(directory0 + item.text())
@@ -278,18 +278,18 @@ class BrowseBrick(Core.BaseBrick):
                     items += "," + filename
         self.emit("displayItemChanged", items)
         self.getObject('image_proxy').load_files(items.split(','))
-                              
-        
+
+
 
 
     def refreshPushButtonClicked(self):
         self.populateItemsListWidget()
-                               
+
 
 
     def populatePrefixComboBox(self):
         items = []
-        if self.typeComboBox.currentIndex() == 0:                  
+        if self.typeComboBox.currentIndex() == 0:
             try:
                 format = self.__formats[self.formatComboBox.currentIndex()][1]
                 for filename in os.listdir(self.locationLineEdit.text()):
@@ -302,10 +302,10 @@ class BrowseBrick(Core.BaseBrick):
                                     flag = True
                                     break
                         else:
-                            flag = (extension == format)                                
+                            flag = (extension == format)
                         if flag:
                             try:
-                                items.index(prefix)                            
+                                items.index(prefix)
                             except:
                                 items.append(prefix)
             except:
@@ -313,7 +313,7 @@ class BrowseBrick(Core.BaseBrick):
         else:
             pass    # implement HDF  
         items.sort()
-        items.insert(0, "All")                                                        
+        items.insert(0, "All")
         currentText = self.prefixComboBox.currentText()
         self.prefixComboBox.clear()
         self.prefixComboBox.addItems(items)
@@ -321,27 +321,27 @@ class BrowseBrick(Core.BaseBrick):
             self.prefixComboBox.setCurrentIndex(items.index(currentText))
         except:
             self.prefixComboBox.setCurrentIndex(0)
-            
-        
+
+
 
     def populateRunNumberComboBox(self):
         items = []
-        if self.typeComboBox.currentIndex() == 0:            
+        if self.typeComboBox.currentIndex() == 0:
             try:
                 for filename in os.listdir(self.locationLineEdit.text()):
                     prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                    if run != "":               
+                    if run != "":
                         if self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText():
                             try:
-                                items.index(run)                        
+                                items.index(run)
                             except:
-                                items.append(run)          
+                                items.append(run)
             except:
                 pass
         else:
             pass    # implement HDF
         items.sort(reverse = True)
-        items.insert(0, "All")                                                        
+        items.insert(0, "All")
         currentText = self.runNumberComboBox.currentText()
         self.runNumberComboBox.clear()
         self.runNumberComboBox.addItems(items)
@@ -349,28 +349,28 @@ class BrowseBrick(Core.BaseBrick):
             self.runNumberComboBox.setCurrentIndex(items.index(currentText))
         except:
             self.runNumberComboBox.setCurrentIndex(0)
-            
-            
 
 
-    def populateExtraComboBox(self):        
+
+
+    def populateExtraComboBox(self):
         items = []
-        if self.typeComboBox.currentIndex() == 0:                    
+        if self.typeComboBox.currentIndex() == 0:
             try:
                 for filename in os.listdir(self.locationLineEdit.text()):
                     prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
                     #if len(extra) > 0:
                     if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or run == self.runNumberComboBox.currentText()):
                         try:
-                            items.index(extra)                        
+                            items.index(extra)
                         except:
-                            items.append(extra)          
+                            items.append(extra)
             except:
                 pass
         else:
             pass    # implement HDF
         items.sort()
-        items.insert(0, "All")                                                        
+        items.insert(0, "All")
         currentText = self.extraComboBox.currentText()
         self.extraComboBox.clear()
         self.extraComboBox.addItems(items)
@@ -378,7 +378,7 @@ class BrowseBrick(Core.BaseBrick):
             self.extraComboBox.setCurrentIndex(items.index(currentText))
         except:
             self.extraComboBox.setCurrentIndex(0)
-            
+
 
 
 
@@ -401,7 +401,7 @@ class BrowseBrick(Core.BaseBrick):
                             flag = (extension == format)
                         if flag:
                             if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or self.runNumberComboBox.currentText() == run) and (self.extraComboBox.currentIndex() == 0 or extra == self.extraComboBox.currentText()):
-                                items.append(filename)                                                                                                                                                          
+                                items.append(filename)
             except:
                 pass
         else:
@@ -411,35 +411,35 @@ class BrowseBrick(Core.BaseBrick):
         for i in range(0, self.itemsListWidget.count()):
             if self.itemsListWidget.item(i).isSelected():
                 itemsSelect.append(self.itemsListWidget.item(i).text())
-                
+
         self.itemsListWidget.clear()
         self.itemsListWidget.addItems(items)
-        
+
         for i in range(0, self.itemsListWidget.count()):
             if self.itemsListWidget.item(i).text() in itemsSelect:
-                self.itemsListWidget.item(i).setSelected(True)        
+                self.itemsListWidget.item(i).setSelected(True)
 
-        self.itemsLabel.setText("Items (" + str(self.itemsListWidget.count()) +")")
+        self.itemsLabel.setText("Items (" + str(self.itemsListWidget.count()) + ")")
         self.itemsListWidget.blockSignals(False)
 
 
 
     def getFilenameDetails(self, pFilename):
-        pFilename = str(pFilename)        
+        pFilename = str(pFilename)
         i = pFilename.rfind(".")
         if i == -1:
             file = pFilename
-            extension = ""            
+            extension = ""
         else:
-            file = pFilename[:i]            
-            extension = pFilename[i + 1:]        
-        items = file.split("_")                       
+            file = pFilename[:i]
+            extension = pFilename[i + 1:]
+        items = file.split("_")
         prefix = items[0]
         run = ""
         frame = ""
         extra = ""
         i = len(items)
-        j = 1                
+        j = 1
         while j < i:
             if items[j].isdigit():
                 run = items[j]
@@ -458,6 +458,6 @@ class BrowseBrick(Core.BaseBrick):
                 else:
                     extra.join("_".join(items[j]))
                 j += 1
-        
+
         return prefix, run, frame, extra, extension
 

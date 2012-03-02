@@ -1,25 +1,25 @@
-from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot    
+from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
 
 class Browse(CObjectBase):
-    
+
 
     __CHANNEL_LIST = ["browseTypeChanged",
                      "browseLocationChanged"]
-    
+
 
     signals = [Signal(channel) for channel in __CHANNEL_LIST]
-    
+
     slots = []
-    
+
 
 
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
-        
-  
+
+
 
     def init(self):
         for channel in self.__CHANNEL_LIST:
@@ -30,7 +30,7 @@ class Browse(CObjectBase):
                     getattr(self, channel[:-7]).connect("update", getattr(self, channel))
             except:
                 pass
-                                           
+
     def browseTypeChanged(self, pValue):
         print "emitting"
         self.emit("browseTypeChanged", pValue)
@@ -38,7 +38,7 @@ class Browse(CObjectBase):
 
     def browseLocationChanged(self, pValue):
         self.emit("browseLocationChanged", pValue)
-        
+
 
 
 

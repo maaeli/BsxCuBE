@@ -26,7 +26,7 @@ try:
     import sys
     import os
     from xml.sax import make_parser
-    from xml.sax.handler import ContentHandler        
+    from xml.sax.handler import ContentHandler
 except:
     print __name__ + ".py: error when importing module!"
 
@@ -80,14 +80,14 @@ class HDFDictionary():
     format (optional)   : the format of the value (basically, it formats the value using the same syntax as Python). If not specified, then no
                           format will be done. For more details, please see http://docs.python.org/library/string.html#formatspec.                       
     """
-    
-    
+
+
 
     # =============================================
     #  CONSTRUCTOR
     # =============================================
     def __init__(self):
-        self.__filename = None                
+        self.__filename = None
 
 
 
@@ -103,8 +103,8 @@ class HDFDictionary():
         @type pDictionary: list
         @param pDictionary: the dictionary to be returned (if None, then all existing dictionaries stored in the XML file will be returned).        
         @rtype: int (status), list (containing a single dictionary) or dictionary (containing two or more dictionaries).
-        """                                   
-        try:      
+        """
+        try:
             xmlHandler = _XMLHandler()
             parser = make_parser()
             parser.setContentHandler(xmlHandler)
@@ -120,11 +120,11 @@ class HDFDictionary():
                 if dictionary.has_key(pDictionary):
                     return 0, dictionary[pDictionary]
                 else:
-                    return 0, [] 
+                    return 0, []
         except:
             return -1, []
 
-            
+
 
     def translate(self, pMetaData, pDictionary = None):
         """
@@ -135,9 +135,9 @@ class HDFDictionary():
         @type pDictionary: list
         @param pDictionary: the dictionary to be used for the extraction/translation of keywords and their values (if None, then it is assumed that, for each line of the data, the keyword is on the left side of "=" and the value is on the right side of "=").        
         @rtype: int (status), list of lists (containing the translated metadata)
-        """                                           
+        """
         status = 0
-        result = []        
+        result = []
         try:
             metaDataList = []
             for metaData in pMetaData:
@@ -147,17 +147,17 @@ class HDFDictionary():
                         result.append([metaData[:i].strip(), metaData[i + 1:].strip()])
                 else:
                     for keyWord, separator, finish, split, slice, format, translate in pDictionary:
-                        if keyWord not in metaDataList:                                 
+                        if keyWord not in metaDataList:
                             i = metaData.find(keyWord)
                             if i != -1:
                                 i = metaData.find(separator, len(keyWord) + i)
                                 if i != -1:
                                     if len(finish) == 0:
-                                        data = metaData[i + 1:].strip()                                        
+                                        data = metaData[i + 1:].strip()
                                     else:
                                         j = metaData.find(finish, i + 1)
                                         if j == -1:
-                                            data = metaData[i + 1:].strip()                                        
+                                            data = metaData[i + 1:].strip()
                                         else:
                                             data = metaData[i + 1:j].strip()
                                     if len(slice) > 0:
@@ -167,25 +167,25 @@ class HDFDictionary():
                                             k = ""
                                             flag = False
                                         else:
-                                            j = slice[:i] 
+                                            j = slice[:i]
                                             k = slice[i + 1:]
                                             flag = True
                                     if len(split) == 0:
                                         if len(slice) > 0:
                                             if flag:
                                                 if len(j) == 0:
-                                                    data = data[:int(k)]                                                       
+                                                    data = data[:int(k)]
                                                 else:
                                                     if len(k) == 0:
                                                         data = data[int(j):]
                                                     else:
-                                                        data = data[int(j):int(k)]                                                
+                                                        data = data[int(j):int(k)]
                                             else:
                                                 data = data[int(j)]
                                         if len(format) == 0:
                                             result.append([translate, data])
                                         else:
-                                            result.append([translate, format % data])                                                                                               
+                                            result.append([translate, format % data])
                                     else:
                                         dataList = data.split(split)
                                         translateList = translate.split(",")
@@ -193,7 +193,7 @@ class HDFDictionary():
                                             count = len(translateList)
                                         else:
                                             count = len(dataList)
-                                        for i in range(0, count):                                                
+                                        for i in range(0, count):
                                             if len(slice) == 0:
                                                 data = dataList[i].strip()
                                             else:
@@ -206,25 +206,25 @@ class HDFDictionary():
                                                         else:
                                                             data = dataList[i].strip()[int(j):int(k)]
                                                 else:
-                                                    data = dataList[i].strip()[int(j)]                                            
+                                                    data = dataList[i].strip()[int(j)]
                                             if len(format) == 0:
                                                 result.append([translateList[i].strip(), data])
                                             else:
-                                                result.append([translateList[i].strip(), format % data])                                                
-                                                                                                                                                                                                                                                        
+                                                result.append([translateList[i].strip(), format % data])
+
                                     metaDataList.append(keyWord)
             return status, result
         except:
-            return -1, [] 
+            return -1, []
 
 
-        
-                
+
+
 # =============================================
 #  OTHER CLASS
 # =============================================                 
 class _XMLHandler(ContentHandler):
-    
+
 
     # =============================================
     #  CONSTRUCTOR
@@ -246,14 +246,14 @@ class _XMLHandler(ContentHandler):
 
     def startDocument(self):
         self.__result = {}
-        self.__dictionary = ""        
+        self.__dictionary = ""
         self.__keyWord = []
 
-          
+
 
     def startElement(self, pName, pAttributes):
         if pName == "dictionary":
-            self.__dictionary = str(pAttributes["name"])   
+            self.__dictionary = str(pAttributes["name"])
             self.__result[self.__dictionary] = []
         else:
             if pName == "keyword":
@@ -278,26 +278,26 @@ class _XMLHandler(ContentHandler):
                     self.__keyWord.append(str(pAttributes["format"]))
                 else:
                     self.__keyWord.append("")
-                
 
-            
-    def characters(self, pContent): 
+
+
+    def characters(self, pContent):
         if len(self.__keyWord) > 0:
             self.__keyWord.append(str(pContent))
             self.__result[self.__dictionary].append(self.__keyWord)
             self.__keyWord = []
-        
+
 
 
     def endDocument(self):
         pass
 
 
-        
-        
+
+
 if __name__ == "__main__":
-    
-    
+
+
     # =============================================
     #  CHECK IF PARAMETERS ARE VALID
     # =============================================
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     dictionaryName = ""
     inputFile = ""
     outputFile = ""
-    maxLines = 0    
+    maxLines = 0
     for i in range(1, len(sys.argv)):
         if sys.argv[i].upper() == "-HELP":
             print
@@ -314,17 +314,17 @@ if __name__ == "__main__":
             print "  -dic_file:x    Use dictionary XML file 'x'. This parameter is mandatory."
             print
             print "  -dic_name:x    Use dictionary name 'x'. If not specified, then the first dictionary found in the XML file is used."
-            print            
+            print
             print "  -input:x       Read data to be extracted/converted from file 'x'. This parameter is mandatory."
-            print            
+            print
             print "  -max:x         Read the first 'x' lines from input file. If not specified, then the input file is read until the end."
             print
-            print "  -output:x      Save extracted/converted data to file 'x'. If not specified, then the output is displayed on screen."            
+            print "  -output:x      Save extracted/converted data to file 'x'. If not specified, then the output is displayed on screen."
             print
             sys.exit(0)
         else:
             if sys.argv[i][:10].upper() == "-DIC_FILE:":
-                dictionaryFile = sys.argv[i][10:] 
+                dictionaryFile = sys.argv[i][10:]
                 if len(dictionaryFile) == 0:
                     print
                     print "Please, specify the dictionary file (example: /users/dummy/myDictionary.xml)."
@@ -338,7 +338,7 @@ if __name__ == "__main__":
                         sys.exit(-1)
             else:
                 if sys.argv[i][:10].upper() == "-DIC_NAME:":
-                    dictionaryName = sys.argv[i][10:] 
+                    dictionaryName = sys.argv[i][10:]
                     if len(dictionaryFile) == 0:
                         print
                         print "Please, specify the dictionary name (example: SPEC)."
@@ -373,7 +373,7 @@ if __name__ == "__main__":
                                     print
                                     sys.exit(-1)
                                 else:
-                                    maxLines = int(maxLines)                                    
+                                    maxLines = int(maxLines)
                         else:
                             if sys.argv[i][:8].upper() == "-OUTPUT:":
                                 outputFile = sys.argv[i][8:]
@@ -388,15 +388,15 @@ if __name__ == "__main__":
                                 print
                                 sys.exit(-1)
 
-    
+
 
     # =============================================
     #  START PROCESSING
     # =============================================    
     if len(dictionaryFile) > 0:
-        if len(inputFile) > 0:                
-            
-            try:                  
+        if len(inputFile) > 0:
+
+            try:
                 inputHandler = open(inputFile, "r")
                 lineList = []
                 countLines = 0
@@ -404,11 +404,11 @@ if __name__ == "__main__":
                     lineList.append(line)
                     countLines += 1
                     if countLines == maxLines:
-                        break                                                    
-                inputHandler.close()                        
-                
+                        break
+                inputHandler.close()
+
                 hdfDictionary = HDFDictionary()
-                
+
                 if len(dictionaryName) == 0:
                     status, dictionaryList = hdfDictionary.get(dictionaryFile)
                     if len(dictionaryList) > 1:
@@ -417,8 +417,8 @@ if __name__ == "__main__":
                     status, dictionaryList = hdfDictionary.get(dictionaryFile, dictionaryName)
 
                 if status == 0:
-                    status, translationList = hdfDictionary.translate(lineList, dictionaryList)                     
-                    if status == 0:                        
+                    status, translationList = hdfDictionary.translate(lineList, dictionaryList)
+                    if status == 0:
                         if len(outputFile) > 0:
                             outputHandler = open(outputFile, "w")
                             for translation in translationList:
@@ -430,15 +430,15 @@ if __name__ == "__main__":
                     else:
                         raise(StandardError)
                 else:
-                    raise(StandardError)            
+                    raise(StandardError)
             except:
                 print
                 print "Error when processing. Exiting..."
                 print
                 sys.exit(-1)
-                
-            sys.exit(0)         
-            
+
+            sys.exit(0)
+
         else:
             print
             print "Please, specify the input file parameter (example: -input:/users/dummy/myInput.txt)."
@@ -449,7 +449,7 @@ if __name__ == "__main__":
         print "Please, specify the dictionary file parameter (example: -dic_name:/users/dummy/myDictionary.xml)."
         print
         sys.exit(-1)
-    
+
 
 
 

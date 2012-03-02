@@ -42,7 +42,7 @@ class EDF:
     #  CONSTRUCTOR
     # ============================================= 
     def __init__(self):
-        self.__handler = None        
+        self.__handler = None
         self.__filename = None
 
 
@@ -52,9 +52,9 @@ class EDF:
     # =============================================
     def getFilename(self):
         return self.__filename
-    
 
-    
+
+
     def open(self, pFilename, pMode = "r+"):
         try:
             self.__filename = str(pFilename)
@@ -75,16 +75,16 @@ class EDF:
 
 
 
-    def isValid(self):            
+    def isValid(self):
         try:
             self.__handler.seek(0)
-            if self.__handler.read(1) == "{":                                              
+            if self.__handler.read(1) == "{":
                 return 0
             else:
-                return -1                                              
+                return -1
         except:
             return -1
-        
+
 
 
     def getHeader(self, pSplit = False):
@@ -92,25 +92,25 @@ class EDF:
         try:
             self.__handler.seek(1)
             lines = self.__handler.read(8192).split(";")
-            count = len(lines)                                     
-            for i in range(0, count):                 
+            count = len(lines)
+            for i in range(0, count):
                 if pSplit:
                     j = lines[i].find("=")
                     if j != -1:
                         header.append([lines[i][1:j].strip(), lines[i][j + 1:].strip()])
-                else:                 
+                else:
                     #if i > 0:
                     header.append(lines[i][2:-1])
         except:
             pass
-        return header    
-                
+        return header
 
 
-    def getValues(self):        
+
+    def getValues(self):
         result = ""
         try:
-            self.__handler.seek(8192)                
+            self.__handler.seek(8192)
             while True:
                 tmp = self.__handler.read(1024)
                 if tmp == "":
@@ -118,25 +118,25 @@ class EDF:
                 else:
                    result.join(tmp)
         except:
-            pass            
+            pass
         return result
-    
-    
+
+
 
 
 
 if __name__ == "__main__":
 
     edf = EDF()
-    
+
     print edf.open("/bliss/users/nogueira/workspace/data/processing/test_001_01.edf")
-    
+
     print edf.isValid()
-    
+
     print edf.getHeader()
-    
+
     print len(edf.getValues())
-    
+
     print edf.close()
-    
+
 

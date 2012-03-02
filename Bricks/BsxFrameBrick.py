@@ -1,13 +1,13 @@
 import logging
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot                   
+from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
-from Qub.Widget.DataDisplay import QubDataImageDisplay    
+from Qub.qt4.Widget.DataDisplay import QubDataImageDisplay
 
 __category__ = "BsxCuBE"
 
 class BsxFrameBrick(Core.BaseBrick):
-    properties = {}       
+    properties = {}
     connections = {"display": Connection("Display object",
                                       [Signal("displayResetChanged", "displayResetChanged"),
                                        Signal("displayItemChanged", "displayItemChanged")],
@@ -17,7 +17,7 @@ class BsxFrameBrick(Core.BaseBrick):
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
-        
+
     def init(self):
         Qt.QVBoxLayout(self.brick_widget)
         self.frameDisplay = QubDataImageDisplay.QubDataImageDisplay(self.brick_widget, noAction = False, noToolbarAction = False, forcePopupSubWindow = True)

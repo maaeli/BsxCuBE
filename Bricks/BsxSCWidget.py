@@ -1,38 +1,38 @@
 import sys, os, time
 import logging
-    
+
 from PyQt4  import QtCore, QtGui, Qt
 import WellPicker , TimeDialog, TemperatureSelector
 
-class BsxSCWidget( Qt.QWidget ): 
+class BsxSCWidget(Qt.QWidget):
 
-    def __init__(self,parent):
+    def __init__(self, parent):
 
         self.__robotMoveState = 0
         self.plateGeomery = []
-        self.lastWell     = [1,1,1]
+        self.lastWell = [1, 1, 1]
 
         Qt.QWidget.__init__(self, parent)
 
         self.vBoxLayout = Qt.QVBoxLayout()
 
-        self.topHBox      = Qt.QHBoxLayout()
+        self.topHBox = Qt.QHBoxLayout()
         self.syringeGroup = Qt.QGroupBox("Syringe", self)
-        self.actionGroup  = Qt.QGroupBox("Actions", self)
-        self.tempGroup    = Qt.QGroupBox("Temperature",self)
-        self.bottomBox    = Qt.QHBoxLayout()
+        self.actionGroup = Qt.QGroupBox("Actions", self)
+        self.tempGroup = Qt.QGroupBox("Temperature", self)
+        self.bottomBox = Qt.QHBoxLayout()
 
-        self.vBoxLayout.addLayout( self.topHBox )
-        self.vBoxLayout.addWidget( self.actionGroup )
-        self.vBoxLayout.addLayout( self.bottomBox )
-        
+        self.vBoxLayout.addLayout(self.topHBox)
+        self.vBoxLayout.addWidget(self.actionGroup)
+        self.vBoxLayout.addLayout(self.bottomBox)
+
         #  Top Line
         self.syringeLayout = Qt.QHBoxLayout()
         self.robotMoveBackwardPushButton = Qt.QPushButton("<<", self)
         self.robotMoveBackwardPushButton.setFixedWidth(150)
         self.robotMoveBackwardPushButton.setToolTip("Move liquid backward")
-        Qt.QObject.connect(self.robotMoveBackwardPushButton, Qt.SIGNAL("pressed()"),  self.robotMoveBackwardPushButtonPressed)
-        Qt.QObject.connect(self.robotMoveBackwardPushButton, Qt.SIGNAL("released()"), self.robotMoveBackwardPushButtonReleased)                
+        Qt.QObject.connect(self.robotMoveBackwardPushButton, Qt.SIGNAL("pressed()"), self.robotMoveBackwardPushButtonPressed)
+        Qt.QObject.connect(self.robotMoveBackwardPushButton, Qt.SIGNAL("released()"), self.robotMoveBackwardPushButtonReleased)
         self.syringeLayout.addWidget(self.robotMoveBackwardPushButton)
 
         self.robotFixLiquidPositionPushButton = Qt.QPushButton(">|<", self)
@@ -41,59 +41,59 @@ class BsxSCWidget( Qt.QWidget ):
         Qt.QObject.connect(self.robotFixLiquidPositionPushButton, Qt.SIGNAL("clicked()"), self.robotFixLiquidPositionPushButtonClicked)
         self.syringeLayout.addWidget(self.robotFixLiquidPositionPushButton)
 
-        self.robotMoveForwardPushButton = Qt.QPushButton(">>", self)        
+        self.robotMoveForwardPushButton = Qt.QPushButton(">>", self)
         self.robotMoveForwardPushButton.setFixedWidth(150)
         self.robotMoveForwardPushButton.setToolTip("Move liquid forward")
-        Qt.QObject.connect(self.robotMoveForwardPushButton, Qt.SIGNAL("pressed()"),  self.robotMoveForwardPushButtonPressed)        
+        Qt.QObject.connect(self.robotMoveForwardPushButton, Qt.SIGNAL("pressed()"), self.robotMoveForwardPushButtonPressed)
         Qt.QObject.connect(self.robotMoveForwardPushButton, Qt.SIGNAL("released()"), self.robotMoveForwardPushButtonReleased)
         self.syringeLayout.addWidget(self.robotMoveForwardPushButton)
 
-        self.syringeGroup.setLayout( self.syringeLayout )
+        self.syringeGroup.setLayout(self.syringeLayout)
 
-        self.topHBox.addWidget( self.syringeGroup )
-        self.topHBox.addWidget( self.tempGroup )
+        self.topHBox.addWidget(self.syringeGroup)
+        self.topHBox.addWidget(self.tempGroup)
 
         #  Action group
         self.actionLayout = Qt.QHBoxLayout()
 
-        self.robotFillPushButton = Qt.QPushButton("Fill", self)       
+        self.robotFillPushButton = Qt.QPushButton("Fill", self)
         Qt.QObject.connect(self.robotFillPushButton, Qt.SIGNAL("clicked()"), self.robotFillPushButtonClicked)
-        self.actionLayout.addWidget( self.robotFillPushButton )
+        self.actionLayout.addWidget(self.robotFillPushButton)
 
-        self.robotRecuperatePushButton = Qt.QPushButton("Recuperate", self)        
-        Qt.QObject.connect(self.robotRecuperatePushButton, Qt.SIGNAL("clicked()"), self.robotRecuperatePushButtonClicked)        
-        self.actionLayout.addWidget(self.robotRecuperatePushButton)                        
+        self.robotRecuperatePushButton = Qt.QPushButton("Recuperate", self)
+        Qt.QObject.connect(self.robotRecuperatePushButton, Qt.SIGNAL("clicked()"), self.robotRecuperatePushButtonClicked)
+        self.actionLayout.addWidget(self.robotRecuperatePushButton)
 
-        self.robotCleanPushButton = Qt.QPushButton("Clean", self)        
+        self.robotCleanPushButton = Qt.QPushButton("Clean", self)
         Qt.QObject.connect(self.robotCleanPushButton, Qt.SIGNAL("clicked()"), self.robotCleanPushButtonClicked)
         self.actionLayout.addWidget(self.robotCleanPushButton)
 
-        self.robotDryPushButton = Qt.QPushButton("Dry", self)       
+        self.robotDryPushButton = Qt.QPushButton("Dry", self)
         Qt.QObject.connect(self.robotDryPushButton, Qt.SIGNAL("clicked()"), self.robotDryPushButtonClicked)
         self.actionLayout.addWidget(self.robotDryPushButton)
 
-        self.robotFlowPushButton = Qt.QPushButton("Flow", self)        
-        Qt.QObject.connect(self.robotFlowPushButton, Qt.SIGNAL("clicked()"), self.robotFlowPushButtonClicked)        
+        self.robotFlowPushButton = Qt.QPushButton("Flow", self)
+        Qt.QObject.connect(self.robotFlowPushButton, Qt.SIGNAL("clicked()"), self.robotFlowPushButtonClicked)
         self.actionLayout.addWidget(self.robotFlowPushButton)
 
-        self.robotMixPushButton = Qt.QPushButton("Mix", self)        
-        Qt.QObject.connect(self.robotMixPushButton, Qt.SIGNAL("clicked()"), self.robotMixPushButtonClicked)        
+        self.robotMixPushButton = Qt.QPushButton("Mix", self)
+        Qt.QObject.connect(self.robotMixPushButton, Qt.SIGNAL("clicked()"), self.robotMixPushButtonClicked)
         self.actionLayout.addWidget(self.robotMixPushButton)
 
-        self.robotTransferPushButton = Qt.QPushButton("Transfer", self)        
-        Qt.QObject.connect(self.robotTransferPushButton, Qt.SIGNAL("clicked()"), self.robotTransferPushButtonClicked)        
+        self.robotTransferPushButton = Qt.QPushButton("Transfer", self)
+        Qt.QObject.connect(self.robotTransferPushButton, Qt.SIGNAL("clicked()"), self.robotTransferPushButtonClicked)
         self.actionLayout.addWidget(self.robotTransferPushButton)
 
-        self.robotAbortPushButton = Qt.QPushButton("Abort", self)       
+        self.robotAbortPushButton = Qt.QPushButton("Abort", self)
         Qt.QObject.connect(self.robotAbortPushButton, Qt.SIGNAL("clicked()"), self.robotAbortPushButtonClicked)
         self.robotAbortPushButton.setDisabled(True)
         self.robotAbortPushButton.setObjectName("abortbutton")
-        self.robotAbortPushButton.setProperty("abortactive","false")
+        self.robotAbortPushButton.setProperty("abortactive", "false")
 
         self.actionLayout.addWidget(self.robotAbortPushButton)
 
-        self.actionGroup.setLayout( self.actionLayout )
-         
+        self.actionGroup.setLayout(self.actionLayout)
+
         #  Temperature settings
 
         self.tempLayout = Qt.QHBoxLayout()
@@ -107,8 +107,8 @@ class BsxSCWidget( Qt.QWidget ):
         self.tempLayout.addWidget(self.robotStorageTemperatureLineEdit)
 
         self.robotStorageTemperaturePushButton = Qt.QPushButton("Set", self)
-        Qt.QObject.connect(self.robotStorageTemperaturePushButton, Qt.SIGNAL("clicked()"), self.robotStorageTemperaturePushButtonClicked)        
-        self.tempLayout.addWidget(self.robotStorageTemperaturePushButton)      
+        Qt.QObject.connect(self.robotStorageTemperaturePushButton, Qt.SIGNAL("clicked()"), self.robotStorageTemperaturePushButtonClicked)
+        self.tempLayout.addWidget(self.robotStorageTemperaturePushButton)
 
         self.robotSEUTemperatureLabel = Qt.QLabel("SEU Temp.", self)
         self.tempLayout.addWidget(self.robotSEUTemperatureLabel)
@@ -119,31 +119,31 @@ class BsxSCWidget( Qt.QWidget ):
         self.tempLayout.addWidget(self.robotSEUTemperatureLineEdit)
 
         self.robotSEUTemperaturePushButton = Qt.QPushButton("Set", self)
-        Qt.QObject.connect(self.robotSEUTemperaturePushButton, Qt.SIGNAL("clicked()"), self.robotSEUTemperaturePushButtonClicked)        
-        self.tempLayout.addWidget(self.robotSEUTemperaturePushButton)                                          
+        Qt.QObject.connect(self.robotSEUTemperaturePushButton, Qt.SIGNAL("clicked()"), self.robotSEUTemperaturePushButtonClicked)
+        self.tempLayout.addWidget(self.robotSEUTemperaturePushButton)
 
-        self.tempGroup.setLayout( self.tempLayout )
+        self.tempGroup.setLayout(self.tempLayout)
 
         #  Bottom Line
         self.robotSampleStateLabel = Qt.QLabel("State: ", self)
         self.robotSampleStateLabel.setFixedWidth(70)
-        self.bottomBox.addWidget( self.robotSampleStateLabel )
+        self.bottomBox.addWidget(self.robotSampleStateLabel)
 
         self.robotSampleChangerStatus = Qt.QLabel()
         self.robotSampleChangerStatus.setObjectName("statuslabel")
         self.robotSampleChangerStatus.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-        self.bottomBox.addWidget( self.robotSampleChangerStatus )
+        self.bottomBox.addWidget(self.robotSampleChangerStatus)
 
         self.robotRestartPushButton = Qt.QPushButton("Restart", self)
         self.robotRestartPushButton.setFixedWidth(150)
-        self.robotRestartMenu                = Qt.QMenu(self.robotRestartPushButton)        
-        self.robotRestartWithHomingAction    = Qt.QAction("With homing",    self.robotRestartMenu)
+        self.robotRestartMenu = Qt.QMenu(self.robotRestartPushButton)
+        self.robotRestartWithHomingAction = Qt.QAction("With homing", self.robotRestartMenu)
         self.robotRestartWithoutHomingAction = Qt.QAction("Without homing", self.robotRestartMenu)
         self.robotRestartMenu.addAction(self.robotRestartWithHomingAction)
         self.robotRestartMenu.addAction(self.robotRestartWithoutHomingAction)
-        Qt.QObject.connect(self.robotRestartWithHomingAction,    Qt.SIGNAL("triggered(bool)"), self.robotRestartWithHomingActionTriggered)
+        Qt.QObject.connect(self.robotRestartWithHomingAction, Qt.SIGNAL("triggered(bool)"), self.robotRestartWithHomingActionTriggered)
         Qt.QObject.connect(self.robotRestartWithoutHomingAction, Qt.SIGNAL("triggered(bool)"), self.robotRestartWithoutHomingActionTriggered)
-        self.robotRestartPushButton.setMenu(self.robotRestartMenu)        
+        self.robotRestartPushButton.setMenu(self.robotRestartMenu)
         self.bottomBox.addWidget(self.robotRestartPushButton)
 
         self.setStyleSheet(' #abortbutton[abortactive="true"]  {background-color: red;color: white}\
@@ -153,9 +153,9 @@ class BsxSCWidget( Qt.QWidget ):
                              #statuslabel[state="disconnected"] {background-color: #f0f;color: black}\
                              #statuslabel[state="alarm"] {background-color: #f0f;color: black}')
 
-        self.setLayout( self.vBoxLayout )
+        self.setLayout(self.vBoxLayout)
         self.__sampleChangerDisplayFlag = False
-        self.__sampleChangerDisplayMessage = ""        
+        self.__sampleChangerDisplayMessage = ""
 
     # 
     # BUTTON Callbacks
@@ -165,20 +165,20 @@ class BsxSCWidget( Qt.QWidget ):
     #
     def robotFixLiquidPositionPushButtonClicked(self):
         logging.getLogger().info("Fixing liquid position...")
-        self.__sampleChangerDisplayFlag    = True
+        self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to fix liquid position!"
         self.setLiquidPositionFixed(True)
 
     def robotMoveForwardPushButtonPressed(self):
         self.__robotMoveState = 2
-        self.__sampleChangerDisplayFlag    = True
+        self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to move syringe forward!"
         self.startSyringeForward()
 
     def robotMoveBackwardPushButtonPressed(self):
-        logging.getLogger().info("Moving syringe backward...")        
+        logging.getLogger().info("Moving syringe backward...")
         self.__robotMoveState = 1
-        self.__sampleChangerDisplayFlag    = True
+        self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to move syringe backward!"
         self.startSyringeBackward()
 
@@ -189,7 +189,7 @@ class BsxSCWidget( Qt.QWidget ):
     def robotMoveBackwardPushButtonReleased(self):
         self.__robotMoveState = 0
         self.robotStopSyringe()
-        
+
     def robotStopSyringe(self):
         logging.getLogger().info("Stopping syringe...")
         self.__sampleChangerDisplayFlag = True
@@ -200,11 +200,11 @@ class BsxSCWidget( Qt.QWidget ):
     # action callbacks
     #
     def robotFillPushButtonClicked(self):
-        well   = WellPicker.getWellAndVolume(self.plateGeometry, "Select Well", default_well=self.lastWell  )
+        well = WellPicker.getWellAndVolume(self.plateGeometry, "Select Well", default_well = self.lastWell)
         if well != None:
             logging.info('filling from [plate, row, column] = %s', well)
             self.lastWell = well[0:3]
-            self.fill(*well) 
+            self.fill(*well)
 
     def robotDryPushButtonClicked(self):
         dryTime, buttonOk = Qt.QInputDialog.getInteger(self, "Dry", "\nPlease, insert time of drying (seconds):", 15, 1, 60, 2)
@@ -221,57 +221,57 @@ class BsxSCWidget( Qt.QWidget ):
            self.__sampleChangerDisplayFlag = True
            self.__sampleChangerDisplayMessage = "Error when trying to flow!"
            self.flow(flowtime)
-                
+
     def robotRecuperatePushButtonClicked(self):
-        well   = WellPicker.getWell( self.plateGeometry, "Recuperate to:" , default_well=self.lastWell)
+        well = WellPicker.getWell(self.plateGeometry, "Recuperate to:" , default_well = self.lastWell)
         if well != None:
             self.lastWell = well[0:3]
             logging.info('recuperating to [plate, row, column] = %s', well)
-            self.recuperate( *well )
+            self.recuperate(*well)
 
     def robotCleanPushButtonClicked(self):
         logging.getLogger().info("Cleaning the robot...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to clean the robot!"
-        self.clean()                
+        self.clean()
 
     def robotMixPushButtonClicked(self):
-        values   = WellPicker.getWellVolumeAndCycles(self.plateGeometry, "Select Well,Vol and Cycles", default_well=self.lastWell )
+        values = WellPicker.getWellVolumeAndCycles(self.plateGeometry, "Select Well,Vol and Cycles", default_well = self.lastWell)
         if values != None:
             self.lastWell = values[0:3]
-            logging.getLogger().info("Mixing volume(%s) for %s cycles on %s" % (values[4],values[3],str(values[0:3])))
-            self.mix( *values )
+            logging.getLogger().info("Mixing volume(%s) for %s cycles on %s" % (values[4], values[3], str(values[0:3])))
+            self.mix(*values)
 
     def robotTransferPushButtonClicked(self):
-        values   = WellPicker.getTwoWellsAndVolume(self.plateGeometry, "From","To", default_well=self.lastWell )
+        values = WellPicker.getTwoWellsAndVolume(self.plateGeometry, "From", "To", default_well = self.lastWell)
         if values != None :
             self.lastWell = values[0:3]
             logging.getLogger().info("Transfering volume(%s) from %s to %s" % (values[-1], values[0:3], values[3:6]))
-            self.transfer( *values )
+            self.transfer(*values)
 
     def robotAbortPushButtonClicked(self):
         logging.getLogger().info("Aborting ongoing action in robot...")
         self.__sampleChangerDisplayFlag = False
         self.abort()
-                
+
     #
     # Temperature callbacks
     #
     def robotStorageTemperaturePushButtonClicked(self):
 
-        initvalue = self.robotStorageTemperatureLineEdit.text().split(" ")[0] 
+        initvalue = self.robotStorageTemperatureLineEdit.text().split(" ")[0]
         if not str(initvalue).strip():
             initvalue = None
-        temperature = TemperatureSelector.getTemperature("Storage temperature",initvalue) 
+        temperature = TemperatureSelector.getTemperature("Storage temperature", initvalue)
 
         logging.getLogger().info("Setting storage temperature to '" + str(temperature) + "'...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to set storage temperature!"
-        self.setStorageTemperature( temperature )
+        self.setStorageTemperature(temperature)
 
     def robotSEUTemperaturePushButtonClicked(self):
         initvalue = self.robotSEUTemperatureLineEdit.text().split(" ")[0]
-        temperature = TemperatureSelector.getTemperature("SEU temperature",initvalue,minvalue=4,maxvalue=60) 
+        temperature = TemperatureSelector.getTemperature("SEU temperature", initvalue, minvalue = 4, maxvalue = 60)
 
         logging.getLogger().info("Setting SEU temperature to '" + str(temperature) + "'...")
         self.__sampleChangerDisplayFlag = True
@@ -293,12 +293,12 @@ class BsxSCWidget( Qt.QWidget ):
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to restart (without homing) the robot!"
         self.restart(False)
-    
+
     #  
     # Slots .  Overload these for behaviour if needed
     #
     def setPlateGeometry(self, plateGeometry):
-        self.plateGeometry = plateGeometry 
+        self.plateGeometry = plateGeometry
 
     def startSyringeForward(self):
         print "Starting syringe forward"
@@ -306,7 +306,7 @@ class BsxSCWidget( Qt.QWidget ):
         print "Starting syringe backward"
     def stopSyringe(self):
         print "Stopping syringe "
-    def setLiquidPositionFixed(self,yesno):
+    def setLiquidPositionFixed(self, yesno):
         print "Fixing liquid position (%s) " % yesno
 
     def fill(self, *selected_well):
@@ -323,33 +323,33 @@ class BsxSCWidget( Qt.QWidget ):
         print "Aborting action "
     def mix(self, *selected_values):
         print "Mixing "
-    def transfer(self, *selected_values ):
-        print "Transferring (volume=%s) from %s to %s " % (selected_values[-1],selected_values[0:3],selected_values[3,6])
+    def transfer(self, *selected_values):
+        print "Transferring (volume=%s) from %s to %s " % (selected_values[-1], selected_values[0:3], selected_values[3, 6])
 
-    def restart(self,flag):
+    def restart(self, flag):
         print "Restarting... (%s)" % flag
-            
-    def setStorageTemperature(self,temperature):
-        print "Setting storage temperature to ",temperature 
-    def setSEUTemperature(self,temperature):
-        print "Setting SEU temperature to ",temperature 
+
+    def setStorageTemperature(self, temperature):
+        print "Setting storage temperature to ", temperature
+    def setSEUTemperature(self, temperature):
+        print "Setting SEU temperature to ", temperature
 
     def setCurrentStorageTemperature(self, temperature):
         if temperature != None:
            self.robotStorageTemperatureLineEdit.setText("%02.2f C" % float(temperature))
-        
+
     def setCurrentSEUTemperature(self, temperature):
         if temperature != None:
            self.robotSEUTemperatureLineEdit.setText("%02.2f C" % float(temperature))
 
-    def setState(self, state, status="", exception=None):
+    def setState(self, state, status = "", exception = None):
 
-        if (state == "READY"): 
+        if (state == "READY"):
             state = "STANDBY"
 
         stateLine = "%s (%s)" % (str(state), str(status))
         self.robotSampleChangerStatus.setText(stateLine)
-        
+
         self.robotMoveBackwardPushButton.setEnabled       (state == "STANDBY" or self.__robotMoveState == 1)
         self.robotMoveForwardPushButton.setEnabled        (state == "STANDBY" or self.__robotMoveState == 2)
         self.robotFixLiquidPositionPushButton.setEnabled  (state == "STANDBY")
@@ -369,19 +369,19 @@ class BsxSCWidget( Qt.QWidget ):
 
         if state in ("ALARM", "MOVING", "RUNNING"):
             self.robotAbortPushButton.setDisabled(False)
-            self.robotAbortPushButton.setProperty("abortactive","true")
-        else:     
+            self.robotAbortPushButton.setProperty("abortactive", "true")
+        else:
             self.robotAbortPushButton.setDisabled(True)
-            self.robotAbortPushButton.setProperty("abortactive","false")
+            self.robotAbortPushButton.setProperty("abortactive", "false")
 
         if state in ("ALARM", "FAULT"):
-            self.robotSampleChangerStatus.setProperty("state","alarm")
+            self.robotSampleChangerStatus.setProperty("state", "alarm")
         elif state in ("MOVING", "RUNNING"):
-            self.robotSampleChangerStatus.setProperty("state","running")
-        elif state in ("STANDBY", "INIT"): 
-            self.robotSampleChangerStatus.setProperty("state","standby")
+            self.robotSampleChangerStatus.setProperty("state", "running")
+        elif state in ("STANDBY", "INIT"):
+            self.robotSampleChangerStatus.setProperty("state", "standby")
         else:
-            self.robotSampleChangerStatus.setProperty("state","disconnected")
+            self.robotSampleChangerStatus.setProperty("state", "disconnected")
 
         if state == "STANDBY":
             if self.__sampleChangerDisplayFlag:
@@ -394,25 +394,25 @@ class BsxSCWidget( Qt.QWidget ):
         else:
            self.__sampleChangerDisplayFlag = True
 
-        self.setStyleSheet( self.styleSheet() )
+        self.setStyleSheet(self.styleSheet())
 
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
 
    from PyTango import DeviceProxy
    import sys
 
-   sc       = DeviceProxy("//deino:20000/id14/bssc/1")
-   geometry = [ sc.getPlateInfo(i) for i in range(1,4) ]
+   sc = DeviceProxy("//deino:20000/id14/bssc/1")
+   geometry = [ sc.getPlateInfo(i) for i in range(1, 4) ]
 
    app = QtGui.QApplication(sys.argv)
 
    win = Qt.QMainWindow()
    wid = BsxSCWidget(win)
-   wid.setPlateGeometry ( geometry )
-   win.setCentralWidget(wid) 
+   wid.setPlateGeometry (geometry)
+   win.setCentralWidget(wid)
    wid.setWindowTitle('Collect Robot')
-   wid.setState("Disconnected","SC GUI not running?" )
+   wid.setState("Disconnected", "SC GUI not running?")
    win.show()
 
    sys.exit(app.exec_())

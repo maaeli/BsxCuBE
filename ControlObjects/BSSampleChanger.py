@@ -3,7 +3,7 @@ from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 from PyTango import DevState
 
 class BSSampleChanger(CObjectBase):
-    signals =  [Signal('seuTemperatureChanged')
+    signals = [Signal('seuTemperatureChanged')
                , Signal('storageTemperatureChanged')
                , Signal('stateChanged')
                ]
@@ -14,20 +14,20 @@ class BSSampleChanger(CObjectBase):
         #
         # this is not used.  it is just a list of things
         #
-        self.__channels = ["Status",           "AlarmList",               "BeamLocation",
-                           "BeamMarkVolume",   "BeamShapeEllipse",        "CleanVenturiOK",
-                           "CollisionDetected","CommandException",        "CommandOutput",
-                           "CoverOpen",        "CurrentLiquidPosition",   "DetergentEmpty",
-                           "Flooding",         "OverflowVenturiOK",       "PlateID",
-                           "PLCState",         "HardwareInitPending",     "Power12OK",
-                           "SampleType",       "TemperatureSampleStorage","TemperatureSEU",
-                           "LocalLockout",     "State",                   "VacuumOK",
-                           "ViscosityLevel",   "WasteFull",               "WaterEmpty",
+        self.__channels = ["Status", "AlarmList", "BeamLocation",
+                           "BeamMarkVolume", "BeamShapeEllipse", "CleanVenturiOK",
+                           "CollisionDetected", "CommandException", "CommandOutput",
+                           "CoverOpen", "CurrentLiquidPosition", "DetergentEmpty",
+                           "Flooding", "OverflowVenturiOK", "PlateID",
+                           "PLCState", "HardwareInitPending", "Power12OK",
+                           "SampleType", "TemperatureSampleStorage", "TemperatureSEU",
+                           "LocalLockout", "State", "VacuumOK",
+                           "ViscosityLevel", "WasteFull", "WaterEmpty",
                            "LiquidPositionFixed"]
 
         # The target user-entered temperature
         self.__target_temperature = None
-        
+
     def init(self):
         self.current_status = self.current_state = 'Not Available'
         self.channels['State'].connect('update', self.state_changed)
@@ -45,7 +45,7 @@ class BSSampleChanger(CObjectBase):
     def beamlocation_changed(self, beamlocation):
         self.beam_location = self.getBeamLocation()
         self.emit('beamLocationChanged', self.beam_location)
-    
+
     def setBeamLocation(self, x1, y1, x2, y2):
         self.channels["BeamLocation"] = "%d %d %d %d" % (x1, y1, x2, y2)
 
@@ -58,7 +58,7 @@ class BSSampleChanger(CObjectBase):
              beamLocation = map(int, beam.strip().split())
              return beamLocation
         except:
-             return None 
+             return None
 
     def setBeamMark(self, x1, y1, x2, y2, is_ellipse):
         self.setBeamLocation(x1, y1, x2, y2)
