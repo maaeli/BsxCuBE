@@ -8,11 +8,11 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
 
 from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
-from Qub.Widget.DataDisplay import QubDataImageDisplay
-from Qub.Widget.QubActionSet import QubOpenDialogAction, QubPrintPreviewAction, QubZoomListAction, QubZoomAction
-from Qub.Widget.QubDialog import QubMaskToolsDialog, QubDataStatWidget
-from Qub.Widget.QubColormap import QubColormapDialog
-from Qub.Print.QubPrintPreview import getPrintPreviewDialog
+from Qub.qt4.Widget.DataDisplay import QubDataImageDisplay
+from Qub.qt4.Widget.QubActionSet import QubOpenDialogAction, QubPrintPreviewAction, QubZoomListAction, QubZoomAction
+from Qub.qt4.Widget.QubDialog import QubMaskToolsDialog, QubDataStatWidget
+from Qub.qt4.Widget.QubColormap import QubColormapDialog
+from Qub.qt4.Print.QubPrintPreview import getPrintPreviewDialog
 
 __category__ = "BsxCuBE"
 
