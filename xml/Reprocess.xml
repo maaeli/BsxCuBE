@@ -1,0 +1,51 @@
+<object class = "Reprocess" username = "Reprocess">
+	
+   <uri>nela:exp</uri>
+
+   <command name="reprocess" type="spec" call="_reprocess"/>
+	
+   <channel name="reprocessDetector" type="spec" call="BSX_GLOBAL/reprocess/detector"/>		
+
+   <channel name="reprocessOperation" type="spec" call="BSX_GLOBAL/reprocess/operation"/>			
+				
+   <channel name="reprocessDirectory" type="spec" call="BSX_GLOBAL/reprocess/directory"/>
+	
+   <channel name="reprocessPrefix" type="spec" call="BSX_GLOBAL/reprocess/prefix"/>
+	
+   <channel name="reprocessRunNumber" type="spec" call="BSX_GLOBAL/reprocess/runNumber"/>
+
+   <channel name="reprocessFrameFirst" type="spec" call="BSX_GLOBAL/reprocess/frameFirst"/>
+
+   <channel name="reprocessFrameLast" type="spec" call="BSX_GLOBAL/reprocess/frameLast"/>	
+	
+   <channel name="reprocessConcentration" type="spec" call="BSX_GLOBAL/reprocess/concentration"/>
+	      
+   <channel name="reprocessComments" type="spec" call="BSX_GLOBAL/reprocess/comments"/>
+	
+   <channel name="reprocessCode" type="spec" call="BSX_GLOBAL/reprocess/code"/>		
+		
+   <channel name="reprocessMaskFile" type="spec" call="BSX_GLOBAL/reprocess/maskFile"/>
+	
+   <channel name="reprocessDetectorDistance" type="spec" call="BSX_GLOBAL/reprocess/detectorDistance"/>
+	
+   <channel name="reprocessWaveLength" type="spec" call="BSX_GLOBAL/reprocess/waveLength"/>		
+	
+   <channel name="reprocessPixelSizeX" type="spec" call="BSX_GLOBAL/reprocess/pixelSizeX"/>
+	
+   <channel name="reprocessPixelSizeY" type="spec" call="BSX_GLOBAL/reprocess/pixelSizeY"/>	
+
+   <channel name="reprocessBeamCenterX" type="spec" call="BSX_GLOBAL/reprocess/beamCenterX"/>
+	
+   <channel name="reprocessBeamCenterY" type="spec" call="BSX_GLOBAL/reprocess/beamCenterY"/>	
+		
+   <channel name="reprocessNormalisation" type="spec" call="BSX_GLOBAL/reprocess/normalisation"/>	
+	
+   <channel name="reprocessBeamStopDiode" type="spec" call="BSX_GLOBAL/reprocess/beamStopDiode"/>
+	
+   <channel name="reprocessMachineCurrent" type="spec" call="BSX_GLOBAL/reprocess/machineCurrent"/>		
+
+   <channel name="reprocessKeepOriginal" type="spec" call="BSX_GLOBAL/reprocess/keepOriginal"/>		
+	
+   <channel name="reprocessStatus" type="spec" call="BSX_GLOBAL/reprocess/status"/>	
+						 					
+</object>	

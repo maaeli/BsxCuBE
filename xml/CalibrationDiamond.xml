@@ -1,0 +1,12 @@
+<object class = "CalibrationDiamond" username = "CalibrationDiamond">
+	
+   <uri>nela:optics</uri>	
+	
+   <command name="executeCalibration" type="spec" call="_calib_diam"/>
+	
+   <command name="setPosition" type="spec" call="_set_diam_position"/>			 		
+		
+   <channel name="newPosition" type="spec" call="diamondNewPosition"/>		
+			
+</object>	
+

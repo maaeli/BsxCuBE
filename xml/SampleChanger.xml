@@ -1,0 +1,33 @@
+<object class="BSSampleChanger" username="BioSax Sample Changer">
+  <uri>bm29/bssc/1</uri>
+  <channel type="tango" name="State"  polling="1000" slot="getState"/>
+  <channel type="tango" name="Status" polling="1000"/>
+  <channel type="tango" name="SEUTemperature" signal="seuTemperatureChanged" call="TemperatureSEU" polling="1000" slot="getSEUTemperature"/>
+  <channel type="tango" name="TemperatureSampleStorage"/>
+  <channel type="tango" name="StorageTemperature" signal="storageTemperatureChanged" call="TemperatureSampleStorage" polling="1000" slot="getSampleStorageTemperature"/>
+  <channel type="tango" name="SampleType"/>
+  <channel type="tango" name="ViscosityLevel"/>
+  <channel type="tango" name="BeamLocation"          slot="getBeamLocation"/>
+  <channel type="tango" name="BeamShapeEllipse"/>
+  <channel type="tango" name="CommandException"      slot="getCommandException" polling="1000"/>
+  <channel type="tango" name="CommandOutput"    polling="1000"/>
+  <channel type="tango" name="CurrentLiquidPosition" slot="getCurrentLiquidPosition"/>
+  <channel type="tango" name="LiquidPositionFixed" />
+  <command type="tango" name="abort"              slot="abort"/>
+  <command type="tango" name="clean"              slot="clean" />
+  <command type="tango" name="dry" slot="dry" />
+  <command type="tango" name="fill" slot="fill" />
+  <command type="tango" name="flow" slot="flow" />
+  <command type="tango" name="flowAll"             slot="flowAll" />
+  <command type="tango" name="getImageJPG"         slot="getImageJPG" />
+  <command type="tango" name="getPlateInfo"        slot="getPlateInfo" />
+  <command type="tango" name="moveSyringeBackward" slot="moveSyringeBackward" />
+  <command type="tango" name="moveSyringeForward"  slot="moveSyringeForward" />
+  <command type="tango" name="stopSyringe"         slot="stopSyringe" />
+  <command type="tango" name="pull"                slot="pull" />
+  <command type="tango" name="push"                slot="push" />
+  <command type="tango" name="recuperate"          slot="recuperate" />
+  <command type="tango" name="mix"                 slot="mix" />
+  <command type="tango" name="transfer"            slot="transfer" />
+  <command type="tango" name="restart"             slot="restart" />
+</object>

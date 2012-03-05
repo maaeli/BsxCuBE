@@ -1,0 +1,14 @@
+<object class = "Shutter" username = "ShutterGuillotine">
+	
+   <uri>nela:exp</uri> 
+
+   <command name="open" type="spec" call="guillopen"/>
+			
+   <command name="close" type="spec" call="guillclose"/>
+   
+   <channel name="state" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>
+	
+   <channel name="status" type="spec" call="BSX_GLOBAL/shutter/guillstatus"/>
+
+</object>	
+

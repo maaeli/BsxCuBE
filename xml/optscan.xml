@@ -1,0 +1,5 @@
+<object class = "SpecScan" username = "Optics scans">
+   <uri>nela:optics</uri>
+   <channel name="newscan" type="spec" call="_SC_NEWSCAN"/>
+   <channel name="newscanpoint" type="spec" call="_SC_NEWPLOTDATA"/>
+</object>

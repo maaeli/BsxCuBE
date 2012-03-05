@@ -1,0 +1,18 @@
+<object class = "Attenuators" username = "Attenuators">
+	
+   <uri>nela:exp</uri>
+	
+   <command name="toggleFilter" type="spec" call="attio"/>
+			
+   <command name="setTransmission" type="spec" call="transmission"/>
+   
+   <channel name="attenuatorsState" type="spec" call="MATT_STATE"/>
+	
+   <channel name="attenuatorsFactor" type="spec" call="ATT_FACTOR"/>
+
+   <data name="Aluminium 50 um" bits="1"/>
+   <data name="Aluminium 100 um" bits="2"/>
+   <data name="Aluminium 150 um" bits="4 8"/>
+   <data name="Aluminium 500 um" bits="16"/>
+   <data name="Aluminium 1 um" bits="32 64 128"/>
+</object>	
