@@ -1068,7 +1068,7 @@ if __name__ == '__main__':
        pass
 
    from PyTango import DeviceProxy
-   sc = DeviceProxy("deino:20000/id14/bssc/1")
+   sc = DeviceProxy("inela:20000/bm29/bssc/1")
 
    app = Qt.QApplication(sys.argv)
 

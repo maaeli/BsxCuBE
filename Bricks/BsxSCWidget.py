@@ -402,7 +402,7 @@ if __name__ == '__main__':
    from PyTango import DeviceProxy
    import sys
 
-   sc = DeviceProxy("//deino:20000/id14/bssc/1")
+   sc = DeviceProxy("nela:20000/bm29/bssc/1")
    geometry = [ sc.getPlateInfo(i) for i in range(1, 4) ]
 
    app = QtGui.QApplication(sys.argv)
