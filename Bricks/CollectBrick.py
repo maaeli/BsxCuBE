@@ -1,17 +1,16 @@
-import sys, os, time, logging, exceptions
+import os, logging
 
 from Framework4.GUI      import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
+from Framework4.GUI.Core import Connection, Signal, Slot
 
 from CollectRobotDialog  import CollectRobotDialog
 from CollectRobotObject  import CollectRobotObject
 
-from PyQt4               import QtCore, QtGui, Qt, Qwt5 as qwt
+from PyQt4               import QtCore, QtGui, Qt
 from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
 
-from PyTango import DevState
 
 __category__ = "BsxCuBE"
 
@@ -75,7 +74,7 @@ class CollectBrick(Core.BaseBrick):
 
     def exp_spec_connected(self, spec):
         if spec != None:
-           self.spec = spec
+            self.spec = spec
 
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
@@ -132,11 +131,11 @@ class CollectBrick(Core.BaseBrick):
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
         if last_dat and last_dat[0] == dat_filename:
-          return
+            return
         else:
-          if last_dat:
-             last_dat.pop()
-          last_dat.append(dat_filename)
+            if last_dat:
+                last_dat.pop()
+                last_dat.append(dat_filename)
         #TODO remove this hack ASAP (SO 27/9 11)
         ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
         logging.info("processing done, file is %r", dat_filename)
@@ -169,11 +168,11 @@ class CollectBrick(Core.BaseBrick):
                 self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
 
                 if not self.__isTesting:
-                        if self._currentFrame == self._frameNumber:
-                            splitList = os.path.basename(filename0).split("_")
-                            # Take away last _ piece
-                            filename1 = "_".join(splitList[:-1])
-                            ave_filename = directory + filename1 + "_ave.dat"
+                    if self._currentFrame == self._frameNumber:
+                        splitList = os.path.basename(filename0).split("_")
+                        # Take away last _ piece
+                        filename1 = "_".join(splitList[:-1])
+                        ave_filename = directory + filename1 + "_ave.dat"
                 self.emitDisplayItemChanged(filename0)
             else:
                 if os.path.exists(filename0):
@@ -211,16 +210,16 @@ class CollectBrick(Core.BaseBrick):
 
     def checkBeamChanged(self, pValue):
         if pValue == 1:
-             self.checkBeamBox.setChecked(True)
+            self.checkBeamBox.setChecked(True)
         else:
-             self.checkBeamBox.setChecked(False)
+            self.checkBeamBox.setChecked(False)
 
     # When a macro in spec changes the value of SPEC_STATUS variable to busy
     def specStatusChanged(self, pValue):
         if pValue == "busy":
-           setCollectionStatus(self, "busy", progress = None)
+            self.setCollectionStatus("busy", progress = None)
         else:
-           setCollectionStatus(self, "ready", progress = None)
+            self.setCollectionStatus("ready", progress = None)
 
     def expertModeChanged(self, pValue):
         self.__expertMode = pValue
@@ -233,7 +232,7 @@ class CollectBrick(Core.BaseBrick):
         self.emit("displayItemChanged", str(pValue))
 
         if self.image_proxy is None:
-          return
+            return
         try:
             logging.info(str(pValue))
             self.image_proxy.load_files(str(pValue))
@@ -364,11 +363,11 @@ class CollectBrick(Core.BaseBrick):
         self.hBoxLayout7.addWidget(self.codeLineEdit)
         self.brick_widget.layout().addLayout(self.hBoxLayout7)
 
-        self.hBoxLayout61 = Qt.QHBoxLayout()
+        self.hBoxLayout71 = Qt.QHBoxLayout()
         self.blParamsButton = Qt.QPushButton("Show Beamline Parameters", self.brick_widget)
         self.blParamsButton.setFixedWidth(230)
-        self.hBoxLayout61.addWidget(self.blParamsButton)
-        self.brick_widget.layout().addLayout(self.hBoxLayout61)
+        self.hBoxLayout71.addWidget(self.blParamsButton)
+        self.brick_widget.layout().addLayout(self.hBoxLayout71)
         Qt.QObject.connect(self.blParamsButton, Qt.SIGNAL("clicked()"), self.showHideBeamlineParams)
 
         self.hBoxLayout8 = Qt.QHBoxLayout()
@@ -452,6 +451,10 @@ class CollectBrick(Core.BaseBrick):
         self.brick_widget.layout().addLayout(self.hBoxLayout13)
 
 
+        self.vBoxLayout0 = Qt.QVBoxLayout()
+        self.vBoxLayout0.addSpacing(15)
+        self.brick_widget.layout().addLayout(self.vBoxLayout0)
+
         # Radiation Damage 
         self.hBoxLayout15 = Qt.QHBoxLayout()
         self.radiationCheckBox = Qt.QCheckBox("Radiation damage", self.brick_widget)
@@ -470,10 +473,22 @@ class CollectBrick(Core.BaseBrick):
         self.hBoxLayout15.addWidget(self.radiationAbsoluteDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout15)
 
+        # Spectro Online
+        self.hBoxLayout151 = Qt.QHBoxLayout()
+        self.spectroCheckBox = Qt.QCheckBox("Spectro online", self.brick_widget)
+        self.spectroCheckBox.setFixedWidth(130)
+        Qt.QObject.connect(self.spectroCheckBox, Qt.SIGNAL("toggled(bool)"), self.spectroCheckBoxToggled)
+        self.hBoxLayout151.addWidget(self.spectroCheckBox)
+        self.extinctionCoefficentDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
+        self.extinctionCoefficentDoubleSpinBox.setRange(0.001, 99.998)
+        self.extinctionCoefficentDoubleSpinBox.setDecimals(3)
+        # TODO - Change by reading from SPEC/File
+        self.extinctionCoefficentDoubleSpinBox.setValue(1.000)
+        self.extinctionCoefficentDoubleSpinBox.setSuffix(" ml*1/mg*1/cm)")
+        self.extinctionCoefficentDoubleSpinBox.setToolTip("Extinction Coefficient")
+        self.hBoxLayout151.addWidget(self.extinctionCoefficentDoubleSpinBox)
+        self.brick_widget.layout().addLayout(self.hBoxLayout151)
 
-        self.vBoxLayout0 = Qt.QVBoxLayout()
-        self.vBoxLayout0.addSpacing(15)
-        self.brick_widget.layout().addLayout(self.vBoxLayout0)
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
         self.processCheckBox = Qt.QCheckBox("Process after collect", self.brick_widget)
@@ -487,16 +502,11 @@ class CollectBrick(Core.BaseBrick):
         self.notifyCheckBox = Qt.QCheckBox("Notify when done", self.brick_widget)
         self.notifyCheckBox.setChecked(True)
         self.hBoxLayout17.addWidget(self.notifyCheckBox)
-        self.hdfCheckBox = Qt.QCheckBox("Save to HDF file", self.brick_widget)
-        self.hBoxLayout17.addWidget(self.hdfCheckBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout17)
-
-        self.hBoxLayout171 = Qt.QHBoxLayout()
         self.checkBeamBox = Qt.QCheckBox("Check beam", self.brick_widget)
         self.checkBeamBox.setChecked(True)
         Qt.QObject.connect(self.checkBeamBox, Qt.SIGNAL("toggled(bool)"), self.checkBeamBoxToggled)
-        self.hBoxLayout171.addWidget(self.checkBeamBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout171)
+        self.hBoxLayout17.addWidget(self.checkBeamBox)
+        self.brick_widget.layout().addLayout(self.hBoxLayout17)
 
         self.hBoxLayout18 = Qt.QHBoxLayout()
         self.testPushButton = Qt.QPushButton("Test", self.brick_widget)
@@ -549,6 +559,7 @@ class CollectBrick(Core.BaseBrick):
         self.prefixLineEditChanged(None)
         self.maskLineEditChanged(None)
         self.radiationCheckBoxToggled(False)
+        self.spectroCheckBoxToggled(False)
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -610,7 +621,7 @@ class CollectBrick(Core.BaseBrick):
     def collectObjectConnected(self, collect_obj):
         self.collectObj = collect_obj
         if self.collectObj is not None:
-          self.collectObj.updateChannels()
+            self.collectObj.updateChannels()
 
     #
     #  Other
@@ -641,11 +652,11 @@ class CollectBrick(Core.BaseBrick):
         else:
             buffernames = []
 
-            for buffer in pars.bufferList:
-                # NOW buffers of same name are allowed.  But we should do something about it during collect
+            for myBuffer in pars.bufferList:
+                # NOW myBuffers of same name are allowed.  But we should do something about it during collect
 
-                if buffer not in buffernames:
-                    buffernames.append(buffer.buffername)
+                if myBuffer not in buffernames:
+                    buffernames.append(myBuffer.buffername)
 
             for sample in pars.sampleList:
                 if sample.buffername not in buffernames:
@@ -656,74 +667,74 @@ class CollectBrick(Core.BaseBrick):
         return valid
 
     def getFileInfo(self, all = 0):
-         generalParsWidget = self
-         filepars = CollectPars()
-         filepars.prefix = generalParsWidget.prefixLineEdit.text()
-         filepars.runNumber = generalParsWidget.runNumberSpinBox.value()
-         filepars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
-         return filepars
+        generalParsWidget = self
+        filepars = CollectPars()
+        filepars.prefix = generalParsWidget.prefixLineEdit.text()
+        filepars.runNumber = generalParsWidget.runNumberSpinBox.value()
+        filepars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
+        return filepars
 
     def getCollectPars(self, robot = 1):
 
-         #
-         # First of all. Collect collection values
-         #
-         collectpars = CollectPars()
+        #
+        # First of all. Collect collection values
+        #
+        collectpars = CollectPars()
 
-         logging.info("   - reading collection parameters")
-         #
-         #  I should actually separate values so that each widget represents a certain data in a clear way
-         #
-         generalParsWidget = self
-         robotParsWidget = self._collectRobotDialog
+        logging.info("   - reading collection parameters")
+        #
+        #  I should actually separate values so that each widget represents a certain data in a clear way
+        #
+        generalParsWidget = self
+        robotParsWidget = self._collectRobotDialog
 
-         collectpars.directory = generalParsWidget.directoryLineEdit.text()
-         collectpars.prefix = generalParsWidget.prefixLineEdit.text()
-         collectpars.runNumber = generalParsWidget.runNumberSpinBox.value()
-         collectpars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
-         collectpars.timePerFrame = generalParsWidget.timePerFrameSpinBox.value()
-         collectpars.currentConcentration = generalParsWidget.concentrationDoubleSpinBox.value()
-         collectpars.currentComments = generalParsWidget.commentsLineEdit.text()
-         collectpars.currentCode = generalParsWidget.codeLineEdit.text()
+        collectpars.directory = generalParsWidget.directoryLineEdit.text()
+        collectpars.prefix = generalParsWidget.prefixLineEdit.text()
+        collectpars.runNumber = generalParsWidget.runNumberSpinBox.value()
+        collectpars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
+        collectpars.timePerFrame = generalParsWidget.timePerFrameSpinBox.value()
+        collectpars.currentConcentration = generalParsWidget.concentrationDoubleSpinBox.value()
+        collectpars.currentComments = generalParsWidget.commentsLineEdit.text()
+        collectpars.currentCode = generalParsWidget.codeLineEdit.text()
 
-         collectpars.doProcess = generalParsWidget.processCheckBox.isChecked()
+        collectpars.doProcess = generalParsWidget.processCheckBox.isChecked()
 
-         collectpars.mask = generalParsWidget.maskLineEdit.text()
-         collectpars.detectorDistance = generalParsWidget.detectorDistanceDoubleSpinBox.value()
-         collectpars.waveLength = generalParsWidget.waveLengthDoubleSpinBox.value()
-         collectpars.pixelSizeX = generalParsWidget.pixelSizeXDoubleSpinBox.value()
-         collectpars.pixelSizeY = generalParsWidget.pixelSizeYDoubleSpinBox.value()
-         collectpars.beamCenterX = generalParsWidget.beamCenterXSpinBox.value()
-         collectpars.beamCenterY = generalParsWidget.beamCenterYSpinBox.value()
-         collectpars.normalisation = generalParsWidget.normalisationDoubleSpinBox.value()
-         collectpars.radiationChecked = generalParsWidget.radiationCheckBox.isChecked()
-         collectpars.radiationRelative = generalParsWidget.radiationRelativeDoubleSpinBox.value()
-         collectpars.radiationAbsolute = generalParsWidget.radiationAbsoluteDoubleSpinBox.value()
-         collectpars.SEUTemperature = self._sampleChanger.getSEUTemperature()
-         collectpars.storageTemperature = self._sampleChanger.getSampleStorageTemperature()
+        collectpars.mask = generalParsWidget.maskLineEdit.text()
+        collectpars.detectorDistance = generalParsWidget.detectorDistanceDoubleSpinBox.value()
+        collectpars.waveLength = generalParsWidget.waveLengthDoubleSpinBox.value()
+        collectpars.pixelSizeX = generalParsWidget.pixelSizeXDoubleSpinBox.value()
+        collectpars.pixelSizeY = generalParsWidget.pixelSizeYDoubleSpinBox.value()
+        collectpars.beamCenterX = generalParsWidget.beamCenterXSpinBox.value()
+        collectpars.beamCenterY = generalParsWidget.beamCenterYSpinBox.value()
+        collectpars.normalisation = generalParsWidget.normalisationDoubleSpinBox.value()
+        collectpars.radiationChecked = generalParsWidget.radiationCheckBox.isChecked()
+        collectpars.radiationRelative = generalParsWidget.radiationRelativeDoubleSpinBox.value()
+        collectpars.radiationAbsolute = generalParsWidget.radiationAbsoluteDoubleSpinBox.value()
+        collectpars.SEUTemperature = self._sampleChanger.getSEUTemperature()
+        collectpars.storageTemperature = self._sampleChanger.getSampleStorageTemperature()
 
-         if robot:
-             logging.info("   - getting robot parameters")
-             # merge all parameters 
-             robotpars = robotParsWidget.getCollectRobotPars()
-             collectpars.__dict__.update(robotpars.__dict__)
-             logging.info("sample type is %s" , collectpars.sampleType)
-             logging.info("number of samples is %s" , len(collectpars.sampleList))
+        if robot:
+            logging.info("   - getting robot parameters")
+            # merge all parameters 
+            robotpars = robotParsWidget.getCollectRobotPars()
+            collectpars.__dict__.update(robotpars.__dict__)
+            logging.info("sample type is %s" , collectpars.sampleType)
+            logging.info("number of samples is %s" , len(collectpars.sampleList))
 
-         #=================================================
-         # Correct value for processData 
-         #=================================================
-         if collectpars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
-              collectpars.processData = 1
-         else:
-              collectpars.processData = 0
+   #=================================================
+   # Correct value for processData 
+   #=================================================
+        if collectpars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
+            collectpars.processData = 1
+        else:
+            collectpars.processData = 0
 
-         #=================================================
-         #  Calculate total flow time
-         #=================================================
-         collectpars.flowTime = collectpars.timePerFrame * collectpars.frameNumber + collectpars.extraFlowTime
+        #=================================================
+        #  Calculate total flow time
+        #=================================================
+        collectpars.flowTime = collectpars.timePerFrame * collectpars.frameNumber + collectpars.extraFlowTime
 
-         return collectpars
+        return collectpars
 
     def delete(self):
         self._collectRobot.terminate()
@@ -731,49 +742,43 @@ class CollectBrick(Core.BaseBrick):
     def showHideBeamlineParams(self, pValue = None):
 
         if self.showingBLParams:
-             self.showingBLParams = 0
-             self.blParamsButton.setText("Show Beamline Parameters")
-             self.maskLineEdit.hide()
-             self.maskDirectoryPushButton.hide()
-             self.maskDisplayPushButton.hide()
-             self.detectorDistanceDoubleSpinBox.hide()
-             self.waveLengthDoubleSpinBox.hide()
-             self.pixelSizeXDoubleSpinBox.hide()
-             self.pixelSizeYDoubleSpinBox.hide()
-             self.beamCenterXSpinBox.hide()
-             self.beamCenterYSpinBox.hide()
-             self.normalisationDoubleSpinBox.hide()
-             self.radiationCheckBox.hide()
-             self.radiationRelativeDoubleSpinBox.hide()
-             self.radiationAbsoluteDoubleSpinBox.hide()
-             self.maskLabel.hide()
-             self.detectorDistanceLabel.hide()
-             self.pixelSizeLabel.hide()
-             self.waveLengthLabel.hide()
-             self.beamCenterLabel.hide()
-             self.normalisationLabel.hide()
+            self.showingBLParams = 0
+            self.blParamsButton.setText("Show Beamline Parameters")
+            self.maskLineEdit.hide()
+            self.maskDirectoryPushButton.hide()
+            self.maskDisplayPushButton.hide()
+            self.detectorDistanceDoubleSpinBox.hide()
+            self.waveLengthDoubleSpinBox.hide()
+            self.pixelSizeXDoubleSpinBox.hide()
+            self.pixelSizeYDoubleSpinBox.hide()
+            self.beamCenterXSpinBox.hide()
+            self.beamCenterYSpinBox.hide()
+            self.normalisationDoubleSpinBox.hide()
+            self.maskLabel.hide()
+            self.detectorDistanceLabel.hide()
+            self.pixelSizeLabel.hide()
+            self.waveLengthLabel.hide()
+            self.beamCenterLabel.hide()
+            self.normalisationLabel.hide()
         else:
-             self.blParamsButton.setText("Hide Beamline Parameters")
-             self.showingBLParams = 1
-             self.maskLineEdit.show()
-             self.maskDirectoryPushButton.show()
-             self.maskDisplayPushButton.show()
-             self.detectorDistanceDoubleSpinBox.show()
-             self.waveLengthDoubleSpinBox.show()
-             self.pixelSizeXDoubleSpinBox.show()
-             self.pixelSizeYDoubleSpinBox.show()
-             self.beamCenterXSpinBox.show()
-             self.beamCenterYSpinBox.show()
-             self.normalisationDoubleSpinBox.show()
-             self.radiationCheckBox.show()
-             self.radiationRelativeDoubleSpinBox.show()
-             self.radiationAbsoluteDoubleSpinBox.show()
-             self.maskLabel.show()
-             self.detectorDistanceLabel.show()
-             self.pixelSizeLabel.show()
-             self.waveLengthLabel.show()
-             self.beamCenterLabel.show()
-             self.normalisationLabel.show()
+            self.blParamsButton.setText("Hide Beamline Parameters")
+            self.showingBLParams = 1
+            self.maskLineEdit.show()
+            self.maskDirectoryPushButton.show()
+            self.maskDisplayPushButton.show()
+            self.detectorDistanceDoubleSpinBox.show()
+            self.waveLengthDoubleSpinBox.show()
+            self.pixelSizeXDoubleSpinBox.show()
+            self.pixelSizeYDoubleSpinBox.show()
+            self.beamCenterXSpinBox.show()
+            self.beamCenterYSpinBox.show()
+            self.normalisationDoubleSpinBox.show()
+            self.maskLabel.show()
+            self.detectorDistanceLabel.show()
+            self.pixelSizeLabel.show()
+            self.waveLengthLabel.show()
+            self.beamCenterLabel.show()
+            self.normalisationLabel.show()
 
     def readOnlyCheckBoxToggled(self, pValue):
 
@@ -820,13 +825,13 @@ class CollectBrick(Core.BaseBrick):
 
     def prefixLineEditChanged(self, pValue):
         if self._isCollecting:
-             return
+            return
 
         self.__validParameters[1] = pValue is not None and self.prefixLineEdit.hasAcceptableInput()
         if self.__validParameters[1]:
-           self.prefixLineEdit.setProperty("valid", "true")
+            self.prefixLineEdit.setProperty("valid", "true")
         else:
-           self.prefixLineEdit.setProperty("valid", "false")
+            self.prefixLineEdit.setProperty("valid", "false")
 
         self.testPushButton.setEnabled   (False not in self.__validParameters)
         self.collectPushButton.setEnabled(False not in self.__validParameters)
@@ -880,6 +885,9 @@ class CollectBrick(Core.BaseBrick):
     def radiationCheckBoxToggled(self, pValue):
         self.radiationRelativeDoubleSpinBox.setEnabled(pValue)
         self.radiationAbsoluteDoubleSpinBox.setEnabled(pValue)
+
+    def spectroCheckBoxToggled(self, pValue):
+        self.extinctionCoefficentDoubleSpinBox.setEnabled(pValue)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
@@ -946,25 +954,25 @@ class CollectBrick(Core.BaseBrick):
             else:
                 if not self.__expertMode:
 
-                        if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
-                            flag = (Qt.QMessageBox.question(self.brick_widget, \
+                    if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
+                        flag = (Qt.QMessageBox.question(self.brick_widget, \
                                     "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
                                                   self.concentrationDoubleSpinBox.value(), \
                                                   Qt.QMessageBox.Yes, \
                                                   Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
 
                 if flag:
-                   self.startCollectWithoutRobot()
+                    self.startCollectWithoutRobot()
 
     def setCollectionStatus(self, status, progress = None):
         if status == "running":
-           self._isCollecting = True
-           self.abortPushButton.setEnabled(True)
-           self.abortPushButton.setProperty("abortactive", "true")
+            self._isCollecting = True
+            self.abortPushButton.setEnabled(True)
+            self.abortPushButton.setProperty("abortactive", "true")
         else:
-           self._isCollecting = False
-           self.abortPushButton.setEnabled(False)
-           self.abortPushButton.setProperty("abortactive", "false")
+            self._isCollecting = False
+            self.abortPushButton.setEnabled(False)
+            self.abortPushButton.setProperty("abortactive", "false")
 
         self.brick_widget.setStyleSheet(self.brick_widget.styleSheet())
         self.collectStatus.setText(status)
@@ -1030,7 +1038,7 @@ class CollectBrick(Core.BaseBrick):
         self.setCollectionStatus("running")
 
         if mode == "test":
-           self.__isTesting = True
+            self.__isTesting = True
 
         logging.info("   - collection started (mode: %s)" % mode)
 
@@ -1146,7 +1154,7 @@ class CollectBrick(Core.BaseBrick):
 
     def setButtonState(self, pOption):
         buttons = (self.processCheckBox,
-                   self.notifyCheckBox, self.robotCheckBox, self.hdfCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
+                   self.notifyCheckBox, self.robotCheckBox, self.spectroCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
         def enable_buttons(*args):
             if len(args) == 1:
               for button in buttons:
@@ -1188,12 +1196,12 @@ class CollectBrick(Core.BaseBrick):
         pFilename = str(pFilename)
         i = pFilename.rfind(".")
         if i == -1:
-            file = pFilename
+            myFile = pFilename
             extension = ""
         else:
-            file = pFilename[:i]
+            myFile = pFilename[:i]
             extension = pFilename[i + 1:]
-        items = file.split("_")
+        items = myFile.split("_")
         prefix = items[0]
         run = ""
         frame = ""
@@ -1222,5 +1230,4 @@ class CollectBrick(Core.BaseBrick):
         return prefix, run, frame, extra, extension
 
 if __name__ == '__main__':
-   print "nada"
-
+    print "nada"
