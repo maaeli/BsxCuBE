@@ -7,7 +7,7 @@
    <!-- 
    OLD code:
    <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/> 
-   Might need to take away from spec when it works SO 7/3 2012
+   TODO: Need to take away from spec when it works SO 7/3 2012
    -->
    
 
