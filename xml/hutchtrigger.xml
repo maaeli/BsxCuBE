@@ -1,10 +1,10 @@
 <object class = "HutchTrigger" username = "Hutch trigger control">
-   <uri>orion:10000/exp/id14-cr2/sl0</uri>
+   <uri>orion:10000/exp/bm29-cr1/sl0</uri>
    <command name="read_interlock" type="tango"  call="GetInterlockState"/>
    <command name="trigger" type="spec" uri="nela:exp" call="hutchtrigger"/>
    <channel name="update_attribute" type="tango"  call="Interlocks" polling="3000" />
-   
-   <data name="card" value="2"/>
+   <!--  Board = card and Relay = channel in JPSS -->
+   <data name="card" value="7"/>
    <data name="channel" value="1"/>
 
 </object>	
