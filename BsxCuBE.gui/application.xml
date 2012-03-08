@@ -296,7 +296,7 @@
   </properties>
   <properties id="LoginBrick1">
      <property name="flex" value="0"/>
-     <property name="password" value="tonic14"/>
+     <property name="password" value="tonic29"/>
      <property name="orientation" value="Landscape"/>
   </properties>
   <properties id="BsxVideoBrick1">
