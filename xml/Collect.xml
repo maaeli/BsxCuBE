@@ -2,11 +2,13 @@
 	
    <uri>nela:exp</uri>	
 
-   <!-- TO BE DONE LATER (bug in FWK4)
-   <object href="ESRFMachInfo" role="machine_current"/>
-   in the meantime, use the reading done by spec
+   <object href="BsxCuBE/ESRFMachinfo" role="machine_current"/>
+   <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
+   <!-- 
+   OLD code:
+   <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/> 
+   Might need to take away from spec when it works SO 7/3 2012
    -->
-   <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/>
    
 
    <command name="startJob_chris" type="tango" uri="DAU/edna/1" call="startJob"/>
