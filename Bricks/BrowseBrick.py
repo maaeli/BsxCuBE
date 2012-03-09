@@ -31,11 +31,11 @@ class BrowseBrick(Core.BaseBrick):
 
     def browseTypeChanged(self, pValue):
         if pValue is not None:
-           self.typeComboBox.setCurrentIndex(int(pValue))
+            self.typeComboBox.setCurrentIndex(int(pValue))
 
     def browseLocationChanged(self, pValue):
         if pValue is not None:
-           self.locationLineEdit.setText(pValue)
+            self.locationLineEdit.setText(pValue)
 
     def connectionStatusChanged(self, pPeer):
         pass
