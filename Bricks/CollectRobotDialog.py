@@ -264,13 +264,10 @@ class CollectRobotDialog(Qt.QDialog):
     #------------------
     #  createSampleRow.  Creates GUI for each row in sample table
     #-------------------
-    def createSampleRow(self, row, id = None):
+    def createSampleRow(self, row):
 
-        if id is None:
-            sampleID = self.sampleIDCount
-            self.sampleIDCount += 1
-        else:
-            sampleID = id
+        sampleID = self.sampleIDCount
+        self.sampleIDCount += 1
 
         self.sampleIDs.insert(row, sampleID)
 
@@ -321,7 +318,7 @@ class CollectRobotDialog(Qt.QDialog):
         typeComboBox.addItems(["Buffer", "Sample"])
         tableWidget.setCellWidget(row, self.SAMPLETYPE_COLUMN, typeComboBox)
 
-           # use QSignalMapper to pass row as argument to the event handler
+        # use QSignalMapper to pass row as argument to the event handler
         tSignalMapper = Qt.QSignalMapper(self)
         tSignalMapper.setMapping(typeComboBox, sampleID)
         typeComboBox.currentIndexChanged.connect(tSignalMapper.map)
@@ -331,7 +328,7 @@ class CollectRobotDialog(Qt.QDialog):
         plateComboBox = Qt.QComboBox(tableWidget)
         tableWidget.setCellWidget(row, self.PLATE_COLUMN, plateComboBox)
 
-            # use QSignalMapper to pass row as argument to the event handler
+        # use QSignalMapper to pass row as argument to the event handler
         pSignalMapper = Qt.QSignalMapper(self)
         pSignalMapper.setMapping(plateComboBox, sampleID)
         plateComboBox.currentIndexChanged.connect(pSignalMapper.map)
@@ -428,51 +425,52 @@ class CollectRobotDialog(Qt.QDialog):
         self.historyText.append(message)
 
     def getCollectRobotPars(self, all = 0):
-        pars = CollectPars()
+        params = CollectPars()
         sampleList = SampleList()
         bufferList = SampleList()
 
-        pars.sampleType = self.sampleTypeComboBox.currentText()
-        pars.storageTemperature = self.storageTemperatureDoubleSpinBox.value()
-        pars.extraFlowTime = self.extraFlowTimeSpinBox.value()
-        pars.optimization = self.optimizationComboBox.currentIndex()
-        pars.optimizationText = self.optimizationComboBox.currentText()
-        pars.initialCleaning = self.initialCleaningCheckBox.isChecked()
-        pars.bufferMode = self.bufferModeComboBox.currentIndex()
+        params.sampleType = self.sampleTypeComboBox.currentText()
+        params.storageTemperature = self.storageTemperatureDoubleSpinBox.value()
+        params.extraFlowTime = self.extraFlowTimeSpinBox.value()
+        params.optimization = self.optimizationComboBox.currentIndex()
+        params.optimizationText = self.optimizationComboBox.currentText()
+        params.initialCleaning = self.initialCleaningCheckBox.isChecked()
+        params.bufferMode = self.bufferModeComboBox.currentIndex()
 
         #=================================================
         # value for processData - THIS BELONGS TO THE MAIN BRICK
         #=================================================
-        #if pars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
-        #     pars.processData = 1
+        #if params.doProcess:  # in principle this is not necessary as True and False values should work.  
+        # TODO:  check this
+        #     params.processData = 1
         #else:
-        #     pars.processData = 0
+        #     params.processData = 0
 
         #=================================================
         #  buffer mode
         #=================================================
-        pars.bufferFirst = False
-        pars.bufferBefore = False
-        pars.bufferAfter = False
+        params.bufferFirst = False
+        params.bufferBefore = False
+        params.bufferAfter = False
 
-        if pars.bufferMode == 0:
-              pars.bufferFirst = True
-              pars.bufferAfter = True
-        elif pars.bufferMode == 1:
-              pars.bufferBefore = True
-        elif pars.bufferMode == 2:
-              pars.bufferAfter = True
+        if params.bufferMode == 0:
+            params.bufferFirst = True
+            params.bufferAfter = True
+        elif params.bufferMode == 1:
+            params.bufferBefore = True
+        elif params.bufferMode == 2:
+            params.bufferAfter = True
 
         #=================================================
         # optimization mode
         #=================================================
-        pars.optimSEUtemp = False
-        pars.optimCodeAndSEU = False
+        params.optimSEUtemp = False
+        params.optimCodeAndSEU = False
 
-        if pars.optimization == 1:
-             pars.optimSEUtemp = True
-        elif pars.optimization == 2:
-             pars.optimCodeAndSEU = True
+        if params.optimization == 1:
+            params.optimSEUtemp = True
+        elif params.optimization == 2:
+            params.optimCodeAndSEU = True
 
 
         #-----------------------------------------------------
@@ -481,40 +479,40 @@ class CollectRobotDialog(Qt.QDialog):
         # 
         #-----------------------------------------------------
         for i in range(0, self.tableWidget.rowCount()):
-              sample = self.getSampleRow(i)
+            sample = self.getSampleRow(i)
 
-              if all or sample.enable:
-                  if sample.isBuffer():
-                      bufferList.append(sample)
-                  else:
-                      sampleList.append(sample)
+            if all or sample.enable:
+                if sample.isBuffer():
+                    bufferList.append(sample)
+                else:
+                    sampleList.append(sample)
 
         #=================================================
         #  assign buffer to sample
         #  TODO:  allow to assign more than one buffer. all with same name
         #=================================================
         for sample in sampleList:
-              sample.buffer = []
-              if len(bufferList) == 1:   # if there is one and only one buffer defined dont look at name. assign
-                  sample.buffer.append(bufferList[0])
-              else:
-                  for buffer in bufferList:
-                      if buffer.buffername == sample.buffername:
-                          sample.buffer.append(buffer)
+            sample.buffer = []
+            if len(bufferList) == 1:   # if there is one and only one buffer defined dont look at name. assign
+                sample.buffer.append(bufferList[0])
+            else:
+                for buffer in bufferList:
+                    if buffer.buffername == sample.buffername:
+                        sample.buffer.append(buffer)
 
         # ==================================================
         #  OPTIMIZE DATA COLLECTION PROCEDURE (IF REQUESTED)
         # ==================================================
 
-        if pars.optimSEUtemp:
-              sampleList.sortSEUtemp()
-        elif pars.optimCodeAndSEU:
-              sampleList.sortCodeAndSEU()
+        if params.optimSEUtemp:
+            sampleList.sortSEUtemp()
+        elif params.optimCodeAndSEU:
+            sampleList.sortCodeAndSEU()
 
-        pars.sampleList = sampleList
-        pars.bufferList = bufferList
+        params.sampleList = sampleList
+        params.bufferList = bufferList
 
-        return pars
+        return params
 
 #---------------#
 # CALLBACKS     #
@@ -525,71 +523,72 @@ class CollectRobotDialog(Qt.QDialog):
     #------------------------------------------------------------------------
     def loadPushButtonClicked(self):
 
-       dirname = ""
-       if self.filename != "":
-           dirname = os.path.split(self.filename)[0]
-       else:
-           try:
-              dirname = os.path.split(self.__parent.collectpars.directory)
-           except:
-              pass
+        dirname = ""
+        if self.filename != "":
+            dirname = os.path.split(self.filename)[0]
+        else:
+            try:
+                dirname = os.path.split(self.__parent.collectpars.directory)
+            except Exception, e:
+                logging.getLogger().error("Ignored Exception: " + e)
+                pass
 
-       filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
+        filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
 
-       if not filename:
+        if not filename:
             return
 
-       self.fileLineEdit.setText(filename)
-       filename = str(filename)
+        self.fileLineEdit.setText(filename)
+        filename = str(filename)
 
-       self.loadFile(filename)
+        self.loadFile(filename)
 
     def loadFile(self, filename):
+        try:
+            pars = CollectPars(filename)
 
-       try:
-           pars = CollectPars(filename)
+            self.clearConfiguration()
 
-           self.clearConfiguration()
+            #  Clear first if load was succesful
+            # 
+            for sampleID in self.sampleIDs:
+                index = self.sampleIDs.index(sampleID)
+                self.tableWidget.removeRow(index)
+                self.sampleIDs.remove(sampleID)
 
-           #  Clear first if load was succesful
-           # 
-           for sampleID in self.sampleIDs:
-               index = self.sampleIDs.index(sampleID)
-               self.tableWidget.removeRow(index)
-               self.sampleIDs.remove(sampleID)
+            # 
+            # General parameters
+            # 
+            self.CBblock = 1
+            self.setComboBox(self.sampleTypeComboBox, pars.sampleType)
 
-           # 
-           # General parameters
-           # 
-           self.CBblock = 1
-           self.setComboBox(self.sampleTypeComboBox, pars.sampleType)
+            self.storageTemperatureDoubleSpinBox.setValue(float(pars.storageTemperature))
+            self.extraFlowTimeSpinBox.setValue(float(pars.extraFlowTime))
 
-           self.storageTemperatureDoubleSpinBox.setValue(float(pars.storageTemperature))
-           self.extraFlowTimeSpinBox.setValue(float(pars.extraFlowTime))
+            self.initialCleaningCheckBox.setChecked(pars.initialCleaning)
 
-           self.initialCleaningCheckBox.setChecked(pars.initialCleaning)
+            # These are saved by index
+            self.optimizationComboBox.setCurrentIndex(pars.optimization)
+            self.bufferModeComboBox.setCurrentIndex(pars.bufferMode)
 
-           # These are saved by index
-           self.optimizationComboBox.setCurrentIndex(pars.optimization)
-           self.bufferModeComboBox.setCurrentIndex(pars.bufferMode)
+            self.historyText.clear()
+            self.historyText.setText(pars.history.strip())
 
-           self.historyText.clear()
-           self.historyText.setText(pars.history.strip())
-
-           for buffer in  pars.bufferList:
+            for buffer in  pars.bufferList:
                 self.addSampleRow(buffer)
-           for sample in  pars.sampleList:
+            for sample in  pars.sampleList:
                 self.addSampleRow(sample)
 
-           self.CBblock = 0
-           self.filename = filename
+            self.CBblock = 0
+            self.filename = filename
 
-           Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
-       except:
-           import traceback
-           logmsg = traceback.print_exc()
-           logging.exception('hopla. Cannot load collection parameters file. \n%s' % logmsg)
-           Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
+            Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
+        except Exception, e:
+            import traceback
+            logmsg = traceback.print_exc()
+            logging.exception('Cannot load collection parameters file. \n%s' % logmsg)
+            logging.getLogger().error("Full Exception: " + e)
+            Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
     def saveAsPushButtonClicked(self):
 
@@ -609,9 +608,9 @@ class CollectRobotDialog(Qt.QDialog):
 
     def savePushButtonClicked(self, filename = None):
         if self.filename == "" or not os.path.isfile(self.filename):
-             self.saveAsPushButtonClicked()
+            self.saveAsPushButtonClicked()
         else:
-             self.saveFile(self.filename , askrewrite = False)
+            self.saveFile(self.filename , askrewrite = False)
 
     def saveFile(self, filename, askrewrite = True):
 
@@ -626,10 +625,11 @@ class CollectRobotDialog(Qt.QDialog):
         try:
             pars.save(filename , history)
             Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully saved!" % filename)
-        except:
+        except Exception, e:
             import traceback
             logmsg = traceback.print_exc()
-            logging.exception('hopla. Cannot save collection parameters file.\n%s' % logmsg)
+            logging.exception('Cannot save collection parameters file.\n%s' % logmsg)
+            logging.getLogger().error("Full Exception: " + e)
             Qt.QMessageBox.critical(self, "Error", "Error when trying to save file '%s'!" % filename)
 
 
@@ -721,57 +721,57 @@ class CollectRobotDialog(Qt.QDialog):
 
 
     def setComboBox(self, combo, value):
-         for i in range(combo.count()):
-             if value == combo.itemText(i):
-                 combo.setCurrentIndex(i)
-                 break
-         else:
-             combo.setCurrentIndex(0)
+        for i in range(combo.count()):
+            if value == combo.itemText(i):
+                combo.setCurrentIndex(i)
+                break
+        else:
+            combo.setCurrentIndex(0)
 
     def getSampleRow(self, i):
         table = self.tableWidget
-        sample = Sample()
+        sampleRow = Sample()
 
-        sample.enable = table.cellWidget(i, self.ENABLE_COLUMN).isChecked()
-        sample.type = str(table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentText())
-        sample.typen = table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentIndex()
-        sample.plate = str(table.cellWidget(i, self.PLATE_COLUMN).currentText())
-        #sample.row            =  str(table.cellWidget(i, self.ROW_COLUMN).currentText())   
+        sampleRow.enable = table.cellWidget(i, self.ENABLE_COLUMN).isChecked()
+        sampleRow.type = str(table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentText())
+        sampleRow.typen = table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentIndex()
+        sampleRow.plate = str(table.cellWidget(i, self.PLATE_COLUMN).currentText())
+        #sampleRow.row            =  str(table.cellWidget(i, self.ROW_COLUMN).currentText())   
         rowtxt = str(table.cellWidget(i, self.ROW_COLUMN).currentText())
-        sample.row = rowletters.index(rowtxt) + 1
-        sample.well = str(table.cellWidget(i, self.WELL_COLUMN).currentText())
-        sample.concentration = table.cellWidget(i, self.CONCENTRATION_COLUMN).value()
-        sample.comments = str(table.cellWidget(i, self.COMMENTS_COLUMN).text())
-        sample.code = str(table.cellWidget(i, self.CODE_COLUMN).text())
-        sample.viscosity = str(table.cellWidget(i, self.VISCOSITY_COLUMN).currentText())
-        sample.buffername = str(table.cellWidget(i, self.BUFFERNAME_COLUMN).currentText())
-        sample.transmission = table.cellWidget(i, self.TRANSMISSION_COLUMN).value()
-        sample.volume = table.cellWidget(i, self.VOLUME_COLUMN).value()
-        sample.flow = table.cellWidget(i, self.FLOW_COLUMN).isChecked()
-        sample.recuperate = table.cellWidget(i, self.RECUPERATE_COLUMN).isChecked()
-        if sample.type == 'Sample':
-            sample.SEUtemperature = table.cellWidget(i, self.TEMPERATURE_COLUMN).value()
-            sample.waittime = table.cellWidget(i, self.WAITTIME_COLUMN).value()
+        sampleRow.row = rowletters.index(rowtxt) + 1
+        sampleRow.well = str(table.cellWidget(i, self.WELL_COLUMN).currentText())
+        sampleRow.concentration = table.cellWidget(i, self.CONCENTRATION_COLUMN).value()
+        sampleRow.comments = str(table.cellWidget(i, self.COMMENTS_COLUMN).text())
+        sampleRow.code = str(table.cellWidget(i, self.CODE_COLUMN).text())
+        sampleRow.viscosity = str(table.cellWidget(i, self.VISCOSITY_COLUMN).currentText())
+        sampleRow.buffername = str(table.cellWidget(i, self.BUFFERNAME_COLUMN).currentText())
+        sampleRow.transmission = table.cellWidget(i, self.TRANSMISSION_COLUMN).value()
+        sampleRow.volume = table.cellWidget(i, self.VOLUME_COLUMN).value()
+        sampleRow.flow = table.cellWidget(i, self.FLOW_COLUMN).isChecked()
+        sampleRow.recuperate = table.cellWidget(i, self.RECUPERATE_COLUMN).isChecked()
+        if sampleRow.type == 'Sample':
+            sampleRow.SEUtemperature = table.cellWidget(i, self.TEMPERATURE_COLUMN).value()
+            sampleRow.waittime = table.cellWidget(i, self.WAITTIME_COLUMN).value()
         else:
-            sample.SEUtemperature = 20.0
-            sample.waittime = 0.0
-        sample.title = sample.getTitle()
+            sampleRow.SEUtemperature = 20.0
+            sampleRow.waittime = 0.0
+        sampleRow.title = sampleRow.getTitle()
 
-        return sample
+        return sampleRow
 
     def addSampleRow(self, sample = None, index = -1):
 
         if sample is None:
-           samp = Sample()
-           if self.tableWidget.rowCount() == 0:
-               samp.type = "Buffer"
-           else:
-               samp.type = "Sample"
+            samp = Sample()
+            if self.tableWidget.rowCount() == 0:
+                samp.type = "Buffer"
+            else:
+                samp.type = "Sample"
         else:
-           samp = sample
+            samp = sample
 
         if index == -1:
-           index = self.tableWidget.rowCount()
+            index = self.tableWidget.rowCount()
 
         self.createSampleRow(index)
         self.setSampleRow(index, samp)
@@ -860,8 +860,8 @@ class CollectRobotDialog(Qt.QDialog):
         bufferComboBox = tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN)
 
         if sample.type == "Buffer":
-           if sample.buffername not in self.bufferNames:
-               self.bufferNames.append(sample.buffername)
+            if sample.buffername not in self.bufferNames:
+                self.bufferNames.append(sample.buffername)
         self.assignOneBufferName(index, sample.buffername)
 
         # transmission
@@ -882,12 +882,12 @@ class CollectRobotDialog(Qt.QDialog):
 
         # waittime
         if sample.type != 'Buffer':
-          waittimeSpinBox = tableWidget.cellWidget(index, self.WAITTIME_COLUMN)
-          waittimeSpinBox.setValue(sample.waittime)
+            waittimeSpinBox = tableWidget.cellWidget(index, self.WAITTIME_COLUMN)
+            waittimeSpinBox.setValue(sample.waittime)
         # temperature SEU
         if sample.type != 'Buffer':
-          temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
-          temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
+            temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
+            temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
 
 
         # final arrangementes
@@ -931,11 +931,11 @@ class CollectRobotDialog(Qt.QDialog):
             bufcombo.setEditable(False)
 
             if sample:
-                 temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
-                 waittimeSpinBox.setValue(sample.waittime)
+                temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
+                waittimeSpinBox.setValue(sample.waittime)
 
         for i in range(len(self.column_headers)):
-             self.tableWidget.cellWidget(index, i).setProperty("sampletype", well_type)
+            self.tableWidget.cellWidget(index, i).setProperty("sampletype", well_type)
 
         self.setStyleSheet(self.styleSheet())
 
@@ -947,7 +947,7 @@ class CollectRobotDialog(Qt.QDialog):
             if well_type == "Buffer":
                 bufferName = str(self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).currentText())
                 if bufferName not in bufferNames:
-                     bufferNames.append(bufferName)
+                    bufferNames.append(bufferName)
         return bufferNames
 
 
@@ -956,20 +956,20 @@ class CollectRobotDialog(Qt.QDialog):
         for index in range(self.tableWidget.rowCount()):
             well_type = str(self.tableWidget.cellWidget(index, self.SAMPLETYPE_COLUMN).currentText())
             if well_type == "Sample":
-              currentBuffer = str(self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).currentText())
-              self.assignOneBufferName(index, currentBuffer)
+                currentBuffer = str(self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).currentText())
+                self.assignOneBufferName(index, currentBuffer)
 
     def assignOneBufferName(self, index, value):
-            try:
-               self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).clear()
-               self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).addItems(self.bufferNames)
-               idx = self.bufferNames.index(value)
-               if idx != -1:
-                      self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).setCurrentIndex(idx)
-            except AttributeError:
-                pass     # there are some uncaught exceptions because when deleting samples some of the callbacks are still there. How to delete the callback?
-            except ValueError:
-                pass
+        try:
+            self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).clear()
+            self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).addItems(self.bufferNames)
+            idx = self.bufferNames.index(value)
+            if idx != -1:
+                self.tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN).setCurrentIndex(idx)
+        except AttributeError:
+            pass     # there are some uncaught exceptions because when deleting samples some of the callbacks are still there. How to delete the callback?
+        except ValueError:
+            pass
 
     def addPushButtonClicked(self):
         index = self.tableWidget.currentRow()
@@ -984,7 +984,7 @@ class CollectRobotDialog(Qt.QDialog):
         index = self.tableWidget.currentRow()
         self.addSampleRow(index = index + 1)
         if self.copiedSample is not None:
-             self.setSampleRow(index + 1, self.copiedSample)
+            self.setSampleRow(index + 1, self.copiedSample)
 
     @Qt.pyqtSlot(int)
     def upPushButtonClicked(self, sampleID1):
@@ -1003,7 +1003,7 @@ class CollectRobotDialog(Qt.QDialog):
 
         index2 = self.sampleIDs.index(sampleID2)
         if index2 >= (self.tableWidget.rowCount() - 1):
-                return
+            return
 
         sampleID1 = self.sampleIDs[index2 + 1]
 
@@ -1039,19 +1039,19 @@ class CollectRobotDialog(Qt.QDialog):
             self.clearConfiguration()
 
     def clearConfiguration(self):
-            self.sampleTypeComboBox.setCurrentIndex(0)
-            self.storageTemperatureDoubleSpinBox.setValue(0)
-            self.optimizationComboBox.setCurrentIndex(0)
-            self.extraFlowTimeSpinBox.setValue(0)
-            self.initialCleaningCheckBox.setChecked(1)
-            self.bufferModeComboBox.setCurrentIndex(0)
-            self.copyPushButton.setEnabled(0)
-            self.pastePushButton.setEnabled(0)
+        self.sampleTypeComboBox.setCurrentIndex(0)
+        self.storageTemperatureDoubleSpinBox.setValue(0)
+        self.optimizationComboBox.setCurrentIndex(0)
+        self.extraFlowTimeSpinBox.setValue(0)
+        self.initialCleaningCheckBox.setChecked(1)
+        self.bufferModeComboBox.setCurrentIndex(0)
+        self.copyPushButton.setEnabled(0)
+        self.pastePushButton.setEnabled(0)
 
-            self.historyText.clear()
+        self.historyText.clear()
 
-            while self.tableWidget.rowCount() > 0:
-                self.tableWidget.removeRow(0)
+        while self.tableWidget.rowCount() > 0:
+            self.tableWidget.removeRow(0)
 
 
     def clearHistoryPushButtonClicked(self):
@@ -1059,28 +1059,27 @@ class CollectRobotDialog(Qt.QDialog):
             self.historyText.clear()
 
     def closePushButtonClicked(self):
-       self.accept()
+        self.accept()
 
 if __name__ == '__main__':
+    import sys
+    class Parent:
+        pass
 
-   import sys
-   class Parent:
-       pass
+    from PyTango import DeviceProxy
+    sc = DeviceProxy("nela:20000/bm29/bssc/1")
 
-   from PyTango import DeviceProxy
-   sc = DeviceProxy("nela:20000/bm29/bssc/1")
+    app = Qt.QApplication(sys.argv)
 
-   app = Qt.QApplication(sys.argv)
-
-   bla = Parent()
-   bla._sampleChanger = sc
-   bla.nbPlates = 3
-   bla.plateInfos = [[8, 12, 12],
+    bla = Parent()
+    bla._sampleChanger = sc
+    bla.nbPlates = 3
+    bla.plateInfos = [[8, 12, 12],
                       [8, 12, 0],
                       [4, 11, 3]]
 
-   wid = CollectRobotDialog(bla)
-   wid.setWindowTitle('Collect Robot')
-   wid.show()
+    wid = CollectRobotDialog(bla)
+    wid.setWindowTitle('Collect Robot')
+    wid.show()
 
-   sys.exit(app.exec_())
+    sys.exit(app.exec_())

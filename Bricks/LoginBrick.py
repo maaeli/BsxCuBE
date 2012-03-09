@@ -1,7 +1,7 @@
 import sip
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
-from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
+from Framework4.GUI.Core import Property, Signal
+from PyQt4 import QtCore, Qt
 
 
 __category__ = "General"

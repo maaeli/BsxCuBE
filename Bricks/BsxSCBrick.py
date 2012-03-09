@@ -1,7 +1,7 @@
 import logging
 
 from Framework4.GUI      import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
+from Framework4.GUI.Core import Connection, Signal
 
 from BsxSCWidget import BsxSCWidget
 from PyQt4 import Qt
@@ -72,7 +72,7 @@ class BsxSCBrick(Core.BaseBrick):
     def state_changed(self, state, status):
 
         if self._sampleChanger is None:
-              return
+            return
 
         cmdException = self._sampleChanger.getCommandException()
         self.SCWidget.setState(state, status, cmdException)
@@ -81,4 +81,3 @@ class BsxSCBrick(Core.BaseBrick):
         self._sampleChanger.moveSyringeForward(5)
     def startSyringeBackward(self):
         self._sampleChanger.moveSyringeBackward(5)
-

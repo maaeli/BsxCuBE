@@ -1,3 +1,4 @@
+import logging
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 class CalibrationDiamond(CObjectBase):
@@ -16,7 +17,6 @@ class CalibrationDiamond(CObjectBase):
 
 
 
-
     def init(self):
         for channel in self.__CHANNEL_LIST:
             try:
@@ -24,8 +24,8 @@ class CalibrationDiamond(CObjectBase):
                 setattr(self, channel[:-7], value)
                 if value is not None:
                     getattr(self, channel[:-7]).connect("update", getattr(self, channel))
-            except:
-                pass
+            except Exception, e:
+                logging.getLogger().error("Ignored Exception: " + e)
 
     def executeCalibration(self, pValue):
         if pValue == "":

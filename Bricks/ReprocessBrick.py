@@ -829,9 +829,10 @@ class ReprocessBrick(Core.BaseBrick):
                         if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
                             try:
                                 items.index(prefix)
-                            except:
+                            except ValueError:
                                 items.append(prefix)
-        except:
+        except Exception, e:
+            logging.getLogger().error("Ignored Exception: " + e)
             pass
         items.sort()
         items.insert(0, "Select")
@@ -840,7 +841,7 @@ class ReprocessBrick(Core.BaseBrick):
         self.prefixComboBox.addItems(items)
         try:
             self.prefixComboBox.setCurrentIndex(items.index(currentText))
-        except:
+        except ValueError:
             self.prefixComboBox.setCurrentIndex(0)
 
 
@@ -860,10 +861,11 @@ class ReprocessBrick(Core.BaseBrick):
                             if prefix == self.prefixComboBox.currentText():
                                 try:
                                     items.index(run)
-                                except:
+                                except ValueError:
                                     items.append(run)
-            except:
-               pass
+            except Exception, e:
+                logging.getLogger().error("Ignored Exception: " + e)
+                pass
 
         items.sort()
         itemsSelect = []
@@ -897,10 +899,11 @@ class ReprocessBrick(Core.BaseBrick):
                                     if frame != "":
                                         try:
                                             items.index(frame)
-                                        except:
+                                        except ValueError:
                                             items.append(frame)
-                except:
-                   pass
+                except Exception, e:
+                    logging.getLogger().error("Ignored Exception: " + e)
+                    pass
         items.sort()
         items.insert(0, "Select")
         self.frameFirstComboBox.clear()

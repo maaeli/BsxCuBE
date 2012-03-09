@@ -398,22 +398,20 @@ class BsxSCWidget(Qt.QWidget):
 
 
 if __name__ == '__main__':
+    from PyTango import DeviceProxy
+    import sys
 
-   from PyTango import DeviceProxy
-   import sys
+    sc = DeviceProxy("nela:20000/bm29/bssc/1")
+    geometry = [ sc.getPlateInfo(i) for i in range(1, 4) ]
 
-   sc = DeviceProxy("nela:20000/bm29/bssc/1")
-   geometry = [ sc.getPlateInfo(i) for i in range(1, 4) ]
+    app = QtGui.QApplication(sys.argv)
 
-   app = QtGui.QApplication(sys.argv)
+    win = Qt.QMainWindow()
+    wid = BsxSCWidget(win)
+    wid.setPlateGeometry (geometry)
+    win.setCentralWidget(wid)
+    wid.setWindowTitle('Collect Robot')
+    wid.setState("Disconnected", "SC GUI not running?")
+    win.show()
 
-   win = Qt.QMainWindow()
-   wid = BsxSCWidget(win)
-   wid.setPlateGeometry (geometry)
-   win.setCentralWidget(wid)
-   wid.setWindowTitle('Collect Robot')
-   wid.setState("Disconnected", "SC GUI not running?")
-   win.show()
-
-   sys.exit(app.exec_())
-
+    sys.exit(app.exec_())
