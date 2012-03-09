@@ -1,18 +1,14 @@
-import sys
-import os
 import time
 import logging
 from curses import ascii
 
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
+from Framework4.GUI.Core import Connection, Signal
 
-from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
+from PyQt4 import QtCore, QtGui, Qt
 from Qub.qt4.Widget.DataDisplay import QubDataImageDisplay
-from Qub.qt4.Widget.QubActionSet import QubOpenDialogAction, QubPrintPreviewAction, QubZoomListAction, QubZoomAction
+from Qub.qt4.Widget.QubActionSet import QubOpenDialogAction, QubZoomListAction, QubZoomAction
 from Qub.qt4.Widget.QubDialog import QubMaskToolsDialog, QubDataStatWidget
-from Qub.qt4.Widget.QubColormap import QubColormapDialog
-from Qub.qt4.Print.QubPrintPreview import getPrintPreviewDialog
 
 __category__ = "BsxCuBE"
 
@@ -23,20 +19,20 @@ class BsxRobotBrick(Core.BaseBrick):
 
     properties = {}
     connections = {"samplechanger": Connection("Sample Changer object",
-					[Signal('seuTemperatureChanged', 'seu_temperature_changed')
+                    [Signal('seuTemperatureChanged', 'seu_temperature_changed')
                                        , Signal('storageTemperatureChanged', 'storage_temperature_changed')
                                        , Signal('stateChanged', 'state_changed')
                                         ],
-					[],
+                    [],
                                        "sample_changer_connected")}
 
 
     def sample_changer_connected(self, sc):
         if sc is not None:
-	    self._sampleChanger = sc
-	    self.__updateTimer.start(50)
+            self._sampleChanger = sc
+            self.__updateTimer.start(50)
         else:
-	    self.__updateTimer.stop()
+            self.__updateTimer.stop()
 
 
     def __init__(self, *args, **kargs):
@@ -149,9 +145,9 @@ class BsxRobotBrick(Core.BaseBrick):
         self.__sampleChangerDisplayFlag = False
         self.__sampleChangerDisplayMessage = ""
 
-	self.__updateTimer = QtCore.QTimer(self.brick_widget)
+        self.__updateTimer = QtCore.QTimer(self.brick_widget)
 
-	QtCore.QObject.connect(self.__updateTimer, QtCore.SIGNAL('timeout()'), self.updateSampleChanger)
+        QtCore.QObject.connect(self.__updateTimer, QtCore.SIGNAL('timeout()'), self.updateSampleChanger)
 
     def updateSampleChanger(self):
         self._sampleChangerFrame = self._sampleChanger.getImageJPG()
@@ -178,7 +174,7 @@ class BsxRobotBrick(Core.BaseBrick):
         temperatureDoubleSpinBox.setRange(4, 40)
         try:
             temperatureDoubleSpinBox.setValue(float(self.robotStorageTemperatureLineEdit.text().split(" ")[0]))
-        except:
+        except ValueError:
             temperatureDoubleSpinBox.setValue(20)
         vBoxLayout.addWidget(temperatureDoubleSpinBox)
 
@@ -219,7 +215,7 @@ class BsxRobotBrick(Core.BaseBrick):
         temperatureDoubleSpinBox.setRange(4, 60)
         try:
             temperatureDoubleSpinBox.setValue(float(self.robotSEUTemperatureLineEdit.text().split(" ")[0]))
-        except:
+        except ValueError:
             temperatureDoubleSpinBox.setValue(20)
         vBoxLayout.addWidget(temperatureDoubleSpinBox)
 
@@ -449,19 +445,19 @@ class BsxRobotBrick(Core.BaseBrick):
         self.robotSampleChangerFramePixmap = QtGui.QPixmap()
         self.robotSampleChangerFramePixmap.loadFromData(self._sampleChangerFrame, "JPG")
         self.robotSampleChangerFramePainter.begin(self.robotSampleChangerFramePixmap)
-	try:
-	    self.robotSampleChangerFramePainter.setPen(QtCore.Qt.green)
-	    self.robotSampleChangerFramePainter.drawText(5, 15, "%d/%02d/%02d" % (time.localtime()[0], time.localtime()[1], time.localtime()[2]))
-	    self.robotSampleChangerFramePainter.drawText(5, 30, "%02d:%02d:%02d" % (time.localtime()[3], time.localtime()[4], time.localtime()[5]))
-	    currentLiquidPositionList = self._sampleChanger.getCurrentLiquidPosition()
-	    if currentLiquidPositionList is not None:
-		for currentLiquidPosition in currentLiquidPositionList:
-		    self.robotSampleChangerFramePainter.drawLine(currentLiquidPosition, 0, currentLiquidPosition, self.robotSampleChangerFrameLabel.height())
+        try:
+            self.robotSampleChangerFramePainter.setPen(QtCore.Qt.green)
+            self.robotSampleChangerFramePainter.drawText(5, 15, "%d/%02d/%02d" % (time.localtime()[0], time.localtime()[1], time.localtime()[2]))
+            self.robotSampleChangerFramePainter.drawText(5, 30, "%02d:%02d:%02d" % (time.localtime()[3], time.localtime()[4], time.localtime()[5]))
+            currentLiquidPositionList = self._sampleChanger.getCurrentLiquidPosition()
+            if currentLiquidPositionList is not None:
+                for currentLiquidPosition in currentLiquidPositionList:
+                    self.robotSampleChangerFramePainter.drawLine(currentLiquidPosition, 0, currentLiquidPosition, self.robotSampleChangerFrameLabel.height())
 
-		if self._isDrawing:
-		    self.robotSampleChangerFramePainter.setPen(QtCore.Qt.red)
-		    self.robotSampleChangerFramePainter.drawRect(self._beamLocation[0], self._beamLocation[1], self._beamLocation[2] - self._beamLocation[0], self._beamLocation[3] - self._beamLocation[1])
-		else:
+                if self._isDrawing:
+                    self.robotSampleChangerFramePainter.setPen(QtCore.Qt.red)
+                    self.robotSampleChangerFramePainter.drawRect(self._beamLocation[0], self._beamLocation[1], self._beamLocation[2] - self._beamLocation[0], self._beamLocation[3] - self._beamLocation[1])
+                else:
                     beamLocation = self._sampleChanger.getBeamLocation()
                     if beamLocation is not None:
                         # values are now separated by the UNIT SEPARATOR ascii character
@@ -471,9 +467,9 @@ class BsxRobotBrick(Core.BaseBrick):
                         self._beamLocation = [int(beamLocationList[1]), int(beamLocationList[2]), int(beamLocationList[3]), int(beamLocationList[4])]
                         self.robotSampleChangerFramePainter.setPen(QtCore.Qt.red)
                         self.robotSampleChangerFramePainter.drawRect(self._beamLocation[0], self._beamLocation[1], self._beamLocation[2] - self._beamLocation[0], self._beamLocation[3] - self._beamLocation[1])
-	finally:
-		self.robotSampleChangerFramePainter.end()
-        self.robotSampleChangerFrameLabel.setPixmap(self.robotSampleChangerFramePixmap)
+        finally:
+            self.robotSampleChangerFramePainter.end()
+            self.robotSampleChangerFrameLabel.setPixmap(self.robotSampleChangerFramePixmap)
 
 class WellPickerWidget(QtGui.QWidget):
     # geometry is a list of 3 lists (one per plate)
