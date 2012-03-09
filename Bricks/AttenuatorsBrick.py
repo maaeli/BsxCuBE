@@ -253,7 +253,7 @@ class FiltersDialog(Qt.QDialog):
                     self.__attenuatorsCheckBoxList[i].blockSignals(False)
             except Exception, e:
                 logging.getLogger().error("Error reading filter status '" + str(pValue) + "'!")
-                logging.getLogger().error("Full Exception: " + e)
+                logging.getLogger().error("Full Exception: " + str(e))
 
 
 

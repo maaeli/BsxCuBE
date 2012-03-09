@@ -1,3 +1,4 @@
+import logging
 import re, ast
 from copy import copy
 
@@ -34,7 +35,7 @@ general_pars = {
 def valdict(indict, idx):
     a = {}
     for key in indict:
-       a[key] = indict[key][idx]
+        a[key] = indict[key][idx]
     return a
 
 
@@ -68,25 +69,25 @@ class Sample:
 
     def __init__(self, copysample = None):
 
-         if copysample:
-              self.__dict__ = copy (copysample.__dict__)
-         else:
-              self.__dict__.update(valdict(sample_pars, 0))
+        if copysample:
+            self.__dict__ = copy (copysample.__dict__)
+        else:
+            self.__dict__.update(valdict(sample_pars, 0))
 
     def isBuffer(self):
         return self.type == "Buffer"
 
     def getTitle(self):
-         return "P%(plate)s-%(row)s:%(well)s" % self.__dict__
+        return "P%(plate)s-%(row)s:%(well)s" % self.__dict__
 
     def xmlFormat(self, format = "xmlline"):
-         if format == "xmlline":
-             return self.__xmlformat % self.__dict__
-         else:
-             return self.__xmlformat % self.__dict__
+        if format == "xmlline":
+            return self.__xmlformat % self.__dict__
+        else:
+            return self.__xmlformat % self.__dict__
 
 class CollectPars(list):
-     __xmlformat = """
+    __xmlformat = """
 <general>
      <sampleType>%(sampleType)s</sampleType>
      <storageTemperature>%(storageTemperature)s</storageTemperature>
@@ -97,7 +98,7 @@ class CollectPars(list):
 </general>
     """
 
-     def __init__(self, filename = None):
+    def __init__(self, filename = None):
         # initialize
         self.__dict__.update(valdict(general_pars, 0))
 
@@ -107,97 +108,99 @@ class CollectPars(list):
         if filename:
             self.loadFromXML(filename)
 
-     def xmlFormat(self, format = "xmlline"):
-         if format == "xmlline":
-             return self.__xmlformat % self.__dict__
-         else:
-             return self.__xmlformat % self.__dict__
+    def xmlFormat(self, format = "xmlline"):
+        if format == "xmlline":
+            return self.__xmlformat % self.__dict__
+        else:
+            return self.__xmlformat % self.__dict__
 
-     def loadFromXML(self, filename):
-          bufstr = open(filename).read()
-          self.searchXML(bufstr , self)
+    def loadFromXML(self, filename):
+        bufstr = open(filename).read()
+        self.searchXML(bufstr , self)
 
-     def searchXML(self, xmlstr, destobj):
-         retag = re.compile('\<(?P<key>.*?)\>(?P<value>.*?)\<\/(?P=key)\>', re.DOTALL | re.MULTILINE)
+    def searchXML(self, xmlstr, destobj):
+        retag = re.compile('\<(?P<key>.*?)\>(?P<value>.*?)\<\/(?P=key)\>', re.DOTALL | re.MULTILINE)
 
-         cursor = 0
-         mat = retag.search(xmlstr, cursor)
+        cursor = 0
+        mat = retag.search(xmlstr, cursor)
 
-         while mat :
-             foundkey = mat.group('key')
-             if foundkey in ['bsxcube', 'general', 'collectpars', 'sampledesc' ]:   # Do nothing. Go deeper only
-                   self.searchXML(mat.group('value'), destobj)
-             elif foundkey in ['Sample', 'Buffer']:  # create sample and add to list. pass object to continue deeper
-                   sample = Sample()
-                   self.searchXML(mat.group('value'), sample)
-                   sample.type = foundkey
-                   print sample.type
-                   if foundkey == 'Buffer':
-                       self.bufferList.append(sample)
-                   else:
-                       self.sampleList.append(sample)
-             elif foundkey == 'history':
-                   self.history = mat.group('value')
-             elif foundkey in sample_pars:
-                   try:
-                      destobj.__dict__[foundkey] = sample_pars[foundkey][1](mat.group('value'))
-                   except:
-                       print "problem interpreting ", foundkey
-                       print " value is ", mat.group('value')
-             elif foundkey in general_pars:
-                   try:
-                      destobj.__dict__[foundkey] = general_pars[foundkey][1](mat.group('value'))
-                   except:
-                       print "problem interpreting ", foundkey
-                       print " value is ", mat.group('value')
-             cursor = mat.end()
-             mat = retag.search(xmlstr, cursor)
+        while mat :
+            foundkey = mat.group('key')
+            if foundkey in ['bsxcube', 'general', 'collectpars', 'sampledesc' ]:   # Do nothing. Go deeper only
+                self.searchXML(mat.group('value'), destobj)
+            elif foundkey in ['Sample', 'Buffer']:  # create sample and add to list. pass object to continue deeper
+                sample = Sample()
+                self.searchXML(mat.group('value'), sample)
+                sample.type = foundkey
+                print sample.type
+                if foundkey == 'Buffer':
+                    self.bufferList.append(sample)
+                else:
+                    self.sampleList.append(sample)
+            elif foundkey == 'history':
+                self.history = mat.group('value')
+            elif foundkey in sample_pars:
+                try:
+                    destobj.__dict__[foundkey] = sample_pars[foundkey][1](mat.group('value'))
+                except Exception, e:
+                    print "problem interpreting ", foundkey
+                    print " value is ", mat.group('value')
+                    logging.getLogger().error("Got Exception: " + str(e) + "When interpreting value")
+            elif foundkey in general_pars:
+                try:
+                    destobj.__dict__[foundkey] = general_pars[foundkey][1](mat.group('value'))
+                except Exception, e:
+                    print "problem interpreting ", foundkey
+                    print " value is ", mat.group('value')
+                    logging.getLogger().error("Got Exception: " + str(e) + "When interpreting value")
+            cursor = mat.end()
+            mat = retag.search(xmlstr, cursor)
 
-     def save(self, filename, history, format = "xml"):
+    def save(self, filename, history, format = "xml"):
 
-          # start
-          bufstr = "<bsxcube>"
+        # start
+        bufstr = "<bsxcube>"
 
-          # general pars
-          bufstr += self.xmlFormat()
+        # general pars
+        bufstr += self.xmlFormat()
 
-          # samples and buffers
-          for buffer in self.bufferList:
-              bufstr += buffer.xmlFormat()
-          for sample in self.sampleList:
-              bufstr += sample.xmlFormat()
+        # samples and buffers
+        for localBuffer in self.bufferList:
+            bufstr += localBuffer.xmlFormat()
+        for localSample in self.sampleList:
+            bufstr += localSample.xmlFormat()
 
-          # then history
-          bufstr += "\n<history>\n"
-          bufstr += history
-          bufstr += "\n</history>\n"
+        # then history
+        bufstr += "\n<history>\n"
+        bufstr += history
+        bufstr += "\n</history>\n"
 
-          # end
-          bufstr += "</bsxcube>"
+        # end
+        bufstr += "</bsxcube>"
 
-          open(filename, "w").write(bufstr)
+        open(filename, "w").write(bufstr)
 
 class SampleList(list):
 
-     def sortSEUtemp(self):
-           self.sort(self.cmpSEUtemp)
-     def sortCode(self):
-           self.sort(self.cmpCode)
-     def sortCodeAndSEU(self):
-           self.sort(self.cmpCodeAndSEU)
+    def sortSEUtemp(self):
+        self.sort(self.cmpSEUtemp)
+    def sortCode(self):
+        self.sort(self.cmpCode)
+    def sortCodeAndSEU(self):
+        self.sort(self.cmpCodeAndSEU)
 
-     def cmpSEUtemp(self, a, b):
-           return cmp(a.SEUtemperature, b.SEUtemperature)
-     def cmpCode(self, a, b):
-           return cmp(a.code, b.code)
-     def cmpCodeAndSEU(self, a, b):
-           if a.code == b.code:
-               return cmp(a.SEUtemperature, b.SEUtemperature)
-           else:
-              return cmp(a.code, b.code)
+    def cmpSEUtemp(self, a, b):
+        return cmp(a.SEUtemperature, b.SEUtemperature)
+    def cmpCode(self, a, b):
+        return cmp(a.code, b.code)
+    def cmpCodeAndSEU(self, a, b):
+        if a.code == b.code:
+            return cmp(a.SEUtemperature, b.SEUtemperature)
+        else:
+            return cmp(a.code, b.code)
 
 if __name__ == '__main__':
     pars = CollectPars('/data/id14eh3/inhouse/saxs_pilatus/Sandra/Dps1_DNAcomplexes/Dps1complexes.xml')
     for sample in pars.sampleList:
-         print sample.SEUtemperature
+        print sample.SEUtemperature
     print pars

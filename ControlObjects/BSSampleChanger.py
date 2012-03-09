@@ -1,6 +1,6 @@
 import logging
+import time
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
-from PyTango import DevState
 
 class BSSampleChanger(CObjectBase):
     signals = [Signal('seuTemperatureChanged')
@@ -95,9 +95,37 @@ class BSSampleChanger(CObjectBase):
         self.commands['transfer'](map(str, args))
 
     def isExecuting(self):
-        state = self.getState()
+        state = str(self.getState())
         if state:
-           return (state != DevState.STANDBY)
+           return (state != "STANDBY")
         else:
            return False
 
+    def doCleanProcedure(self):
+        self.clean()
+        self.wait()
+
+
+    def wait(self):
+        while self.isExecuting():
+            time.sleep(0.5)
+
+        exception = self.getCommandException()
+        if exception is not None and exception != "":
+            raise RuntimeError, "could not complete cleaning procedure"
+
+    def doSetSEUTemperatureProcedure(self, temperature):
+        self.setSEUTemperature(temperature)
+        self.wait()
+
+    def doFillProcedure(self, *args):
+        self.fill(*args)
+        self.wait()
+
+    def doFlowProcedure(self, *args):
+        self.flow(*args)
+        self.wait()
+
+    def doRecuperateProcedure(self, *args):
+        self.recuperate(*args)
+        self.wait()

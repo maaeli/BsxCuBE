@@ -530,7 +530,7 @@ class CollectRobotDialog(Qt.QDialog):
             try:
                 dirname = os.path.split(self.__parent.collectpars.directory)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 5: " + str(e)
                 pass
 
         filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
@@ -587,7 +587,7 @@ class CollectRobotDialog(Qt.QDialog):
             import traceback
             logmsg = traceback.print_exc()
             logging.exception('Cannot load collection parameters file. \n%s' % logmsg)
-            logging.getLogger().error("Full Exception: " + e)
+            logging.getLogger().error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
     def saveAsPushButtonClicked(self):
@@ -629,7 +629,7 @@ class CollectRobotDialog(Qt.QDialog):
             import traceback
             logmsg = traceback.print_exc()
             logging.exception('Cannot save collection parameters file.\n%s' % logmsg)
-            logging.getLogger().error("Full Exception: " + e)
+            logging.getLogger().error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to save file '%s'!" % filename)
 
 

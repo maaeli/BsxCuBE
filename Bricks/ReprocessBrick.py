@@ -832,7 +832,7 @@ class ReprocessBrick(Core.BaseBrick):
                             except ValueError:
                                 items.append(prefix)
         except Exception, e:
-            logging.getLogger().error("Ignored Exception: " + e)
+            print "Ignored Exception 6: " + str(e)
             pass
         items.sort()
         items.insert(0, "Select")
@@ -864,7 +864,7 @@ class ReprocessBrick(Core.BaseBrick):
                                 except ValueError:
                                     items.append(run)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 7: " + str(e)
                 pass
 
         items.sort()
@@ -902,7 +902,7 @@ class ReprocessBrick(Core.BaseBrick):
                                         except ValueError:
                                             items.append(frame)
                 except Exception, e:
-                    logging.getLogger().error("Ignored Exception: " + e)
+                    print "Ignored Exception 8: " + str(e)
                     pass
         items.sort()
         items.insert(0, "Select")

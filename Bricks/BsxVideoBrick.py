@@ -32,7 +32,8 @@ class BsxVideoBrick(Core.BaseBrick):
         pass #logging.info("EXCEPTION:%r", exception)
 
     def sample_changer_connected(self, sc):
-
+        #TODO: take away!!! this is for test only
+        return
         if sc is not None:
            logging.info("Sample changer VIDEO connected")
 

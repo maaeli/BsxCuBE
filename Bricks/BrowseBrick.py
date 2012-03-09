@@ -310,7 +310,7 @@ class BrowseBrick(Core.BaseBrick):
                             except ValueError:
                                 items.append(prefix)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 1: " + str(e)
                 pass
         else:
             logging.getLogger().error("Unexpected HDF file")
@@ -340,7 +340,7 @@ class BrowseBrick(Core.BaseBrick):
                             except ValueError:
                                 items.append(run)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 2: " + str(e)
                 pass
         else:
             logging.getLogger().error("Unexpected HDF file")
@@ -371,7 +371,7 @@ class BrowseBrick(Core.BaseBrick):
                         except ValueError:
                             items.append(extra)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 3: " + str(e)
                 pass
         else:
             logging.getLogger().error("Unexpected HDF file")
@@ -410,7 +410,7 @@ class BrowseBrick(Core.BaseBrick):
                             if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or self.runNumberComboBox.currentText() == run) and (self.extraComboBox.currentIndex() == 0 or extra == self.extraComboBox.currentText()):
                                 items.append(filename)
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 4: " + str(e)
                 pass
         else:
             logging.getLogger().error("Unexpected HDF file")

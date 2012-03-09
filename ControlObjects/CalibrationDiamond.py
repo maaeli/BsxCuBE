@@ -25,7 +25,7 @@ class CalibrationDiamond(CObjectBase):
                 if value is not None:
                     getattr(self, channel[:-7]).connect("update", getattr(self, channel))
             except Exception, e:
-                logging.getLogger().error("Ignored Exception: " + e)
+                print "Ignored Exception 9: " + str(e)
 
     def executeCalibration(self, pValue):
         if pValue == "":
