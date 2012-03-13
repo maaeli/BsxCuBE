@@ -1,7 +1,6 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
-
 class Browse(CObjectBase):
 
 
@@ -12,8 +11,6 @@ class Browse(CObjectBase):
     signals = [Signal(channel) for channel in __CHANNEL_LIST]
 
     slots = []
-
-
 
 
     def __init__(self, *args, **kwargs):
@@ -38,8 +35,3 @@ class Browse(CObjectBase):
 
     def browseLocationChanged(self, pValue):
         self.emit("browseLocationChanged", pValue)
-
-
-
-
-
