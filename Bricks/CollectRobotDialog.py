@@ -641,7 +641,6 @@ class CollectRobotDialog(Qt.QDialog):
 
         if self.CBblock:
               return
-
         try:
            index = self.sampleIDs.index(sampleID)
            checked = self.tableWidget.cellWidget(index, self.ENABLE_COLUMN).isChecked()
