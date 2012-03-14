@@ -291,30 +291,30 @@ class BrowseBrick(Core.BaseBrick):
     def populatePrefixComboBox(self):
         items = []
         if self.typeComboBox.currentIndex() == 0:
-            try:
-                comboFormat = self.__formats[self.formatComboBox.currentIndex()][1]
-                for filename in os.listdir(self.locationLineEdit.text()):
-                    if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
-                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                        flag = False
-                        if self.formatComboBox.currentIndex() == 0:
-                            for i in range(1, len(self.__formats)):
-                                if extension == self.__formats[i][1]:
-                                    flag = True
-                                    break
-                        else:
-                            flag = (extension == comboFormat)
-                        if flag:
-                            try:
-                                items.index(prefix)
-                            except ValueError:
-                                items.append(prefix)
-            except Exception, e:
-                print "Ignored Exception 1: " + str(e)
-                pass
+            comboFormat = self.__formats[self.formatComboBox.currentIndex()][1]
+            if os.path.isdir(self.locationLineEdit.text()):
+                try:
+                    for filename in os.listdir(self.locationLineEdit.text()):
+                        if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
+                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                            flag = False
+                            if self.formatComboBox.currentIndex() == 0:
+                                for i in range(1, len(self.__formats)):
+                                    if extension == self.__formats[i][1]:
+                                        flag = True
+                                        break
+                            else:
+                                flag = (extension == comboFormat)
+                            if flag:
+                                try:
+                                    items.index(prefix)
+                                except ValueError:
+                                    items.append(prefix)
+                except Exception, e:
+                    logging.getLogger().error("Full Exception: " + str(e))
         else:
+            #TODO: Should implement HDF - But how ? SO 13/3 12
             logging.getLogger().error("Unexpected HDF file")
-            pass    # implement HDF  
         items.sort()
         items.insert(0, "All")
         currentText = self.prefixComboBox.currentText()
@@ -330,21 +330,21 @@ class BrowseBrick(Core.BaseBrick):
     def populateRunNumberComboBox(self):
         items = []
         if self.typeComboBox.currentIndex() == 0:
-            try:
-                for filename in os.listdir(self.locationLineEdit.text()):
-                    prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                    if run != "":
-                        if self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText():
-                            try:
-                                items.index(run)
-                            except ValueError:
-                                items.append(run)
-            except Exception, e:
-                print "Ignored Exception 2: " + str(e)
-                pass
+            if os.path.isdir(self.locationLineEdit.text()):
+                try:
+                    for filename in os.listdir(self.locationLineEdit.text()):
+                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                        if run != "":
+                            if self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText():
+                                try:
+                                    items.index(run)
+                                except ValueError:
+                                    items.append(run)
+                except Exception, e:
+                    logging.getLogger().error("Full Exception: " + str(e))
         else:
+            #TODO: Should implement HDF - But how ? SO 13/3 12
             logging.getLogger().error("Unexpected HDF file")
-            pass    # implement HDF  
         items.sort(reverse = True)
         items.insert(0, "All")
         currentText = self.runNumberComboBox.currentText()
@@ -356,26 +356,24 @@ class BrowseBrick(Core.BaseBrick):
             self.runNumberComboBox.setCurrentIndex(0)
 
 
-
-
     def populateExtraComboBox(self):
         items = []
         if self.typeComboBox.currentIndex() == 0:
-            try:
-                for filename in os.listdir(self.locationLineEdit.text()):
-                    prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                    #if len(extra) > 0:
-                    if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or run == self.runNumberComboBox.currentText()):
-                        try:
-                            items.index(extra)
-                        except ValueError:
-                            items.append(extra)
-            except Exception, e:
-                print "Ignored Exception 3: " + str(e)
-                pass
+            if os.path.isdir(self.locationLineEdit.text()):
+                try:
+                    for filename in os.listdir(self.locationLineEdit.text()):
+                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                        #if len(extra) > 0:
+                        if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or run == self.runNumberComboBox.currentText()):
+                            try:
+                                items.index(extra)
+                            except ValueError:
+                                items.append(extra)
+                except Exception, e:
+                    logging.getLogger().error("Full Exception: " + str(e))
         else:
+            #TODO: Should implement HDF - But how ? SO 13/3 12
             logging.getLogger().error("Unexpected HDF file")
-            pass    # implement HDF
         items.sort()
         items.insert(0, "All")
         currentText = self.extraComboBox.currentText()
@@ -393,28 +391,28 @@ class BrowseBrick(Core.BaseBrick):
         self.itemsListWidget.blockSignals(True)
         items = []
         if self.typeComboBox.currentIndex() == 0:
-            try:
-                comboFormat = self.__formats[self.formatComboBox.currentIndex()][1]
-                for filename in os.listdir(self.locationLineEdit.text()):
-                    if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
-                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                        if comboFormat == "":
-                            flag = False
-                            for i in range(1, len(self.__formats)):
-                                if extension == self.__formats[i][1]:
-                                    flag = True
-                                    break
-                        else:
-                            flag = (extension == comboFormat)
-                        if flag:
-                            if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or self.runNumberComboBox.currentText() == run) and (self.extraComboBox.currentIndex() == 0 or extra == self.extraComboBox.currentText()):
-                                items.append(filename)
-            except Exception, e:
-                print "Ignored Exception 4: " + str(e)
-                pass
+            comboFormat = self.__formats[self.formatComboBox.currentIndex()][1]
+            if os.path.isdir(self.locationLineEdit.text()):
+                try:
+                    for filename in os.listdir(self.locationLineEdit.text()):
+                        if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
+                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                            if comboFormat == "":
+                                flag = False
+                                for i in range(1, len(self.__formats)):
+                                    if extension == self.__formats[i][1]:
+                                        flag = True
+                                        break
+                            else:
+                                flag = (extension == comboFormat)
+                            if flag:
+                                if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or self.runNumberComboBox.currentText() == run) and (self.extraComboBox.currentIndex() == 0 or extra == self.extraComboBox.currentText()):
+                                    items.append(filename)
+                except Exception, e:
+                    logging.getLogger().error("Full Exception: " + str(e))
         else:
+            #TODO: Should implement HDF - But how ? SO 13/3 12
             logging.getLogger().error("Unexpected HDF file")
-            pass    # implement HDF
         items.sort(reverse = True)
         itemsSelect = []
         for i in range(0, self.itemsListWidget.count()):

@@ -821,19 +821,20 @@ class ReprocessBrick(Core.BaseBrick):
         else:
             directory = self.directoryLineEdit.text() + "/"
         items = []
-        try:
-            for filename in os.listdir(directory):
-                if os.path.isfile(directory + filename):
-                    prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                    if frame != "":
-                        if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
-                            try:
-                                items.index(prefix)
-                            except ValueError:
-                                items.append(prefix)
-        except Exception, e:
-            print "Ignored Exception 6: " + str(e)
-            pass
+        if os.path.isdir(directory):
+            try:
+                for filename in os.listdir(directory):
+                    #TODO: Why is this check needed ? SO 14/3 12 
+                    if os.path.isfile(directory + filename):
+                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                        if frame != "":
+                            if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
+                                try:
+                                    items.index(prefix)
+                                except ValueError:
+                                    items.append(prefix)
+            except Exception, e:
+                logging.getLogger().error("Full Exception: " + str(e))
         items.sort()
         items.insert(0, "Select")
         currentText = self.prefixComboBox.currentText()
@@ -853,19 +854,20 @@ class ReprocessBrick(Core.BaseBrick):
                 directory = self.directoryLineEdit.text() + "/raw/"
             else:
                 directory = self.directoryLineEdit.text() + "/"
-            try:
-                for filename in os.listdir(directory):
-                    if os.path.isfile(directory + "/" + filename):
-                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                        if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
-                            if prefix == self.prefixComboBox.currentText():
-                                try:
-                                    items.index(run)
-                                except ValueError:
-                                    items.append(run)
-            except Exception, e:
-                print "Ignored Exception 7: " + str(e)
-                pass
+            if os.path.isdir(directory):
+                try:
+                    for filename in os.listdir(directory):
+                        #TODO: Why is this check needed ? SO 14/3 12 
+                        if os.path.isfile(directory + "/" + filename):
+                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                            if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
+                                if prefix == self.prefixComboBox.currentText():
+                                    try:
+                                        items.index(run)
+                                    except ValueError:
+                                        items.append(run)
+                except Exception, e:
+                    logging.getLogger().error("Full Exception: " + str(e))
 
         items.sort()
         itemsSelect = []
@@ -890,20 +892,21 @@ class ReprocessBrick(Core.BaseBrick):
                     directory = self.directoryLineEdit.text() + "/raw/"
                 else:
                     directory = self.directoryLineEdit.text() + "/"
-                try:
-                    for filename in os.listdir(directory):
-                        if os.path.isfile(directory + "/" + filename):
-                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
-                            if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
-                                if prefix == self.prefixComboBox.currentText():
-                                    if frame != "":
-                                        try:
-                                            items.index(frame)
-                                        except ValueError:
-                                            items.append(frame)
-                except Exception, e:
-                    print "Ignored Exception 8: " + str(e)
-                    pass
+                if os.path.isdir(directory):
+                    try:
+                        for filename in os.listdir(directory):
+                            #TODO: Why is this check needed ? SO 14/3 12 
+                            if os.path.isfile(directory + "/" + filename):
+                                prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                                if self.detectorComboBox.currentIndex() == 0 and extension == "edf" or self.detectorComboBox.currentIndex() == 1 and extension == "gfrm":
+                                    if prefix == self.prefixComboBox.currentText():
+                                        if frame != "":
+                                            try:
+                                                items.index(frame)
+                                            except ValueError:
+                                                items.append(frame)
+                    except Exception, e:
+                        logging.getLogger().error("Full Exception: " + str(e))
         items.sort()
         items.insert(0, "Select")
         self.frameFirstComboBox.clear()
