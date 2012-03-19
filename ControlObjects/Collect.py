@@ -46,7 +46,7 @@ class Collect(CObjectBase):
                 return self.channels[attr]
             except KeyError:
                 pass
-            raise AttributeError, attr
+        raise AttributeError, attr
 
     def init(self):
         self.collecting = False
