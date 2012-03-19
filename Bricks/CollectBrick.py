@@ -4,7 +4,7 @@ from Framework4.GUI      import Core
 from Framework4.GUI.Core import Connection, Signal, Slot
 
 from CollectRobotDialog  import CollectRobotDialog
-from CollectRobotObject  import CollectRobotObject
+#from CollectRobotObject  import CollectRobotObject
 
 from PyQt4               import QtCore, QtGui, Qt
 from LeadingZeroSpinBox  import LeadingZeroSpinBox
@@ -13,6 +13,16 @@ from Samples             import CollectPars
 
 
 __category__ = "BsxCuBE"
+
+def cmpSEUtemp(a, b):
+    return cmp(a["SEUtemperature"], b["SEUtemperature"])
+def cmpCode(a, b):
+    return cmp(a["code"], b["code"])
+def cmpCodeAndSEU(a, b):
+    if a["code"] == b["code"]:
+        return cmpSEUtemp(a, b)
+    else:
+        return cmpCode(a, b)
 
 class CollectBrick(Core.BaseBrick):
     properties = {}
@@ -141,11 +151,22 @@ class CollectBrick(Core.BaseBrick):
         logging.info("processing done, file is %r", dat_filename)
         self.emitDisplayItemChanged(dat_filename)
 
-    def collectProcessingLog(self, log):
-        if log != self.lastCollectProcessingLog:
-            for line in log.split(os.linesep):
-                logging.info(line.rstrip())
-        self.lastCollectProcessingLog = log
+    def collectProcessingLog(self, level, logmsg, notify):
+        # Level 0 = info, Level 1 = 
+        if level == 0:
+            logmethod = logging.info
+        elif level == 2:
+            logmethod = logging.error
+
+        if logmsg != self.lastCollectProcessingLog:
+            for line in logmsg.split(os.linesep):
+                logmethod(line.rstrip())
+
+        self.lastCollectProcessingLog = logmsg
+        self._collectRobotDialog.addHistory(pLevel, pMessage)
+
+        if notify:
+             self.messageDialog(pLevel, pMessage)
 
     def collectNewFrameChanged(self, pValue):
         filename0 = pValue.split(",")[0]
@@ -249,6 +270,7 @@ class CollectBrick(Core.BaseBrick):
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
+        self._curveList = []
         self.lastCollectProcessingLog = None
 
     def init(self):
@@ -261,7 +283,6 @@ class CollectBrick(Core.BaseBrick):
         self._frameNumber = 0
         self._currentFrame = 0
         self._currentCurve = 0
-
         self._collectRobotDialog = CollectRobotDialog(self)
         self.__lastFrame = None
         self.__currentConcentration = None
@@ -269,7 +290,7 @@ class CollectBrick(Core.BaseBrick):
         self.__expertMode = False
 
         self.__validParameters = [False, False, False]
-        self._curveList = []
+
         self.image_proxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
@@ -482,7 +503,7 @@ class CollectBrick(Core.BaseBrick):
         self.extinctionCoefficentDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
         self.extinctionCoefficentDoubleSpinBox.setRange(0.001, 99.998)
         self.extinctionCoefficentDoubleSpinBox.setDecimals(3)
-        # TODO - Change by reading from SPEC/File
+        #TODO: - Change by reading from SPEC/File
         self.extinctionCoefficentDoubleSpinBox.setValue(1.000)
         self.extinctionCoefficentDoubleSpinBox.setSuffix(" ml*1/mg*1/cm)")
         self.extinctionCoefficentDoubleSpinBox.setToolTip("Extinction Coefficient")
@@ -567,23 +588,24 @@ class CollectBrick(Core.BaseBrick):
         self._sampleChangerDisplayFlag = False
         self._sampleChangerDisplayMessage = ""
 
-        self._collectRobot = CollectRobotObject(self, self.brick_widget)
+        #self._collectRobot = CollectRobotObject(self, self.brick_widget)
 
-        QtCore.QObject.connect(self._collectRobot.proxySampleChanger, QtCore.SIGNAL("doSampleChangerAction"), self.doSampleChangerAction, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollect"), self.doRobotCollect, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollectEnd"), self.doRobotCollectEnd, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getCollectPars"), self.doGetCollectPars, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getFileInfo"), self.doGetFileInfo, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("showMessage"), self.doShowMessage, Qt.Qt.BlockingQueuedConnection)
-        QtCore.QObject.connect(self._collectRobot, QtCore.SIGNAL("displayReset"), self.displayReset, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxySampleChanger, QtCore.SIGNAL("doSampleChangerAction"), self.doSampleChangerAction, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollect"), self.doRobotCollect, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollectEnd"), self.doRobotCollectEnd, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getCollectPars"), self.doGetCollectPars, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getFileInfo"), self.doGetFileInfo, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("showMessage"), self.doShowMessage, Qt.Qt.BlockingQueuedConnection)
+        #QtCore.QObject.connect(self._collectRobot, QtCore.SIGNAL("displayReset"), self.displayReset, Qt.Qt.BlockingQueuedConnection)
 
         # start robot thread
-        self._collectRobot.start()
+        #self._collectRobot.start()
 
         self.setWidgetState()
         self.setButtonState(0)
 
     # Proxy actions
+    """
     def doSampleChangerAction(self, action_name, argdict = None):
         method = getattr(self._sampleChanger, action_name)
         try:
@@ -617,18 +639,18 @@ class CollectBrick(Core.BaseBrick):
     def doShowMessage(self, argdict = None):
         r = self.showMessage(*argdict['args'])
         argdict['returned'] = r
+    """
 
     def collectObjectConnected(self, collect_obj):
         self.collectObj = collect_obj
         if self.collectObj is not None:
-            self.collectObj.updateChannels()
+            self.collectObj.updateChannels(oneway = True)
 
     #
     #  Other
     #
     def sample_changer_connected(self, sc):
-
-        #  How to read an attribute?
+        #  How to read an attribute? You can't.
         self._sampleChanger = sc
         if sc is None:
             return
@@ -646,20 +668,20 @@ class CollectBrick(Core.BaseBrick):
         pars = self.getCollectPars(robot = 1)
         valid = True
 
-        if len(pars.sampleList) == 0:
+        if len(pars["sampleList"]) == 0:
             valid = False
             Qt.QMessageBox.information(self.brick_widget, "Warning", "No sample to collect in robot!")
         else:
             buffernames = []
 
-            for myBuffer in pars.bufferList:
+            for myBuffer in pars["bufferList"]:
                 # NOW myBuffers of same name are allowed.  But we should do something about it during collect
 
                 if myBuffer not in buffernames:
-                    buffernames.append(myBuffer.buffername)
+                    buffernames.append(myBuffer["buffername"])
 
-            for sample in pars.sampleList:
-                if sample.buffername not in buffernames:
+            for sample in pars["sampleList"]:
+                if sample["buffername"] not in buffernames:
                     Qt.QMessageBox.information(self.brick_widget, "Warning", "Sample with no buffer assignment or buffer name does not exist")
                     valid = False
                     break
@@ -674,70 +696,144 @@ class CollectBrick(Core.BaseBrick):
         filepars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
         return filepars
 
-    def getCollectPars(self, robot = 1):
-
-        #
-        # First of all. Collect collection values
-        #
-        collectpars = CollectPars()
-
-        logging.info("   - reading collection parameters")
-        #
-        #  I should actually separate values so that each widget represents a certain data in a clear way
-        #
-        generalParsWidget = self
-        robotParsWidget = self._collectRobotDialog
-
-        collectpars.directory = generalParsWidget.directoryLineEdit.text()
-        collectpars.prefix = generalParsWidget.prefixLineEdit.text()
-        collectpars.runNumber = generalParsWidget.runNumberSpinBox.value()
-        collectpars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
-        collectpars.timePerFrame = generalParsWidget.timePerFrameSpinBox.value()
-        collectpars.currentConcentration = generalParsWidget.concentrationDoubleSpinBox.value()
-        collectpars.currentComments = generalParsWidget.commentsLineEdit.text()
-        collectpars.currentCode = generalParsWidget.codeLineEdit.text()
-
-        collectpars.doProcess = generalParsWidget.processCheckBox.isChecked()
-
-        collectpars.mask = generalParsWidget.maskLineEdit.text()
-        collectpars.detectorDistance = generalParsWidget.detectorDistanceDoubleSpinBox.value()
-        collectpars.waveLength = generalParsWidget.waveLengthDoubleSpinBox.value()
-        collectpars.pixelSizeX = generalParsWidget.pixelSizeXDoubleSpinBox.value()
-        collectpars.pixelSizeY = generalParsWidget.pixelSizeYDoubleSpinBox.value()
-        collectpars.beamCenterX = generalParsWidget.beamCenterXSpinBox.value()
-        collectpars.beamCenterY = generalParsWidget.beamCenterYSpinBox.value()
-        collectpars.normalisation = generalParsWidget.normalisationDoubleSpinBox.value()
-        collectpars.radiationChecked = generalParsWidget.radiationCheckBox.isChecked()
-        collectpars.radiationRelative = generalParsWidget.radiationRelativeDoubleSpinBox.value()
-        collectpars.radiationAbsolute = generalParsWidget.radiationAbsoluteDoubleSpinBox.value()
-        collectpars.SEUTemperature = self._sampleChanger.getSEUTemperature()
-        collectpars.storageTemperature = self._sampleChanger.getSampleStorageTemperature()
-
+    def getCollectPars(self, robot = 1, all = 0):
         if robot:
-            logging.info("   - getting robot parameters")
-            # merge all parameters 
-            robotpars = robotParsWidget.getCollectRobotPars()
-            collectpars.__dict__.update(robotpars.__dict__)
-            logging.info("sample type is %s" , collectpars.sampleType)
-            logging.info("number of samples is %s" , len(collectpars.sampleList))
+            # return a dictionary
+            collectpars = { "directory": str(self.directoryLineEdit.text()),
+                            "prefix": str(self.prefixLineEdit.text()),
+                            "runNumber": int(self.runNumberSpinBox.value()),
+                            "frameNumber": int(self.frameNumberSpinBox.value()),
+                            "timePerFrame": int(self.timePerFrameSpinBox.value()),
+                            "currentConcentration": float(self.concentrationDoubleSpinBox.value()),
+                            "currentComments":str(self.commentsLineEdit.text()),
+                            "currentCode": str(self.codeLineEdit.text()),
+                            "doProcess":self.processCheckBox.isChecked(),
+                            "mask":str(self.maskLineEdit.text()),
+                            "detectorDistance": float(self.detectorDistanceDoubleSpinBox.value()),
+                            "waveLength": float(self.waveLengthDoubleSpinBox.value()),
+                            "pixelSizeX":float(self.pixelSizeXDoubleSpinBox.value()),
+                            "pixelSizeY":float(self.pixelSizeYDoubleSpinBox.value()),
+                            "beamCenterX": int(self.beamCenterXSpinBox.value()),
+                            "beamCenterY": int(self.beamCenterYSpinBox.value()),
+                            "normalisation": float(self.normalisationDoubleSpinBox.value()),
+                            "radiationChecked":self.radiationCheckBox.isChecked(),
+                            "radiationRelative": float(self.radiationRelativeDoubleSpinBox.value()),
+                            "radiationAbsolute": float(self.radiationAbsoluteDoubleSpinBox.value()),
+                            "SEUTemperature": self._sampleChanger.getSEUTemperature(),
+                            "storageTemperature": self._sampleChanger.getSampleStorageTemperature() }
 
-   #=================================================
-   # Correct value for processData 
-   #=================================================
-        if collectpars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
-            collectpars.processData = 1
+            robotpars = { "sampleType": str(self._collectRobotDialog.sampleTypeComboBox.currentText()),
+                          "storageTemperature": float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value()),
+                          "extraFlowTime": int(self._collectRobotDialog.extraFlowTimeSpinBox.value()),
+                          "optimization": str(self._collectRobotDialog.optimizationComboBox.currentIndex()),
+                          "optimizationText": str(self._collectRobotDialog.optimizationComboBox.currentText()),
+                          "initialCleaning": self._collectRobotDialog.initialCleaningCheckBox.isChecked(),
+                          "bufferMode": str(self._collectRobotDialog.bufferModeComboBox.currentIndex()),
+                          "bufferFirst": False,
+                          "bufferBefore": False,
+                          "bufferAfter": False }
+
+            filepars = { "runNumber": self.runNumberSpinBox.value(),
+                         "frameNumber": self.frameNumberSpinBox.value() }
+            collectpars.update(filepars)
+
+            if robotpars["bufferMode"] == 0:
+                robotpars.update({ "bufferFirst":True, "bufferAfter": True })
+            elif robotpars["bufferMode"] == 1:
+                robotpars["bufferBefore"] = True
+            elif robotpars["bufferMode"] == 2:
+                robotpars["bufferAfter"] = True
+
+            robotpars["optimSEUtemp"] = False
+            robotpars["optimCodeAndSEU"] = False
+            if robotpars["optimization"] == 1:
+                robotpars["optimSEUtemp"] = True
+            elif robotpars["optimization"] == 2:
+                robotpars["optimCodeAndSEU"] = True
+
+            bufferList = []
+            sampleList = []
+            robotpars.update({ "bufferList": bufferList, "sampleList": sampleList })
+            for i in range(0, self._collectRobotDialog.tableWidget.rowCount()):
+                sample = self._collectRobotDialog.getSampleRow(i)
+
+                if all or sample.enable:
+                    if sample.isBuffer():
+                        bufferList.append(sample.__dict__)
+                    else:
+                        sampleList.append(sample.__dict__)
+
+            for sample in sampleList:
+              sample["buffer"] = []
+              if len(bufferList) == 1:   # if there is one and only one buffer defined dont look at name. assign
+                  sample["buffer"].append(bufferList[0])
+              else:
+                  for buffer in bufferList:
+                      if buffer["buffername"] == sample["buffername"]:
+                          sample["buffer"].append(buffer)
+
+            if robotpars["optimSEUtemp"]:
+                sampleList.sort(cmpSEUtemp)
+            elif robotpars["optimCodeAndSEU"]:
+                sampleList.sort(cmpCodeAndSEU)
+
+            collectpars.update(robotpars)
+
+            collectpars["flowTime"] = collectpars["timePerFrame"] * collectpars["frameNumber"] + collectpars["extraFlowTime"]
+            collectpars["processData"] = 1 if collectpars["doProcess"] else 0
+
+            logging.info("sample type is %s" , collectpars["sampleType"])
+            logging.info("number of samples is %s" , len(collectpars["sampleList"]))
         else:
-            collectpars.processData = 0
+            collectpars = CollectPars()
 
-        #=================================================
-        #  Calculate total flow time
-        #=================================================
-        collectpars.flowTime = collectpars.timePerFrame * collectpars.frameNumber + collectpars.extraFlowTime
+            logging.info("   - reading collection parameters")
+            #
+            #  I should actually separate values so that each widget represents a certain data in a clear way
+            #
+            collectpars.directory = self.directoryLineEdit.text()
+            collectpars.prefix = self.prefixLineEdit.text()
+            collectpars.runNumber = self.runNumberSpinBox.value()
+            collectpars.frameNumber = self.frameNumberSpinBox.value()
+            collectpars.timePerFrame = self.timePerFrameSpinBox.value()
+            collectpars.currentConcentration = self.concentrationDoubleSpinBox.value()
+            collectpars.currentComments = self.commentsLineEdit.text()
+            collectpars.currentCode = self.codeLineEdit.text()
+
+            collectpars.doProcess = self.processCheckBox.isChecked()
+
+            collectpars.mask = self.maskLineEdit.text()
+            collectpars.detectorDistance = self.detectorDistanceDoubleSpinBox.value()
+            collectpars.waveLength = self.waveLengthDoubleSpinBox.value()
+            collectpars.pixelSizeX = self.pixelSizeXDoubleSpinBox.value()
+            collectpars.pixelSizeY = self.pixelSizeYDoubleSpinBox.value()
+            collectpars.beamCenterX = self.beamCenterXSpinBox.value()
+            collectpars.beamCenterY = self.beamCenterYSpinBox.value()
+            collectpars.normalisation = self.normalisationDoubleSpinBox.value()
+            collectpars.radiationChecked = self.radiationCheckBox.isChecked()
+            collectpars.radiationRelative = self.radiationRelativeDoubleSpinBox.value()
+            collectpars.radiationAbsolute = self.radiationAbsoluteDoubleSpinBox.value()
+            collectpars.SEUTemperature = self._sampleChanger.getSEUTemperature()
+            collectpars.storageTemperature = self._sampleChanger.getSampleStorageTemperature()
+
+
+           #=================================================
+           # Correct value for processData 
+           #=================================================
+            if collectpars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
+                collectpars.processData = 1
+            else:
+                collectpars.processData = 0
+
+            #=================================================
+            #  Calculate total flow time
+            #=================================================
+            collectpars.flowTime = collectpars.timePerFrame * collectpars.frameNumber + collectpars.extraFlowTime
 
         return collectpars
 
-    def delete(self):
-        self._collectRobot.terminate()
+    #def delete(self):
+    #    self._collectRobot.terminate()
 
     def showHideBeamlineParams(self, pValue = None):
 
@@ -981,13 +1077,13 @@ class CollectBrick(Core.BaseBrick):
         self.brick_widget.setStyleSheet(self.brick_widget.styleSheet())
 
     def startCollectWithRobot(self):
-
         # starts a series of individual collections
         #  blocks widget or whatever during the time of the collection
         self.setButtonState(1)
         self._abortFlag = False
         self._collectRobotDialog.clearHistory()
-        self._collectRobot.robotStartCollection()
+        self.getObject("collect").collectWithRobot(self.getCollectPars(), oneway = True)
+        #self._collectRobot.robotStartCollection()
 
     def endCollectWithRobot(self):
         # should unblock things here at the end
@@ -1085,6 +1181,12 @@ class CollectBrick(Core.BaseBrick):
         except Exception, e:
             logging.exception(e)
 
+    def messageDialog(self, pType, pMessage):
+        if pType == 0:
+            Qt.QMessageBox.information(self.brick_widget, "Info", pMessage)
+        else:
+            Qt.QMessageBox.critical(self.brick_widget, "Error", pMessage)
+
     def showMessage(self, pLevel, pMessage, notify = 0):
         if pLevel == 0:
             logging.info(pMessage)
@@ -1095,16 +1197,10 @@ class CollectBrick(Core.BaseBrick):
 
         self._collectRobotDialog.addHistory(pLevel, pMessage)
         if notify:
-             self.messageDialog(pLevel, pMessage)
+            self.messageDialog(pLevel, pMessage)
 
-    def messageDialog(self, pType, pMessage):
-        if pType == 0:
-            Qt.QMessageBox.information(self.brick_widget, "Info", pMessage)
-        else:
-            Qt.QMessageBox.critical(self.brick_widget, "Error", pMessage)
 
     def abortPushButtonClicked(self):
-
         if self.robotCheckBox.isChecked():
             answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Do you want to abort the ongoing data collection?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
             if answer == Qt.QMessageBox.No:
@@ -1120,8 +1216,8 @@ class CollectBrick(Core.BaseBrick):
         else:
             self.getObject("collect").collectAbort()
 
-        if self.robotCheckBox.isChecked():
-           self._collectRobot.abort()
+        #if self.robotCheckBox.isChecked():
+        #   self._collectRobot.abort()
 
         #
         # Stop all timers 

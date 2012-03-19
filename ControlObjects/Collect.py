@@ -2,6 +2,9 @@ from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import os
 import logging
 import numpy
+import exceptions
+import gevent
+import time
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -12,7 +15,8 @@ from XSDataSAS import XSDataInputSolutionScattering
 
 class Collect(CObjectBase):
     signals = [Signal("collectProcessingDone"),
-               Signal("collectProcessingLog")]
+               Signal("collectProcessingLog"),
+               Signal("collectDone")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -21,6 +25,7 @@ class Collect(CObjectBase):
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
+        self.__collectWithRobotProcedure = None
         self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0(experimentSetup = XSDataBioSaxsExperimentSetup(), sample = XSDataBioSaxsSample())
         self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
         self.xsdout = None
@@ -37,18 +42,18 @@ class Collect(CObjectBase):
 
     def __getattr__(self, attr):
         if not attr.startswith("__"):
-          try:
-             return self.channels[attr]
-          except KeyError:
-              pass
-        raise AttributeError, attr
+            try:
+                return self.channels[attr]
+            except KeyError:
+                pass
+            raise AttributeError, attr
 
     def init(self):
         self.collecting = False
-        self.channels["jobSuccess_chris"].connect("update", self.processingDone)
+        self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
         #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
-        self.commands["initPlugin_chris"](self.pluginIntegrate)
-        self.commands["initPlugin_chris"](self.pluginMerge)
+        self.commands["initPlugin_sparta"](self.pluginIntegrate)
+        self.commands["initPlugin_sparta"](self.pluginMerge)
         self.commands["initPlugin_slavia"](self.pluginSAS)
 
 
@@ -146,7 +151,8 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channels["machine_current"].value()))
+        #TODO: Get Machine current via Tango
+        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.objects["machine_current"].get_current()))
         xsdin1d = self.xsdin.copy()
 
         xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))
@@ -155,7 +161,7 @@ class Collect(CObjectBase):
         xsdin1d.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
         xsdin1d.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
 
-        jobId = self.commands["startJob_chris"]([self.pluginIntegrate, xsdin1d.marshal()])
+        jobId = self.commands["startJob_sparta"]([self.pluginIntegrate, xsdin1d.marshal()])
         self.dat_filenames[jobId] = xsdin1d.integratedCurve.path.value
         logging.info("Processing job %s started", jobId)
         #For debugging
@@ -166,7 +172,7 @@ class Collect(CObjectBase):
     def collectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
-        jobId = self.commands["startJob_chris"]([self.pluginMerge, self.xsdAverage.marshal()])
+        jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
         self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
 
 
@@ -176,7 +182,7 @@ class Collect(CObjectBase):
             logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
-                strXsdout = self.commands["getJobOutput_chris"](jobId)
+                strXsdout = self.commands["getJobOutput_sparta"](jobId)
                 try:
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
                 except:
@@ -184,7 +190,8 @@ class Collect(CObjectBase):
                 else:
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
-                    self.emit("collectProcessingLog", log)
+                    # Log on info on Pipeline
+                    self.showMessage(0, "collectProcessingLog")
                     # If autoRG has been used, launch the SAS pipeline (very time consuming)
                     if xsd.autoRg is not None:
                         rgOut = xsd.autoRg
@@ -207,15 +214,24 @@ class Collect(CObjectBase):
         else:
             logging.warning("processing Done from EDNA: %s -X-> None", jobId)
 
-    def collectFailed(self):
-        self.collecting = False
+    def _abortCollectWithRobot(self):
+        if  self.__collectWithRobotProcedure is not None:
+            self.__collectWithRobotProcedure.kill()
 
+    def collectFailed(self, error):
+        """Callback when collect is aborted in spec (CTRL-C or error)"""
+        self.collecting = False
+        self._abortCollectWithRobot()
 
     def collectAbort(self):
         logging.info("sending abort to stop spec collection")
+        #TODO: understand what this is doing SO 13/3
         self.abortCollect.set_value(1)
 
-        #self.commands["collect"].abort()
+        # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
+        # self.commands["collect"].abort()
+
+        self._abortCollectWithRobot()
 
 
     def testCollectAbort(self):
@@ -235,8 +251,227 @@ class Collect(CObjectBase):
     def connectNotify(self, signal_name):
         pass
 
+
     def updateChannels(self):
         for channel_name, channel in self.channels.iteritems():
             if channel_name.startswith("jobSuccess"):
                 continue
             channel.update(channel.value())
+
+
+    def showMessage(self, level, msg, notify = 0):
+        self.emit("collectProcessingLog", level, msg, notify)
+
+
+    def _collectOne(self, sample, pars, mode = None):
+        # ==================================================
+        #  SETTING VISCOSITY
+        # ==================================================
+        if mode == "buffer_before":
+           # this will allow to use several buffers of same name for same sample
+           # we should check if enough volume is not available then go to next buffer in list
+           tocollect = sample["buffer"][0]
+        elif mode == "buffer_after":
+           tocollect = sample["buffer"][0]
+        else:
+           tocollect = sample
+
+        self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
+        if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
+            self.showMessage(2, "Error when trying to set viscosity to '%s'..." % tocollect["viscosity"])
+
+        # ==================================================
+        #  SETTING SEU TEMPERATURE
+        # ==================================================                        
+        # temperature is taken from sample (not from buffer) even if buffer is collected
+        try:
+            self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
+        except RuntimeError:
+            self.showMessage(2, "Error when setting SEU temperature ")
+            raise
+
+        # ==================================================
+        #  FILLING 
+        # ==================================================        
+        self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"]))
+
+        try:
+            self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
+        except RuntimeError:
+            message = "Error when trying to fill from plate '%s', row '%s' and well '%s'. Aborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"])
+            self.showMessage(2, message, notify = 1)
+            raise
+
+        # ==================================================
+        #  FLOW
+        # ==================================================
+        self.showMessage(0, "Setting Flow or Fix")
+
+        if tocollect["flow"]:
+            self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
+            try:
+                self.objects["sample_changer"].doFlowProcedure(tocollect["volume"], pars["flowTime"])
+            except RuntimeError:
+                self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
+        else:
+            self.showMessage(0, "Fixing liquid position...")
+            self.objects["sample_changer"].setLiquidPositionFixed(True)
+            self.showMessage(0, "  - liquid position fixed.")
+
+        self.showMessage(0, "Setting Flow or Fix done")
+
+        # ==========================
+        #  SETTING TRANSMISSION 
+        # ========================== 
+        self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
+        #self.__parent.emit("transmissionChanged", tocollect.transmission)
+
+        # ==================================================
+        #  PERFORM COLLECT
+        # ==================================================
+        self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
+        #self.emit(QtCore.SIGNAL("displayReset"))  
+        self.collect(pars["directory"],
+                     pars["prefix"], pars["runNumber"],
+                     pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
+                     tocollect["code"], pars["mask"], pars["detectorDistance"], pars["waveLength"],
+                     pars["pixelSizeX"], pars["pixelSizeY"], pars["beamCenterX"], pars["beamCenterY"],
+                     pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
+                     pars["radiationRelative"],
+                     pars["processData"], pars["SEUTemperature"], pars["storageTemperature"])
+
+        while self.collecting:
+            time.sleep(1)
+
+        self.showMessage(0, "Finish collecting '%s'..." % pars["prefix"])
+
+        # ======================
+        #  WAIT FOR END OF FLOW 
+        # ======================
+        if tocollect["flow"]:
+            self.showMessage(0, "Waiting for end of flow...")
+            try:
+                self.objects["sample_changer"].wait()
+            except RuntimeError:
+                self.showMessage(2, "Error when waiting for end of flow...")
+
+        # =============
+        #  RECUPERATE 
+        # =============
+        if tocollect["recuperate"]:
+            self.showMessage(0, "Recuperating to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+
+            try:
+                self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
+            except RuntimeError:
+                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+
+        # ==================================================
+        #  CLEANING
+        # ==================================================
+        self.showMessage(0, "Cleaning...")
+
+        try:
+            self.doCleanProcedure()
+        except RuntimeError:
+            message = "Error when trying to clean. Aborting collection!"
+            self.showMessage(2, message, notify = 1)
+            raise
+
+
+    def _collectWithRobot(self, pars):
+        lastBuffer = ""
+        # 
+        # Setting sample type
+        # ===================                                                
+        self.showMessage(0, "Setting sample type to '%s'..." % pars["sampleType"])
+        # Synchronous - no exception handling
+        self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
+
+        # 
+        #  Setting storage temperature
+        # ============================
+        self.showMessage(0, "Setting storage temperature to '%s' C..." % pars["storageTemperature"])
+        # Synchronous - no exception handling
+        self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
+
+        if pars["initialCleaning"]:
+            self.showMessage(0, "Initial cleaning...")
+            try:
+                self.objects["sample_changer"].doCleanProcedure()
+            except RuntimeError:
+                message = "Error when trying to clean. Aborting collection!"
+                self.showMessage(2, message, notify = 1)
+                raise
+
+        self.lastSampleTime = time.time()
+        prevSample = None
+
+        # ==================================================
+        #   MAIN LOOP on Samples
+        # ==================================================        
+        for sample in pars["sampleList"]:
+            #
+            #  Collect buffer before
+            #     - in mode BufferBefore  , always
+            #     - in mode BufferFirst   , at beginning and every time buffer changes
+            # 
+            # In buffer first mode check also if temperature has changed. If so, consider as
+            #    a change in buffer
+            doFirstBuffer = pars["bufferBefore"]
+
+            # in bufferFirst mode decide when to collect the buffer 
+            if pars["bufferFirst"]:
+                if sample["buffername"] != lastBuffer:
+                    doFirstBuffer = True
+                if prevSample is not None:
+                    if prevSample["SEUtemperature"] != sample["SEUtemperature"]:
+                        self.showMessage(0, "SEU Temperature different from previous. Collecting buffer.")
+                        doFirstBuffer = True
+
+            if doFirstBuffer:
+                if sample["buffername"] != lastBuffer:
+                    lastBuffer = sample["buffername"]
+
+                self._collectOne(sample, pars, mode = "buffer_before")
+
+            #
+            # Wait if necessary before collecting sample
+            #
+            if sample["waittime"]:
+                time_to_wait = sample["waittime"]
+                while time_to_wait > 0:
+                    self.showMessage(0, "Waiting to start next sample. %d secs left..." % time_to_wait)
+                    time.sleep(min(10, time_to_wait))
+                    time_to_wait = time_to_wait - 10
+                self.showMessage(0, "    Done waiting.")
+
+            self.lastSampleTime = time.time()
+
+            #
+            # Collect sample
+            #
+            self._collectOne(sample, pars, mode = "sample")
+
+            if pars.bufferAfter:
+                self._collectOne(sample, pars, mode = "buffer_after")
+
+            prevSample = sample
+
+        #
+        # End of for sample loop
+        #---------------------------------- 
+        self.showMessage(0, "The data collection is done!")
+
+        self.emit("collectDone", ())
+
+
+    def collectWithRobot(self, *args):
+        try:
+            self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
+            try:
+                return self.__collectWithRobotProcedure.get()
+            except:
+                self.showMessage(2, "collectWithRobot aborted !")
+        finally:
+            self.__collectWithRobotProcedure = None
