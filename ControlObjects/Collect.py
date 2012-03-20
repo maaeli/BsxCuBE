@@ -2,7 +2,6 @@ from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import os
 import logging
 import numpy
-import exceptions
 import gevent
 import time
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \

@@ -68,7 +68,6 @@ class Sample:
 
 
     def __init__(self, copysample = None):
-
         if copysample:
             self.__dict__ = copy (copysample.__dict__)
         else:

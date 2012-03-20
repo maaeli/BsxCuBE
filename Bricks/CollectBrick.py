@@ -588,58 +588,9 @@ class CollectBrick(Core.BaseBrick):
         self._sampleChangerDisplayFlag = False
         self._sampleChangerDisplayMessage = ""
 
-        #self._collectRobot = CollectRobotObject(self, self.brick_widget)
-
-        #QtCore.QObject.connect(self._collectRobot.proxySampleChanger, QtCore.SIGNAL("doSampleChangerAction"), self.doSampleChangerAction, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollect"), self.doRobotCollect, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("robotCollectEnd"), self.doRobotCollectEnd, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getCollectPars"), self.doGetCollectPars, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("getFileInfo"), self.doGetFileInfo, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot.proxyRobot, QtCore.SIGNAL("showMessage"), self.doShowMessage, Qt.Qt.BlockingQueuedConnection)
-        #QtCore.QObject.connect(self._collectRobot, QtCore.SIGNAL("displayReset"), self.displayReset, Qt.Qt.BlockingQueuedConnection)
-
-        # start robot thread
-        #self._collectRobot.start()
-
         self.setWidgetState()
         self.setButtonState(0)
 
-    # Proxy actions
-    """
-    def doSampleChangerAction(self, action_name, argdict = None):
-        method = getattr(self._sampleChanger, action_name)
-        try:
-            r = method(*argdict['args'])
-        except:
-            logging.warning("Lost connection with Sample Changer. Please abort data collection")
-            argdict['returned'] = None
-        else:
-            argdict['returned'] = r
-
-    def doRobotCollect(self, argdict = None):
-        self.startCollection(mode = "robot")
-
-        r = self.collect(*argdict['args'])
-        argdict['returned'] = r
-
-    def doRobotCollectEnd(self, argdict = None):
-        logging.info("doRobotCollectEnd")
-        self.setCollectionStatus("done")
-        r = self.setButtonState(0)
-        argdict['returned'] = r
-
-    def doGetCollectPars(self, ret):
-        r = self.getCollectPars(robot = 1)
-        ret['returned'] = r
-
-    def doGetFileInfo(self, ret):
-        r = self.getFileInfo()
-        ret['returned'] = r
-
-    def doShowMessage(self, argdict = None):
-        r = self.showMessage(*argdict['args'])
-        argdict['returned'] = r
-    """
 
     def collectObjectConnected(self, collect_obj):
         self.collectObj = collect_obj
