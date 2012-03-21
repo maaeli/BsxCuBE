@@ -163,10 +163,10 @@ class CollectBrick(Core.BaseBrick):
                 logmethod(line.rstrip())
 
         self.lastCollectProcessingLog = logmsg
-        self._collectRobotDialog.addHistory(pLevel, pMessage)
+        self._collectRobotDialog.addHistory(level, logmsg)
 
         if notify:
-             self.messageDialog(pLevel, pMessage)
+            self.messageDialog(level, logmsg)
 
     def collectNewFrameChanged(self, pValue):
         filename0 = pValue.split(",")[0]
@@ -505,7 +505,7 @@ class CollectBrick(Core.BaseBrick):
         self.extinctionCoefficentDoubleSpinBox.setDecimals(3)
         #TODO: - Change by reading from SPEC/File
         self.extinctionCoefficentDoubleSpinBox.setValue(1.000)
-        self.extinctionCoefficentDoubleSpinBox.setSuffix(" ml*1/mg*1/cm)")
+        self.extinctionCoefficentDoubleSpinBox.setSuffix(" (ml)*(1/mg)*(1/cm)")
         self.extinctionCoefficentDoubleSpinBox.setToolTip("Extinction Coefficient")
         self.hBoxLayout151.addWidget(self.extinctionCoefficentDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout151)
@@ -639,7 +639,7 @@ class CollectBrick(Core.BaseBrick):
 
         return valid
 
-    def getFileInfo(self, all = 0):
+    def getFileInfo(self):
         generalParsWidget = self
         filepars = CollectPars()
         filepars.prefix = generalParsWidget.prefixLineEdit.text()
@@ -647,7 +647,7 @@ class CollectBrick(Core.BaseBrick):
         filepars.frameNumber = generalParsWidget.frameNumberSpinBox.value()
         return filepars
 
-    def getCollectPars(self, robot = 1, all = 0):
+    def getCollectPars(self, robot = 1):
         if robot:
             # return a dictionary
             collectpars = { "directory": str(self.directoryLineEdit.text()),
@@ -708,20 +708,20 @@ class CollectBrick(Core.BaseBrick):
             for i in range(0, self._collectRobotDialog.tableWidget.rowCount()):
                 sample = self._collectRobotDialog.getSampleRow(i)
 
-                if all or sample.enable:
+                if sample.enable:
                     if sample.isBuffer():
                         bufferList.append(sample.__dict__)
                     else:
                         sampleList.append(sample.__dict__)
 
             for sample in sampleList:
-              sample["buffer"] = []
-              if len(bufferList) == 1:   # if there is one and only one buffer defined dont look at name. assign
-                  sample["buffer"].append(bufferList[0])
-              else:
-                  for buffer in bufferList:
-                      if buffer["buffername"] == sample["buffername"]:
-                          sample["buffer"].append(buffer)
+                sample["buffer"] = []
+                if len(bufferList) == 1:   # if there is one and only one buffer defined dont look at name. assign
+                    sample["buffer"].append(bufferList[0])
+                else:
+                    for bufferEntry in bufferList:
+                        if buffer["buffername"] == sample["buffername"]:
+                            sample["buffer"].append(bufferEntry)
 
             if robotpars["optimSEUtemp"]:
                 sampleList.sort(cmpSEUtemp)
