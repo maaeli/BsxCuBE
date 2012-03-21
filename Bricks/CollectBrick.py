@@ -1126,7 +1126,7 @@ class CollectBrick(Core.BaseBrick):
     def displayReset(self):
         self.emit("displayResetChanged")
         if self.image_proxy is None:
-          return
+            return
         try:
             self.image_proxy.erase_curves()
         except Exception, e:
@@ -1155,7 +1155,7 @@ class CollectBrick(Core.BaseBrick):
         if self.robotCheckBox.isChecked():
             answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Do you want to abort the ongoing data collection?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
             if answer == Qt.QMessageBox.No:
-                 return
+                return
 
         logging.getLogger().info("Aborting!")
         logging.getLogger().warning("Wait for current action to finish...")
