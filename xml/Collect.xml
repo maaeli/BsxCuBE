@@ -2,15 +2,9 @@
 	
    <uri>nela:exp</uri>	
 
-   <object href="BsxCuBE/ESRFMachinfo" role="machine_current"/>
+   <channel call="SR_Current" type="tango" uri="orion:10000/FE/D/29"  name="machine_current"  />
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
-   <!-- 
-   OLD code:
-   <channel name="machine_current" type="spec" call="BSX_GLOBAL/collect/machineCurrent"/> 
-   TODO: Need to take away from spec when it works SO 7/3 2012
-   -->
    
-
    <command name="startJob_sparta" type="tango" uri="DAU/edna/1" call="startJob"/>
    <command name="initPlugin_sparta" type="tango" uri="DAU/edna/1" call="initPlugin" />
    <command name="getJobOutput_sparta" type="tango" uri="DAU/edna/1" call="getJobOutput"/>

@@ -150,8 +150,7 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-        #TODO: Get Machine current via Tango
-        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.objects["machine_current"].get_current()))
+        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channel["machine_current"].value()))
         xsdin1d = self.xsdin.copy()
 
         xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))
