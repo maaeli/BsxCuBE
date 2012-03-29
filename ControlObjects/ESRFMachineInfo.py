@@ -14,37 +14,53 @@ class ESRFMachineInfo(CObjectBase):
         self.operator_msg = str()
         self.next_fill = str()
 
-        # We should have read_sig_values, read_op_message, read_fill_mode
-        # in taco: DevReadSigValues | DevReadOpMesg | DevReadFillMode
-        chans = (('read_op_message', 'DevReadOpMesg'),
-                 ('read_fill_mode', 'DevReadFillMode'))
-        ds_name = str(self.config["/object/data[@name='uri']/@value"][0])
-        self.addChannel('taco',
-                        'read_sig_values',
-                        ds_name,
-                        'DevReadSigValues',
-                        polling=3000)
-        for (name, call) in chans:
-            self.addChannel('taco',
-                            name,
-                            ds_name,
-                            call)
+        # Extract tango device name from a file ESRFMachInfo.xml: 
+        #======= BEGIN =====
+        #<object class = "ESRFMachineInfo" username = "ESRFMachineInfo">
+        #    <data name="uri"  value="orion:10000/FE/D/29" />
+        #</object>    
+        #======== END =========
+        # 
+        # get device from config file
+        devName = str(self.config["/object/data[@name='uri']/@value"][0])
+        #
+        # read three values
+        #
+        # We should have read_current_value, read_op_message, read_fill_mode, read_next_fill
+        # in tango: SR_Current | SR_Operator_Mesg | SR_Filling_Mode | SR_Refill_Countdown
+        # Read Current regularly to update all values
+        self.addChannel('tango',
+                        'read_current_value',
+                        devName,
+                        'SR_Current',
+                        polling = 3000)
+        self.addChannel('tango',
+                        'read_op_message',
+                        devName,
+                        'SR_Operator_Mesg')
+        self.addChannel('tango',
+                        'read_fill_mode',
+                        devName,
+                        'SR_Filling_Mode')
+        self.addChannel('tango',
+                        'read_next_fill',
+                        devName,
+                        'SR_Refill_CountDown')
 
-        read_sig_values = self.channels.get('read_sig_values')
-        if read_sig_values is not None:
-            read_sig_values.connect('update', self.values_changed)
+        read_current_value = self.channels.get('read_current_value')
+        if read_current_value is not None:
+            read_current_value.connect('update', self.current_changed)
 
 
     def get_current(self):
         return self.machine_current
 
 
-    def values_changed(self, values):
-        self.machine_current = values[14]
-        self.next_fill = values[16]
+    def current_changed(self, current):
+        self.machine_current = current
+        self.next_fill = self.channels.get('read_next_fill').value()
         self.operator_msg = self.channels.get('read_op_message').value().strip()
         self.fill_mode = self.channels.get('read_fill_mode').value().strip()
-        
         self.emit('machine_info_updated',
                   self.machine_current,
                   self.operator_msg,
