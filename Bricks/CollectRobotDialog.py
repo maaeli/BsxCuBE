@@ -585,8 +585,8 @@ class CollectRobotDialog(Qt.QDialog):
             Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
         except Exception, e:
             import traceback
-            logmsg = traceback.print_exc()
-            logging.exception('Cannot load collection parameters file. \n%s' % logmsg)
+            traceback.print_exc()
+            logging.exception('Cannot load collection parameters file. \n')
             logging.getLogger().error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
@@ -627,8 +627,8 @@ class CollectRobotDialog(Qt.QDialog):
             Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully saved!" % filename)
         except Exception, e:
             import traceback
-            logmsg = traceback.print_exc()
-            logging.exception('Cannot save collection parameters file.\n%s' % logmsg)
+            traceback.print_exc()
+            logging.exception('Cannot save collection parameters file.\n')
             logging.getLogger().error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to save file '%s'!" % filename)
 

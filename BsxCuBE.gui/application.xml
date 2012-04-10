@@ -29,22 +29,36 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Beamline"/>
   </properties>
+  <properties id="OHScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Optics"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="15"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
   <properties id="ReprocessTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Reprocess"/>
   </properties>
-  <properties id="BsxSCBrick1">
-     <property name="flex" value="0"/>
-  </properties>
-  <properties id="ReadingBrick3">
-     <property name="flex" value="0"/>
-     <property name="valueThreshold" value="0.80000000000000004"/>
-     <property name="maskFormat" value="%1.1e"/>
-     <property name="suffix" value=" mbar"/>
-     <property name="toolTip" value="Vacuum in flight tube"/>
-     <property name="fontSize" value="24"/>
+  <properties id="Display">
+     <property name="flex" value="2"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Display"/>
   </properties>
   <properties id="BsxFrameBrick1">
      <property name="flex" value="1"/>
@@ -159,36 +173,11 @@
   <properties id="CollectBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="BrowseTab">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Browse"/>
-  </properties>
   <properties id="EH">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="EH Scan"/>
-  </properties>
-  <properties id="OHScan">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="Optics"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="defaultScale" value="linear"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="15"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
   </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
@@ -206,6 +195,9 @@
      <property name="maximumHistory" value="10"/>
      <property name="minimumValue" value="0.0"/>
      <property name="orientation" value="Landscape"/>
+  </properties>
+  <properties id="BsxSCBrick1">
+     <property name="flex" value="0"/>
   </properties>
   <properties id="Robot">
      <property name="flex" value="1"/>
@@ -264,13 +256,13 @@
   <properties id="BsxCuBE">
      <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
      <property name="objects_server" value="localhost:6667"/>
-     <property name="expert_password" value=""/>
+     <property name="expert_password" value="tonic29"/>
   </properties>
-  <properties id="Display">
-     <property name="flex" value="2"/>
+  <properties id="BrowseTab">
+     <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Display"/>
+     <property name="caption" value="Browse"/>
   </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
@@ -301,6 +293,14 @@
   </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
+  </properties>
+  <properties id="ReadingBrick3">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in flight tube"/>
+     <property name="fontSize" value="24"/>
   </properties>
   <properties id="Misc">
      <property name="flex" value="0"/>
@@ -370,10 +370,6 @@
   </connections>
 
   <connections id="CalibrationDiamondBrick1">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="calibration">
       <signal name="calibrationStatusChanged"/>
       <signal name="newPositionChanged"/>
@@ -400,23 +396,36 @@
   <connections id="BeamlineTab">
   </connections>
 
+  <connections id="OHScan">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="BsxCuBE/optscan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
   <connections id="ReprocessTab">
   </connections>
 
-  <connections id="BsxSCBrick1">
-    <connection role="samplechanger">
-      <signal name="seuTemperatureChanged"/>
-      <signal name="storageTemperatureChanged"/>
-      <signal name="stateChanged"/>
-      <peer name="BsxCuBE/SampleChanger"/>
-    </connection>
-  </connections>
-
-  <connections id="ReadingBrick3">
-    <connection role="reading">
-      <signal name="readingChanged"/>
-      <peer name="BsxCuBE/ReadingVacFlightTube"/>
-    </connection>
+  <connections id="Display">
   </connections>
 
   <connections id="BsxFrameBrick1">
@@ -625,36 +634,7 @@
     </connection>
   </connections>
 
-  <connections id="BrowseTab">
-  </connections>
-
   <connections id="EH">
-  </connections>
-
-  <connections id="OHScan">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-      <peer name="BsxCuBE/optscan"/>
-    </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
-    </connection>
   </connections>
 
   <connections id="splitter1">
@@ -673,6 +653,15 @@
       <signal name="attenuatorsStateChanged"/>
       <signal name="attenuatorsFactorChanged"/>
       <peer name="BsxCuBE/Attenuators"/>
+    </connection>
+  </connections>
+
+  <connections id="BsxSCBrick1">
+    <connection role="samplechanger">
+      <signal name="seuTemperatureChanged"/>
+      <signal name="storageTemperatureChanged"/>
+      <signal name="stateChanged"/>
+      <peer name="BsxCuBE/SampleChanger"/>
     </connection>
   </connections>
 
@@ -726,7 +715,7 @@
   <connections id="BsxCuBE">
   </connections>
 
-  <connections id="Display">
+  <connections id="BrowseTab">
   </connections>
 
   <connections id="ReadingBrick1">
@@ -752,6 +741,13 @@
   <connections id="BsxVideoBrick1">
     <connection role="samplechanger">
       <peer name="BsxCuBE/SampleChanger"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick3">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="BsxCuBE/ReadingVacFlightTube"/>
     </connection>
   </connections>
 
@@ -848,4 +844,5 @@
   <connections id="1D">
   </connections>
 
+  
   </application>

@@ -1,3 +1,16 @@
+"""
+ESRFMachineInfo Control Object
+
+Description: Reads values from the FrontEnd (via Tango)
+
+Example xml:
+<object class = "ESRFMachineInfo" username = "ESRFMachineInfo">
+      <data name="uri"  value="orion:10000/FE/D/29" />
+</object> 
+
+
+"""
+
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 from Framework4.Control.Core.CObject import addChannel, addCommand
 
@@ -14,14 +27,7 @@ class ESRFMachineInfo(CObjectBase):
         self.operator_msg = str()
         self.next_fill = str()
 
-        # Extract tango device name from a file ESRFMachInfo.xml: 
-        #======= BEGIN =====
-        #<object class = "ESRFMachineInfo" username = "ESRFMachineInfo">
-        #    <data name="uri"  value="orion:10000/FE/D/29" />
-        #</object>    
-        #======== END =========
-        # 
-        # get device from config file
+        # get device from config file (see docstrings for xml example)
         devName = str(self.config["/object/data[@name='uri']/@value"][0])
         #
         # read three values

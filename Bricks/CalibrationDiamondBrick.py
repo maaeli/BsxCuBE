@@ -16,10 +16,10 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                                             [Signal("calibrationStatusChanged", "calibrationStatusChanged"),
                                              Signal("newPositionChanged", "newPositionChanged")],
                                             [Slot("executeCalibration")],
-                                            "calibrationObjectConnected"),
-                    "login": Connection("Login object",
-                                            [Signal("expertModeChanged", "expertModeChanged")],
-                                             [])}
+                                            "calibrationObjectConnected")}
+                    #"login": Connection("Login object",
+                    #                        [Signal("expertModeChanged", "expertModeChanged")],
+                    #                         [])}
 
     signals = []
     slots = []
@@ -58,7 +58,7 @@ class CalibrationDiamondBrick(Core.BaseBrick):
 
     def expertModeOnlyChanged(self, pValue):
         self.__expertModeOnly = pValue
-        self.expertModeChanged(self.__expertMode)
+        self.expert_mode(self.__expertMode)
 
 
     def commandPushButtonClicked(self):
@@ -87,9 +87,13 @@ class CalibrationDiamondBrick(Core.BaseBrick):
                 if Qt.QMessageBox.question(self.brick_widget, "Info", "Do you accept '%s' as the inflexion point?" % self.__newPosition, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
                     self.getObject("calibration").setPosition(self.__newPosition)
 
+    
+    #def expertModeChanged(self, pValue):
+    #    self.__expertMode = pValue
+    #    self.commandPushButton.setEnabled(not self.__expertModeOnly or self.__expertMode)
 
-    def expertModeChanged(self, pValue):
-        self.__expertMode = pValue
+    def expert_mode(self, expert):
+        self.__expertMode = expert
         self.commandPushButton.setEnabled(not self.__expertModeOnly or self.__expertMode)
 
 
