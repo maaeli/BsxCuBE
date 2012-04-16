@@ -180,6 +180,18 @@
      <property name="pack" value="start"/>
      <property name="caption" value="EH Scan"/>
   </properties>
+  <properties id="DualCurrentNewBrick1">
+     <property name="flex" value="0"/>
+     <property name="maskFormat2" value=""/>
+     <property name="maskFormat1" value=""/>
+     <property name="maximumHistory" value="0"/>
+     <property name="maximumValue2" value="0.0"/>
+     <property name="maximumValue1" value="0.0"/>
+     <property name="minimumValue1" value="0.0"/>
+     <property name="minimumValue2" value="0.0"/>
+     <property name="suffix2" value=""/>
+     <property name="suffix1" value=""/>
+  </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
   </properties>
@@ -589,6 +601,15 @@
   <connections id="EH">
   </connections>
 
+  <connections id="DualCurrentNewBrick1">
+    <connection role="reading1">
+      <signal name="value1Changed"/>
+    </connection>
+    <connection role="reading2">
+      <signal name="value2Changed"/>
+    </connection>
+  </connections>
+
   <connections id="splitter1">
   </connections>
 
@@ -598,7 +619,6 @@
   <connections id="AttenuatorsBrick1">
     <connection role="Collect">
       <signal name="transmissionChanged"/>
-      <peer name="BsxCuBE/Attenuators"/>
       <peer name="CollectBrick1"/>
     </connection>
     <connection role="attenuators">
