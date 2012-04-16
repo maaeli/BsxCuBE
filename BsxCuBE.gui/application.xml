@@ -182,15 +182,17 @@
   </properties>
   <properties id="DualCurrentNewBrick1">
      <property name="flex" value="0"/>
-     <property name="maskFormat2" value=""/>
-     <property name="maskFormat1" value=""/>
-     <property name="maximumHistory" value="0"/>
-     <property name="maximumValue2" value="0.0"/>
-     <property name="maximumValue1" value="0.0"/>
+     <property name="maskFormat2" value="%.3f"/>
+     <property name="maskFormat1" value="%.3f"/>
+     <property name="label1" value="Energy        "/>
+     <property name="label2" value="Wavelength"/>
+     <property name="maximumHistory" value="10"/>
+     <property name="maximumValue2" value="100.0"/>
+     <property name="maximumValue1" value="100.0"/>
      <property name="minimumValue1" value="0.0"/>
      <property name="minimumValue2" value="0.0"/>
-     <property name="suffix2" value=""/>
-     <property name="suffix1" value=""/>
+     <property name="suffix2" value="Angstrom"/>
+     <property name="suffix1" value="KeV"/>
   </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
@@ -271,11 +273,11 @@
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value="tonic29"/>
   </properties>
-  <properties id="BrowseTab">
+  <properties id="Operation">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Browse"/>
+     <property name="caption" value="Operation"/>
   </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
@@ -338,11 +340,11 @@
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="Operation">
+  <properties id="BrowseTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Operation"/>
+     <property name="caption" value="Browse"/>
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
@@ -687,7 +689,7 @@
   <connections id="BsxCuBE">
   </connections>
 
-  <connections id="BrowseTab">
+  <connections id="Operation">
   </connections>
 
   <connections id="ReadingBrick1">
@@ -778,7 +780,7 @@
     </connection>
   </connections>
 
-  <connections id="Operation">
+  <connections id="BrowseTab">
   </connections>
 
   <connections id="FeedbackBrick1">

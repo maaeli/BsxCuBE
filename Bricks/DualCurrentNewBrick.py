@@ -22,10 +22,12 @@ class DualCurrentNewBrick(Core.BaseBrick):
     # =============================================
     #  PROPERTIES/CONNECTIONS DEFINITION
     # =============================================            
-    properties = {"maskFormat1": Property("string", "Mask format1", "", "maskFormat1Changed"),
+    properties = {"label1": Property("string", "Label value1", "", "label1Changed"),
+                  "maskFormat1": Property("string", "Mask format1", "", "maskFormat1Changed"),
                   "suffix1": Property("string", "Suffix1", "", "suffix1Changed"),
                   "minimumValue1": Property("float", "Minimum value1", "", "minimumValue1Changed"),
                   "maximumValue1": Property("float", "Maximum value1", "", "maximumValue1Changed"),
+                  "label2": Property("string", "Label value2", "", "label2Changed"),
                   "maskFormat2": Property("string", "Mask format2", "", "maskFormat2Changed"),
                   "suffix2": Property("string", "Suffix2", "", "suffix2Changed"),
                   "minimumValue2": Property("float", "Minimum value2", "", "minimumValue2Changed"),
@@ -66,10 +68,12 @@ class DualCurrentNewBrick(Core.BaseBrick):
     # =============================================
     def init(self):
         self.__filtersDialog = None
+        self.__label1 = ""
         self.__maskFormat1 = ""
         self.__suffix1 = ""
         self.__minimumValue1 = 0
         self.__maximumValue1 = 100
+        self.__label2 = ""
         self.__maskFormat2 = ""
         self.__suffix2 = ""
         self.__minimumValue2 = 0
@@ -80,20 +84,20 @@ class DualCurrentNewBrick(Core.BaseBrick):
 
         self.brick_widget.setLayout(self.vboxLayout)
 
-        self.value1Label = Qt.QLabel("Value1 (current, new)", self.brick_widget)
+        self.value1Label = Qt.QLabel(self.__label1 + " (current, new)", self.brick_widget)
         self.hBox1Layout.addWidget(self.value1Label)
 
         self.currentValue1LineEdit = Qt.QLineEdit(self.brick_widget)
         self.currentValue1LineEdit.setEnabled(False)
         self.currentValue1LineEdit.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-        self.currentValue1LineEdit.setToolTip("Current transmission")
+        self.currentValue1LineEdit.setToolTip("Current " + self.__label1)
         self.hBox1Layout.addWidget(self.currentValue1LineEdit)
 
         self.newValue1ComboBox = Qt.QComboBox(self.brick_widget)
         self.newValue1ComboBox.setEditable(True)
         self.newValue1ComboBox.lineEdit().setMaxLength(10)
         self.newValue1ComboBox.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-        self.newValue1ComboBox.setToolTip("New transmission")
+        self.newValue1ComboBox.setToolTip("New " + self.__label1)
         Qt.QObject.connect(self.newValue1ComboBox, Qt.SIGNAL("editTextChanged(const QString &)"), self.newValue1ComboBoxChanged)
         Qt.QObject.connect(self.newValue1ComboBox.lineEdit(), Qt.SIGNAL("returnPressed()"), self.newValue1ComboBoxReturnPressed)
         self.hBox1Layout.addWidget(self.newValue1ComboBox)
@@ -104,20 +108,20 @@ class DualCurrentNewBrick(Core.BaseBrick):
 
         self.hBox2Layout = Qt.QHBoxLayout()
 
-        self.value2Label = Qt.QLabel("Value2 (current, new)", self.brick_widget)
+        self.value2Label = Qt.QLabel(self.__label2 + " (current, new)", self.brick_widget)
         self.hBox2Layout.addWidget(self.value2Label)
 
         self.currentValue2LineEdit = Qt.QLineEdit(self.brick_widget)
         self.currentValue2LineEdit.setEnabled(False)
         self.currentValue2LineEdit.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-        self.currentValue2LineEdit.setToolTip("Current transmission")
+        self.currentValue2LineEdit.setToolTip("Current " + self.__label2)
         self.hBox2Layout.addWidget(self.currentValue2LineEdit)
 
         self.newValue2ComboBox = Qt.QComboBox(self.brick_widget)
         self.newValue2ComboBox.setEditable(True)
         self.newValue2ComboBox.lineEdit().setMaxLength(10)
         self.newValue2ComboBox.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-        self.newValue2ComboBox.setToolTip("New transmission")
+        self.newValue2ComboBox.setToolTip("New " + self.__label2)
         Qt.QObject.connect(self.newValue2ComboBox, Qt.SIGNAL("editTextChanged(const QString &)"), self.newValue2ComboBoxChanged)
         Qt.QObject.connect(self.newValue2ComboBox.lineEdit(), Qt.SIGNAL("returnPressed()"), self.newValue2ComboBoxReturnPressed)
         self.hBox2Layout.addWidget(self.newValue2ComboBox)
@@ -130,6 +134,19 @@ class DualCurrentNewBrick(Core.BaseBrick):
     # =============================================
     #  HANDLE PROPERTIES CHANGES
     # =============================================
+    def label1Changed(self, pValue):
+        self.__label1 = pValue
+        self.value1Label.setText(self.__label1)
+        self.currentValue1LineEdit.setToolTip("Current " + self.__label1)
+        self.newValue1ComboBox.setToolTip("New " + self.__label1)
+
+
+    def label2Changed(self, pValue):
+        self.__label2 = pValue
+        self.value2Label.setText(self.__label2)
+        self.currentValue2LineEdit.setToolTip("Current " + self.__label2)
+        self.newValue2ComboBox.setToolTip("New " + self.__label2)
+
     def maskFormat1Changed(self, pValue):
         self.__maskFormat1 = pValue
         self.attenuators1FactorChanged(self.currentValue1LineEdit.text())
