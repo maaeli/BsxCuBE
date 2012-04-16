@@ -1,7 +1,7 @@
 import os, logging
 
 from Framework4.GUI      import Core
-from Framework4.GUI.Core import Connection, Signal, Slot
+from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
 from CollectRobotDialog  import CollectRobotDialog
 #from CollectRobotObject  import CollectRobotObject
@@ -25,7 +25,8 @@ def cmpCodeAndSEU(a, b):
         return cmpCode(a, b)
 
 class CollectBrick(Core.BaseBrick):
-    properties = {}
+    properties = {"expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
+
     connections = {"collect": Connection("Collect object",
                                              [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
                                               Signal("collectPrefixChanged", "collectPrefixChanged"),
@@ -54,14 +55,9 @@ class CollectBrick(Core.BaseBrick):
                                              Slot("collectAbort"),
                                              Slot("triggerEDNA")],
                                             "collectObjectConnected"),
-                    "login": Connection("Login object",
-                                            [Signal("expertModeChanged", "expertModeChanged")],
-                                             [],
-                                             "connectionStatusChanged"),
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
-                                             [],
-                                             "connectionStatusChanged"),
+                                             []),
                     "sample_changer": Connection("SampleChanger object",
                                              [],
                                              [],
@@ -69,8 +65,7 @@ class CollectBrick(Core.BaseBrick):
                     "image_proxy": Connection("image proxy",
                                              [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                              [],
-                                             "image_proxy_connected"),
-                    }
+                                             "image_proxy_connected")}
 
 
 
@@ -242,8 +237,12 @@ class CollectBrick(Core.BaseBrick):
         else:
             self.setCollectionStatus("ready", progress = None)
 
-    def expertModeChanged(self, pValue):
-        self.__expertMode = pValue
+    def expertModeOnlyChanged(self, pValue):
+        self.__expertModeOnly = pValue
+        self.expert_mode(self.__expertMode)
+
+    def expert_mode(self, expert):
+        self.__expertMode = expert
         self.setWidgetState()
 
     def executeTestCollect(self):
@@ -263,10 +262,10 @@ class CollectBrick(Core.BaseBrick):
 
     def y_curves_data(self, pPeer):
         pass
+
     def erase_curve(self, pPeer):
         pass
-    def connectionStatusChanged(self, pPeer):
-        pass
+
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
@@ -287,7 +286,9 @@ class CollectBrick(Core.BaseBrick):
         self.__lastFrame = None
         self.__currentConcentration = None
         self.__isTesting = False
+        self.__expertModeOnly = False
         self.__expertMode = False
+
 
         self.__validParameters = [False, False, False]
 
@@ -835,16 +836,16 @@ class CollectBrick(Core.BaseBrick):
         self.runNumberSpinBox.setEnabled(not pValue)
         self.frameNumberSpinBox.setEnabled(not pValue)
         self.timePerFrameSpinBox.setEnabled(not pValue)
-        self.maskLineEdit.setEnabled(not pValue and self.__expertMode)
-        self.maskDirectoryPushButton.setEnabled(not pValue and self.__expertMode)
-        self.maskDisplayPushButton.setEnabled(not pValue and self.__expertMode)
-        self.detectorDistanceDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.waveLengthDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.pixelSizeXDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.pixelSizeYDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.beamCenterXSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.beamCenterYSpinBox.setEnabled(not pValue and self.__expertMode)
-        self.normalisationDoubleSpinBox.setEnabled(not pValue and self.__expertMode)
+        self.maskLineEdit.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.maskDirectoryPushButton.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.maskDisplayPushButton.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.detectorDistanceDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.waveLengthDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.pixelSizeXDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.pixelSizeYDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.beamCenterXSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.beamCenterYSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
+        self.normalisationDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.radiationCheckBox.setEnabled(not pValue)
         self.radiationRelativeDoubleSpinBox.setEnabled(not pValue and self.radiationCheckBox.isChecked())
         self.radiationAbsoluteDoubleSpinBox.setEnabled(not pValue and self.radiationCheckBox.isChecked())
@@ -911,7 +912,7 @@ class CollectBrick(Core.BaseBrick):
             self.__validParameters[2] = False
             self.maskLineEdit.setProperty("valid", "false")
 
-        self.maskDisplayPushButton.setEnabled(self.__validParameters[2] and self.__expertMode)
+        self.maskDisplayPushButton.setEnabled(self.__validParameters[2] and (not self.__expertModeOnly or self.__expertMode))
         self.testPushButton.setEnabled(False not in self.__validParameters)
         self.collectPushButton.setEnabled(False not in self.__validParameters)
 
@@ -999,7 +1000,7 @@ class CollectBrick(Core.BaseBrick):
             if self.robotCheckBox.isChecked():
                 self.startCollectWithRobot()
             else:
-                if not self.__expertMode:
+                if not (not self.__expertModeOnly or self.__expertMode):
 
                     if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
                         flag = (Qt.QMessageBox.question(self.brick_widget, \
@@ -1177,7 +1178,7 @@ class CollectBrick(Core.BaseBrick):
             self.SPECBusyTimerTimeOut()
 
         for timer in self._curveList:
-           timer.stop()
+            timer.stop()
 
         self.setCollectionStatus("aborting")
         self._curveList = []
@@ -1186,7 +1187,8 @@ class CollectBrick(Core.BaseBrick):
 
     def setWidgetState(self):
 
-        enabled = self.__expertMode and not self.readOnlyCheckBox.isChecked()
+        enabled = (not self.__expertModeOnly or self.__expertMode) and (not self.readOnlyCheckBox.isChecked())
+
 
         self.maskLineEdit.setEnabled(enabled)
         self.maskDirectoryPushButton.setEnabled(enabled)

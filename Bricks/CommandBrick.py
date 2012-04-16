@@ -20,10 +20,7 @@ class CommandBrick(Core.BaseBrick):
     connections = {"command": Connection("Command object",
                                             [Signal("commandStatusChanged", "commandStatusChanged")],
                                             [Slot("executeCommand")],
-                                            "connectionStatusChanged"),
-                    "login": Connection("Login object",
-                                            [Signal("expertModeChanged", "expertModeChanged")],
-                                             [])}
+                                            "connectionStatusChanged")}
 
     signals = []
     slots = []
@@ -65,7 +62,7 @@ class CommandBrick(Core.BaseBrick):
 
     def expertModeOnlyChanged(self, pValue):
         self.__expertModeOnly = pValue
-        self.expertModeChanged(self.__expertMode)
+        self.expert_mode(self.__expertMode)
 
 
 
@@ -86,8 +83,8 @@ class CommandBrick(Core.BaseBrick):
             elif messageList[0] == "2":     # command error
                 logging.getLogger().error(messageList[1])
 
-    def expertModeChanged(self, pValue):
-        self.__expertMode = pValue
+    def expert_mode(self, expert):
+        self.__expertMode = expert
         self.commandPushButton.setEnabled(not self.__expertModeOnly or self.__expertMode)
 
     def connectionStatusChanged(self, peer):

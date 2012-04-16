@@ -97,14 +97,14 @@
      <property name="caption" value="Sample alignment"/>
      <property name="parameter" value=""/>
      <property name="toolTip" value="Execute sample alignment"/>
-     <property name="expertModeOnly" value="False"/>
+     <property name="expertModeOnly" value="True"/>
   </properties>
   <properties id="CommandBrick1">
      <property name="flex" value="0"/>
      <property name="caption" value="Quick realignment"/>
      <property name="parameter" value=""/>
      <property name="toolTip" value="Execute quick realignment"/>
-     <property name="expertModeOnly" value="False"/>
+     <property name="expertModeOnly" value="True"/>
   </properties>
   <properties id="LogBrick1">
      <property name="flex" value="1"/>
@@ -172,6 +172,7 @@
   </properties>
   <properties id="CollectBrick1">
      <property name="flex" value="0"/>
+     <property name="expertModeOnly" value="True"/>
   </properties>
   <properties id="EH">
      <property name="flex" value="1"/>
@@ -286,11 +287,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="OH Scan"/>
   </properties>
-  <properties id="LoginBrick1">
-     <property name="flex" value="0"/>
-     <property name="password" value="tonic29"/>
-     <property name="orientation" value="Landscape"/>
-  </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
   </properties>
@@ -384,10 +380,6 @@
       <slot name="moveMotor"/>
       <peer name="BsxCuBE/MotorAlignmentSM"/>
     </connection>
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
   </connections>
 
   <connections id="tabbox1">
@@ -444,10 +436,6 @@
       <slot name="moveMotor"/>
       <peer name="BsxCuBE/MotorAlignmentBS"/>
     </connection>
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
   </connections>
 
   <connections id="MotorAlignmentBrick3">
@@ -456,10 +444,6 @@
       <slot name="moveMotor"/>
       <peer name="BsxCuBE/MotorAlignmentS2"/>
     </connection>
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
   </connections>
 
   <connections id="MotorAlignmentBrick2">
@@ -467,10 +451,6 @@
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
       <peer name="BsxCuBE/MotorAlignmentS1"/>
-    </connection>
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 
@@ -487,10 +467,6 @@
   </connections>
 
   <connections id="CommandBrick3">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -499,10 +475,6 @@
   </connections>
 
   <connections id="CommandBrick2">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -511,10 +483,6 @@
   </connections>
 
   <connections id="CommandBrick1">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -526,10 +494,6 @@
   </connections>
 
   <connections id="CommandBrick6">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -538,10 +502,6 @@
   </connections>
 
   <connections id="CommandBrick5">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -550,10 +510,6 @@
   </connections>
 
   <connections id="CommandBrick4">
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
-    </connection>
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
@@ -619,10 +575,6 @@
       <slot name="collectAbort"/>
       <slot name="triggerEDNA"/>
       <peer name="BsxCuBE/Collect"/>
-    </connection>
-    <connection role="login">
-      <signal name="expertModeChanged"/>
-      <peer name="LoginBrick1"/>
     </connection>
     <connection role="image_proxy">
       <signal name="new_curves_data"/>
@@ -733,9 +685,6 @@
   </connections>
 
   <connections id="OH">
-  </connections>
-
-  <connections id="LoginBrick1">
   </connections>
 
   <connections id="BsxVideoBrick1">

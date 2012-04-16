@@ -17,12 +17,7 @@ class MotorAlignmentBrick(Core.BaseBrick):
 
     connections = {"motoralignment": Connection("MotorAlignment object",
                                              [Signal("motorPositionChanged", "motorPositionChanged")],
-                                            [Slot("moveMotor")],
-                                            "connectionStatusChanged"),
-                    "login": Connection("Login object",
-                                            [Signal("expertModeChanged", "expertModeChanged")],
-                                             [],
-                                             "connectionStatusChanged")}
+                                            [Slot("moveMotor")])}
     signals = [Signal("executeTestCollect")]
     slots = []
 
@@ -34,18 +29,12 @@ class MotorAlignmentBrick(Core.BaseBrick):
 
 
 
-    def expertModeChanged(self, pValue):
-        self.__expertMode = pValue
+    def expert_mode(self, expert):
+        self.__expertMode = expert
         flag = (not self.__expertModeOnly or self.__expertMode)
         self.motorAlignmentPushButton.setEnabled(flag)
         if not flag and self.__motorAlignmentDialog is not None:
             self.__motorAlignmentDialog.close()
-
-
-
-    def connectionStatusChanged(self, pPeer):
-        pass
-
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
@@ -72,7 +61,7 @@ class MotorAlignmentBrick(Core.BaseBrick):
 
     def expertModeOnlyChanged(self, pValue):
         self.__expertModeOnly = pValue
-        self.expertModeChanged(self.__expertMode)
+        self.expert_mode(self.__expertMode)
 
     def motorAlignmentPushButtonClicked(self):
         if self.__motorAlignmentDialog is not None and self.__motorAlignmentDialog.isVisible():
