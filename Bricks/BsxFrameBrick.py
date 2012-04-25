@@ -30,8 +30,10 @@ class BsxFrameBrick(Core.BaseBrick):
         self.frameDisplay = QubDataImageDisplay(self.brick_widget, noAction = False,
                                                                     noToolbarAction = False, forcePopupSubWindow = True)
         # layout
+        # Next line will always have an error in Eclipse, even if it is correct.
         self.frameDisplay.setSizePolicy(Qt.QSizePolicy.MinimumExpanding, Qt.QSizePolicy.MinimumExpanding)
         self.brick_widget.layout().addWidget(self.frameDisplay)
+        # remove all to remove foreground color changer
         self.frameDisplay.delAllAction()
         # No foreground color change - all other left in
         action_enum = [QubDataImageDisplay.QUICK_SCROLL,
@@ -56,7 +58,7 @@ class BsxFrameBrick(Core.BaseBrick):
         openDialog.setDialog(dialog)
         openDialog._dialog = dialog
         self.frameDisplay.addDataAction(openDialog, dialog)
-        #TODO: ask Sebastien why this is needed
+        # Reference the openDialog to make sure the Garbage Collector does not remove it (_openD could be _dummy)
         self.frameDisplay._openD = openDialog
 
     def displayItemChanged(self, files_string):
