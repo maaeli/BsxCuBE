@@ -1,0 +1,8 @@
+<object class = "DualCurrentNew" username = "DualCurrentNew">
+    
+   <uri>nela:oh</uri>
+   <command name="setValue1" type="spec" call="setEnergy"/>
+   <channel name="getValue1" type="spec" call="BSX_GLOBAL/"/>
+   
+
+</object>
