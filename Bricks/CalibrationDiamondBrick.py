@@ -93,8 +93,8 @@ class CalibrationDiamondBrick(Core.BaseBrick):
     def calibrationObjectConnected(self, peer):
         self.calibration_object = peer
         if self.calibration_object is None:
-          self.brick_widget.setEnabled(False)
+            self.brick_widget.setEnabled(False)
         else:
-          self.brick_widget.setEnabled(True)
+            self.brick_widget.setEnabled(True)
 
 

@@ -20,7 +20,7 @@ class TemperatureSelector(Qt.QDialog):
 
         try:
             initvalue = float(initvalue)
-        except:
+        except ValueError:
             initvalue = 20
         self.temperatureDoubleSpinBox.setValue(initvalue)
 
@@ -50,9 +50,9 @@ def getTemperature(title = "Temperature", initvalue = 20, minvalue = 4, maxvalue
     dialog = TemperatureSelector(title, initvalue, minvalue, maxvalue)
 
     if dialog.exec_() == Qt.QDialog.Accepted:
-       return dialog.getTemperature()
+        return dialog.getTemperature()
     else:
-       return None
+        return None
 
 if __name__ == '__main__':
     app = Qt.QApplication(sys.argv)
