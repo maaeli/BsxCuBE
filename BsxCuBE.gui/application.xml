@@ -48,6 +48,12 @@
      <property name="y2AxisLabel" value=""/>
      <property name="showPrintButton" value="True"/>
   </properties>
+  <properties id="vgroupbox1">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="User"/>
+  </properties>
   <properties id="ReprocessTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
@@ -301,6 +307,9 @@
      <property name="pack" value="start"/>
      <property name="caption" value="OH Scan"/>
   </properties>
+  <properties id="LoginBrick1">
+     <property name="flex" value="0"/>
+  </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
   </properties>
@@ -426,6 +435,9 @@
     <connection role="Y2">
       <signal name="update"/>
     </connection>
+  </connections>
+
+  <connections id="vgroupbox1">
   </connections>
 
   <connections id="ReprocessTab">
@@ -707,6 +719,9 @@
   </connections>
 
   <connections id="OH">
+  </connections>
+
+  <connections id="LoginBrick1">
   </connections>
 
   <connections id="BsxVideoBrick1">

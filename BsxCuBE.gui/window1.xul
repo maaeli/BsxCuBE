@@ -88,7 +88,12 @@
   
 <vgroupbox id="Misc" orient="vertical">
   <caption label="Misc"/>
-  <hbox qwidget="true" id="MachineCurrentBrick1" brick="true"><script src="MachineCurrentBrick" tau="false"/></hbox>
+  <vgroupbox id="vgroupbox1" orient="vertical">
+  <caption label="User"/>
+  <hbox qwidget="true" id="LoginBrick1" brick="true"><script src="LoginBrick" tau="false"/></hbox>
+</vgroupbox>
+  
+<hbox qwidget="true" id="MachineCurrentBrick1" brick="true"><script src="MachineCurrentBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ReadingBrick1" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ReadingBrick2" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ReadingBrick3" brick="true"><script src="ReadingBrick" tau="false"/></hbox>
