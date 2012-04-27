@@ -96,11 +96,11 @@ class AttenuatorsBrick(Core.BaseBrick):
 
         self.newTransmissionComboBoxChanged(None)
 
+    # Logged In : True or False (from LoginBrick)
+    def loggedIn(self, pValue):
+        if (pValue):
+            self.brick_widget.SetEnable(pValue)
 
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
     def maskFormatChanged(self, pValue):
         self.__maskFormat = pValue
         self.attenuatorsFactorChanged(self.currentTransmissionLineEdit.text())
