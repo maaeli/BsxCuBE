@@ -98,7 +98,6 @@ class LoginBrick(Core.BaseBrick):
         ## First set up info and connection
         self.ldapHost = "ldap.esrf.fr"
         self.ldapConnection = ldap.open(self.ldapHost)
-        print "DEBUG - connected to ldap"
         if (self.checkLogin(self.__username, self.__password)[0]):
             # Got usernamed checked
             #TODO: get info from IspyB
@@ -108,7 +107,7 @@ class LoginBrick(Core.BaseBrick):
             # if username is opd29, no IspyB is needed
 
             self.brick_widget.setEnabled(True)
-            self.loginton.hide()
+            self.loginButton.hide()
             self.logoutButton.show()
         else:
             self.refuseLogin("Username or password bad")
@@ -216,7 +215,6 @@ class LoginBrick(Core.BaseBrick):
 
     def refuseLogin(self, message = None):
         if message is not None:
-            print "Do message Box"
             self.errorBox = Qt.QMessageBox.critical(self.brick_widget, "Error", message, Qt.QMessageBox.Ok)
             self.brick_widget.setEnabled(True)
 
