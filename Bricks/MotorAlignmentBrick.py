@@ -1,9 +1,7 @@
-import sys, os, time
 import logging
-import exceptions
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
-from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
+from Framework4.GUI.Core import Property, Connection, Signal, Slot
+from PyQt4 import QtGui, Qt
 
 __category__ = "General"
 
