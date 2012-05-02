@@ -1,6 +1,6 @@
 from Framework4.GUI      import Core
-from Framework4.GUI.Core import Connection, Signal, Slot
-from PyQt4 import QtGui, Qt, QtCore
+from Framework4.GUI.Core import Signal, Slot
+from PyQt4 import Qt, QtCore
 import ldap
 import logging
 
@@ -116,6 +116,8 @@ class LoginBrick(Core.BaseBrick):
             self.logoutButton.show()
             self.brick_widget.setEnabled(True)
             self.infoLabel.setStyleSheet('QLabel {color: gray}')
+            infoLabelText = "<h2>Logged in as %s to BsxCUBE</h2>" % self.__username
+            self.infoLabel.setText(infoLabelText)
             self.codeLabel.hide()
             self.propType.hide()
             self.dashLabel.hide()
@@ -204,6 +206,7 @@ class LoginBrick(Core.BaseBrick):
         self.logoutButton.hide()
         self.loginButton.show()
         self.infoLabel.setStyleSheet('QLabel {color: red}')
+        self.infoLabel.setText("<h2>You must log in to use BsxCuBE</h2>")
         self.codeLabel.show()
         self.propType.show()
         self.dashLabel.show()

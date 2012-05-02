@@ -610,6 +610,10 @@
       <slot name="triggerEDNA"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
     <connection role="image_proxy">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
