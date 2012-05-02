@@ -12,11 +12,15 @@ class BsxSCBrick(Core.BaseBrick):
 
     properties = {}
     connections = {"samplechanger": Connection("Sample Changer object",
-                      [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
-                       Signal('storageTemperatureChanged', 'storage_temperature_changed'),
-                       Signal('stateChanged', 'state_changed'), ],
-                    [],
-                    "sample_changer_connected")}
+                            [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
+                             Signal('storageTemperatureChanged', 'storage_temperature_changed'),
+                             Signal('stateChanged', 'state_changed'), ],
+                            [],
+                            "sample_changer_connected"),
+                    "login": Connection("Login object",
+                            [Signal("loggedIn", "loggedIn")],
+                            [],
+                            "connectionToLogin")}
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
@@ -29,6 +33,17 @@ class BsxSCBrick(Core.BaseBrick):
         mainLayout.addWidget(self.SCWidget)
         self.brick_widget.setLayout(mainLayout)
         # self.SCWidget.setState( "Disconnected" )
+
+    # When connected to Login, then block the brick
+    def connectionToLogin(self, pPeer):
+        if pPeer is not None:
+            self.brick_widget.setEnabled(False)
+
+
+    # Logged In : True or False 
+    def loggedIn(self, pValue):
+        self.brick_widget.setEnabled(pValue)
+
 
     def sample_changer_connected(self, sc):
 

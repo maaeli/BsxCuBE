@@ -447,6 +447,10 @@
   </connections>
 
   <connections id="BsxFrameBrick1">
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
     <connection role="display">
       <signal name="displayResetChanged"/>
       <signal name="displayItemChanged"/>
@@ -656,6 +660,10 @@
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
       <peer name="BsxCuBE/SampleChanger"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 

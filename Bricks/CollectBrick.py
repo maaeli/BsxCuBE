@@ -28,28 +28,28 @@ class CollectBrick(Core.BaseBrick):
     properties = {"expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
 
     connections = {"collect": Connection("Collect object",
-                                             [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
-                                              Signal("collectPrefixChanged", "collectPrefixChanged"),
-                                              Signal("collectRunNumberChanged", "collectRunNumberChanged"),
-                                              Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
-                                              Signal("collectTimePerFrameChanged", "collectTimePerFrameChanged"),
-                                              Signal("collectConcentrationChanged", "collectConcentrationChanged"),
-                                              Signal("collectCommentsChanged", "collectCommentsChanged"),
-                                              Signal("collectCodeChanged", "collectCodeChanged"),
-                                              Signal("collectMaskFileChanged", "collectMaskFileChanged"),
-                                              Signal("collectDetectorDistanceChanged", "collectDetectorDistanceChanged"),
-                                              Signal("collectWaveLengthChanged", "collectWaveLengthChanged"),
-                                              Signal("collectPixelSizeXChanged", "collectPixelSizeXChanged"),
-                                              Signal("collectPixelSizeYChanged", "collectPixelSizeYChanged"),
-                                              Signal("collectBeamCenterXChanged", "collectBeamCenterXChanged"),
-                                              Signal("collectBeamCenterYChanged", "collectBeamCenterYChanged"),
-                                              Signal("collectNormalisationChanged", "collectNormalisationChanged"),
-                                              Signal("collectProcessDataChanged", "collectProcessDataChanged"),
-                                              Signal("collectNewFrameChanged", "collectNewFrameChanged"),
-                                              Signal("checkBeamChanged", "checkBeamChanged"),
-                                              Signal("beamLostChanged", "beamLostChanged"),
-                                              Signal("collectProcessingDone", "collectProcessingDone"),
-                                              Signal("collectProcessingLog", "collectProcessingLog") ],
+                                            [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
+                                             Signal("collectPrefixChanged", "collectPrefixChanged"),
+                                             Signal("collectRunNumberChanged", "collectRunNumberChanged"),
+                                             Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
+                                             Signal("collectTimePerFrameChanged", "collectTimePerFrameChanged"),
+                                             Signal("collectConcentrationChanged", "collectConcentrationChanged"),
+                                             Signal("collectCommentsChanged", "collectCommentsChanged"),
+                                             Signal("collectCodeChanged", "collectCodeChanged"),
+                                             Signal("collectMaskFileChanged", "collectMaskFileChanged"),
+                                             Signal("collectDetectorDistanceChanged", "collectDetectorDistanceChanged"),
+                                             Signal("collectWaveLengthChanged", "collectWaveLengthChanged"),
+                                             Signal("collectPixelSizeXChanged", "collectPixelSizeXChanged"),
+                                             Signal("collectPixelSizeYChanged", "collectPixelSizeYChanged"),
+                                             Signal("collectBeamCenterXChanged", "collectBeamCenterXChanged"),
+                                             Signal("collectBeamCenterYChanged", "collectBeamCenterYChanged"),
+                                             Signal("collectNormalisationChanged", "collectNormalisationChanged"),
+                                             Signal("collectProcessDataChanged", "collectProcessDataChanged"),
+                                             Signal("collectNewFrameChanged", "collectNewFrameChanged"),
+                                             Signal("checkBeamChanged", "checkBeamChanged"),
+                                             Signal("beamLostChanged", "beamLostChanged"),
+                                             Signal("collectProcessingDone", "collectProcessingDone"),
+                                             Signal("collectProcessingLog", "collectProcessingLog") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -57,15 +57,19 @@ class CollectBrick(Core.BaseBrick):
                                             "collectObjectConnected"),
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
-                                             []),
+                                            []),
                     "sample_changer": Connection("SampleChanger object",
-                                             [],
-                                             [],
-                                             'sample_changer_connected'),
+                                            [],
+                                            [],
+                                            "sample_changer_connected"),
                     "image_proxy": Connection("image proxy",
-                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
-                                             [],
-                                             "image_proxy_connected")}
+                                            [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
+                                            [],
+                                            "image_proxy_connected"),
+                    "login": Connection("Login object",
+                                            [Signal("loggedIn", "loggedIn")],
+                                            [],
+                                            "connectionToLogin")}
 
 
 
@@ -73,6 +77,17 @@ class CollectBrick(Core.BaseBrick):
                Signal("displayItemChanged"),
                Signal("transmissionChanged")]
     slots = []
+
+    # When connected to Login, then block the brick
+    def connectionToLogin(self, pPeer):
+        if pPeer is not None:
+            self.brick_widget.setEnabled(False)
+
+
+    # Logged In : True or False 
+    def loggedIn(self, pValue):
+        self.brick_widget.setEnabled(pValue)
+
 
     def image_proxy_connected(self, image_proxy):
         self.image_proxy = image_proxy
@@ -1277,6 +1292,3 @@ class CollectBrick(Core.BaseBrick):
                 j += 1
 
         return prefix, run, frame, extra, extension
-
-if __name__ == '__main__':
-    print "nada"
