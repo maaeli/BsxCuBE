@@ -6,9 +6,6 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Connection, Signal
 
 from PyQt4 import QtCore, QtGui, Qt
-from Qub.qt4.Widget.DataDisplay import QubDataImageDisplay
-from Qub.qt4.Widget.QubActionSet import QubOpenDialogAction, QubZoomListAction, QubZoomAction
-from Qub.qt4.Widget.QubDialog import QubMaskToolsDialog, QubDataStatWidget
 
 __category__ = "BsxCuBE"
 
@@ -19,12 +16,12 @@ class BsxRobotBrick(Core.BaseBrick):
 
     properties = {}
     connections = {"samplechanger": Connection("Sample Changer object",
-                    [Signal('seuTemperatureChanged', 'seu_temperature_changed')
+                        [Signal('seuTemperatureChanged', 'seu_temperature_changed')
                                        , Signal('storageTemperatureChanged', 'storage_temperature_changed')
                                        , Signal('stateChanged', 'state_changed')
                                         ],
-                    [],
-                                       "sample_changer_connected")}
+                        [],
+                        "sample_changer_connected")}
 
 
     def sample_changer_connected(self, sc):
@@ -241,6 +238,7 @@ class BsxRobotBrick(Core.BaseBrick):
         if ret:
             selected_well = dialog.get_selected_well()
             logging.info('filling from [plate, row, column] = %s', selected_well)
+            #TODO: understand message and why it is not good
             self.getObject('samplechanger').fill(*selected_well)
 
     def robotDryPushButtonClicked(self):
@@ -345,6 +343,7 @@ class BsxRobotBrick(Core.BaseBrick):
         if ret:
             selected_well = dialog.get_selected_well()
             logging.info('recuperating from [plate, row, column] = %s', selected_well)
+            #TODO: Fix so that Eclipse does not complain
             self.getObject('samplechanger').recuperate(*selected_well)
 
 
@@ -386,15 +385,15 @@ class BsxRobotBrick(Core.BaseBrick):
         qFileDialog.setFilters(filterList)
         if qFileDialog.exec_():
             if qFileDialog.selectedNameFilter() == filterList[0]:
-                format = "PNG"
+                formatGraphics = "PNG"
             elif qFileDialog.selectedNameFilter() == filterList[1]:
-                format = "BMP"
+                formatGraphics = "BMP"
             else:
-                format = "JPG"
+                formatGraphics = "JPG"
             fileName = str(qFileDialog.selectedFiles()[0])
-            if not fileName.upper().endswith("." + format):
-                fileName += "." + format
-            if QtGui.QPixmap.grabWidget(self.robotSampleChangerFrameLabel).save(fileName, format):
+            if not fileName.upper().endswith("." + formatGraphics):
+                fileName += "." + formatGraphics
+            if QtGui.QPixmap.grabWidget(self.robotSampleChangerFrameLabel).save(fileName, formatGraphics):
                 Qt.QMessageBox.information(self.brick_widget, "Info", "Image was successfully saved in file '" + fileName + "'!")
             else:
                 Qt.QMessageBox.critical(self.brick_widget, "Error", "Error when trying to save image to file '" + fileName + "'!")
@@ -498,13 +497,12 @@ class WellPickerWidget(QtGui.QWidget):
 
         # the optional volume spinbox
         if self._display_volume:
-           self.layout().addWidget(QtGui.QLabel('Volume', self), 3, 0)
-
-           self.volume_spinbox = Qt.QSpinBox(self)
-           self.volume_spinbox.setSuffix(" u/l")
-           self.volume_spinbox.setRange(5, 150)
-           self.volume_spinbox.setValue(10)
-           self.layout().addWidget(self.volume_spinbox, 3, 1)
+            self.layout().addWidget(QtGui.QLabel('Volume', self), 3, 0)
+            self.volume_spinbox = Qt.QSpinBox(self)
+            self.volume_spinbox.setSuffix(" u/l")
+            self.volume_spinbox.setRange(5, 150)
+            self.volume_spinbox.setValue(10)
+            self.layout().addWidget(self.volume_spinbox, 3, 1)
 
         self.plate_combo.addItems(['1', '2', '3'])
         # other 2 combos filled  by callbacks
@@ -749,24 +747,25 @@ class RobotSampleChangerFrameLabel(Qt.QLabel):
 
 
     def mouseReleaseEvent(self, pEvent):
-        if self.__isDefining or self.__isMovingAll or self.__isMovingHorizontalUp or self.__isMovingHorizontalDown or self.__isMovingVerticalLeft or self.__isMovingVerticalRight:
-            if self.__parent._beamLocation[0] != self.__parent._beamLocation[2] or self.__parent._beamLocation[1] != self.__parent._beamLocation[3]:
-                self.setCursor(Qt.Qt.ArrowCursor)
-                if Qt.QMessageBox.question(self, "Info", "Do you accept this position as where the beam is located?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
-                    if self.__parent._beamLocation[0] > self.__parent._beamLocation[2]:
-                        x = self.__parent._beamLocation[0]
-                        self.__parent._beamLocation[0] = self.__parent._beamLocation[2]
-                        self.__parent._beamLocation[2] = x
+        if pEvent is not None:
+            if self.__isDefining or self.__isMovingAll or self.__isMovingHorizontalUp or self.__isMovingHorizontalDown or self.__isMovingVerticalLeft or self.__isMovingVerticalRight:
+                if self.__parent._beamLocation[0] != self.__parent._beamLocation[2] or self.__parent._beamLocation[1] != self.__parent._beamLocation[3]:
+                    self.setCursor(Qt.Qt.ArrowCursor)
+                    if Qt.QMessageBox.question(self, "Info", "Do you accept this position as where the beam is located?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
+                        if self.__parent._beamLocation[0] > self.__parent._beamLocation[2]:
+                            x = self.__parent._beamLocation[0]
+                            self.__parent._beamLocation[0] = self.__parent._beamLocation[2]
+                            self.__parent._beamLocation[2] = x
 
-                    if self.__parent._beamLocation[1] > self.__parent._beamLocation[3]:
-                        y = self.__parent._beamLocation[1]
-                        self.__parent._beamLocation[1] = self.__parent._beamLocation[3]
-                        self.__parent._beamLocation[3] = y
-                    self.__parent._sampleChanger.setBeamLocation(self.__parent._beamLocation[0], self.__parent._beamLocation[1], self.__parent._beamLocation[2], self.__parent._beamLocation[3])
-                self.__parent._isDrawing = False
-                self.__isDefining = False
-            self.__isMovingAll = False
-            self.__isMovingHorizontalUp = False
-            self.__isMovingHorizontalDown = False
-            self.__isMovingVerticalLeft = False
-            self.__isMovingVerticalRight = False
+                        if self.__parent._beamLocation[1] > self.__parent._beamLocation[3]:
+                            y = self.__parent._beamLocation[1]
+                            self.__parent._beamLocation[1] = self.__parent._beamLocation[3]
+                            self.__parent._beamLocation[3] = y
+                        self.__parent._sampleChanger.setBeamLocation(self.__parent._beamLocation[0], self.__parent._beamLocation[1], self.__parent._beamLocation[2], self.__parent._beamLocation[3])
+                    self.__parent._isDrawing = False
+                    self.__isDefining = False
+                self.__isMovingAll = False
+                self.__isMovingHorizontalUp = False
+                self.__isMovingHorizontalDown = False
+                self.__isMovingVerticalLeft = False
+                self.__isMovingVerticalRight = False

@@ -486,6 +486,10 @@
       <signal name="browseLocationChanged"/>
       <peer name="BsxCuBE/Browse"/>
     </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
     <connection role="image_proxy">
       <slot name="load_files"/>
       <peer name="BsxCuBE/image_proxy"/>

@@ -17,11 +17,12 @@ class BrowseBrick(Core.BaseBrick):
                                         [],
                                         "connectionStatusChanged"),
                     "image_proxy": Connection("image proxy",
-                                             [],
-                                             [Slot('load_files')])
-                   }
-
-
+                                        [],
+                                        [Slot('load_files')]),
+                    "login": Connection("Login object",
+                                        [Signal("loggedIn", "loggedIn")],
+                                        [],
+                                        "connectionToLogin")}
 
 
     signals = [Signal("displayResetChanged"),
@@ -138,6 +139,16 @@ class BrowseBrick(Core.BaseBrick):
         self.typeComboBoxChanged(self.typeComboBox.currentIndex())
         self.locationLineEditChanged(None)
 
+   # When connected to Login, then block the brick
+    def connectionToLogin(self, pPeer):
+        if pPeer is not None:
+            self.brick_widget.setEnabled(False)
+
+
+    # Logged In : True or False 
+    def loggedIn(self, pValue):
+        self.brick_widget.setEnabled(pValue)
+
     def delete(self):
         pass
 
@@ -152,7 +163,7 @@ class BrowseBrick(Core.BaseBrick):
         self.formatComboBox.clear()
         if pValue == 0:
             self.locationLabel.setText("Directory")
-            for description, extension in self.__formats:
+            for description, self.__ignore in self.__formats:
                 self.formatComboBox.addItem(description)
         else:
             self.locationLabel.setText("File")
@@ -203,51 +214,55 @@ class BrowseBrick(Core.BaseBrick):
 
 
     def formatComboBoxChanged(self, pValue):
-        if self.typeComboBox.currentIndex() == 0:
-            directory = ("", "raw", "2d", "raw", "raw", "raw", "1d")[self.formatComboBox.currentIndex()]
-            if directory != "":
-                directoryList = str(self.locationLineEdit.text()).split("/")
-                for i in range(len(directoryList) - 1, -1, -1):
-                    if directoryList[i] != "":
-                        if directoryList[i] in ("raw", "1d", "2d"):
-                            directoryList[i] = directory
-                        else:
-                            directoryList.insert(i + 1, directory)
-                        break
-                directory = ""
-                for i in range(0, len(directoryList)):
-                    if directoryList[i] != "":
-                        directory += "/" + directoryList[i]
-                if os.path.exists(directory):
-                    self.locationLineEdit.setText(directory)
+        if pValue is not None:
+            if self.typeComboBox.currentIndex() == 0:
+                directory = ("", "raw", "2d", "raw", "raw", "raw", "1d")[self.formatComboBox.currentIndex()]
+                if directory != "":
+                    directoryList = str(self.locationLineEdit.text()).split("/")
+                    for i in range(len(directoryList) - 1, -1, -1):
+                        if directoryList[i] != "":
+                            if directoryList[i] in ("raw", "1d", "2d"):
+                                directoryList[i] = directory
+                            else:
+                                directoryList.insert(i + 1, directory)
+                            break
+                    directory = ""
+                    for i in range(0, len(directoryList)):
+                        if directoryList[i] != "":
+                            directory += "/" + directoryList[i]
+                    if os.path.exists(directory):
+                        self.locationLineEdit.setText(directory)
 
-            if self.formatComboBox.currentIndex() == 6:
-                self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+                if self.formatComboBox.currentIndex() == 6:
+                    self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+                else:
+                    self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
             else:
-                self.itemsListWidget.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
-        else:
-            pass    # implement HDF
+                pass    # implement HDF
 
-        self.populatePrefixComboBox()
-        self.populateRunNumberComboBox()
-        self.populateExtraComboBox()
-        self.populateItemsListWidget()
+            self.populatePrefixComboBox()
+            self.populateRunNumberComboBox()
+            self.populateExtraComboBox()
+            self.populateItemsListWidget()
 
 
     def prefixComboBoxChanged(self, pValue):
-        self.populateRunNumberComboBox()
-        self.populateExtraComboBox()
-        self.populateItemsListWidget()
+        if pValue is not None:
+            self.populateRunNumberComboBox()
+            self.populateExtraComboBox()
+            self.populateItemsListWidget()
 
 
     def runNumberComboBoxChanged(self, pValue):
-        self.populateExtraComboBox()
-        self.populateItemsListWidget()
+        if pValue is not None:
+            self.populateExtraComboBox()
+            self.populateItemsListWidget()
 
 
 
     def extraComboBoxChanged(self, pValue):
-        self.populateItemsListWidget()
+        if pValue is not None:
+            self.populateItemsListWidget()
 
 
     def itemsListWidgetChanged(self):
@@ -296,7 +311,7 @@ class BrowseBrick(Core.BaseBrick):
                 try:
                     for filename in os.listdir(self.locationLineEdit.text()):
                         if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
-                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                            prefix, self.__runIgnored, self.__frameIgnored, self.__extraIgnored, extension = self.getFilenameDetails(filename)
                             flag = False
                             if self.formatComboBox.currentIndex() == 0:
                                 for i in range(1, len(self.__formats)):
@@ -333,7 +348,7 @@ class BrowseBrick(Core.BaseBrick):
             if os.path.isdir(self.locationLineEdit.text()):
                 try:
                     for filename in os.listdir(self.locationLineEdit.text()):
-                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                        prefix, run, self.__frameIgnored, self.__extraIgnored, self.__extensionIgnored = self.getFilenameDetails(filename)
                         if run != "":
                             if self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText():
                                 try:
@@ -362,7 +377,7 @@ class BrowseBrick(Core.BaseBrick):
             if os.path.isdir(self.locationLineEdit.text()):
                 try:
                     for filename in os.listdir(self.locationLineEdit.text()):
-                        prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                        prefix, run, self.__frameIgnored, extra, self.__extensionIgnored = self.getFilenameDetails(filename)
                         #if len(extra) > 0:
                         if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or run == self.runNumberComboBox.currentText()):
                             try:
@@ -396,7 +411,7 @@ class BrowseBrick(Core.BaseBrick):
                 try:
                     for filename in os.listdir(self.locationLineEdit.text()):
                         if os.path.isfile(self.locationLineEdit.text() + "/" + filename):
-                            prefix, run, frame, extra, extension = self.getFilenameDetails(filename)
+                            prefix, run, self.__frameIgnored, extra, extension = self.getFilenameDetails(filename)
                             if comboFormat == "":
                                 flag = False
                                 for i in range(1, len(self.__formats)):
