@@ -38,7 +38,11 @@ class AttenuatorsBrick(Core.BaseBrick):
                     "Collect": Connection("Collect object",
                                              [Signal("transmissionChanged", "transmissionChanged")],
                                              [],
-                                             "connectionStatusChanged")}
+                                             "connectionStatusChanged"),
+                    "login": Connection("Login object",
+                                            [Signal("loggedIn", "loggedIn")],
+                                             [],
+                                             "connectionToLogin")}
 
 
 
@@ -96,10 +100,17 @@ class AttenuatorsBrick(Core.BaseBrick):
 
         self.newTransmissionComboBoxChanged(None)
 
-    # Logged In : True or False (from LoginBrick)
+    # When connected to Login, then block the brick
+    def connectionToLogin(self, pPeer):
+        if pPeer is not None:
+            self.brick_widget.setEnabled(False)
+
+
+    # Logged In : True or False 
     def loggedIn(self, pValue):
-        if (pValue):
-            self.brick_widget.SetEnable(pValue)
+        self.brick_widget.setEnabled(pValue)
+
+
 
     def maskFormatChanged(self, pValue):
         self.__maskFormat = pValue
@@ -167,7 +178,7 @@ class AttenuatorsBrick(Core.BaseBrick):
 
 
     def connectionStatusChanged(self, pPeer):
-        self.brick_widget.setEnabled(pPeer is not None)
+        pass
 
 
 

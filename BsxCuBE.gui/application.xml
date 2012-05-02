@@ -52,7 +52,7 @@
      <property name="flex" value="0"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="User"/>
+     <property name="caption" value="Login Box"/>
   </properties>
   <properties id="ReprocessTab">
      <property name="flex" value="1"/>
@@ -634,6 +634,10 @@
     <connection role="Collect">
       <signal name="transmissionChanged"/>
       <peer name="CollectBrick1"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
     </connection>
     <connection role="attenuators">
       <signal name="attenuatorsStateChanged"/>

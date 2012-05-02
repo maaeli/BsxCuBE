@@ -89,7 +89,7 @@
 <vgroupbox id="Misc" orient="vertical">
   <caption label="Misc"/>
   <vgroupbox id="vgroupbox1" orient="vertical">
-  <caption label="User"/>
+  <caption label="Login Box"/>
   <hbox qwidget="true" id="LoginBrick1" brick="true"><script src="LoginBrick" tau="false"/></hbox>
 </vgroupbox>
   

@@ -10,7 +10,7 @@ class LoginBrick(Core.BaseBrick):
 
     properties = {}
 
-    signals = []
+    signals = [Signal("loggedIn")]
     slots = []
 
 
@@ -22,6 +22,7 @@ class LoginBrick(Core.BaseBrick):
         self.__password = ""
         self.__username = "nobody"
         self.loginProxy = None
+        self.__loggedIn = False
 
         #TODO: make it more prominent with coloring
         # Set up layout
@@ -35,8 +36,15 @@ class LoginBrick(Core.BaseBrick):
         if self.brick_widget.layout() is not None:
             self.infoBox.setParent(None)
         self.brick_widget.layout().addLayout(self.infoBox)
-        self.infoLabel = Qt.QLabel("You must log in to use BsxCuBE", self.brick_widget)
+        self.infoLabel = Qt.QLabel("<h2>You must log in to use BsxCuBE</h2>", self.brick_widget)
+        self.infoLabel.setStyleSheet('QLabel {color: red}')
         self.infoBox.addWidget(self.infoLabel)
+        #
+        # Add spacer
+        self.spacerBox = Qt.QHBoxLayout()
+        self.brick_widget.layout().addLayout(self.spacerBox)
+        self.spacerLabel = Qt.QLabel(" ", self.brick_widget)
+        self.spacerBox.addWidget(self.spacerLabel)
 
         #
         # Select User to login
@@ -78,7 +86,7 @@ class LoginBrick(Core.BaseBrick):
         self.logoutButton = Qt.QPushButton("Logout")
         Qt.QObject.connect(self.logoutButton, Qt.SIGNAL('clicked()'), self.openLogoutDialog)
         self.logoutButton.hide()
-        self.passwordBox.addWidget(self.loginButton)
+        self.passwordBox.addWidget(self.logoutButton)
 
     def login(self):
 
@@ -105,10 +113,18 @@ class LoginBrick(Core.BaseBrick):
             #      and if several -> ask which
             #      if none - Popup to suggest to use opd29
             # if username is opd29, no IspyB is needed
-
-            self.brick_widget.setEnabled(True)
-            self.loginButton.hide()
             self.logoutButton.show()
+            self.brick_widget.setEnabled(True)
+            self.infoLabel.setStyleSheet('QLabel {color: gray}')
+            self.codeLabel.hide()
+            self.propType.hide()
+            self.dashLabel.hide()
+            self.propNumber.hide()
+            self.passwordLabel.hide()
+            self.propPassword.hide()
+            self.loginButton.hide()
+            self.__loggedIn = True
+            self.emit("loggedIn", self.__loggedIn)
         else:
             self.refuseLogin("Username or password bad")
 
@@ -160,7 +176,7 @@ class LoginBrick(Core.BaseBrick):
         logging.getLogger().debug("LdapLogin: validating %s" % username)
         handle = self.ldapConnection.simple_bind("uid=%s,ou=people,dc=esrf,dc=fr" % username, password)
         try:
-            result = self.ldapConnection.result(handle)
+            self.result = self.ldapConnection.result(handle)
         except ldap.INVALID_CREDENTIALS:
             return self.cleanup(msg = "invalid password for %s" % username)
         except ldap.LDAPError, err:
@@ -172,46 +188,6 @@ class LoginBrick(Core.BaseBrick):
 
         return (True, username)
 
-#            now=time.strftime("%Y-%m-%d %H:%M:S")
-#            prop_dict={'code':'', 'number':'', 'title':'', 'proposalId':''}
-#            ses_dict={'sessionId':'', 'startDate':now, 'endDate':now, 'comments':''}
-#            try:
-#                locallogin_person=self.localLogin.person
-#            except AttributeError:
-#                locallogin_person="local user"
-#            pers_dict={'familyName':locallogin_person}
-#            lab_dict={'name':'ESRF'}
-#            cont_dict={'familyName':'local contact'}
-#
-#            logging.getLogger().debug("ProposalBrick: local login password validated")
-#
-#            return self.acceptLogin(prop_dict,pers_dict,lab_dict,ses_dict,cont_dict)
-#
-#        try:
-#            beamline_name=os.environ[ENV_BEAMLINE_NAME]
-#        except KeyError:
-#            beamline_name=""
-#        if beamline_name=="":
-#            return self.refuseLogin(False,"Unknown beamline (environment variable %s is missing)." % ENV_BEAMLINE_NAME)
-#
-#        try:
-#            prop_number=int(prop_number)
-#        except (ValueError,TypeError):
-#            return self.refuseLogin(None,"Invalid proposal number.")
-#
-#        if self.ldapConnection is None and str(beamline_name) != "My_office":
-#            return self.refuseLogin(False,'Not connected to LDAP, unable to verify password.')
-#        if self.dbConnection is None:
-#            return self.refuseLogin(False,'Not connected to the ISPyB database, unable to get proposal.')
-#
-#        if str(beamline_name) == "My_office":
-#            self.loginActions=LoginThread(self,prop_type,prop_number,prop_password,beamline_name,self.ldapConnection,self.dbConnection, imper
-#sonate=True)
-#        else:
-#            self.loginActions=LoginThread(self,prop_type,prop_number,prop_password,beamline_name,self.ldapConnection,self.dbConnection)
-#        self.loginActions.start()
-
-
 
     def refuseLogin(self, message = None):
         if message is not None:
@@ -220,135 +196,20 @@ class LoginBrick(Core.BaseBrick):
 
     # Opens the logout dialog (modal); if the answer is OK then logout the user
     def openLogoutDialog(self):
-        logoutDialog = Qt.QMessageBox.critical("Confirm logout", "Press OK to logout.", Qt.QMessageBox.Ok)
-        if logoutDialog.exec_loop() == Qt.QMessageBox.Ok:
-            self.logout()
+        self.logoutDialog = Qt.QMessageBox.critical(self.brick_widget, "Confirm logout", "Press OK to logout.", Qt.QMessageBox.Ok)
+        self.logout()
 
     # Logout the user; reset the brick; changes from logout mode to login mode
     def logout(self):
-        print "Logout"
-#        # Reset brick info
-#        self.propNumber.setText("")
-#        self.proposal=None
-#        self.session=None
-#        #self.sessionId=None
-#        self.person=None
-#        self.laboratory=None
-#        # Change mode from logout to login
-#        self.loginBox.show()
-#        self.logoutButton.hide()
-#        self.titleLabel.hide()
-#        self.proposalLabel.setText(ProposalBrick2.NOBODY_STR)
-#        QToolTip.add(self.proposalLabel,"")
-#
-#        # Emit signals clearing the proposal and session
-#        self.emit(PYSIGNAL("setWindowTitle"),(self["titlePrefix"],))
-#        self.emit(PYSIGNAL("sessionSelected"),(None, ))
-#        self.emit(PYSIGNAL("loggedIn"), (False, ))
-
-
-#    def acceptLogin(self, proposal_dict, person_dict, lab_dict, session_dict, contact_dict):
-#        if self.loginActions is not None:
-#            self.loginActions.wait()
-#            self.loginActions = None
-#        self.setProposal(proposal_dict, person_dict, lab_dict, session_dict, contact_dict)
-#        self.setEnabled(True)
-#
-#    def ispybDown(self):
-#        if self.loginActions is not None:
-#            self.loginActions.wait()
-#            self.loginActions = None
-#
-#        msg_dialog = QMessageBox("Register user", \
-#            "Couldn't contact the ISPyB database server: you've been logged as the local user.\nYour experiments' information will not be sto
-#red in ISPyB!", \
-#            QMessageBox.Warning, QMessageBox.Ok, QMessageBox.NoButton, \
-#            QMessageBox.NoButton, self)
-#        s = self.font().pointSize()
-#        f = msg_dialog.font()
-#        f.setPointSize(s)
-#        msg_dialog.setFont(f)
-#        msg_dialog.updateGeometry()
-#        msg_dialog.exec_loop()
-#
-#        now = time.strftime("%Y-%m-%d %H:%M:S")
-#        prop_dict = {'code':'', 'number':'', 'title':'', 'proposalId':''}
-#        ses_dict = {'sessionId':'', 'startDate':now, 'endDate':now, 'comments':''}
-#        try:
-#            locallogin_person = self.localLogin.person
-#        except AttributeError:
-#            locallogin_person = "local user"
-#        pers_dict = {'familyName':locallogin_person}
-#        lab_dict = {'name':'ESRF'}
-#        cont_dict = {'familyName':'local contact'}
-#        self.acceptLogin(prop_dict, pers_dict, lab_dict, ses_dict, cont_dict)
-#
-#### Thread to perform the login actions in the background: verify LDAP password,
-#### get proposal and sessions from the ISPyB server
-#class LoginThread(QThread):
-#    def __init__(self, brick, proposal_code, proposal_number, proposal_password, beamline_name, ldap_connection, db_connection, impersonate = False):
-#        QThread.__init__(self)
-#
-#        self.Brick = brick
-#        self.proposalCode = proposal_code
-#        self.proposalNumber = proposal_number
-#        self.proposalPassword = proposal_password
-#        self.beamlineName = beamline_name
-#        self.ldapConnection = ldap_connection
-#        self.dbConnection = db_connection
-#        self.condition = LoginCondition()
-#        self.impersonate = impersonate
-#
-#    def postAcceptEvent(self, proposal, person, laboratory, session, localcontact):
-#        #logging.getLogger().debug("ProposalBrick2: queue accept event")
-#        method = ProposalBrick2.acceptLogin
-#        arguments = (self.Brick, proposal, person, laboratory, session, localcontact)
-#        custom_event = ProposalGUIEvent(method, arguments)
-#        self.postEvent(self.Brick, custom_event)
-#
-#    def postRefuseEvent(self, stat, message):
-#        #logging.getLogger().debug("ProposalBrick2: queue refuse event")
-#        method = ProposalBrick2.refuseLogin
-#        arguments = (self.Brick, stat, message)
-#        custom_event = ProposalGUIEvent(method, arguments)
-#        self.postEvent(self.Brick, custom_event)
-#
-#    def postNewSessionEvent(self):
-#        #logging.getLogger().debug("ProposalBrick2: queue new session event")
-#        method = ProposalBrick2.askForNewSession
-#        arguments = (self.Brick,)
-#        custom_event = ProposalGUIEvent(method, arguments)
-#        self.postEvent(self.Brick, custom_event)
-#
-#    def postIspybDownEvent(self):
-#        #logging.getLogger().debug("ProposalBrick2: queue ispyb down event")
-#        method = ProposalBrick2.ispybDown
-#        arguments = (self.Brick,)
-#        custom_event = ProposalGUIEvent(method, arguments)
-#        self.postEvent(self.Brick, custom_event)
-#
-#    def createSession(self, create):
-#        if create:
-#            self.condition.proceed()
-#        else:
-
-
-#                                                      
-
-
-#
-# OLD CODE
-#
-#    def passwordChanged(self, pValue):
-#        self.__password = pValue
-#
-#    def loginConnected(self, pPeer):
-#        if pPeer is not None:
-#            # we are connected, let us block the other bricks
-#            self.__loggedIn = False
-#            self.loginProxy = pPeer
-#            self.loginProxy.loginTry("tes")
-#            self.emit("loggedIn", self.__loggedIn)
-#
-#    def modePushButtonClicked(self):
-#        print "Pushed button"
+        self.logoutButton.hide()
+        self.loginButton.show()
+        self.infoLabel.setStyleSheet('QLabel {color: red}')
+        self.codeLabel.show()
+        self.propType.show()
+        self.dashLabel.show()
+        self.propNumber.show()
+        self.passwordLabel.show()
+        self.propPassword.show()
+        self.loginButton.show()
+        self.__loggedIn = False
+        self.emit("loggedIn", self.__loggedIn)
