@@ -1,8 +1,6 @@
 <object class = "DualCurrentNew" username = "DualCurrentNew">
-    
+   <object href="energy" role="getEnergy"/>
    <uri>nela:oh</uri>
    <command name="setValue1" type="spec" call="setEnergy"/>
-   <channel name="getValue1" type="spec" call="BSX_GLOBAL/"/>
-   
-
+   <data name="numeratorToGet2" value="12.398"/>
 </object>

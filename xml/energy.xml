@@ -1,0 +1,3 @@
+<object class="SpecMotor">
+  <data uri="nela:oh" name="spec" motor="energy"/>
+</object>
