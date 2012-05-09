@@ -1,4 +1,4 @@
-<object class = "DualCurrentNew" username = "DualCurrentNew">
+<object class = "EnergyWaveLength" username = "EnergyWaveLength">
    <object href="energy" role="getEnergy"/>
    <uri>nela:oh</uri>
    <command name="setValue1" type="spec" call="setEnergy"/>

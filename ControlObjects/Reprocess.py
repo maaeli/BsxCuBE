@@ -1,9 +1,7 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 class Reprocess(CObjectBase):
-    __CHANNEL_LIST = ["reprocessDetectorChanged",
-                      "reprocessOperationChanged",
-                      "reprocessDirectoryChanged",
+    __CHANNEL_LIST = ["reprocessDirectoryChanged",
                       "reprocessPrefixChanged",
                       "reprocessRunNumberChanged",
                       "reprocessFrameFirstChanged",
@@ -40,9 +38,11 @@ class Reprocess(CObjectBase):
             except:
                 pass
 
-    def reprocess(self, pDetector, pOperation, pDirectory, pPrefix, pRunNumber, pFrameFirst, pFrameLast, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pBeamStopDiode, pMachineCurrent, pKeepOriginal, pTimeOut, pFeedback):
-        self.reprocessDetector.set_value(pDetector)
-        self.reprocessOperation.set_value(pOperation)
+    def reprocess(self, pDirectory, pPrefix, pRunNumber, pFrameFirst, pFrameLast, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pBeamStopDiode, pMachineCurrent, pKeepOriginal, pTimeOut, pFeedback):
+        # Fixed since 2011
+        self.reprocessDetector.set_value("Pilatus")
+        # Fixed by SO 5/9 2012
+        self.reprocessOperation.set_value("Complete reprocess")
         self.reprocessDirectory.set_value(pDirectory)
         self.reprocessPrefix.set_value(pPrefix)
         self.reprocessRunNumber.set_value(pRunNumber)
@@ -139,9 +139,7 @@ class Reprocess(CObjectBase):
 
         self.reprocessKeepOriginal.set_value(pKeepOriginal)
 
-        self.commands["reprocess"](str(pDetector),
-                                   str(pOperation),
-                                   str(pDirectory),
+        self.commands["reprocess"](str(pDirectory),
                                    str(pPrefix),
                                    pRunNumber,
                                    frameFirst,
@@ -166,12 +164,6 @@ class Reprocess(CObjectBase):
 
     def reprocessAbort(self):
         self.commands["reprocess"].abort()
-
-    def reprocessDetectorChanged(self, pValue):
-        self.emit("reprocessDetectorChanged", pValue)
-
-    def reprocessOperationChanged(self, pValue):
-        self.emit("reprocessOperationChanged", pValue)
 
     def reprocessDirectoryChanged(self, pValue):
         self.emit("reprocessDirectoryChanged", pValue)

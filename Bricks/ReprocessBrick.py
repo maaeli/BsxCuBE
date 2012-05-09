@@ -1,8 +1,8 @@
 import os
 import logging
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
-from PyQt4 import QtCore, QtGui, Qt, Qwt5 as qwt
+from Framework4.GUI.Core import Property, Connection, Signal, Slot
+from PyQt4 import QtCore, QtGui, Qt
 
 
 __category__ = "BsxCuBE"
@@ -14,9 +14,7 @@ class ReprocessBrick(Core.BaseBrick):
 
     properties = {}
     connections = {"reprocess": Connection("Reprocess object",
-                                             [Signal("reprocessDetectorChanged", "reprocessDetectorChanged"),
-                                              Signal("reprocessOperationChanged", "reprocessOperationChanged"),
-                                              Signal("reprocessDirectoryChanged", "reprocessDirectoryChanged"),
+                                             [Signal("reprocessDirectoryChanged", "reprocessDirectoryChanged"),
                                               Signal("reprocessPrefixChanged", "reprocessPrefixChanged"),
                                               Signal("reprocessRunNumberChanged", "reprocessRunNumberChanged"),
                                               Signal("reprocessFrameFirstChanged", "reprocessFrameFirstChanged"),
@@ -44,18 +42,6 @@ class ReprocessBrick(Core.BaseBrick):
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged")]
     slots = []
-
-
-
-    def reprocessDetectorChanged(self, pValue):
-        self.detectorComboBox.setCurrentIndex(int(pValue))
-        self.detectorComboBoxChanged(int(pValue))
-
-
-    def reprocessOperationChanged(self, pValue):
-        self.operationComboBox.setCurrentIndex(int(pValue))
-        self.operationComboBoxChanged(int(pValue))
-
 
     def reprocessDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
@@ -149,6 +135,7 @@ class ReprocessBrick(Core.BaseBrick):
 
 
     def reprocessStatusChanged(self, pValue):
+        #TODO: Understand
         if self.__isReprocessing:
             messageList = pValue.split(",", 3)
             if messageList[0] == "0":   # reprocess done
@@ -164,8 +151,7 @@ class ReprocessBrick(Core.BaseBrick):
             elif messageList[0] == "2":     # reprocess info with item to be displayed
                 self.SPECBusyTimer.start(25000)
                 logging.getLogger().info(messageList[1])
-                if self.displayCheckBox.isChecked():
-                    self.emit("displayItemChanged", messageList[2])
+                self.emit("displayItemChanged", messageList[2])
             elif messageList[0] == "3":     # reprocess warning
                 logging.getLogger().warning(messageList[1])
             elif messageList[0] == "4":     # reprocess error
@@ -189,26 +175,6 @@ class ReprocessBrick(Core.BaseBrick):
         self.__validParameters = [False, False, False, False, False]
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
-
-        self.hBoxLayout0 = Qt.QHBoxLayout()
-        self.detectorLabel = Qt.QLabel("Detector", self.brick_widget)
-        self.detectorLabel.setFixedWidth(130)
-        self.hBoxLayout0.addWidget(self.detectorLabel)
-        self.detectorComboBox = Qt.QComboBox(self.brick_widget)
-        self.detectorComboBox.addItems(["Pilatus", "Vantec"])
-        Qt.QObject.connect(self.detectorComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.detectorComboBoxChanged)
-        self.hBoxLayout0.addWidget(self.detectorComboBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout0)
-
-        self.hBoxLayout1 = Qt.QHBoxLayout()
-        self.operationLabel = Qt.QLabel("Operation", self.brick_widget)
-        self.operationLabel.setFixedWidth(130)
-        self.hBoxLayout1.addWidget(self.operationLabel)
-        self.operationComboBox = Qt.QComboBox(self.brick_widget)
-        self.operationComboBox.addItems(["Normalisation", "Reprocess", "Average", "Complete reprocess"])
-        Qt.QObject.connect(self.operationComboBox, Qt.SIGNAL("currentIndexChanged(int)"), self.operationComboBoxChanged)
-        self.hBoxLayout1.addWidget(self.operationComboBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout1)
 
         self.hBoxLayout2 = Qt.QHBoxLayout()
         self.directoryLabel = Qt.QLabel("Directory", self.brick_widget)
@@ -407,9 +373,6 @@ class ReprocessBrick(Core.BaseBrick):
         self.notifyCheckBox = Qt.QCheckBox("Notify when done", self.brick_widget)
         self.notifyCheckBox.setChecked(True)
         self.hBoxLayout18.addWidget(self.notifyCheckBox)
-        self.displayCheckBox = Qt.QCheckBox("Display", self.brick_widget)
-        self.displayCheckBox.setChecked(True)
-        self.hBoxLayout18.addWidget(self.displayCheckBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout18)
 
         self.vBoxLayout0 = Qt.QVBoxLayout()
@@ -430,9 +393,6 @@ class ReprocessBrick(Core.BaseBrick):
         Qt.QObject.connect(self.abortPushButton, Qt.SIGNAL("clicked()"), self.abortPushButtonClicked)
         self.brick_widget.layout().addLayout(self.hBoxLayout19)
 
-
-        self.detectorComboBoxChanged(self.detectorComboBox.currentIndex())
-        self.operationComboBoxChanged(self.operationComboBox.currentIndex())
         self.directoryLineEditChanged(None)
         self.concentrationCheckBoxToggled(False)
         self.commentsCheckBoxToggled(False)
@@ -458,42 +418,44 @@ class ReprocessBrick(Core.BaseBrick):
 
 
 
-    def detectorComboBoxChanged(self, pValue):
-        if not self.__isReprocessing:
-            self.populatePrefixComboBox()
-            self.populateRunNumberListWidget()
-            self.populateFrameComboBox()
+#TODO: replace
+#    def detectorComboBoxChanged(self, pValue):
+#        if not self.__isReprocessing:
+#            self.populatePrefixComboBox()
+#            self.populateRunNumberListWidget()
+#            self.populateFrameComboBox()
 
 
 
-    def operationComboBoxChanged(self, pValue):
-        if not self.__isReprocessing:
-            self.concentrationCheckBox.setEnabled(pValue in (1, 3))
-            self.concentrationDoubleSpinBox.setEnabled(pValue in (1, 3) and self.concentrationCheckBox.isChecked())
-            self.commentsCheckBox.setEnabled(pValue in (1, 3))
-            self.commentsLineEdit.setEnabled(pValue in (1, 3) and self.commentsCheckBox.isChecked())
-            self.codeCheckBox.setEnabled(pValue in (1, 3))
-            self.codeLineEdit.setEnabled(pValue in (1, 3) and self.codeCheckBox.isChecked())
-            self.maskCheckBox.setEnabled(pValue in (1, 3))
-            self.maskLineEdit.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
-            self.maskDirectoryPushButton.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
-            self.maskDisplayPushButton.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
-            self.detectorDistanceCheckBox.setEnabled(pValue in (1, 3))
-            self.detectorDistanceDoubleSpinBox.setEnabled(pValue in (1, 3) and self.detectorDistanceCheckBox.isChecked())
-            self.waveLengthCheckBox.setEnabled(pValue in (1, 3))
-            self.waveLengthDoubleSpinBox.setEnabled(pValue in (1, 3) and self.waveLengthCheckBox.isChecked())
-            self.pixelSizeCheckBox.setEnabled(pValue in (1, 3))
-            self.pixelSizeXDoubleSpinBox.setEnabled(pValue in (1, 3) and self.pixelSizeCheckBox.isChecked())
-            self.pixelSizeYDoubleSpinBox.setEnabled(pValue in (1, 3) and self.pixelSizeCheckBox.isChecked())
-            self.beamCenterCheckBox.setEnabled(pValue in (1, 3))
-            self.beamCenterXSpinBox.setEnabled(pValue in (1, 3) and self.beamCenterCheckBox.isChecked())
-            self.beamCenterYSpinBox.setEnabled(pValue in (1, 3) and self.beamCenterCheckBox.isChecked())
-            self.normalisationCheckBox.setEnabled(pValue in (0, 3))
-            self.normalisationDoubleSpinBox.setEnabled(pValue in (0, 3) and self.normalisationCheckBox.isChecked())
-            self.beamStopDiodeCheckBox.setEnabled(pValue in (0, 3))
-            self.beamStopDiodeDoubleSpinBox.setEnabled(pValue in (0, 3) and self.beamStopDiodeCheckBox.isChecked())
-            self.machineCurrentCheckBox.setEnabled(pValue in (1, 3))
-            self.machineCurrentDoubleSpinBox.setEnabled(pValue in (1, 3) and self.machineCurrentCheckBox.isChecked())
+#TODO: replace
+#    def operationComboBoxChanged(self, pValue):
+#        if not self.__isReprocessing:
+#            self.concentrationCheckBox.setEnabled(pValue in (1, 3))
+#            self.concentrationDoubleSpinBox.setEnabled(pValue in (1, 3) and self.concentrationCheckBox.isChecked())
+#            self.commentsCheckBox.setEnabled(pValue in (1, 3))
+#            self.commentsLineEdit.setEnabled(pValue in (1, 3) and self.commentsCheckBox.isChecked())
+#            self.codeCheckBox.setEnabled(pValue in (1, 3))
+#            self.codeLineEdit.setEnabled(pValue in (1, 3) and self.codeCheckBox.isChecked())
+#            self.maskCheckBox.setEnabled(pValue in (1, 3))
+#            self.maskLineEdit.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
+#            self.maskDirectoryPushButton.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
+#            self.maskDisplayPushButton.setEnabled(pValue in (1, 3) and self.maskCheckBox.isChecked())
+#            self.detectorDistanceCheckBox.setEnabled(pValue in (1, 3))
+#            self.detectorDistanceDoubleSpinBox.setEnabled(pValue in (1, 3) and self.detectorDistanceCheckBox.isChecked())
+#            self.waveLengthCheckBox.setEnabled(pValue in (1, 3))
+#            self.waveLengthDoubleSpinBox.setEnabled(pValue in (1, 3) and self.waveLengthCheckBox.isChecked())
+#            self.pixelSizeCheckBox.setEnabled(pValue in (1, 3))
+#            self.pixelSizeXDoubleSpinBox.setEnabled(pValue in (1, 3) and self.pixelSizeCheckBox.isChecked())
+#            self.pixelSizeYDoubleSpinBox.setEnabled(pValue in (1, 3) and self.pixelSizeCheckBox.isChecked())
+#            self.beamCenterCheckBox.setEnabled(pValue in (1, 3))
+#            self.beamCenterXSpinBox.setEnabled(pValue in (1, 3) and self.beamCenterCheckBox.isChecked())
+#            self.beamCenterYSpinBox.setEnabled(pValue in (1, 3) and self.beamCenterCheckBox.isChecked())
+#            self.normalisationCheckBox.setEnabled(pValue in (0, 3))
+#            self.normalisationDoubleSpinBox.setEnabled(pValue in (0, 3) and self.normalisationCheckBox.isChecked())
+#            self.beamStopDiodeCheckBox.setEnabled(pValue in (0, 3))
+#            self.beamStopDiodeDoubleSpinBox.setEnabled(pValue in (0, 3) and self.beamStopDiodeCheckBox.isChecked())
+#            self.machineCurrentCheckBox.setEnabled(pValue in (1, 3))
+#            self.machineCurrentDoubleSpinBox.setEnabled(pValue in (1, 3) and self.machineCurrentCheckBox.isChecked())
 
 
 
@@ -662,8 +624,7 @@ class ReprocessBrick(Core.BaseBrick):
             self.setButtonState(1)
             self.SPECBusyTimer.start(20000)
             logging.getLogger().info("Start reprocessing...")
-            if self.displayCheckBox.isChecked():
-                self.emit("displayResetChanged")
+            self.emit("displayResetChanged")
             self.__isReprocessing = True
 
             runNumber = ""
@@ -744,29 +705,27 @@ class ReprocessBrick(Core.BaseBrick):
             else:
                 keepOriginal = "0"
 
-            self.getObject("reprocess").reprocess(self.detectorComboBox.currentIndex(),
-                                                   self.operationComboBox.currentIndex(),
-                                                   self.directoryLineEdit.text(),
-                                                   self.prefixComboBox.currentText(),
-                                                   runNumber,
-                                                   frameFirst,
-                                                   frameLast,
-                                                   concentration,
-                                                   comments,
-                                                   code,
-                                                   mask,
-                                                   detectorDistance,
-                                                   waveLength,
-                                                   pixelSizeX,
-                                                   pixelSizeY,
-                                                   beamCenterX,
-                                                   beamCenterY,
-                                                   normalisation,
-                                                   beamStopDiode,
-                                                   machineCurrent,
-                                                   keepOriginal,
-                                                   "20",
-                                                   "1")
+            self.getObject("reprocess").reprocess(self.directoryLineEdit.text(),
+                                                  self.prefixComboBox.currentText(),
+                                                  runNumber,
+                                                  frameFirst,
+                                                  frameLast,
+                                                  concentration,
+                                                  comments,
+                                                  code,
+                                                  mask,
+                                                  detectorDistance,
+                                                  waveLength,
+                                                  pixelSizeX,
+                                                  pixelSizeY,
+                                                  beamCenterX,
+                                                  beamCenterY,
+                                                  normalisation,
+                                                  beamStopDiode,
+                                                  machineCurrent,
+                                                  keepOriginal,
+                                                  "20",
+                                                  "1")
 
 
 
@@ -783,19 +742,16 @@ class ReprocessBrick(Core.BaseBrick):
         if pOption == 0:     # normal
             self.keepOriginalCheckBox.setEnabled(True)
             self.notifyCheckBox.setEnabled(True)
-            self.displayCheckBox.setEnabled(True)
             self.reprocessPushButton.setEnabled(True)
             self.abortPushButton.setEnabled(False)
         elif pOption == 1:   # reprocessing
             self.keepOriginalCheckBox.setEnabled(False)
             self.notifyCheckBox.setEnabled(False)
-            self.displayCheckBox.setEnabled(False)
             self.reprocessPushButton.setEnabled(False)
             self.abortPushButton.setEnabled(True)
         elif pOption == 2:   # invalid parameters
             self.keepOriginalCheckBox.setEnabled(True)
             self.notifyCheckBox.setEnabled(True)
-            self.displayCheckBox.setEnabled(True)
             self.reprocessPushButton.setEnabled(False)
             self.abortPushButton.setEnabled(False)
         if self.abortPushButton.isEnabled():
