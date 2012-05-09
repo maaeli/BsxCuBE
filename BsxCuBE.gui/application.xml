@@ -346,7 +346,7 @@
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
-     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr, matthew.bowler@esrf.fr"/>
      <property name="send_icon" value=""/>
   </properties>
   <properties id="EHScan">
@@ -680,6 +680,7 @@
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 
@@ -692,6 +693,7 @@
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 
