@@ -29,135 +29,97 @@ class Reprocess(CObjectBase):
         CObjectBase.__init__(self, *args, **kwargs)
 
     def init(self):
-        for channel in self.__CHANNEL_LIST:
-            try:
-                value = self.channels.get(channel[:-7])
-                setattr(self, channel[:-7], value)
-                if value is not None:
-                    getattr(self, channel[:-7]).connect("update", getattr(self, channel))
-            except:
-                pass
+        self.frameFirst = ""
+        self.frameLast = ""
+        self.concentration = ""
+        self.comment = ""
+        self.code = ""
+        self.maskFile = ""
+        self.detectorDistance = ""
+        self.waveLength = ""
+        self.pixelSizeX = ""
+        self.pixelSizeY = ""
+        self.beamCenterX = ""
+        self.beamCenterY = ""
+        self.normalisation = ""
+        self.beamStopDiode = ""
+        self.machineCurrent = ""
 
     def reprocess(self, pDirectory, pPrefix, pRunNumber, pFrameFirst, pFrameLast, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pBeamStopDiode, pMachineCurrent, pKeepOriginal, pTimeOut, pFeedback):
         # Fixed since 2011
-        self.reprocessDetector.set_value("Pilatus")
+        self.detector = "Pilatus"
         # Fixed by SO 5/9 2012
-        self.reprocessOperation.set_value("Complete reprocess")
-        self.reprocessDirectory.set_value(pDirectory)
-        self.reprocessPrefix.set_value(pPrefix)
-        self.reprocessRunNumber.set_value(pRunNumber)
+        self.operation = "Complete reprocess"
+        self.directory = pDirectory
+        self.prefix = pPrefix
+        self.runNumber = pRunNumber
 
         if pFrameFirst is None:
-            frameFirst = ""
-        else:
-            frameFirst = pFrameFirst
-        self.reprocessFrameFirst.set_value(frameFirst)
+            self.frameFirst = pFrameFirst
 
         if pFrameLast is None:
-            frameLast = ""
-        else:
-            frameLast = pFrameLast
-        self.reprocessFrameLast.set_value(frameLast)
+            self.frameLast = pFrameLast
 
         if pConcentration is not None:
-            concentration = str(pConcentration)
-            self.reprocessConcentration.set_value(concentration)
-        else:
-            concentration = ""
+            self.concentration = pConcentration
 
         if pComments is not None:
-            comments = str(pComments)
-            self.reprocessComments.set_value(comments)
-        else:
-            comments = ""
+            self.comments = pComments
 
         if pCode is not None:
-            code = str(pCode)
-            self.reprocessCode.set_value(code)
-        else:
-            code = ""
+            self.code = pCode
 
         if pMaskFile is not None:
-            maskFile = str(pMaskFile)
-            self.reprocessMaskFile.set_value(maskFile)
-        else:
-            maskFile = ""
+            self.maskFile = pMaskFile
 
         if pDetectorDistance is not None:
-            detectorDistance = str(pDetectorDistance)
-            self.reprocessDetector.set_value(detectorDistance)
-        else:
-            detectorDistance = ""
+            self.detectorDistance = pDetectorDistance
 
         if pWaveLength is not None:
-            waveLength = str(pWaveLength)
-            self.reprocessWaveLength.set_value(waveLength)
-        else:
-            waveLength = ""
+            self.waveLength = pWaveLength
 
         if pPixelSizeX is not None:
-            pixelSizeX = str(pPixelSizeX)
-            self.reprocessPixelSizeX.set_value(pixelSizeX)
-        else:
-            pixelSizeX = ""
+            self.pixelSizeX = pPixelSizeX
 
         if pPixelSizeY is not None:
-            pixelSizeY = str(pPixelSizeY)
-            self.reprocessPixelSizeY.set_value(pPixelSizeY)
-        else:
-            pixelSizeY = ""
+            self.pixelSizeY = pPixelSizeY
 
         if pBeamCenterX is not None:
-            beamCenterX = str(pBeamCenterX)
-            self.reprocessBeamCenterX.set_value(beamCenterX)
-        else:
-            beamCenterX = ""
+            self.beamCenterX = pBeamCenterX
 
         if pBeamCenterY is not None:
-            beamCenterY = str(pBeamCenterY)
-            self.reprocessBeamCenterY.set_value(beamCenterY)
-        else:
-            beamCenterY = ""
+            self.beamCenterY = pBeamCenterY
 
         if pNormalisation is not None:
-            normalisation = str(pNormalisation)
-            self.reprocessNormalisation.set_value(normalisation)
-        else:
-            normalisation = ""
+            self.normalisation = pNormalisation
 
         if pBeamStopDiode is not None:
-            beamStopDiode = str(pBeamStopDiode)
-            self.reprocessBeamStopDiode.set_value(beamStopDiode)
-        else:
-            beamStopDiode = ""
+            self.beamStopDiode = pBeamStopDiode
 
         if pMachineCurrent is not None:
-            machineCurrent = str(pMachineCurrent)
-            self.reprocessMachineCurrent.set_value(machineCurrent)
-        else:
-            machineCurrent = ""
+            self.machineCurrent = pMachineCurrent
 
-        self.reprocessKeepOriginal.set_value(pKeepOriginal)
+        self.keepOriginal = pKeepOriginal
 
-        self.commands["reprocess"](str(pDirectory),
-                                   str(pPrefix),
-                                   pRunNumber,
-                                   frameFirst,
-                                   frameLast,
-                                   concentration,
-                                   comments,
-                                   code,
-                                   maskFile,
-                                   detectorDistance,
-                                   waveLength,
-                                   pixelSizeX,
-                                   pixelSizeY,
-                                   beamCenterX,
-                                   beamCenterY,
-                                   normalisation,
-                                   beamStopDiode,
-                                   machineCurrent,
-                                   pKeepOriginal,
+        self.commands["reprocess"](self.directory,
+                                   self.prefix,
+                                   self.runNumber,
+                                   self.frameFirst,
+                                   self.frameLast,
+                                   self.concentration,
+                                   self.comments,
+                                   self.code,
+                                   self.maskFile,
+                                   self.detectorDistance,
+                                   self.waveLength,
+                                   self.pixelSizeX,
+                                   self.pixelSizeY,
+                                   self.beamCenterX,
+                                   self.beamCenterY,
+                                   self.normalisation,
+                                   self.beamStopDiode,
+                                   self.machineCurrent,
+                                   self.keepOriginal,
                                    pTimeOut,
                                    pFeedback)
 
