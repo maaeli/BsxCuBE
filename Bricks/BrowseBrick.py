@@ -7,7 +7,6 @@ from PyQt4 import QtCore, QtGui, Qt
 __category__ = "BsxCuBE"
 
 
-
 class BrowseBrick(Core.BaseBrick):
 
     properties = {"enableType": Property("boolean", "Enable type", "", "enableTypeChanged", True)}
@@ -29,17 +28,6 @@ class BrowseBrick(Core.BaseBrick):
                Signal("displayItemChanged")]
     slots = []
 
-
-    def browseTypeChanged(self, pValue):
-        if pValue is not None:
-            self.typeComboBox.setCurrentIndex(int(pValue))
-
-    def browseLocationChanged(self, pValue):
-        if pValue is not None:
-            self.locationLineEdit.setText(pValue)
-
-    def connectionStatusChanged(self, pPeer):
-        pass
 
 
 
@@ -148,6 +136,18 @@ class BrowseBrick(Core.BaseBrick):
     # Logged In : True or False 
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
+
+    def browseTypeChanged(self, pValue):
+        if pValue is not None:
+            self.typeComboBox.setCurrentIndex(int(pValue))
+
+    def browseLocationChanged(self, pValue):
+        if pValue is not None:
+            self.locationLineEdit.setText(pValue)
+
+    def connectionStatusChanged(self, pPeer):
+        pass
+
 
     def delete(self):
         pass

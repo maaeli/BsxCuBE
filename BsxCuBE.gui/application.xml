@@ -174,7 +174,10 @@
      <property name="suffix" value=" mA"/>
      <property name="showFillMode" value="True"/>
      <property name="currentThreshold" value="1.0"/>
+     <property name="colorUnknown" value=""/>
+     <property name="colorReady" value="lightblue"/>
      <property name="fontSize" value="24"/>
+     <property name="colorError" value=""/>
   </properties>
   <properties id="CollectBrick1">
      <property name="flex" value="0"/>
@@ -185,20 +188,6 @@
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="EH Scan"/>
-  </properties>
-  <properties id="DualCurrentNewBrick1">
-     <property name="flex" value="0"/>
-     <property name="maskFormat2" value="%.3f"/>
-     <property name="maskFormat1" value="%.3f"/>
-     <property name="label1" value="Energy        "/>
-     <property name="label2" value="Wavelength"/>
-     <property name="maximumHistory" value="10"/>
-     <property name="maximumValue2" value="100.0"/>
-     <property name="maximumValue1" value="100.0"/>
-     <property name="minimumValue1" value="0.0"/>
-     <property name="minimumValue2" value="0.0"/>
-     <property name="suffix2" value="Angstrom"/>
-     <property name="suffix1" value="KeV"/>
   </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
@@ -279,11 +268,11 @@
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value="tonic29"/>
   </properties>
-  <properties id="Operation">
+  <properties id="BrowseTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Operation"/>
+     <property name="caption" value="Browse"/>
   </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
@@ -349,11 +338,11 @@
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="BrowseTab">
+  <properties id="Operation">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Browse"/>
+     <property name="caption" value="Operation"/>
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
@@ -627,15 +616,6 @@
   <connections id="EH">
   </connections>
 
-  <connections id="DualCurrentNewBrick1">
-    <connection role="reading1">
-      <signal name="value1Changed"/>
-    </connection>
-    <connection role="reading2">
-      <signal name="value2Changed"/>
-    </connection>
-  </connections>
-
   <connections id="splitter1">
   </connections>
 
@@ -698,6 +678,9 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterMS"/>
     </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+    </connection>
   </connections>
 
   <connections id="ShutterBrick2">
@@ -706,6 +689,9 @@
       <slot name="open"/>
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterGuillotine"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
     </connection>
   </connections>
 
@@ -716,12 +702,16 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterSH"/>
     </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
   </connections>
 
   <connections id="BsxCuBE">
   </connections>
 
-  <connections id="Operation">
+  <connections id="BrowseTab">
   </connections>
 
   <connections id="ReadingBrick1">
@@ -815,7 +805,7 @@
     </connection>
   </connections>
 
-  <connections id="BrowseTab">
+  <connections id="Operation">
   </connections>
 
   <connections id="FeedbackBrick1">

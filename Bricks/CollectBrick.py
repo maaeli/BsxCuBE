@@ -14,6 +14,7 @@ from Samples             import CollectPars
 
 __category__ = "BsxCuBE"
 
+# Compare outside class
 def cmpSEUtemp(a, b):
     return cmp(a["SEUtemperature"], b["SEUtemperature"])
 def cmpCode(a, b):
@@ -77,210 +78,6 @@ class CollectBrick(Core.BaseBrick):
                Signal("displayItemChanged"),
                Signal("transmissionChanged")]
     slots = []
-
-    # When connected to Login, then block the brick
-    def connectionToLogin(self, pPeer):
-        if pPeer is not None:
-            self.brick_widget.setEnabled(False)
-
-
-    # Logged In : True or False 
-    def loggedIn(self, pValue):
-        self.brick_widget.setEnabled(pValue)
-
-
-    def image_proxy_connected(self, image_proxy):
-        self.image_proxy = image_proxy
-
-    def exp_spec_connected(self, spec):
-        if spec != None:
-            self.spec = spec
-
-    def collectDirectoryChanged(self, pValue):
-        self.directoryLineEdit.setText(pValue)
-
-    def collectPrefixChanged(self, pValue):
-        self.prefixLineEdit.setText(pValue)
-
-    def collectRunNumberChanged(self, pValue):
-        self.runNumberSpinBox.setValue(int(pValue))
-
-    def collectNumberFramesChanged(self, pValue):
-        self.frameNumberSpinBox.setValue(int(pValue))
-
-    def collectTimePerFrameChanged(self, pValue):
-        self.timePerFrameSpinBox.setValue(int(pValue))
-
-    def collectConcentrationChanged(self, pValue):
-        self.concentrationDoubleSpinBox.setValue(float(pValue))
-
-    def collectCommentsChanged(self, pValue):
-        self.commentsLineEdit.setText(pValue)
-
-    def collectCodeChanged(self, pValue):
-        self.codeLineEdit.setText(pValue)
-
-    def collectMaskFileChanged(self, pValue):
-        self.maskLineEdit.setText(pValue)
-
-    def collectDetectorDistanceChanged(self, pValue):
-        self.detectorDistanceDoubleSpinBox.setValue(float(pValue))
-
-    def collectWaveLengthChanged(self, pValue):
-        self.waveLengthDoubleSpinBox.setValue(float(pValue))
-
-    def collectPixelSizeXChanged(self, pValue):
-        self.pixelSizeXDoubleSpinBox.setValue(float(pValue))
-
-    def collectPixelSizeYChanged(self, pValue):
-        self.pixelSizeYDoubleSpinBox.setValue(float(pValue))
-
-    def collectBeamCenterXChanged(self, pValue):
-        self.beamCenterXSpinBox.setValue(int(pValue))
-
-    def collectBeamCenterYChanged(self, pValue):
-        self.beamCenterYSpinBox.setValue(int(pValue))
-
-    def collectNormalisationChanged(self, pValue):
-        self.normalisationDoubleSpinBox.setValue(float(pValue))
-
-    def collectProcessDataChanged(self, pValue):
-        self.processCheckBox.setChecked(pValue == "1")
-
-    def collectProcessingDone(self, dat_filename, last_dat = []):
-        #TODO remove this hack ASAP (SO 27/9 11)
-        ### HORRIBLE CODE
-        if last_dat and last_dat[0] == dat_filename:
-            return
-        else:
-            if last_dat:
-                last_dat.pop()
-                last_dat.append(dat_filename)
-        #TODO remove this hack ASAP (SO 27/9 11)
-        ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
-        logging.info("processing done, file is %r", dat_filename)
-        self.emitDisplayItemChanged(dat_filename)
-
-    def collectProcessingLog(self, level, logmsg, notify):
-        # Level 0 = info, Level 1 = 
-        if level == 0:
-            logmethod = logging.info
-        elif level == 2:
-            logmethod = logging.error
-
-        if logmsg != self.lastCollectProcessingLog:
-            for line in logmsg.split(os.linesep):
-                logmethod(line.rstrip())
-
-        self.lastCollectProcessingLog = logmsg
-        self._collectRobotDialog.addHistory(level, logmsg)
-
-        if notify:
-            self.messageDialog(level, logmsg)
-
-    def collectNewFrameChanged(self, pValue):
-        filename0 = pValue.split(",")[0]
-        if os.path.dirname(filename0)[-4:] == "/raw":
-            directory = os.path.dirname(filename0)[:-4] + "/1d/"
-        else:
-            directory = os.path.dirname(filename0) + "/1d/"
-
-        if self.__lastFrame is None or self.__lastFrame != pValue:
-            self.__lastFrame = pValue
-            if self._isCollecting:
-                self.getObject("collect").triggerEDNA(filename0, oneway = True)
-                message = "The frame '%s' was collected..." % filename0
-                logging.getLogger().info(message)
-                if self.robotCheckBox.isChecked():
-                    self._collectRobotDialog.addHistory(0, message)
-
-                self._currentFrame += 1
-
-                self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
-
-                if not self.__isTesting:
-                    if self._currentFrame == self._frameNumber:
-                        splitList = os.path.basename(filename0).split("_")
-                        # Take away last _ piece
-                        filename1 = "_".join(splitList[:-1])
-                        ave_filename = directory + filename1 + "_ave.dat"
-                self.emitDisplayItemChanged(filename0)
-            else:
-                if os.path.exists(filename0):
-                    if filename0.split(".")[-1] != "dat":
-                        filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
-                        if os.path.exists(filename1):
-                            filename0 += "," + filename1
-                    self.emitDisplayItemChanged(filename0)
-
-            if self._currentFrame == self._frameNumber:
-                # data collection done = Last frame
-                if self._isCollecting:
-                    if self.__isTesting:
-                        if self.SPECBusyTimer.isActive():
-                            self.SPECBusyTimerTimeOut()
-                        logging.getLogger().info("The data collection is done!")
-                    else:
-                        feedBackFlag = self._feedBackFlag
-                        if self.robotCheckBox.isChecked():
-                            self.setCollectionStatus("done")
-                            self._feedBackFlag = False
-                            self.__isTesting = False
-                        else:
-                            if self.SPECBusyTimer.isActive():
-                                self.SPECBusyTimerTimeOut()
-                        if feedBackFlag:
-                            logging.getLogger().info("The data collection is done!")
-                            if self.notifyCheckBox.isChecked():
-                                Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
-
-
-    def beamLostChanged(self, pValue):
-        if pValue != None and pValue != "":
-            logging.getLogger().error("BEAM LOST: %s" % pValue)
-
-    def checkBeamChanged(self, pValue):
-        if pValue == 1:
-            self.checkBeamBox.setChecked(True)
-        else:
-            self.checkBeamBox.setChecked(False)
-
-    # When a macro in spec changes the value of SPEC_STATUS variable to busy
-    def specStatusChanged(self, pValue):
-        if pValue == "busy":
-            self.setCollectionStatus("busy", progress = None)
-        else:
-            self.setCollectionStatus("ready", progress = None)
-
-    def expertModeOnlyChanged(self, pValue):
-        self.__expertModeOnly = pValue
-        self.expert_mode(self.__expertMode)
-
-    def expert_mode(self, expert):
-        self.__expertMode = expert
-        self.setWidgetState()
-
-    def executeTestCollect(self):
-        self.testPushButtonClicked()
-
-    def emitDisplayItemChanged(self, pValue):
-        self.emit("displayItemChanged", str(pValue))
-
-        if self.image_proxy is None:
-            return
-        try:
-            logging.info(str(pValue))
-            self.image_proxy.load_files(str(pValue))
-        except Exception, e:
-            logging.error("Could not read file " + str(pValue))
-            logging.exception(e)
-
-    def y_curves_data(self, pPeer):
-        pass
-
-    def erase_curve(self, pPeer):
-        pass
-
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
@@ -606,6 +403,210 @@ class CollectBrick(Core.BaseBrick):
 
         self.setWidgetState()
         self.setButtonState(0)
+
+    # When connected to Login, then block the brick
+    def connectionToLogin(self, pPeer):
+        if pPeer is not None:
+            self.brick_widget.setEnabled(False)
+
+
+    # Logged In : True or False 
+    def loggedIn(self, pValue):
+        self.brick_widget.setEnabled(pValue)
+
+
+    def image_proxy_connected(self, image_proxy):
+        self.image_proxy = image_proxy
+
+    def exp_spec_connected(self, spec):
+        if spec != None:
+            self.spec = spec
+
+    def collectDirectoryChanged(self, pValue):
+        self.directoryLineEdit.setText(pValue)
+
+    def collectPrefixChanged(self, pValue):
+        self.prefixLineEdit.setText(pValue)
+
+    def collectRunNumberChanged(self, pValue):
+        self.runNumberSpinBox.setValue(int(pValue))
+
+    def collectNumberFramesChanged(self, pValue):
+        self.frameNumberSpinBox.setValue(int(pValue))
+
+    def collectTimePerFrameChanged(self, pValue):
+        self.timePerFrameSpinBox.setValue(int(pValue))
+
+    def collectConcentrationChanged(self, pValue):
+        self.concentrationDoubleSpinBox.setValue(float(pValue))
+
+    def collectCommentsChanged(self, pValue):
+        self.commentsLineEdit.setText(pValue)
+
+    def collectCodeChanged(self, pValue):
+        self.codeLineEdit.setText(pValue)
+
+    def collectMaskFileChanged(self, pValue):
+        self.maskLineEdit.setText(pValue)
+
+    def collectDetectorDistanceChanged(self, pValue):
+        self.detectorDistanceDoubleSpinBox.setValue(float(pValue))
+
+    def collectWaveLengthChanged(self, pValue):
+        self.waveLengthDoubleSpinBox.setValue(float(pValue))
+
+    def collectPixelSizeXChanged(self, pValue):
+        self.pixelSizeXDoubleSpinBox.setValue(float(pValue))
+
+    def collectPixelSizeYChanged(self, pValue):
+        self.pixelSizeYDoubleSpinBox.setValue(float(pValue))
+
+    def collectBeamCenterXChanged(self, pValue):
+        self.beamCenterXSpinBox.setValue(int(pValue))
+
+    def collectBeamCenterYChanged(self, pValue):
+        self.beamCenterYSpinBox.setValue(int(pValue))
+
+    def collectNormalisationChanged(self, pValue):
+        self.normalisationDoubleSpinBox.setValue(float(pValue))
+
+    def collectProcessDataChanged(self, pValue):
+        self.processCheckBox.setChecked(pValue == "1")
+
+    def collectProcessingDone(self, dat_filename, last_dat = []):
+        #TODO remove this hack ASAP (SO 27/9 11)
+        ### HORRIBLE CODE
+        if last_dat and last_dat[0] == dat_filename:
+            return
+        else:
+            if last_dat:
+                last_dat.pop()
+                last_dat.append(dat_filename)
+        #TODO remove this hack ASAP (SO 27/9 11)
+        ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
+        logging.info("processing done, file is %r", dat_filename)
+        self.emitDisplayItemChanged(dat_filename)
+
+    def collectProcessingLog(self, level, logmsg, notify):
+        # Level 0 = info, Level 1 = 
+        if level == 0:
+            logmethod = logging.info
+        elif level == 2:
+            logmethod = logging.error
+
+        if logmsg != self.lastCollectProcessingLog:
+            for line in logmsg.split(os.linesep):
+                logmethod(line.rstrip())
+
+        self.lastCollectProcessingLog = logmsg
+        self._collectRobotDialog.addHistory(level, logmsg)
+
+        if notify:
+            self.messageDialog(level, logmsg)
+
+    def collectNewFrameChanged(self, pValue):
+        filename0 = pValue.split(",")[0]
+        if os.path.dirname(filename0)[-4:] == "/raw":
+            directory = os.path.dirname(filename0)[:-4] + "/1d/"
+        else:
+            directory = os.path.dirname(filename0) + "/1d/"
+
+        if self.__lastFrame is None or self.__lastFrame != pValue:
+            self.__lastFrame = pValue
+            if self._isCollecting:
+                self.getObject("collect").triggerEDNA(filename0, oneway = True)
+                message = "The frame '%s' was collected..." % filename0
+                logging.getLogger().info(message)
+                if self.robotCheckBox.isChecked():
+                    self._collectRobotDialog.addHistory(0, message)
+
+                self._currentFrame += 1
+
+                self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
+
+                if not self.__isTesting:
+                    if self._currentFrame == self._frameNumber:
+                        splitList = os.path.basename(filename0).split("_")
+                        # Take away last _ piece
+                        filename1 = "_".join(splitList[:-1])
+                        ave_filename = directory + filename1 + "_ave.dat"
+                self.emitDisplayItemChanged(filename0)
+            else:
+                if os.path.exists(filename0):
+                    if filename0.split(".")[-1] != "dat":
+                        filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
+                        if os.path.exists(filename1):
+                            filename0 += "," + filename1
+                    self.emitDisplayItemChanged(filename0)
+
+            if self._currentFrame == self._frameNumber:
+                # data collection done = Last frame
+                if self._isCollecting:
+                    if self.__isTesting:
+                        if self.SPECBusyTimer.isActive():
+                            self.SPECBusyTimerTimeOut()
+                        logging.getLogger().info("The data collection is done!")
+                    else:
+                        feedBackFlag = self._feedBackFlag
+                        if self.robotCheckBox.isChecked():
+                            self.setCollectionStatus("done")
+                            self._feedBackFlag = False
+                            self.__isTesting = False
+                        else:
+                            if self.SPECBusyTimer.isActive():
+                                self.SPECBusyTimerTimeOut()
+                        if feedBackFlag:
+                            logging.getLogger().info("The data collection is done!")
+                            if self.notifyCheckBox.isChecked():
+                                Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+
+
+    def beamLostChanged(self, pValue):
+        if pValue != None and pValue != "":
+            logging.getLogger().error("BEAM LOST: %s" % pValue)
+
+    def checkBeamChanged(self, pValue):
+        if pValue == 1:
+            self.checkBeamBox.setChecked(True)
+        else:
+            self.checkBeamBox.setChecked(False)
+
+    # When a macro in spec changes the value of SPEC_STATUS variable to busy
+    def specStatusChanged(self, pValue):
+        if pValue == "busy":
+            self.setCollectionStatus("busy", progress = None)
+        else:
+            self.setCollectionStatus("ready", progress = None)
+
+    def expertModeOnlyChanged(self, pValue):
+        self.__expertModeOnly = pValue
+        self.expert_mode(self.__expertMode)
+
+    def expert_mode(self, expert):
+        self.__expertMode = expert
+        self.setWidgetState()
+
+    def executeTestCollect(self):
+        self.testPushButtonClicked()
+
+    def emitDisplayItemChanged(self, pValue):
+        self.emit("displayItemChanged", str(pValue))
+
+        if self.image_proxy is None:
+            return
+        try:
+            logging.info(str(pValue))
+            self.image_proxy.load_files(str(pValue))
+        except Exception, e:
+            logging.error("Could not read file " + str(pValue))
+            logging.exception(e)
+
+    def y_curves_data(self, pPeer):
+        pass
+
+    def erase_curve(self, pPeer):
+        pass
+
 
 
     def collectObjectConnected(self, collect_obj):

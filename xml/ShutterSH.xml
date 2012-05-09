@@ -2,9 +2,9 @@
 	
    <uri>bm29/bsh/1</uri> 
 
-   <command name="open" type="taco" call="DevOpen"/>
-   <command name="close" type="taco" call="DevClose"/>
-   <channel name="state" type="taco" call="DevState" polling="1000"/>
-   <channel name="status" type="taco" call="DevStatus"/>
+   <command name="open" type="tango" call="Open"/>
+   <command name="close" type="tango" call="Close"/>
+   <channel name="state" type="tango" call="State" polling="1000"/>
+   <channel name="status" type="tango" call="Status"/>
 </object>	
 
