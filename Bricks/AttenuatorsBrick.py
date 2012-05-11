@@ -12,7 +12,6 @@ from PyQt4 import QtGui, Qt
 __category__ = "General"
 
 
-
 # =============================================
 #  CLASS DEFINITION
 # =============================================
@@ -111,7 +110,6 @@ class AttenuatorsBrick(Core.BaseBrick):
         self.brick_widget.setEnabled(pValue)
 
 
-
     def maskFormatChanged(self, pValue):
         self.__maskFormat = pValue
         self.attenuatorsFactorChanged(self.currentTransmissionLineEdit.text())
@@ -126,11 +124,9 @@ class AttenuatorsBrick(Core.BaseBrick):
         self.newTransmissionComboBox.setMaxCount(pValue)
 
 
-
     def minimumValueChanged(self, pValue):
         self.__minimumValue = pValue
         self.newTransmissionComboBox.lineEdit().setValidator(Qt.QDoubleValidator(self.__minimumValue, self.__maximumValue, 10, self.newTransmissionComboBox.lineEdit()))
-
 
 
     def maximumValueChanged(self, pValue):
@@ -151,8 +147,6 @@ class AttenuatorsBrick(Core.BaseBrick):
             self.filtersPushButton.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.brick_widget.layout().addLayout(self.hBoxLayout)
         self.brick_widget.layout().addWidget(self.filtersPushButton)
-
-
 
 
     # =============================================
@@ -179,7 +173,6 @@ class AttenuatorsBrick(Core.BaseBrick):
 
     def connectionStatusChanged(self, pPeer):
         pass
-
 
 
     def newTransmissionComboBoxChanged(self, pValue):
@@ -220,8 +213,6 @@ class AttenuatorsBrick(Core.BaseBrick):
                 self.__filtersDialog = FiltersDialog(self, attenuatorsList)
                 self.__filtersDialog.filtersChanged(self.getObject("attenuators").getAttenuatorsState())
                 self.__filtersDialog.show()
-
-
 
 
 # =============================================
@@ -270,8 +261,6 @@ class FiltersDialog(Qt.QDialog):
 
     def closePushButtonClicked(self):
         self.accept()
-
-
 
 
 class AttenuatorCheckBox(Qt.QCheckBox):
