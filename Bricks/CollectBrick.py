@@ -969,7 +969,8 @@ class CollectBrick(Core.BaseBrick):
     def testPushButtonClicked(self):
 
         self.setButtonState(1)
-        self.SPECBusyTimer.start(15000)
+        # For test allow 30s
+        self.SPECBusyTimer.start(30000)
 
         self.startCollection(mode = 'test')
 
