@@ -1,20 +1,22 @@
 import logging
+import sip
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal
 from PyQt4 import QtGui, Qt
 
-__category__ = "BsxCuBE"
+
+__category__ = "General"
 
 
-class EnergyWavewLengthBrick(Core.BaseBrick):
+class EnergyWaveLengthBrick(Core.BaseBrick):
+
 
     properties = {}
 
     connections = {"login": Connection("Login object",
-                                        [Signal("loggedIn", "loggedIn")],
-                                        [],
-                                        "connectionToLogin")}
-
+                                            [Signal("loggedIn", "loggedIn")],
+                                             [],
+                                             "connectionToLogin")}
 
     signals = []
     slots = []
@@ -25,9 +27,6 @@ class EnergyWavewLengthBrick(Core.BaseBrick):
 
 
     def init(self):
-        #
-        # Layout
-        #
         self.vboxLayout = Qt.QVBoxLayout()
         self.hBox1Layout = Qt.QHBoxLayout()
 
@@ -71,11 +70,11 @@ class EnergyWavewLengthBrick(Core.BaseBrick):
 
         self.brick_widget.layout().addLayout(self.hBox2Layout)
 
-
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
+
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
@@ -100,4 +99,5 @@ class EnergyWavewLengthBrick(Core.BaseBrick):
 
     def newWaveLengthReturnPressed(self, pValue):
         pass
+
 

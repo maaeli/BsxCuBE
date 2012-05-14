@@ -17,6 +17,7 @@
   <hbox qwidget="true" id="CollectBrick1" brick="true"><script src="CollectBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="ShutterBrick1" brick="true"><script src="ShutterBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="AttenuatorsBrick1" brick="true"><script src="AttenuatorsBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="EnergyWaveLengthBrick1" brick="true"><script src="EnergyWaveLengthBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
 <tabpanel id='tab_ReprocessTab'><vbox id="ReprocessTab" orient="vertical">

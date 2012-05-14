@@ -241,16 +241,8 @@
      <property name="show_button" value="True"/>
      <property name="show_state" value="True"/>
   </properties>
-  <properties id="ShutterBrick2">
+  <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
-     <property name="shutter_name" value="guillotine"/>
-     <property name="orientation" value="Landscape"/>
-     <propertygroup name="icons">
-       <property name="opened" value=""/>
-       <property name="closed" value=""/>
-     </propertygroup>
-     <property name="show_button" value="True"/>
-     <property name="show_state" value="True"/>
   </properties>
   <properties id="ShutterBrick1">
      <property name="flex" value="0"/>
@@ -338,6 +330,12 @@
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
   </properties>
+  <properties id="1D">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="1D"/>
+  </properties>
   <properties id="Operation">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
@@ -346,7 +344,7 @@
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
-     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr, matthew.bowler@esrf.fr"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr, matthew.bowler@esrf.fr, flot@esrf.fr"/>
      <property name="send_icon" value=""/>
   </properties>
   <properties id="EHScan">
@@ -368,11 +366,16 @@
      <property name="y2AxisLabel" value=""/>
      <property name="showPrintButton" value="True"/>
   </properties>
-  <properties id="1D">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="1D"/>
+  <properties id="ShutterBrick2">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="guillotine"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
   </properties>
     <connections id="CollectTab">
   </connections>
@@ -684,13 +687,7 @@
     </connection>
   </connections>
 
-  <connections id="ShutterBrick2">
-    <connection role="shutter">
-      <signal name="stateChanged"/>
-      <slot name="open"/>
-      <slot name="close"/>
-      <peer name="BsxCuBE/ShutterGuillotine"/>
-    </connection>
+  <connections id="EnergyWaveLengthBrick1">
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
@@ -780,8 +777,6 @@
 
   <connections id="ReprocessBrick1">
     <connection role="reprocess">
-      <signal name="reprocessDetectorChanged"/>
-      <signal name="reprocessOperationChanged"/>
       <signal name="reprocessDirectoryChanged"/>
       <signal name="reprocessPrefixChanged"/>
       <signal name="reprocessRunNumberChanged"/>
@@ -805,6 +800,9 @@
       <slot name="reprocess"/>
       <peer name="BsxCuBE/Reprocess"/>
     </connection>
+  </connections>
+
+  <connections id="1D">
   </connections>
 
   <connections id="Operation">
@@ -839,7 +837,17 @@
     </connection>
   </connections>
 
-  <connections id="1D">
+  <connections id="ShutterBrick2">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="BsxCuBE/ShutterGuillotine"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
   </connections>
 
   
