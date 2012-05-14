@@ -31,8 +31,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         self.hBox1Layout = Qt.QHBoxLayout()
 
         self.brick_widget.setLayout(self.vboxLayout)
-
-        self.energyLabel = Qt.QLabel("Energy (current, new)", self.brick_widget)
+        self.energyLabel = Qt.QLabel("Energy          (current, new)", self.brick_widget)
         self.hBox1Layout.addWidget(self.energyLabel)
 
         self.energyLineEdit = Qt.QLineEdit(self.brick_widget)
@@ -87,17 +86,16 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def connectionStatusChanged(self, pPeer):
         pass
 
-    def newEnergyChanged(self, pValue):
+    def newEnergyChanged(self):
         print "New Energy"
 
-
-    def newEnergyReturnPressed(self, pValue):
+    def newEnergyReturnPressed(self):
         print "New Energy Return Pressed"
 
-    def newWaveLengthChanged(self, pValue):
-        pass
+    def newWaveLengthChanged(self):
+        print "New Wavelength"
 
-    def newWaveLengthReturnPressed(self, pValue):
-        pass
+    def newWaveLengthReturnPressed(self):
+        print "New Wavelength Return Pressed"
 
 
