@@ -5,22 +5,12 @@ from Framework4.GUI.Core import Property, Connection, Signal
 from PyQt4 import QtGui, Qt
 
 
-
-# =============================================
-#  BLISS FRAMEWORK CATEGORY
-# =============================================
 __category__ = "General"
 
 
-# =============================================
-#  CLASS DEFINITION
-# =============================================
 class AttenuatorsBrick(Core.BaseBrick):
 
 
-    # =============================================
-    #  PROPERTIES/CONNECTIONS DEFINITION
-    # =============================================
     properties = {"maskFormat": Property("string", "Mask format", "", "maskFormatChanged"),
                   "suffix": Property("string", "Suffix", "", "suffixChanged"),
                   "maximumHistory": Property("integer", "Maximum history", "", "maximumHistoryChanged"),
@@ -43,29 +33,14 @@ class AttenuatorsBrick(Core.BaseBrick):
                                              [],
                                              "connectionToLogin")}
 
-
-
-    # =============================================
-    #  SIGNALS/SLOTS DEFINITION
-    # =============================================       
     signals = []
     slots = []
 
 
-
-
-    # =============================================
-    #  CONSTRUCTOR
-    # =============================================                    
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
 
-
-
-    # =============================================
-    #  WIDGET DEFINITION
-    # =============================================
     def init(self):
         self.__filtersDialog = None
         self.__maskFormat = ""
@@ -149,9 +124,6 @@ class AttenuatorsBrick(Core.BaseBrick):
         self.brick_widget.layout().addWidget(self.filtersPushButton)
 
 
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================
     def attenuatorsStateChanged(self, pValue):
         if self.__filtersDialog is not None:
             self.__filtersDialog.filtersChanged(pValue)
