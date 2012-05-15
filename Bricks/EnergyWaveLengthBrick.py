@@ -96,32 +96,54 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def connectedToEnergy(self, pPeer):
         self.energyControlObject = pPeer
-        # read energy when getting contact with CO Object
-        self.__energy = self.energyControlObject.getEnergy()
+        if self.energyControlObject is not None:
+            # read energy when getting contact with CO Object
+            self.__energy = float(self.energyControlObject.getEnergy())
+            energyStr = "%.4f" % self.__energy
+            self.energyLineEdit.setText(energyStr + " keV")
+            # and calculate wavelength
+            wavelength = self.hcOverE / self.__energy
+            wavelengthStr = "%.4f" % wavelength
+            self.waveLengthLineEdit.setText(wavelengthStr + " Angstrom")
 
     def newEnergyChanged(self):
         newEnergy = float(self.newEnergyLineEdit.text())
         if self.isEnergyOK(newEnergy):
-            print "sent %.4f" % newEnergy
             newEnergyStr = "%.4f" % newEnergy
             self.energyControlObject.setEnergy(newEnergyStr)
+            self.newEnergyLineEdit.setText("")
         else:
-            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energy between 7 and 15 keV", Qt.QMessageBox.Ok)
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energies between 7 and 15 keV", Qt.QMessageBox.Ok)
 
     def newEnergyReturnPressed(self):
         newEnergy = float(self.newEnergyLineEdit.text())
         if self.isEnergyOK(newEnergy):
-            print "sent %.4f" % newEnergy
             newEnergyStr = "%.4f" % newEnergy
             self.energyControlObject.setEnergy(newEnergyStr)
+            self.newEnergyLineEdit.setText("")
         else:
-            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energy between 7 and 15 keV", Qt.QMessageBox.Ok)
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energies between 7 and 15 keV", Qt.QMessageBox.Ok)
 
     def newWaveLengthChanged(self):
-        print "New Wavelength"
+        newWaveLength = float(self.newWaveLengthLineEdit.text())
+        if self.isWaveLengthOK(newWaveLength):
+            newEnergy = self.hcOverE / newWaveLength
+            newEnergyStr = "%.4f" % newEnergy
+            self.energyControlObject.setEnergy(newEnergyStr)
+            self.newWaveLengthLineEdit.setText("")
+        else:
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Wavelengths between 0.83 A and 1.77 A [7-15 keV]", Qt.QMessageBox.Ok)
+
 
     def newWaveLengthReturnPressed(self):
-        print "New Wavelength Return Pressed"
+        newWaveLength = float(self.newWaveLengthLineEdit.text())
+        if self.isWaveLengthOK(newWaveLength):
+            newEnergy = self.hcOverE / newWaveLength
+            newEnergyStr = "%.4f" % newEnergy
+            self.energyControlObject.setEnergy(newEnergyStr)
+            self.newWaveLengthLineEdit.setText("")
+        else:
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Wavelengths between 0.83 A and 1.77 A [7-15 keV]", Qt.QMessageBox.Ok)
 
     def isEnergyOK(self, energy):
         if energy < 7.0 or energy > 15.0 :
@@ -129,3 +151,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         else:
             return True
 
+    def isWaveLengthOK(self, wavelength):
+        if wavelength < 0.83 or wavelength > 1.77:
+            return False
+        else:
+            return True

@@ -22,12 +22,12 @@ class EnergyWaveLength(CObjectBase):
         self.__energy.connect("positionChanged", self.newEnergy)
 
     def newEnergy(self, pValue):
-        print "Got new value of Energy %d" % pValue
         self.emit("energyChanged", pValue)
 
     def setEnergy(self, pValue):
-        print "Should set energy to %s" % pValue
+        self.commands["setEnergy"](pValue)
 
     def getEnergy(self):
         print "Asked to get Energy"
+        return self.__energy.position()
 
