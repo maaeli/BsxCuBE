@@ -1,6 +1,5 @@
 <object class = "EnergyWaveLength" username = "EnergyWaveLength">
-   <object href="energy" role="getEnergy"/>
+   <object href="BsxCuBE/energy" role="getEnergy"/>
    <uri>nela:oh</uri>
-   <command name="setValue1" type="spec" call="setEnergy"/>
-   <data name="numeratorToGet2" value="12.398"/>
+   <command name="setEnergy" type="spec" call="setEnergy"/>
 </object>

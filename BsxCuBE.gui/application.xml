@@ -688,6 +688,12 @@
   </connections>
 
   <connections id="EnergyWaveLengthBrick1">
+    <connection role="energy">
+      <signal name="energyChanged"/>
+      <slot name="setEnergy"/>
+      <slot name="getEnergy"/>
+      <peer name="BsxCuBE/EnergyWaveLength"/>
+    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>

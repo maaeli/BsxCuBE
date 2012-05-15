@@ -5,7 +5,7 @@ class EnergyWaveLength(CObjectBase):
 
     signals = [Signal("energyChanged")]
 
-    slots = []
+    slots = [Slot("setEnergy"), Slot("getEnergy")]
 
 
     def __init__(self, *args, **kwargs):
@@ -23,4 +23,11 @@ class EnergyWaveLength(CObjectBase):
 
     def newEnergy(self, pValue):
         print "Got new value of Energy %d" % pValue
+        self.emit("energyChanged", pValue)
+
+    def setEnergy(self, pValue):
+        print "Should set energy to %s" % pValue
+
+    def getEnergy(self):
+        print "Asked to get Energy"
 

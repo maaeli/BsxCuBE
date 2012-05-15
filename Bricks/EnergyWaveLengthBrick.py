@@ -1,8 +1,6 @@
-import logging
-import sip
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, Connection, Signal
-from PyQt4 import QtGui, Qt
+from Framework4.GUI.Core import Connection, Signal, Slot
+from PyQt4 import Qt
 
 
 __category__ = "General"
@@ -13,10 +11,14 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     properties = {}
 
-    connections = {"login": Connection("Login object",
+    connections = {"energy": Connection("Energy object",
+                                            [Signal("energyChanged", "energyChanged")],
+                                            [Slot("setEnergy"), Slot("getEnergy")],
+                                            "connectedToEnergy"),
+                   "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
-                                             [],
-                                             "connectionToLogin")}
+                                            [],
+                                            "connectionToLogin")}
 
     signals = []
     slots = []
@@ -27,11 +29,14 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
 
     def init(self):
+        # The keV to Angstrom calc
+        self.hcOverE = 12.398
+
         self.vboxLayout = Qt.QVBoxLayout()
         self.hBox1Layout = Qt.QHBoxLayout()
 
         self.brick_widget.setLayout(self.vboxLayout)
-        self.energyLabel = Qt.QLabel("Energy          (current, new)", self.brick_widget)
+        self.energyLabel = Qt.QLabel("Energy [keV]     (current, new)", self.brick_widget)
         self.hBox1Layout.addWidget(self.energyLabel)
 
         self.energyLineEdit = Qt.QLineEdit(self.brick_widget)
@@ -51,7 +56,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
         self.hBox2Layout = Qt.QHBoxLayout()
 
-        self.wavelengthLabel = Qt.QLabel("Wavelength (current, new)", self.brick_widget)
+        self.wavelengthLabel = Qt.QLabel("Wavelength [A] (current, new)", self.brick_widget)
         self.hBox2Layout.addWidget(self.wavelengthLabel)
 
         self.waveLengthLineEdit = Qt.QLineEdit(self.brick_widget)
@@ -81,16 +86,36 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def energyChanged(self, pValue):
         if pValue is not None:
-            self.energyLineEdit.setText(str(float(pValue)) + "Angstrom")
+            self.__energy = float(pValue)
+            energyStr = "%.4f" % self.__energy
+            self.energyLineEdit.setText(energyStr + " keV")
+            # and calculate wavelength
+            wavelength = self.hcOverE / self.__energy
+            wavelengthStr = "%.4f" % wavelength
+            self.waveLengthLineEdit.setText(wavelengthStr + " Angstrom")
 
-    def connectionStatusChanged(self, pPeer):
-        pass
+    def connectedToEnergy(self, pPeer):
+        self.energyControlObject = pPeer
+        # read energy when getting contact with CO Object
+        self.__energy = self.energyControlObject.getEnergy()
 
     def newEnergyChanged(self):
-        print "New Energy"
+        newEnergy = float(self.newEnergyLineEdit.text())
+        if self.isEnergyOK(newEnergy):
+            print "sent %.4f" % newEnergy
+            newEnergyStr = "%.4f" % newEnergy
+            self.energyControlObject.setEnergy(newEnergyStr)
+        else:
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energy between 7 and 15 keV", Qt.QMessageBox.Ok)
 
     def newEnergyReturnPressed(self):
-        print "New Energy Return Pressed"
+        newEnergy = float(self.newEnergyLineEdit.text())
+        if self.isEnergyOK(newEnergy):
+            print "sent %.4f" % newEnergy
+            newEnergyStr = "%.4f" % newEnergy
+            self.energyControlObject.setEnergy(newEnergyStr)
+        else:
+            Qt.QMessageBox.critical(self.brick_widget, "Warning", "Only Energy between 7 and 15 keV", Qt.QMessageBox.Ok)
 
     def newWaveLengthChanged(self):
         print "New Wavelength"
@@ -98,4 +123,9 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def newWaveLengthReturnPressed(self):
         print "New Wavelength Return Pressed"
 
+    def isEnergyOK(self, energy):
+        if energy < 7.0 or energy > 15.0 :
+            return False
+        else:
+            return True
 
