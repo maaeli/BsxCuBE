@@ -32,22 +32,20 @@ class BsxVideoBrick(Core.BaseBrick):
         pass #logging.info("EXCEPTION:%r", exception)
 
     def sample_changer_connected(self, sc):
-        #TODO: take away!!! this is for test only
-        return
         if sc is not None:
-           logging.info("Sample changer VIDEO connected")
+            logging.info("Sample changer VIDEO connected")
 
-           self._sampleChanger = sc
-           self.videoWidget.setAutoRefreshRate(50)
-           self.videoWidget.setAutoRefresh(True)
+            self._sampleChanger = sc
+            self.videoWidget.setAutoRefreshRate(50)
+            self.videoWidget.setAutoRefresh(True)
 
-           self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
-           self.videoWidget.getCurrentLiquidPosition = self._sampleChanger.getCurrentLiquidPosition
-           self.videoWidget.getCurrentBeamLocation = self._sampleChanger.getBeamLocation
-           self.videoWidget.setBeamLocation = self._sampleChanger.setBeamLocation
-           self.videoWidget.exceptionCallback = self.exceptionCallback
+            self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
+            self.videoWidget.getCurrentLiquidPosition = self._sampleChanger.getCurrentLiquidPosition
+            self.videoWidget.getCurrentBeamLocation = self._sampleChanger.getBeamLocation
+            self.videoWidget.setBeamLocation = self._sampleChanger.setBeamLocation
+            self.videoWidget.exceptionCallback = self.exceptionCallback
         else:
-           logging.info("Sample changer VIDEO NOT connected")
-           self.videoWidget.setAutoRefresh(False)
+            logging.info("Sample changer VIDEO NOT connected")
+            self.videoWidget.setAutoRefresh(False)
 
 
