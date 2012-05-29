@@ -65,7 +65,7 @@ class ShutterBrick(Core.BaseBrick):
                     "opened": Qt.QColor(0x0, 0xff, 0x0),
                     "insert": Qt.QColor(0x66, 0x33, 0x0),
                     "extract": Qt.QColor(0x66, 0x33, 0x0),
-                    "moving": Qt.QColor(0x66, 0x33, 0x0),
+                    "moving": Qt.QColor(0xff, 0xa5, 0x0),
                     "standby": Qt.QColor(0x66, 0x33, 0x0),
                     "fault": Qt.QColor(0xff, 0x0, 0x0),
                     "init": Qt.QColor(0x66, 0x33, 0x0),
