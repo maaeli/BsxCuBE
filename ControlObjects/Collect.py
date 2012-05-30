@@ -39,6 +39,10 @@ class Collect(CObjectBase):
         self.exposureTemperature = -374
         self.xsdAverage = None
 
+        # get machdevice from config file
+        # <data name="uri"  value="orion:10000/FE/D/29" />
+        self.machDevName = str(self.config["/object/data[@name='uri']/@value"][0])
+
     def __getattr__(self, attr):
         if not attr.startswith("__"):
             try:
@@ -49,13 +53,26 @@ class Collect(CObjectBase):
 
     def init(self):
         self.collecting = False
+        self.machineCurrent = 0.00
         self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
         #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
         self.commands["initPlugin_sparta"](self.pluginIntegrate)
         self.commands["initPlugin_sparta"](self.pluginMerge)
         self.commands["initPlugin_slavia"](self.pluginSAS)
 
+        # add a channel to read machine current (with polling)
+        self.addChannel('tango',
+                        'read_current_value',
+                        self.machDevName,
+                        'SR_Current',
+                        polling = 3000)
+        # set up a 
+        readMachCurrentValue = self.channels.get('read_current_value')
+        if readMachCurrentValue is not None:
+            readMachCurrentValue.connect('update', self.currentChanged)
 
+    def currentChanged(self, current):
+        self.machineCurrent = current
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
@@ -150,7 +167,9 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.channel["machine_current"].value()))
+        print  self.machineCurrent
+        print type(self.machineCurrent)
+        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.machineCurrent))
         xsdin1d = self.xsdin.copy()
 
         xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))

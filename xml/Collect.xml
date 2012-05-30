@@ -2,7 +2,8 @@
 	
    <uri>nela:exp</uri>	
 
-   <channel call="SR_Current" type="tango" uri="orion:10000/FE/D/29"  name="machine_current"  />
+   <data name="uri"  value="orion:10000/FE/D/29" />
+   
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    
    <command name="startJob_sparta" type="tango" uri="DAU/edna/1" call="startJob"/>
