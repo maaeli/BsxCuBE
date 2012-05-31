@@ -566,12 +566,16 @@
   </connections>
 
   <connections id="CollectBrick1">
-    <connection role="motoralignment">
-      <signal name="executeTestCollect"/>
-      <peer name="MotorAlignmentBrick1"/>
-      <peer name="MotorAlignmentBrick2"/>
-      <peer name="MotorAlignmentBrick3"/>
-      <peer name="MotorAlignmentBrick4"/>
+    <connection role="energy">
+      <signal name="energyChanged"/>
+      <slot name="setEnergy"/>
+      <slot name="getEnergy"/>
+      <peer name="BsxCuBE/EnergyWaveLength"/>
+    </connection>
+    <connection role="image_proxy">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="collect">
       <signal name="collectDirectoryChanged"/>
@@ -602,14 +606,16 @@
       <slot name="triggerEDNA"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
+    <connection role="motoralignment">
+      <signal name="executeTestCollect"/>
+      <peer name="MotorAlignmentBrick1"/>
+      <peer name="MotorAlignmentBrick2"/>
+      <peer name="MotorAlignmentBrick3"/>
+      <peer name="MotorAlignmentBrick4"/>
+    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
-    </connection>
-    <connection role="image_proxy">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-      <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="sample_changer">
       <peer name="BsxCuBE/SampleChanger"/>

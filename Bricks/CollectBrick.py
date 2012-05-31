@@ -63,6 +63,10 @@ class CollectBrick(Core.BaseBrick):
                                             [],
                                             [],
                                             "sample_changer_connected"),
+                    "energy": Connection("Energy object",
+                                            [Signal("energyChanged", "energyChanged")],
+                                            [Slot("setEnergy"), Slot("getEnergy")],
+                                            "connectedToEnergy"),
                     "image_proxy": Connection("image proxy",
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                             [],
@@ -85,6 +89,8 @@ class CollectBrick(Core.BaseBrick):
         self.lastCollectProcessingLog = None
 
     def init(self):
+        # The keV to Angstrom calc
+        self.hcOverE = 12.398
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
@@ -94,6 +100,7 @@ class CollectBrick(Core.BaseBrick):
         self._frameNumber = 0
         self._currentFrame = 0
         self._currentCurve = 0
+        self._waveLengthStr = "0.0"
         self._collectRobotDialog = CollectRobotDialog(self)
         self.__lastFrame = None
         self.__currentConcentration = None
@@ -232,17 +239,6 @@ class CollectBrick(Core.BaseBrick):
         self.detectorDistanceDoubleSpinBox.setRange(0.1, 10)
         self.hBoxLayout9.addWidget(self.detectorDistanceDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout9)
-
-        self.hBoxLayout10 = Qt.QHBoxLayout()
-        self.waveLengthLabel = Qt.QLabel("Wave length", self.brick_widget)
-        self.waveLengthLabel.setFixedWidth(130)
-        self.hBoxLayout10.addWidget(self.waveLengthLabel)
-        self.waveLengthDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.waveLengthDoubleSpinBox.setSuffix(" nm")
-        self.waveLengthDoubleSpinBox.setDecimals(4)
-        self.waveLengthDoubleSpinBox.setRange(0.01, 1)
-        self.hBoxLayout10.addWidget(self.waveLengthDoubleSpinBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout10)
 
         self.hBoxLayout11 = Qt.QHBoxLayout()
         self.pixelSizeLabel = Qt.QLabel("Pixel size (x, y)", self.brick_widget)
@@ -453,7 +449,7 @@ class CollectBrick(Core.BaseBrick):
         self.detectorDistanceDoubleSpinBox.setValue(float(pValue))
 
     def collectWaveLengthChanged(self, pValue):
-        self.waveLengthDoubleSpinBox.setValue(float(pValue))
+        self._waveLengthStr = pValue
 
     def collectPixelSizeXChanged(self, pValue):
         self.pixelSizeXDoubleSpinBox.setValue(float(pValue))
@@ -614,9 +610,7 @@ class CollectBrick(Core.BaseBrick):
         if self.collectObj is not None:
             self.collectObj.updateChannels(oneway = True)
 
-    #
-    #  Other
-    #
+
     def sample_changer_connected(self, sc):
         #  How to read an attribute? You can't.
         self._sampleChanger = sc
@@ -624,6 +618,23 @@ class CollectBrick(Core.BaseBrick):
             return
         self.nbPlates = 3
         self.plateInfos = [sc.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
+
+    def connectedToEnergy(self, pPeer):
+        self.energyControlObject = pPeer
+        if self.energyControlObject is not None:
+            # read energy when getting contact with CO Object
+            self.__energy = float(self.energyControlObject.getEnergy())
+            wavelength = self.hcOverE / self.__energy
+            wavelengthStr = "%.4f" % wavelength
+            self._waveLengthStr = wavelengthStr
+
+    def energyChanged(self, pValue):
+        if pValue is not None:
+            self.__energy = float(pValue)
+            wavelength = self.hcOverE / self.__energy
+            wavelengthStr = "%.4f" % wavelength
+            self._waveLengthStr = wavelengthStr
+
 
     def validParameters(self):
 
@@ -678,7 +689,7 @@ class CollectBrick(Core.BaseBrick):
                             "doProcess":self.processCheckBox.isChecked(),
                             "mask":str(self.maskLineEdit.text()),
                             "detectorDistance": float(self.detectorDistanceDoubleSpinBox.value()),
-                            "waveLength": float(self.waveLengthDoubleSpinBox.value()),
+                            "waveLength": float(self._waveLengthStr),
                             "pixelSizeX":float(self.pixelSizeXDoubleSpinBox.value()),
                             "pixelSizeY":float(self.pixelSizeYDoubleSpinBox.value()),
                             "beamCenterX": int(self.beamCenterXSpinBox.value()),
@@ -772,7 +783,7 @@ class CollectBrick(Core.BaseBrick):
 
             collectpars.mask = self.maskLineEdit.text()
             collectpars.detectorDistance = self.detectorDistanceDoubleSpinBox.value()
-            collectpars.waveLength = self.waveLengthDoubleSpinBox.value()
+            collectpars.waveLength = self._waveLengthStr
             collectpars.pixelSizeX = self.pixelSizeXDoubleSpinBox.value()
             collectpars.pixelSizeY = self.pixelSizeYDoubleSpinBox.value()
             collectpars.beamCenterX = self.beamCenterXSpinBox.value()
@@ -812,7 +823,6 @@ class CollectBrick(Core.BaseBrick):
             self.maskDirectoryPushButton.hide()
             self.maskDisplayPushButton.hide()
             self.detectorDistanceDoubleSpinBox.hide()
-            self.waveLengthDoubleSpinBox.hide()
             self.pixelSizeXDoubleSpinBox.hide()
             self.pixelSizeYDoubleSpinBox.hide()
             self.beamCenterXSpinBox.hide()
@@ -821,7 +831,6 @@ class CollectBrick(Core.BaseBrick):
             self.maskLabel.hide()
             self.detectorDistanceLabel.hide()
             self.pixelSizeLabel.hide()
-            self.waveLengthLabel.hide()
             self.beamCenterLabel.hide()
             self.normalisationLabel.hide()
         else:
@@ -831,7 +840,6 @@ class CollectBrick(Core.BaseBrick):
             self.maskDirectoryPushButton.show()
             self.maskDisplayPushButton.show()
             self.detectorDistanceDoubleSpinBox.show()
-            self.waveLengthDoubleSpinBox.show()
             self.pixelSizeXDoubleSpinBox.show()
             self.pixelSizeYDoubleSpinBox.show()
             self.beamCenterXSpinBox.show()
@@ -840,7 +848,6 @@ class CollectBrick(Core.BaseBrick):
             self.maskLabel.show()
             self.detectorDistanceLabel.show()
             self.pixelSizeLabel.show()
-            self.waveLengthLabel.show()
             self.beamCenterLabel.show()
             self.normalisationLabel.show()
 
@@ -856,7 +863,6 @@ class CollectBrick(Core.BaseBrick):
         self.maskDirectoryPushButton.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.maskDisplayPushButton.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.detectorDistanceDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
-        self.waveLengthDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.pixelSizeXDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.pixelSizeYDoubleSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
         self.beamCenterXSpinBox.setEnabled(not pValue and (not self.__expertModeOnly or self.__expertMode))
@@ -987,7 +993,7 @@ class CollectBrick(Core.BaseBrick):
                                                str(self.codeLineEdit.text()),
                                                str(self.maskLineEdit.text()),
                                                self.detectorDistanceDoubleSpinBox.value(),
-                                               self.waveLengthDoubleSpinBox.value(),
+                                               self._waveLengthStr,
                                                self.pixelSizeXDoubleSpinBox.value(),
                                                self.pixelSizeYDoubleSpinBox.value(),
                                                self.beamCenterXSpinBox.value(),
@@ -1082,7 +1088,7 @@ class CollectBrick(Core.BaseBrick):
                       str(self.codeLineEdit.text()),
                       str(self.maskLineEdit.text()),
                       self.detectorDistanceDoubleSpinBox.value(),
-                      self.waveLengthDoubleSpinBox.value(),
+                      self._waveLengthStr,
                       self.pixelSizeXDoubleSpinBox.value(),
                       self.pixelSizeYDoubleSpinBox.value(),
                       self.beamCenterXSpinBox.value(),
@@ -1211,7 +1217,6 @@ class CollectBrick(Core.BaseBrick):
         self.maskDirectoryPushButton.setEnabled(enabled)
         self.maskDisplayPushButton.setEnabled(enabled and self.__validParameters[2])
         self.detectorDistanceDoubleSpinBox.setEnabled(enabled)
-        self.waveLengthDoubleSpinBox.setEnabled(enabled)
         self.pixelSizeXDoubleSpinBox.setEnabled(enabled)
         self.pixelSizeYDoubleSpinBox.setEnabled(enabled)
         self.beamCenterXSpinBox.setEnabled(enabled)

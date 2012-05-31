@@ -2,4 +2,5 @@
    <object href="BsxCuBE/energy" role="getEnergy"/>
    <uri>nela:oh</uri>
    <command name="setEnergy" type="spec" call="setEnergy"/>
+   <channel name="collectWaveLength"  type="spec" uri="nela:exp" call="BSX_GLOBAL/collect/waveLength"/>        
 </object>

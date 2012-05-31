@@ -126,7 +126,7 @@ class Collect(CObjectBase):
         xsdExperiment.pixelSize_2 = XSDataLength(value = float(pPixelSizeY) * 1.0e-6)
         xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
         xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
-        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength) * 1.0e-9)
+        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength) * 1.0e-10)
         xsdExperiment.maskFile = XSDataImage(path = XSDataString(str(pMaskFile)))
         xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
         xsdExperiment.frameMax = XSDataInteger(int(pNumberFrames))
@@ -167,9 +167,8 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-        print  self.machineCurrent
-        print type(self.machineCurrent)
-        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(float(self.machineCurrent))
+        # self.machineCurrent is already float
+        self.xsdin.experimentSetup.machineCurrent = XSDataDouble(self.machineCurrent)
         xsdin1d = self.xsdin.copy()
 
         xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))
