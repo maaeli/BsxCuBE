@@ -66,7 +66,7 @@ class Collect(CObjectBase):
                         self.machDevName,
                         'SR_Current',
                         polling = 3000)
-        # set up a 
+        # set up a connect to the Tango channel
         readMachCurrentValue = self.channels.get('read_current_value')
         if readMachCurrentValue is not None:
             readMachCurrentValue.connect('update', self.currentChanged)
