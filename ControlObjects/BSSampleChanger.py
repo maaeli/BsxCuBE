@@ -41,7 +41,12 @@ class BSSampleChanger(CObjectBase):
         self.current_status = str(status)
         self.emit('stateChanged', self.current_state, self.current_status)
 
+    #TODO: SO - Why is beamlocation not used
     def beamlocationChanged(self, beamlocation):
+        #TODO: Take away 
+        print ">>>>"
+        print str(beamlocation)
+        print type(beamlocation)
         self.beam_location = self.getBeamLocation()
         self.emit('beamLocationChanged', self.beam_location)
 
@@ -53,6 +58,8 @@ class BSSampleChanger(CObjectBase):
     #
     def getBeamLocation(self):
         beam = self.channels["BeamLocation"].value()
+        print ">>>"
+        print "Called getBeamlocation %d %d %d %d", int(beam[0]), int(beam[1]), int(beam[2]), int(beam[3])
         try:
             beamLocation = map(int, beam.strip().split())
             return beamLocation
@@ -117,8 +124,6 @@ class BSSampleChanger(CObjectBase):
     def doCleanProcedure(self):
         self.clean()
         self.wait()
-
-
 
 
     def wait(self):
