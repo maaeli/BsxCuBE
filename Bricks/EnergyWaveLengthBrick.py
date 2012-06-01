@@ -1,6 +1,7 @@
+import logging
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Connection, Signal, Slot
-from PyQt4 import Qt, QtGui
+from PyQt4 import Qt
 
 
 __category__ = "General"
@@ -88,7 +89,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
             self.__energyDialog.activateWindow()
             self.__energyDialog.raise_()
         else:
-            self.__energyDialog = EnterEnergy(self, self.energyControlObject)
+            self.__energyDialog = EnterEnergy(self)
             self.__energyDialog.show()
 
     def energyDialogOpen(self):
@@ -103,7 +104,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
             self.__waveLengthDialog.activateWindow()
             self.__waveLengthDialog.raise_()
         else:
-            self.__waveLengthDialog = EnterWaveLength(self, self.energyControlObject)
+            self.__waveLengthDialog = EnterWaveLength(self)
             self.__waveLengthDialog.show()
 
     def waveLengthDialogOpen(self):
@@ -111,6 +112,12 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def waveLengthDialogClose(self):
         self.__waveLengthDialogOpen = False
+
+    def setEnergy(self, energyStr):
+        if self.energyControlObject is not None:
+            self.energyControlObject.setEnergy(energyStr)
+        else:
+            logging.error("Could not set Energy to " + energyStr)
 
     def energyChanged(self, pValue):
         if pValue is not None:
@@ -123,8 +130,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
             self.waveLengthLineEdit.setText(wavelengthStr + " Angstrom")
 
     def connectedToEnergy(self, pPeer):
-        self.energyControlObject = pPeer
-        if self.energyControlObject is not None:
+        if pPeer is not None:
+            self.energyControlObject = pPeer
             # read energy when getting contact with CO Object
             self.__energy = float(self.energyControlObject.getEnergy())
             energyStr = "%.4f" % self.__energy
@@ -138,9 +145,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 class EnterEnergy(Qt.QDialog):
 
 
-    def __init__(self, pParent, COObject):
+    def __init__(self, pParent):
         self.__parent = pParent
-        self.__energyControlObject = COObject
         self.__parent.energyDialogOpen()
 
         Qt.QDialog.__init__(self, self.__parent.brick_widget)
@@ -182,7 +188,7 @@ class EnterEnergy(Qt.QDialog):
         newEnergy = float(self.newEnergyLineEdit.text())
         if self.isEnergyOK(newEnergy):
             newEnergyStr = "%.4f" % newEnergy
-            self.__energyControlObject.setEnergy(newEnergyStr)
+            self.__parent.setEnergy(newEnergyStr)
             self.newEnergyLineEdit.setText("")
             self.__parent.energyDialogClose()
             self.accept()
@@ -198,11 +204,10 @@ class EnterEnergy(Qt.QDialog):
 class EnterWaveLength(Qt.QDialog):
 
 
-    def __init__(self, pParent, COObject):
+    def __init__(self, pParent):
         # The keV to Angstrom calc
         self.hcOverE = 12.398
         self.__parent = pParent
-        self.__energyControlObject = COObject
         self.__parent.waveLengthDialogOpen()
 
         Qt.QDialog.__init__(self, self.__parent.brick_widget)
@@ -246,7 +251,7 @@ class EnterWaveLength(Qt.QDialog):
             # set energy from wavelength
             newEnergy = self.hcOverE / newWaveLength
             newEnergyStr = "%.4f" % newEnergy
-            self.__energyControlObject.setEnergy(newEnergyStr)
+            self.__parent.setEnergy(newEnergyStr)
             self.newWaveLengthLineEdit.setText("")
             self.__parent.waveLengthDialogClose()
             self.accept()
@@ -258,4 +263,3 @@ class EnterWaveLength(Qt.QDialog):
             return False
         else:
             return True
-

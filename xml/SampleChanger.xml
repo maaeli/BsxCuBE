@@ -2,9 +2,9 @@
   <uri>bm29/bssc/1</uri>
   <channel type="tango" name="State"  polling="1000" slot="getState"/>
   <channel type="tango" name="Status" polling="1000"/>
-  <channel type="tango" name="SEUTemperature" signal="seuTemperatureChanged" call="TemperatureSEU" polling="1000" slot="getSEUTemperature"/>
+  <channel type="tango" name="SEUTemperature" signal="seuTemperatureChanged" call="TemperatureSEU" polling="3000" slot="getSEUTemperature"/>
   <channel type="tango" name="TemperatureSampleStorage"/>
-  <channel type="tango" name="StorageTemperature" signal="storageTemperatureChanged" call="TemperatureSampleStorage" polling="1000" slot="getSampleStorageTemperature"/>
+  <channel type="tango" name="StorageTemperature" signal="storageTemperatureChanged" call="TemperatureSampleStorage" polling="3000" slot="getSampleStorageTemperature"/>
   <channel type="tango" name="SampleType"/>
   <channel type="tango" name="ViscosityLevel"/>
   <channel type="tango" name="BeamLocation"          slot="getBeamLocation"/>

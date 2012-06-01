@@ -41,5 +41,5 @@
    <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>			
    <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>			
    <channel name="abortCollect"          type="spec" call="BSX_ABORT" signal="abortCollectChanged"/>
-   <channel name="checkBeam"             type="spec" uri="nela:oh"  call="BSX_CHECKBEAM" signal="checkBeamChanged"/>
+   <channel name="checkBeam"             type="spec" uri="nela:oh"  call="BSX_CHECKBEAM"/>
 </object>	
