@@ -39,11 +39,13 @@ class BsxVideoBrick(Core.BaseBrick):
             self.videoWidget.setAutoRefreshRate(50)
             self.videoWidget.setAutoRefresh(True)
 
+            # override videoWidget calls
             self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
             self.videoWidget.getCurrentLiquidPosition = self._sampleChanger.getCurrentLiquidPosition
             self.videoWidget.getCurrentBeamLocation = self._sampleChanger.getBeamLocation
             self.videoWidget.setBeamLocation = self._sampleChanger.setBeamLocation
             self.videoWidget.exceptionCallback = self.exceptionCallback
+
         else:
             logging.info("Sample changer VIDEO NOT connected")
             self.videoWidget.setAutoRefresh(False)

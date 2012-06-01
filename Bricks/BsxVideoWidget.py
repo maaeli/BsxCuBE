@@ -81,10 +81,13 @@ class BsxVideoWidget(Qt.QWidget):
 
     def getCurrentLiquidPosition(self):
         return self.currentLiquidPositionList
+
     def getCurrentBeamLocation(self):
         return self.beamLocation
+
     def setBeamLocation(self, pos):
         self.beamLocation = pos
+
     def getNewImage(self):
         return self.image
 
@@ -99,20 +102,20 @@ class BsxVideoWidget(Qt.QWidget):
             return
 
         if qFileDialog.selectedNameFilter() == filterList[0]:
-           format = "PNG"
+            imgFormat = "PNG"
         elif qFileDialog.selectedNameFilter() == filterList[1]:
-           format = "BMP"
+            imgFormat = "BMP"
         else:
-           format = "JPG"
+            imgFormat = "JPG"
 
         fileName = str(qFileDialog.selectedFiles()[0])
 
         if not fileName.upper().endswith("." + format):
-           fileName += "." + format
-        if Qt.QPixmap.grabWidget(self.imageLabel).save(fileName, format):
-           Qt.QMessageBox.information(self, "Info", "Image was successfully saved in file '" + fileName + "'!")
+            fileName += "." + imgFormat
+        if Qt.QPixmap.grabWidget(self.imageLabel).save(fileName, imgFormat):
+            Qt.QMessageBox.information(self, "Info", "Image was successfully saved in file '" + fileName + "'!")
         else:
-           Qt.QMessageBox.critical(self, "Error", "Error when trying to save image to file '" + fileName + "'!")
+            Qt.QMessageBox.critical(self, "Error", "Error when trying to save image to file '" + fileName + "'!")
 
     def update(self):
         # update all
@@ -239,6 +242,7 @@ class BsxVideoWidget(Qt.QWidget):
         if self.__isDrawing:
             self.tempBeamLocation = [x, y, x, y]
 
+        #TODO: Understand this return SO 1/6 2012
         return
 
         if self.__isInside:
