@@ -11,38 +11,37 @@ class BSSampleChanger(CObjectBase):
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
 
-        #
-        # this is not used.  it is just a list of things
-        #
-        self.__channels = ["Status", "AlarmList", "BeamLocation",
-                           "BeamMarkVolume", "BeamShapeEllipse", "CleanVenturiOK",
-                           "CollisionDetected", "CommandException", "CommandOutput",
-                           "CoverOpen", "CurrentLiquidPosition", "DetergentEmpty",
-                           "Flooding", "OverflowVenturiOK", "PlateID",
-                           "PLCState", "HardwareInitPending", "Power12OK",
-                           "SampleType", "TemperatureSampleStorage", "TemperatureSEU",
-                           "LocalLockout", "State", "VacuumOK",
-                           "ViscosityLevel", "WasteFull", "WaterEmpty",
-                           "LiquidPositionFixed"]
+
+        # Usable channels:
+        # "Status", "AlarmList", "BeamLocation",
+        # "BeamMarkVolume", "BeamShapeEllipse", "CleanVenturiOK",
+        # "CollisionDetected", "CommandException", "CommandOutput",
+        # "CoverOpen", "CurrentLiquidPosition", "DetergentEmpty",
+        # "Flooding", "OverflowVenturiOK", "PlateID",
+        # "PLCState", "HardwareInitPending", "Power12OK",
+        # "SampleType", "TemperatureSampleStorage", "TemperatureSEU",
+        # "LocalLockout", "State", "VacuumOK",
+        # "ViscosityLevel", "WasteFull", "WaterEmpty",
+        # "LiquidPositionFixed"
 
         # The target user-entered temperature
         self.__target_temperature = None
 
     def init(self):
         self.current_status = self.current_state = 'Not Available'
-        self.channels['State'].connect('update', self.state_changed)
-        self.channels['Status'].connect('update', self.status_changed)
-        self.channels['BeamLocation'].connect('update', self.beamlocation_changed)
+        self.channels['State'].connect('update', self.stateChanged)
+        self.channels['Status'].connect('update', self.statusChanged)
+        self.channels['BeamLocation'].connect('update', self.beamlocationChanged)
 
-    def state_changed(self, state):
+    def stateChanged(self, state):
         self.current_state = str(state)
         self.emit('stateChanged', self.current_state, self.current_status)
 
-    def status_changed(self, status):
+    def statusChanged(self, status):
         self.current_status = str(status)
         self.emit('stateChanged', self.current_state, self.current_status)
 
-    def beamlocation_changed(self, beamlocation):
+    def beamlocationChanged(self, beamlocation):
         self.beam_location = self.getBeamLocation()
         self.emit('beamLocationChanged', self.beam_location)
 
@@ -55,10 +54,21 @@ class BSSampleChanger(CObjectBase):
     def getBeamLocation(self):
         beam = self.channels["BeamLocation"].value()
         try:
-             beamLocation = map(int, beam.strip().split())
-             return beamLocation
+            beamLocation = map(int, beam.strip().split())
+            return beamLocation
         except:
-             return None
+            return None
+
+    def getState(self):
+        scState = self.channels["State"].value()
+        #TODO: Take away at the last
+        print "getState called"
+        print type(scState)
+        return scState
+
+    def getCommandException(self):
+        scException = self.channels["CommandException"].value()
+        return scException
 
     def setBeamMark(self, x1, y1, x2, y2, is_ellipse):
         self.setBeamLocation(x1, y1, x2, y2)
@@ -94,16 +104,21 @@ class BSSampleChanger(CObjectBase):
     def transfer(self, *args):
         self.commands['transfer'](map(str, args))
 
+    def clean(self):
+        self.commands['clean']()
+
     def isExecuting(self):
         state = str(self.getState())
         if state:
-           return (state != "STANDBY")
+           return (state == "RUNNING")
         else:
            return False
 
     def doCleanProcedure(self):
         self.clean()
         self.wait()
+
+
 
 
     def wait(self):
