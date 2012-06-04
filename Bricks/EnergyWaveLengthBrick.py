@@ -86,7 +86,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def newEnergyPushButtonClicked(self):
         # Check if pilatus is ready
-        if self.energyControlObject.pilatusReady():
+        if not self.energyControlObject.pilatusReady():
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
         if self.__energyDialogOpen :
@@ -105,7 +105,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def newWaveLengthPushButtonClicked(self):
         # Check if pilatus is ready
-        if self.energyControlObject.pilatusReady():
+        if not self.energyControlObject.pilatusReady():
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
         if self.__waveLengthDialogOpen :
