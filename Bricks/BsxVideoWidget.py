@@ -1,3 +1,4 @@
+import logging
 import sys, time
 
 from PyQt4 import QtCore, Qt
@@ -150,12 +151,16 @@ class BsxVideoWidget(Qt.QWidget):
     def exceptionCallback(self, exception):
         pass
 
-    def displayImage(self, image, format = "JPG"):
+    def displayImage(self, image, imgFormat = "JPG"):
         self.image = image
-        self.imageFormat = format
+        self.imageFormat = imgFormat
         self.updateFrame()
 
     def updateFrame(self):
+        #TODO: Need to clean this
+        if type(self.image).__name__ == "list":
+            logging.error("Got a list instead of a numpy.ndarray as image" + str(self.image))
+            return
         self.imagePixmap = Qt.QPixmap()
         self.imagePixmap.loadFromData(self.image, self.imageFormat)
 

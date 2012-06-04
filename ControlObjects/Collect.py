@@ -93,8 +93,16 @@ class Collect(CObjectBase):
 
 
     def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-        self.storageTemperature = float(pStorageTemperature)
-        self.exposureTemperature = float(pSEUTemperature)
+        try:
+            self.storageTemperature = float(pStorageTemperature)
+        except:
+            self.storageTemperature = 20
+            logging.error("Could not read storage Temperature - Check sample changer connection")
+        try:
+            self.exposureTemperature = float(pSEUTemperature)
+        except:
+            self.storageTemperature = 20
+            logging.error("Could not read exposure Temperature - Check sample changer connection")
         self.collecting = True
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
@@ -257,7 +265,6 @@ class Collect(CObjectBase):
         #self.commands["testCollect"].abort()
 
     def setCheckBeam(self, flag):
-        logging.info("changing check beam in spec to %s" % flag)
         if flag:
             self.channels["checkBeam"].set_value(1)
         else:

@@ -1,4 +1,6 @@
 import logging
+import math
+import time
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
@@ -6,39 +8,27 @@ class EnergyWaveLength(CObjectBase):
 
     signals = [Signal("energyChanged")]
 
-    slots = [Slot("setEnergy"), Slot("getEnergy")]
+    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
         # Threshold in keV (to change the sensitivity)
         self.__pilatusThreshold = 12.00
-        # get Pilatusdevice from config file
-        # <data name="uri"  value="bm29/pilatus/p0" />
-        self.pilatusDevName = str(self.config["/object/data[@name='uri']/@value"][0])
-        # add a channel to read the Threshold constaqntly
-        self.addChannel('tango',
-                        'pilatus_threshold',
-                        self.pilatusDevName,
-                        'energy_threshold',
-                        polling = 3000)
-        # get threshold constantly
-        self.pilatusThreshold = self.channels.get("pilatus_threshold")
-        if  self.pilatusThreshold is not None:
-            self.connect('update', self.pilatusThresholdChanged)
-        else:
-            logging.error("No connection to Pilatus")
 
-        self.addChannel('tango',
-                        'pilatus_threshold',
-                        self.pilatusDevName,
-                        'energy_threshold',
-                        polling = 3000)
 
 
     def init(self):
         # The keV to Angstrom calc
         self.hcOverE = 12.398
-        # set up connection to Spec motor energy
+        # How many keV before setting a new value
+        self.deltaPilatus = 0.1
+        # check that we have connection to Pilatus
+        self.pilatusThreshold = self.channels.get("pilatus_threshold")
+        if  self.pilatusThreshold is None:
+            logging.error("No connection to Pilatus")
+
+        # Runnning = Nothing should be possible
+        self.__pilatus_status = "Running"
         # get spec motor as described in href and the corresponding energy.xml
         self.__energyMotor = self.objects["getEnergy"]
         if self.__energyMotor is not None:
@@ -50,7 +40,24 @@ class EnergyWaveLength(CObjectBase):
 
     def newEnergy(self, pValue):
         self.__energy = float(pValue)
-        self.pilatusThreshold.set_value(self.__energy)
+        # Check if we need and can set new Energy
+        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+            #TODO: DEBUG
+            print ">>>>>"
+            print ">>>>>"
+            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
+            # loop before changing energy
+            ok = self.pilatusReady()
+            while not ok:
+                time.sleep(0.5)
+                #TODO: DEBUG
+                print ">>>>>"
+                print ">>>>>"
+                print "Checking for OK in loop"
+                ok = self.pilatusReady()
+
+            self.pilatusThreshold.set_value(self.__energy)
         # Calculate wavelength
         wavelength = self.hcOverE / self.__energy
         wavelengthStr = "%.4f" % wavelength
@@ -64,8 +71,18 @@ class EnergyWaveLength(CObjectBase):
     def getEnergy(self):
         return self.__energyMotor.position()
 
-    def pilatusThresholdChanged(self, pValue):
-        print "New Threshold"
-        self.__pilatusThreshold = pValue
-        print pValue
-        print type(pValue)
+    def pilatusReady(self):
+        #TODO: DEBUG
+        print ">>>>>"
+        print ">>>>>"
+        print "Checking for OK"
+        # Check if Pilatus is ready
+        self.__pilatus_status = self.channels["pilatus_status"].value()
+        print str(self.__pilatus_status)
+        print type(self.__pilatus_status)
+        if self.__pilatus_status == "Ready":
+            print ">> Return True"
+            return True
+        else:
+            print ">> Return False"
+            return False

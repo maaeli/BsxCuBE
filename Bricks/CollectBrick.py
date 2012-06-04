@@ -50,7 +50,8 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("checkBeamChanged", "checkBeamChanged"),
                                              Signal("beamLostChanged", "beamLostChanged"),
                                              Signal("collectProcessingDone", "collectProcessingDone"),
-                                             Signal("collectProcessingLog", "collectProcessingLog") ],
+                                             Signal("collectProcessingLog", "collectProcessingLog"),
+                                             Signal("collectDone", "collectDone") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -65,7 +66,7 @@ class CollectBrick(Core.BaseBrick):
                                             "sample_changer_connected"),
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")],
                                             "connectedToEnergy"),
                     "image_proxy": Connection("image proxy",
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
@@ -1112,6 +1113,10 @@ class CollectBrick(Core.BaseBrick):
             self.__isTesting = True
 
         logging.info("   - collection started (mode: %s)" % mode)
+
+    def collectDone(self):
+        #TODO: Inform user maybe
+        pass
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
 

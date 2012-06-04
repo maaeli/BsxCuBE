@@ -43,10 +43,6 @@ class BSSampleChanger(CObjectBase):
 
     #TODO: SO - Why is beamlocation not used
     def beamlocationChanged(self, beamlocation):
-        #TODO: Take away 
-        print ">>>>"
-        print str(beamlocation)
-        print type(beamlocation)
         self.beam_location = self.getBeamLocation()
         self.emit('beamLocationChanged', self.beam_location)
 
@@ -57,9 +53,8 @@ class BSSampleChanger(CObjectBase):
     # We should not need to use this from the Brick. We should just connect to beamLocationChanged
     #
     def getBeamLocation(self):
+        # beam is string
         beam = self.channels["BeamLocation"].value()
-        print ">>>"
-        print "Called getBeamlocation %d %d %d %d", int(beam[0]), int(beam[1]), int(beam[2]), int(beam[3])
         try:
             beamLocation = map(int, beam.strip().split())
             return beamLocation
@@ -67,10 +62,8 @@ class BSSampleChanger(CObjectBase):
             return None
 
     def getState(self):
+        # scState is _PyTango.DevState
         scState = self.channels["State"].value()
-        #TODO: Take away at the last
-        print "getState called"
-        print type(scState)
         return scState
 
     def getCommandException(self):

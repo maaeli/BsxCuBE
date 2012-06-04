@@ -55,11 +55,11 @@ class BsxSCBrick(Core.BaseBrick):
             geometry = [ self._sampleChanger.getPlateInfo(i) for i in range(1, 4) ]
             self.SCWidget.setPlateGeometry(geometry)
 
+            # redefine calls in SCWidget
             self.SCWidget.startSyringeForward = self.startSyringeForward
             self.SCWidget.startSyringeBackward = self.startSyringeBackward
             self.SCWidget.stopSyringe = self._sampleChanger.stopSyringe
             self.SCWidget.setLiquidPositionFixed = self._sampleChanger.setLiquidPositionFixed
-
             self.SCWidget.fill = self._sampleChanger.fill
             self.SCWidget.dry = self._sampleChanger.dry
             self.SCWidget.flow = self._sampleChanger.flowAll
@@ -69,7 +69,6 @@ class BsxSCBrick(Core.BaseBrick):
             self.SCWidget.mix = self._sampleChanger.mix
             self.SCWidget.transfer = self._sampleChanger.transfer
             self.SCWidget.restart = self._sampleChanger.restart
-
             self.SCWidget.setStorageTemperature = self._sampleChanger.setStorageTemperature
             self.SCWidget.setSEUTemperature = self._sampleChanger.setSEUTemperature
             self.SCWidget.setState("READY", "Connected")

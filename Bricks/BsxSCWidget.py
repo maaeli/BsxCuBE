@@ -306,6 +306,7 @@ class BsxSCWidget(Qt.QWidget):
         print "Starting syringe backward"
     def stopSyringe(self):
         print "Stopping syringe "
+
     def setLiquidPositionFixed(self, yesno):
         print "Fixing liquid position (%s) " % yesno
 

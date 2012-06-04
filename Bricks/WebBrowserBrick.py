@@ -3,6 +3,10 @@ import os
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
+from PyQt4.QtWebKit import QWebView
+from PyQt4.QtGui import QApplication
+
+from PyQt4.QtCore import QUrl
 
 
 __category__ = "General"
@@ -21,7 +25,9 @@ class WebBrowseBrick(Core.BaseBrick):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
     def init(self):
-        self.webViewer = QwebView()
+        self.webViewer = QWebView()
+        self.url = "about:blank"
 
     def urlChanged(self, url):
-        self.webViewer.load(url)
+        self.url = url
+        self.webViewer.load(QUrl(self.url))

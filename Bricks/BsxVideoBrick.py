@@ -37,7 +37,10 @@ class BsxVideoBrick(Core.BaseBrick):
 
             self._sampleChanger = sc
             self.videoWidget.setAutoRefreshRate(50)
-            self.videoWidget.setAutoRefresh(True)
+            #TODO: REMOVE when working
+            #TODO:
+            self.videoWidget.setAutoRefresh(False)
+            #TODO: self.videoWidget.setAutoRefresh(Treu)
 
             # override videoWidget calls
             self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
