@@ -354,7 +354,6 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
-        print "----------", pars
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],

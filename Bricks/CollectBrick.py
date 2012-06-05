@@ -537,22 +537,31 @@ class CollectBrick(Core.BaseBrick):
                     self.emitDisplayItemChanged(filename0)
 
 #           TODO: This is how put in a breakpoint 
-#            import pdb; pdb.set_trace()
+#           import pdb; pdb.set_trace()
+            logging.getLogger().info("current frame = %r, frame number = %r" % (self._currentFrame, self._frameNumber))
             if self._currentFrame == self._frameNumber:
                 # data collection done = Last frame
                 if self._isCollecting:
+                    logging.getLogger().info("Is collecting...")
                     if self.__isTesting:
+                        logging.getLogger().info("Is testing!")
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
                         logging.getLogger().info("The data collection is done!")
                     else:
+                        logging.getLogger().info("Is not testing.")
                         feedBackFlag = self._feedBackFlag
+                        logging.getLogger().info("Feedback flag = %r" % feedBackFlag)
                         if self.robotCheckBox.isChecked():
+                            logging.getLogger().info("Robot check box is checked")
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
+                            self.setButtonState(0)
                         else:
+                            logging.getLogger().info("Robot check box is not checked")
                             if self.SPECBusyTimer.isActive():
+                                logging.getLogger().info("Spec busy timer is active")
                                 self.SPECBusyTimerTimeOut()
                         if feedBackFlag:
                             logging.getLogger().info("The data collection is done!")
@@ -1065,6 +1074,7 @@ class CollectBrick(Core.BaseBrick):
         self._abortFlag = False
         self.startCollection(mode = "with robot")
         self._collectRobotDialog.clearHistory()
+        self._frameNumber = self.getCollectPars()["frameNumber"]
         self.getObject("collect").collectWithRobot(self.getCollectPars(), oneway = True)
 
 
@@ -1125,7 +1135,6 @@ class CollectBrick(Core.BaseBrick):
         pass
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-        print "++++++++++++", pFrameNumber
         if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000 + 12000)
 
