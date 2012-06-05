@@ -728,11 +728,11 @@ class CollectBrick(Core.BaseBrick):
                          "frameNumber": self.frameNumberSpinBox.value() }
             collectpars.update(filepars)
 
-            if robotpars["bufferMode"] == 0:
+            if robotpars["bufferMode"] == '0':
                 robotpars.update({ "bufferFirst":True, "bufferAfter": True })
-            elif robotpars["bufferMode"] == 1:
+            elif robotpars["bufferMode"] == '1':
                 robotpars["bufferBefore"] = True
-            elif robotpars["bufferMode"] == 2:
+            elif robotpars["bufferMode"] == '2':
                 robotpars["bufferAfter"] = True
 
             robotpars["optimSEUtemp"] = False

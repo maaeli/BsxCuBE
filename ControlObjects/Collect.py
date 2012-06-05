@@ -435,11 +435,6 @@ class Collect(CObjectBase):
         #   MAIN LOOP on Samples
         # ==================================================        
         for sample in pars["sampleList"]:
-            #TODO: DEBUG
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>"
-            print ">>>>>>>>>>>>>>>>>>>>>>>>>"
-            print "sample %r" % sample
-            print type(sample)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
@@ -448,9 +443,6 @@ class Collect(CObjectBase):
             # In buffer first mode check also if temperature has changed. If so, consider as
             #    a change in buffer
             doFirstBuffer = pars["bufferBefore"]
-            #TODO: DEBUG
-            print ">>>>>>>>>>>>>>>>>>>>>>>>> doFirstBuffer %r" % doFirstBuffer
-            print ">>>>>>>>>>>>>>>>>>>>>>>>> pars bufferFirst %r" % pars["bufferFirst"]
             # in bufferFirst mode decide when to collect the buffer 
             if pars["bufferFirst"]:
                 if sample["buffername"] != lastBuffer:
