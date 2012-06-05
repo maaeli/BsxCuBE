@@ -621,8 +621,8 @@ class CollectBrick(Core.BaseBrick):
         self.plateInfos = [sc.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
 
     def connectedToEnergy(self, pPeer):
-        self.energyControlObject = pPeer
-        if self.energyControlObject is not None:
+        if pPeer is not None:
+            self.energyControlObject = pPeer
             # read energy when getting contact with CO Object
             self.__energy = float(self.energyControlObject.getEnergy())
             wavelength = self.hcOverE / self.__energy
@@ -1002,7 +1002,10 @@ class CollectBrick(Core.BaseBrick):
                                                self.normalisationDoubleSpinBox.value())
 
     def collectPushButtonClicked(self):
-
+        # Check if pilatus is ready
+        if not self.energyControlObject.pilatusReady():
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
+            return
         if not self.robotCheckBox.isChecked() or self.validParameters():
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()

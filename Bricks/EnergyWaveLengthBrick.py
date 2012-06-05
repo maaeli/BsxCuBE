@@ -127,6 +127,12 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         else:
             logging.error("Could not set Energy to " + energyStr)
 
+    def getEnergy(self):
+        if self.energyControlObject is not None:
+            return self.energyControlObject.getEnergy()
+        else:
+            logging.error("Could not get Energy")
+
     def energyChanged(self, pValue):
         if pValue is not None:
             self.__energy = float(pValue)

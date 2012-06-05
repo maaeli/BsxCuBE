@@ -14,19 +14,17 @@ class EnergyWaveLength(CObjectBase):
         CObjectBase.__init__(self, *args, **kwargs)
         # Threshold in keV (to change the sensitivity)
         self.__pilatusThreshold = 12.00
-
-
+        # Special setpoint energy (< 0 when reached)
+        self.__setPointEnergy = -1.000
 
     def init(self):
         # The keV to Angstrom calc
         self.hcOverE = 12.398
-        # How many keV before setting a new value
         self.deltaPilatus = 0.1
         # check that we have connection to Pilatus
         self.pilatusThreshold = self.channels.get("pilatus_threshold")
         if  self.pilatusThreshold is None:
             logging.error("No connection to Pilatus")
-
         # Runnning = Nothing should be possible
         self.__pilatus_status = "Running"
         # get spec motor as described in href and the corresponding energy.xml
@@ -40,24 +38,6 @@ class EnergyWaveLength(CObjectBase):
 
     def newEnergy(self, pValue):
         self.__energy = float(pValue)
-        # Check if we need and can set new Energy
-        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
-        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            #TODO: DEBUG
-            print ">>>>>"
-            print ">>>>>"
-            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
-            # loop before changing energy
-            ok = self.pilatusReady()
-            while not ok:
-                time.sleep(0.5)
-                #TODO: DEBUG
-                print ">>>>>"
-                print ">>>>>"
-                print "Checking for OK in loop"
-                ok = self.pilatusReady()
-
-            self.pilatusThreshold.set_value(self.__energy)
         # Calculate wavelength
         wavelength = self.hcOverE / self.__energy
         wavelengthStr = "%.4f" % wavelength
@@ -65,11 +45,40 @@ class EnergyWaveLength(CObjectBase):
         self.channels["collectWaveLength"].set_value(wavelengthStr)
         self.emit("energyChanged", pValue)
 
-    def setEnergy(self, pValue):
-        self.commands["setEnergy"](pValue)
+        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+            #TODO: DEBUG
+            print "new Energy >>>>>"
+            print "new Energy >>>>>"
+            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
+            # loop before changing energy
+            ok = self.pilatusReady()
+            while not ok:
+                time.sleep(0.2)
+                #TODO: DEBUG
+                print ">>>>>"
+                print ">>>>>"
+                print "Checking for OK in loop"
+                ok = self.pilatusReady()
+
+            self.pilatusThreshold.set_value(self.__energy)
 
     def getEnergy(self):
         return self.__energyMotor.position()
+
+    def setEnergy(self, pValue):
+        self.__energy = float(pValue)
+        self.__setPointEnergy = self.__energy
+        self.commands["setEnergy"](self.__energy)
+        # Check if we need and can set new Energy on Pilatus first.
+        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+            #TODO: DEBUG
+            print "Set Energy >>>>>"
+            print "Set Energy >>>>>"
+            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
+            self.pilatusThreshold.set_value(self.__energy)
+
 
     def pilatusReady(self):
         #TODO: DEBUG

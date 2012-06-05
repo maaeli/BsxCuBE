@@ -42,11 +42,6 @@ class CommandBrick(Core.BaseBrick):
         self.brick_widget.layout().addWidget(self.commandPushButton)
 
 
-
-
-    # =============================================
-    #  HANDLE PROPERTIES CHANGES
-    # =============================================
     def captionChanged(self, pValue):
         self.commandPushButton.setText(pValue)
 
@@ -65,10 +60,6 @@ class CommandBrick(Core.BaseBrick):
         self.expert_mode(self.__expertMode)
 
 
-
-    # =============================================
-    #  HANDLE SIGNALS
-    # =============================================
     def commandPushButtonClicked(self):
         self.getObject("command").executeCommand(self.__parameter)
 
