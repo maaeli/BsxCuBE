@@ -82,9 +82,11 @@ class BSSampleChanger(CObjectBase):
 
     def setSEUTemperature(self, temp):
         self.channels["SEUTemperature"].set_value(temp)
+        self.wait()
 
     def setStorageTemperature(self, temp):
         self.channels["TemperatureSampleStorage"].set_value(temp)
+        self.wait()
 
     def setViscosityLevel(self, level):
         self.channels["ViscosityLevel"].set_value(level)
@@ -120,12 +122,17 @@ class BSSampleChanger(CObjectBase):
 
 
     def wait(self):
+        loopCount = 0
         while self.isExecuting():
+            loopCount = loopCount + 1
             time.sleep(0.5)
+            # check if a minute has passed
+            if loopCount > 120 :
+                raise RuntimeError, "Timeout from Sample Changer"
 
         exception = self.getCommandException()
         if exception is not None and exception != "":
-            raise RuntimeError, "could not complete cleaning procedure"
+            raise RuntimeError, "Sample Changer exception: " + exception
 
     def doSetSEUTemperatureProcedure(self, temperature):
         self.setSEUTemperature(temperature)

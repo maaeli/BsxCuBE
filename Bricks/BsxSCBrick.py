@@ -46,7 +46,6 @@ class BsxSCBrick(Core.BaseBrick):
 
 
     def sample_changer_connected(self, sc):
-
         if sc is not None:
             logging.info("Sample Changer connected")
 

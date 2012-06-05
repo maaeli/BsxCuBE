@@ -88,6 +88,7 @@ class CollectBrick(Core.BaseBrick):
         Core.BaseBrick.__init__(self, *args, **kargs)
         self._curveList = []
         self.lastCollectProcessingLog = None
+        self._frameNumber = 0
 
     def init(self):
         # The keV to Angstrom calc
@@ -98,7 +99,6 @@ class CollectBrick(Core.BaseBrick):
 
         self._feedBackFlag = False
         self._abortFlag = False
-        self._frameNumber = 0
         self._currentFrame = 0
         self._currentCurve = 0
         self._waveLengthStr = "0.0"
@@ -536,6 +536,8 @@ class CollectBrick(Core.BaseBrick):
                             filename0 += "," + filename1
                     self.emitDisplayItemChanged(filename0)
 
+#           TODO: This is how put in a breakpoint 
+#            import pdb; pdb.set_trace()
             if self._currentFrame == self._frameNumber:
                 # data collection done = Last frame
                 if self._isCollecting:
@@ -1001,6 +1003,7 @@ class CollectBrick(Core.BaseBrick):
                                                self.beamCenterYSpinBox.value(),
                                                self.normalisationDoubleSpinBox.value())
 
+
     def collectPushButtonClicked(self):
         # Check if pilatus is ready
         if not self.energyControlObject.pilatusReady():
@@ -1014,7 +1017,7 @@ class CollectBrick(Core.BaseBrick):
             if os.path.isdir(directory):
                 for filename in os.listdir(directory):
                     if os.path.isfile(directory + "/" + filename):
-                        if filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber) and not filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber + "_tst"):
+                        if filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber) and not filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber + "_00"):
                             flag = False
                             break
 
@@ -1060,9 +1063,10 @@ class CollectBrick(Core.BaseBrick):
         #  blocks widget or whatever during the time of the collection
         self.setButtonState(1)
         self._abortFlag = False
+        self.startCollection(mode = "with robot")
         self._collectRobotDialog.clearHistory()
         self.getObject("collect").collectWithRobot(self.getCollectPars(), oneway = True)
-        #self._collectRobot.robotStartCollection()
+
 
     def endCollectWithRobot(self):
         # should unblock things here at the end
@@ -1107,7 +1111,6 @@ class CollectBrick(Core.BaseBrick):
 
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
-
     def startCollection(self, mode = "normal"):
 
         self.setCollectionStatus("running")
@@ -1122,7 +1125,7 @@ class CollectBrick(Core.BaseBrick):
         pass
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-
+        print "++++++++++++", pFrameNumber
         if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000 + 12000)
 
@@ -1236,8 +1239,8 @@ class CollectBrick(Core.BaseBrick):
                    self.notifyCheckBox, self.robotCheckBox, self.spectroCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
         def enable_buttons(*args):
             if len(args) == 1:
-              for button in buttons:
-                button.setEnabled(args[0])
+                for button in buttons:
+                    button.setEnabled(args[0])
             else:
                 for i in range(len(buttons)):
                     buttons[i].setEnabled(args[i])

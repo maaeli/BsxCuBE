@@ -330,8 +330,11 @@ class BsxSCWidget(Qt.QWidget):
     def restart(self, flag):
         print "Restarting... (%s)" % flag
 
+    # Overwritten in Brick
     def setStorageTemperature(self, temperature):
         print "Setting storage temperature to ", temperature
+
+    # Overwritten in Brick
     def setSEUTemperature(self, temperature):
         print "Setting SEU temperature to ", temperature
 

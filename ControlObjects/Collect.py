@@ -156,7 +156,7 @@ class Collect(CObjectBase):
         else:
             self.lastPrefixRun = prefixRun
             logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
-        self.commands["collect"](callback = self.collectDone, error_callback = self.collectFailed)
+        self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
     def triggerEDNA(self, raw_filename):
@@ -193,7 +193,7 @@ class Collect(CObjectBase):
         logging.info("Saving XML data to %s", xmlFilename)
         xsdin1d.exportToFile(xmlFilename)
 
-    def collectDone(self, returned_value):
+    def specCollectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
         jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
@@ -291,13 +291,13 @@ class Collect(CObjectBase):
         #  SETTING VISCOSITY
         # ==================================================
         if mode == "buffer_before":
-           # this will allow to use several buffers of same name for same sample
-           # we should check if enough volume is not available then go to next buffer in list
-           tocollect = sample["buffer"][0]
+            # this will allow to use several buffers of same name for same sample
+            # we should check if enough volume is not available then go to next buffer in list
+            tocollect = sample["buffer"][0]
         elif mode == "buffer_after":
-           tocollect = sample["buffer"][0]
+            tocollect = sample["buffer"][0]
         else:
-           tocollect = sample
+            tocollect = sample
 
         self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
@@ -353,7 +353,8 @@ class Collect(CObjectBase):
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
-        #self.emit(QtCore.SIGNAL("displayReset"))  
+        #self.emit(QtCore.SIGNAL("displayReset"))
+        print "----------", pars
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -395,7 +396,7 @@ class Collect(CObjectBase):
         self.showMessage(0, "Cleaning...")
 
         try:
-            self.doCleanProcedure()
+            self.objects["sample_changer"].doCleanProcedure()
         except RuntimeError:
             message = "Error when trying to clean. Aborting collection!"
             self.showMessage(2, message, notify = 1)
@@ -415,8 +416,9 @@ class Collect(CObjectBase):
         #  Setting storage temperature
         # ============================
         self.showMessage(0, "Setting storage temperature to '%s' C..." % pars["storageTemperature"])
-        # Synchronous - no exception handling
+        # ASynchronous - Treated in sample Changer
         self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
+
 
         if pars["initialCleaning"]:
             self.showMessage(0, "Initial cleaning...")
@@ -434,6 +436,11 @@ class Collect(CObjectBase):
         #   MAIN LOOP on Samples
         # ==================================================        
         for sample in pars["sampleList"]:
+            #TODO: DEBUG
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>"
+            print ">>>>>>>>>>>>>>>>>>>>>>>>>"
+            print "sample %r" % sample
+            print type(sample)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
@@ -442,7 +449,9 @@ class Collect(CObjectBase):
             # In buffer first mode check also if temperature has changed. If so, consider as
             #    a change in buffer
             doFirstBuffer = pars["bufferBefore"]
-
+            #TODO: DEBUG
+            print ">>>>>>>>>>>>>>>>>>>>>>>>> doFirstBuffer %r" % doFirstBuffer
+            print ">>>>>>>>>>>>>>>>>>>>>>>>> pars bufferFirst %r" % pars["bufferFirst"]
             # in bufferFirst mode decide when to collect the buffer 
             if pars["bufferFirst"]:
                 if sample["buffername"] != lastBuffer:
@@ -476,7 +485,7 @@ class Collect(CObjectBase):
             #
             self._collectOne(sample, pars, mode = "sample")
 
-            if pars.bufferAfter:
+            if pars["bufferAfter"]:
                 self._collectOne(sample, pars, mode = "buffer_after")
 
             prevSample = sample
@@ -486,7 +495,7 @@ class Collect(CObjectBase):
         #---------------------------------- 
         self.showMessage(0, "The data collection is done!")
 
-        self.emit("collectDone", ())
+        self.emit("collectDone")
 
 
     def collectWithRobot(self, *args):
