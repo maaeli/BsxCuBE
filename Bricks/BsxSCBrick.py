@@ -83,10 +83,8 @@ class BsxSCBrick(Core.BaseBrick):
         self.SCWidget.setCurrentSEUTemperature(temperature)
 
     def state_changed(self, state, status):
-
         if self._sampleChanger is None:
             return
-
         cmdException = self._sampleChanger.getCommandException()
         self.SCWidget.setState(state, status, cmdException)
 
