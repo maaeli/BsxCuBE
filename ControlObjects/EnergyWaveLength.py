@@ -1,6 +1,5 @@
 import logging
 import math
-import time
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
@@ -14,8 +13,6 @@ class EnergyWaveLength(CObjectBase):
         CObjectBase.__init__(self, *args, **kwargs)
         # Threshold in keV (to change the sensitivity)
         self.__pilatusThreshold = 12.00
-        # Special setpoint energy (< 0 when reached)
-        self.__setPointEnergy = -1.000
 
     def init(self):
         # The keV to Angstrom calc
@@ -44,23 +41,11 @@ class EnergyWaveLength(CObjectBase):
         # set value of BSX_GLOBAL
         self.channels["collectWaveLength"].set_value(wavelengthStr)
         self.emit("energyChanged", pValue)
-
+        # if in movement already, just return....
+        if not self.pilatusReady():
+            return
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            #TODO: DEBUG
-            print "new Energy >>>>>"
-            print "new Energy >>>>>"
-            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
-            # loop before changing energy
-            ok = self.pilatusReady()
-            while not ok:
-                time.sleep(0.2)
-                #TODO: DEBUG
-                print ">>>>>"
-                print ">>>>>"
-                print "Checking for OK in loop"
-                ok = self.pilatusReady()
-
             self.pilatusThreshold.set_value(self.__energy)
 
     def getEnergy(self):
@@ -68,30 +53,19 @@ class EnergyWaveLength(CObjectBase):
 
     def setEnergy(self, pValue):
         self.__energy = float(pValue)
-        self.__setPointEnergy = self.__energy
         self.commands["setEnergy"](self.__energy)
         # Check if we need and can set new Energy on Pilatus first.
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            #TODO: DEBUG
-            print "Set Energy >>>>>"
-            print "Set Energy >>>>>"
-            print "Enough difference in energy to change Pilatus %r %r " % (self.__energy, self.__currentPilatusThreshold)
             self.pilatusThreshold.set_value(self.__energy)
 
 
     def pilatusReady(self):
-        #TODO: DEBUG
-        print ">>>>>"
-        print ">>>>>"
-        print "Checking for OK"
         # Check if Pilatus is ready
         self.__pilatus_status = self.channels["pilatus_status"].value()
         print str(self.__pilatus_status)
         print type(self.__pilatus_status)
         if self.__pilatus_status == "Ready":
-            print ">> Return True"
             return True
         else:
-            print ">> Return False"
             return False
