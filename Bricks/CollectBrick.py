@@ -538,33 +538,25 @@ class CollectBrick(Core.BaseBrick):
 
 #           TODO: This is how put in a breakpoint 
 #           import pdb; pdb.set_trace()
-            logging.getLogger().info("current frame = %r, frame number = %r" % (self._currentFrame, self._frameNumber))
             if self._currentFrame == self._frameNumber:
                 # data collection done = Last frame
                 if self._isCollecting:
-                    logging.getLogger().info("Is collecting...")
                     if self.__isTesting:
-                        logging.getLogger().info("Is testing!")
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
                         logging.getLogger().info("The data collection is done!")
                     else:
-                        logging.getLogger().info("Is not testing.")
                         feedBackFlag = self._feedBackFlag
-                        logging.getLogger().info("Feedback flag = %r" % feedBackFlag)
                         if self.robotCheckBox.isChecked():
-                            logging.getLogger().info("Robot check box is checked")
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
                             self.setButtonState(0)
+                            logging.getLogger().info("The data collection is done!")
                         else:
-                            logging.getLogger().info("Robot check box is not checked")
                             if self.SPECBusyTimer.isActive():
-                                logging.getLogger().info("Spec busy timer is active")
                                 self.SPECBusyTimerTimeOut()
                         if feedBackFlag:
-                            logging.getLogger().info("The data collection is done!")
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
