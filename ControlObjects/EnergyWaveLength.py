@@ -63,8 +63,6 @@ class EnergyWaveLength(CObjectBase):
     def pilatusReady(self):
         # Check if Pilatus is ready
         self.__pilatus_status = self.channels["pilatus_status"].value()
-        print str(self.__pilatus_status)
-        print type(self.__pilatus_status)
         if self.__pilatus_status == "Ready":
             return True
         else:
