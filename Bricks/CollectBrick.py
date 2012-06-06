@@ -88,7 +88,7 @@ class CollectBrick(Core.BaseBrick):
         Core.BaseBrick.__init__(self, *args, **kargs)
         self._curveList = []
         self.lastCollectProcessingLog = None
-        self._frameNumber = 0
+
 
     def init(self):
         # The keV to Angstrom calc
@@ -96,7 +96,7 @@ class CollectBrick(Core.BaseBrick):
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
-
+        self._frameNumber = 0
         self._feedBackFlag = False
         self._abortFlag = False
         self._currentFrame = 0
@@ -551,7 +551,6 @@ class CollectBrick(Core.BaseBrick):
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
-                            self.setButtonState(0)
                             logging.getLogger().info("The data collection is done!")
                         else:
                             if self.SPECBusyTimer.isActive():
@@ -1066,7 +1065,6 @@ class CollectBrick(Core.BaseBrick):
         self._abortFlag = False
         self.startCollection(mode = "with robot")
         self._collectRobotDialog.clearHistory()
-        self._frameNumber = self.getCollectPars()["frameNumber"]
         self.getObject("collect").collectWithRobot(self.getCollectPars(), oneway = True)
 
 
@@ -1123,8 +1121,12 @@ class CollectBrick(Core.BaseBrick):
         logging.info("   - collection started (mode: %s)" % mode)
 
     def collectDone(self):
-        #TODO: Inform user maybe
-        pass
+        self.setCollectionStatus("done")
+        self.setButtonState(0)
+        if self._feedBackFlag:
+            if self.notifyCheckBox.isChecked():
+                Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
         if not self.robotCheckBox.isChecked():

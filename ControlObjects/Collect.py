@@ -54,6 +54,7 @@ class Collect(CObjectBase):
     def init(self):
         self.collecting = False
         self.machineCurrent = 0.00
+        self.nextRunNumber = -1
         self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
         #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
         self.commands["initPlugin_sparta"](self.pluginIntegrate)
@@ -70,9 +71,15 @@ class Collect(CObjectBase):
         readMachCurrentValue = self.channels.get('read_current_value')
         if readMachCurrentValue is not None:
             readMachCurrentValue.connect('update', self.currentChanged)
+        # set up a channel
+        self.channels["collectRunNumber"].connect("update", self.runNumberChanged)
 
     def currentChanged(self, current):
         self.machineCurrent = current
+
+    def runNumberChanged(self, runNumber):
+        # set new run number from Spec - Convert it to int
+        self.nextRunNumber = int(runNumber)
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
@@ -354,6 +361,7 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
+
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -455,7 +463,8 @@ class Collect(CObjectBase):
             if doFirstBuffer:
                 if sample["buffername"] != lastBuffer:
                     lastBuffer = sample["buffername"]
-
+                # need to increase run number
+                pars["runNumber"] = self.nextRunNumber
                 self._collectOne(sample, pars, mode = "buffer_before")
 
             #
@@ -474,9 +483,13 @@ class Collect(CObjectBase):
             #
             # Collect sample
             #
+            # need to increase run number
+            pars["runNumber"] = self.nextRunNumber
             self._collectOne(sample, pars, mode = "sample")
 
             if pars["bufferAfter"]:
+                # need to increase run number
+                pars["runNumber"] = self.nextRunNumber
                 self._collectOne(sample, pars, mode = "buffer_after")
 
             prevSample = sample
