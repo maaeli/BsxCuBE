@@ -167,6 +167,8 @@ class Collect(CObjectBase):
 
 
     def triggerEDNA(self, raw_filename):
+        # TODO: DEBUG
+        logging.info("Trigger EDNA with filename %r" % raw_filename)
         raw_filename = str(raw_filename)
         tmp, suffix = os.path.splitext(raw_filename)
         tmp, base = os.path.split(tmp)
@@ -301,10 +303,17 @@ class Collect(CObjectBase):
             # this will allow to use several buffers of same name for same sample
             # we should check if enough volume is not available then go to next buffer in list
             tocollect = sample["buffer"][0]
+            #TODO: DEBUG
+            print ">>> tocollect buffer_before %r" % tocollect
         elif mode == "buffer_after":
             tocollect = sample["buffer"][0]
+            #TODO: DEBUG
+            print ">>> tocollect buffer_after %r" % tocollect
         else:
             tocollect = sample
+            #TODO: DEBUG
+            print ">>> tocollect rest %r %r " % (mode, tocollect)
+
 
         self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
@@ -340,7 +349,7 @@ class Collect(CObjectBase):
         if tocollect["flow"]:
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
-                self.objects["sample_changer"].doFlowProcedure(tocollect["volume"], pars["flowTime"])
+                self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
             except RuntimeError:
                 self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
         else:
@@ -371,6 +380,10 @@ class Collect(CObjectBase):
                      pars["radiationRelative"],
                      pars["processData"], pars["SEUTemperature"], pars["storageTemperature"])
 
+        # wait for flowing if we started it
+        if tocollect["flow"]:
+            self.objects["sample_changer"].wait()
+
         while self.collecting:
             time.sleep(1)
 
@@ -391,7 +404,6 @@ class Collect(CObjectBase):
         # =============
         if tocollect["recuperate"]:
             self.showMessage(0, "Recuperating to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
-
             try:
                 self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
             except RuntimeError:

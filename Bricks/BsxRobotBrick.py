@@ -41,7 +41,7 @@ class BsxRobotBrick(Core.BaseBrick):
         self.__scanCurveX = {}
         self.__scanCurveY = {}
         self._isDrawing = False
-        self._beamLocation = None
+        self.selectedBeamLocation = None
         self._sampleChanger = None
 
 
@@ -232,14 +232,25 @@ class BsxRobotBrick(Core.BaseBrick):
             self._sampleChanger.setSEUTemperature(temperatureDoubleSpinBox.value())
 
     def robotFillPushButtonClicked(self):
-        geometry = [self.getObject('samplechanger').getPlateInfo(i) for i in range(1, 4)]
+        geometry = [self._sampleChanger.getPlateInfo(i) for i in range(1, 3)]
+        #TODO: DEBUG
+        print ">>>> geometry from Robot %r" % geometry
+        logging.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title = 'Fill', display_volume = True, parent = self.brick_widget)
         ret = dialog.exec_()
         if ret:
             selected_well = dialog.get_selected_well()
             logging.info('filling from [plate, row, column] = %s', selected_well)
-            #TODO: understand message and why it is not good
-            self.getObject('samplechanger').fill(*selected_well)
+            #TODO: DEBUG:
+            print ">>> selected_well %r" % selected_well
+            print ">>> 1, 2, 3, 4 "
+            print selected_well[1]
+            print selected_well[2]
+            print selected_well[3]
+            print selected_well[4]
+            print type(selected_well[3])
+            print type(selected_well[4])
+            self._sampleChanger.fill(selected_well)
 
     def robotDryPushButtonClicked(self):
         dryTime, buttonOk = Qt.QInputDialog.getInteger(self.brick_widget, "Dry", "\nPlease, insert time of drying (seconds):", 15, 1, 60, 2)
@@ -336,15 +347,25 @@ class BsxRobotBrick(Core.BaseBrick):
 
 
     def robotRecuperatePushButtonClicked(self):
-        geometry = [self.getObject('samplechanger').getPlateInfo(i) for i in range(1, 4)]
+        geometry = [self._sampleChanger.getPlateInfo(i) for i in range(1, 3)]
+        #TODO: DEBUG
+        print ">>>> geometry from Robot %r" % geometry
         logging.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title = 'Recuperate', parent = self.brick_widget)
         ret = dialog.exec_()
         if ret:
             selected_well = dialog.get_selected_well()
             logging.info('recuperating from [plate, row, column] = %s', selected_well)
-            #TODO: Fix so that Eclipse does not complain
-            self.getObject('samplechanger').recuperate(*selected_well)
+            #TODO: DEBUG:
+            print ">>> selected_well %r" % selected_well
+            print ">>> 1, 2, 3, 4 "
+            print selected_well[1]
+            print selected_well[2]
+            print selected_well[3]
+            print selected_well[4]
+            print type(selected_well[3])
+            print type(selected_well[4])
+            self._sampleChanger.recuperate(int(selected_well[1]), int(selected_well[2]), int(selected_well[3]))
 
 
     def robotRestartWithHomingActionTriggered(self):
@@ -455,7 +476,7 @@ class BsxRobotBrick(Core.BaseBrick):
 
                 if self._isDrawing:
                     self.robotSampleChangerFramePainter.setPen(QtCore.Qt.red)
-                    self.robotSampleChangerFramePainter.drawRect(self._beamLocation[0], self._beamLocation[1], self._beamLocation[2] - self._beamLocation[0], self._beamLocation[3] - self._beamLocation[1])
+                    self.robotSampleChangerFramePainter.drawRect(self.selectedBeamLocation[0], self.selectedBeamLocation[1], self.selectedBeamLocation[2] - self.selectedBeamLocation[0], self.selectedBeamLocation[3] - self.selectedBeamLocation[1])
                 else:
                     beamLocation = self._sampleChanger.getBeamLocation()
                     if beamLocation is not None:
@@ -463,9 +484,9 @@ class BsxRobotBrick(Core.BaseBrick):
                         # Many thanks to the complete moron who thought that was a good idea, and who didn't tell us it changed
                         # -- TB
                         beamLocationList = beamLocation.split(chr(ascii.US))
-                        self._beamLocation = [int(beamLocationList[1]), int(beamLocationList[2]), int(beamLocationList[3]), int(beamLocationList[4])]
+                        self.selectedBeamLocation = [int(beamLocationList[1]), int(beamLocationList[2]), int(beamLocationList[3]), int(beamLocationList[4])]
                         self.robotSampleChangerFramePainter.setPen(QtCore.Qt.red)
-                        self.robotSampleChangerFramePainter.drawRect(self._beamLocation[0], self._beamLocation[1], self._beamLocation[2] - self._beamLocation[0], self._beamLocation[3] - self._beamLocation[1])
+                        self.robotSampleChangerFramePainter.drawRect(self.selectedBeamLocation[0], self.selectedBeamLocation[1], self.selectedBeamLocation[2] - self.selectedBeamLocation[0], self.selectedBeamLocation[3] - self.selectedBeamLocation[1])
         finally:
             self.robotSampleChangerFramePainter.end()
             self.robotSampleChangerFrameLabel.setPixmap(self.robotSampleChangerFramePixmap)
@@ -616,7 +637,7 @@ class RobotSampleChangerFrameLabel(Qt.QLabel):
     def mouseDoubleClickEvent(self, pEvent):
         if pEvent.button() == 1:
             self.setCursor(Qt.Qt.CrossCursor)
-            self.__parent._beamLocation = [pEvent.x(), pEvent.y(), pEvent.x(), pEvent.y()]
+            self.__parent.selectedBeamLocation = [pEvent.x(), pEvent.y(), pEvent.x(), pEvent.y()]
             self.__parent._isDrawing = True
             self.__isDefining = True
             self.__isMovingAll = False
@@ -648,42 +669,42 @@ class RobotSampleChangerFrameLabel(Qt.QLabel):
 
     def mouseMoveEvent(self, pEvent):
         if self.__isDefining:
-            self.__parent._beamLocation = [self.__parent._beamLocation[0], self.__parent._beamLocation[1], pEvent.x(), pEvent.y()]
+            self.__parent.selectedBeamLocation = [self.__parent.selectedBeamLocation[0], self.__parent.selectedBeamLocation[1], pEvent.x(), pEvent.y()]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
         elif self.__isMovingAll:
-            self.__parent._beamLocation = [pEvent.x() - self.__moveLocation[0], pEvent.y() - self.__moveLocation[1], pEvent.x() + self.__moveLocation[2], pEvent.y() + self.__moveLocation[3]]
+            self.__parent.selectedBeamLocation = [pEvent.x() - self.__moveLocation[0], pEvent.y() - self.__moveLocation[1], pEvent.x() + self.__moveLocation[2], pEvent.y() + self.__moveLocation[3]]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
         elif self.__isMovingHorizontalUp:
-            self.__parent._beamLocation = [self.__parent._beamLocation[0], pEvent.y(), self.__parent._beamLocation[2], self.__parent._beamLocation[3]]
+            self.__parent.selectedBeamLocation = [self.__parent.selectedBeamLocation[0], pEvent.y(), self.__parent.selectedBeamLocation[2], self.__parent.selectedBeamLocation[3]]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
         elif self.__isMovingHorizontalDown:
-            self.__parent._beamLocation = [self.__parent._beamLocation[0], self.__parent._beamLocation[1], self.__parent._beamLocation[2], pEvent.y()]
+            self.__parent.selectedBeamLocation = [self.__parent.selectedBeamLocation[0], self.__parent.selectedBeamLocation[1], self.__parent.selectedBeamLocation[2], pEvent.y()]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
         elif self.__isMovingVerticalLeft:
-            self.__parent._beamLocation = [pEvent.x(), self.__parent._beamLocation[1], self.__parent._beamLocation[2], self.__parent._beamLocation[3]]
+            self.__parent.selectedBeamLocation = [pEvent.x(), self.__parent.selectedBeamLocation[1], self.__parent.selectedBeamLocation[2], self.__parent.selectedBeamLocation[3]]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
         elif self.__isMovingVerticalRight:
-            self.__parent._beamLocation = [self.__parent._beamLocation[0], self.__parent._beamLocation[1], pEvent.x(), self.__parent._beamLocation[3]]
+            self.__parent.selectedBeamLocation = [self.__parent.selectedBeamLocation[0], self.__parent.selectedBeamLocation[1], pEvent.x(), self.__parent.selectedBeamLocation[3]]
             Qt.QObject.emit(self.__brickWidget, Qt.SIGNAL("refreshSampleChangerFrame()"))
 
-        elif self.__parent._beamLocation is not None:
-            if self.__parent._beamLocation[0] > self.__parent._beamLocation[2]:
-                drawBeginX = self.__parent._beamLocation[2]
-                drawEndX = self.__parent._beamLocation[0]
+        elif self.__parent.selectedBeamLocation is not None:
+            if self.__parent.selectedBeamLocation[0] > self.__parent.selectedBeamLocation[2]:
+                drawBeginX = self.__parent.selectedBeamLocation[2]
+                drawEndX = self.__parent.selectedBeamLocation[0]
             else:
-                drawBeginX = self.__parent._beamLocation[0]
-                drawEndX = self.__parent._beamLocation[2]
-            if self.__parent._beamLocation[1] > self.__parent._beamLocation[3]:
-                drawBeginY = self.__parent._beamLocation[3]
-                drawEndY = self.__parent._beamLocation[1]
+                drawBeginX = self.__parent.selectedBeamLocation[0]
+                drawEndX = self.__parent.selectedBeamLocation[2]
+            if self.__parent.selectedBeamLocation[1] > self.__parent.selectedBeamLocation[3]:
+                drawBeginY = self.__parent.selectedBeamLocation[3]
+                drawEndY = self.__parent.selectedBeamLocation[1]
             else:
-                drawBeginY = self.__parent._beamLocation[1]
-                drawEndY = self.__parent._beamLocation[3]
+                drawBeginY = self.__parent.selectedBeamLocation[1]
+                drawEndY = self.__parent.selectedBeamLocation[3]
 
             self.__isInside = (pEvent.x() > drawBeginX and pEvent.x() < drawEndX and pEvent.y() > drawBeginY and pEvent.y() < drawEndY)
             self.__isHorizontalUp = (pEvent.y() == drawBeginY)
@@ -714,7 +735,7 @@ class RobotSampleChangerFrameLabel(Qt.QLabel):
     def mousePressEvent(self, pEvent):
         if pEvent.button() == 1:
             if self.__isInside:
-                self.__moveLocation = [pEvent.x() - self.__parent._beamLocation[0], pEvent.y() - self.__parent._beamLocation[1], self.__parent._beamLocation[2] - pEvent.x(), self.__parent._beamLocation[3] - pEvent.y()]
+                self.__moveLocation = [pEvent.x() - self.__parent.selectedBeamLocation[0], pEvent.y() - self.__parent.selectedBeamLocation[1], self.__parent.selectedBeamLocation[2] - pEvent.x(), self.__parent.selectedBeamLocation[3] - pEvent.y()]
                 self.__isMovingAll = True
                 self.__parent._isDrawing = True
             elif self.__isDiagonalUpLeft:
@@ -749,19 +770,19 @@ class RobotSampleChangerFrameLabel(Qt.QLabel):
     def mouseReleaseEvent(self, pEvent):
         if pEvent is not None:
             if self.__isDefining or self.__isMovingAll or self.__isMovingHorizontalUp or self.__isMovingHorizontalDown or self.__isMovingVerticalLeft or self.__isMovingVerticalRight:
-                if self.__parent._beamLocation[0] != self.__parent._beamLocation[2] or self.__parent._beamLocation[1] != self.__parent._beamLocation[3]:
+                if self.__parent.selectedBeamLocation[0] != self.__parent.selectedBeamLocation[2] or self.__parent.selectedBeamLocation[1] != self.__parent.selectedBeamLocation[3]:
                     self.setCursor(Qt.Qt.ArrowCursor)
                     if Qt.QMessageBox.question(self, "Info", "Do you accept this position as where the beam is located?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
-                        if self.__parent._beamLocation[0] > self.__parent._beamLocation[2]:
-                            x = self.__parent._beamLocation[0]
-                            self.__parent._beamLocation[0] = self.__parent._beamLocation[2]
-                            self.__parent._beamLocation[2] = x
+                        if self.__parent.selectedBeamLocation[0] > self.__parent.selectedBeamLocation[2]:
+                            x = self.__parent.selectedBeamLocation[0]
+                            self.__parent.selectedBeamLocation[0] = self.__parent.selectedBeamLocation[2]
+                            self.__parent.selectedBeamLocation[2] = x
 
-                        if self.__parent._beamLocation[1] > self.__parent._beamLocation[3]:
-                            y = self.__parent._beamLocation[1]
-                            self.__parent._beamLocation[1] = self.__parent._beamLocation[3]
-                            self.__parent._beamLocation[3] = y
-                        self.__parent._sampleChanger.setBeamLocation(self.__parent._beamLocation[0], self.__parent._beamLocation[1], self.__parent._beamLocation[2], self.__parent._beamLocation[3])
+                        if self.__parent.selectedBeamLocation[1] > self.__parent.selectedBeamLocation[3]:
+                            y = self.__parent.selectedBeamLocation[1]
+                            self.__parent.selectedBeamLocation[1] = self.__parent.selectedBeamLocation[3]
+                            self.__parent.selectedBeamLocation[3] = y
+                        self.__parent._sampleChanger.setBeamLocation(self.__parent.selectedBeamLocation[0], self.__parent.selectedBeamLocation[1], self.__parent.selectedBeamLocation[2], self.__parent.selectedBeamLocation[3])
                     self.__parent._isDrawing = False
                     self.__isDefining = False
                 self.__isMovingAll = False

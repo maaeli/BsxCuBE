@@ -470,17 +470,7 @@ class CollectBrick(Core.BaseBrick):
     def collectProcessDataChanged(self, pValue):
         self.processCheckBox.setChecked(pValue == "1")
 
-    def collectProcessingDone(self, dat_filename, last_dat = []):
-        #TODO remove this hack ASAP (SO 27/9 11)
-        ### HORRIBLE CODE
-        if last_dat and last_dat[0] == dat_filename:
-            return
-        else:
-            if last_dat:
-                last_dat.pop()
-                last_dat.append(dat_filename)
-        #TODO remove this hack ASAP (SO 27/9 11)
-        ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
+    def collectProcessingDone(self, dat_filename):
         logging.info("processing done, file is %r", dat_filename)
         self.emitDisplayItemChanged(dat_filename)
 
