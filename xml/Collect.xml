@@ -6,12 +6,12 @@
    
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    
-   <command name="startJob_sparta" type="tango" uri="DAU/edna/1" call="startJob"/>
-   <command name="initPlugin_sparta" type="tango" uri="DAU/edna/1" call="initPlugin" />
-   <command name="getJobOutput_sparta" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
-   <command name="startJob_slavia" type="tango" uri="DAU/edna/2" call="startJob" />
-   <command name="initPlugin_slavia" type="tango" uri="DAU/edna/2" call="initPlugin" />
-   <command name="getJobOutput_slavia" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
+   <command name="startJob_slavia" type="tango" uri="DAU/edna/1" call="startJob" />
+   <command name="initPlugin_slavia" type="tango" uri="DAU/edna/1" call="initPlugin" />
+   <command name="getJobOutput_slavia" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
+   <command name="startJob_sparta" type="tango" uri="DAU/edna/2" call="startJob"/>
+   <command name="initPlugin_sparta" type="tango" uri="DAU/edna/2" call="initPlugin" />
+   <command name="getJobOutput_sparta" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
 			     
    <channel call="jobSuccess" type="tango" uri="DAU/edna/1"  name="jobSuccess_sparta"  /> 
    <channel call="jobFailure" type="tango" uri="DAU/edna/1"  name="jobFailure_sparta"  /> 

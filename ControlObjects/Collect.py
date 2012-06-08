@@ -14,9 +14,13 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
 from XSDataSAS import XSDataInputSolutionScattering
 
 class Collect(CObjectBase):
+    # TODO : DEBUG
     signals = [Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
-               Signal("collectDone")]
+               Signal("collectDone"),
+               Signal("specCollectDone"),
+               Signal("sendProcessParams"),
+               Signal("sendBeamStopDiodeAndCurrent")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -56,7 +60,7 @@ class Collect(CObjectBase):
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
-        self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
+        #self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
         #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
         self.commands["initPlugin_sparta"](self.pluginIntegrate)
         self.commands["initPlugin_sparta"](self.pluginMerge)
@@ -172,6 +176,7 @@ class Collect(CObjectBase):
         #TODO: DEBUG
         logging.info("Starting spec Collect")
         #TODO: DEBUG
+        self.emit("sendProcessParams", self.xsdin.marshal())
         self.showMessage(0, "calls spec collect")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
@@ -218,9 +223,10 @@ class Collect(CObjectBase):
         #TODO: DEBUG
         logging.info("Spec Collect done")
         self.collecting = False
+        self.emit("specCollectDone", self.xsdAverage.marshal())
         # start EDNA to calculate average at the end
-        jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
-        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
+#        jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
+#        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
 
 
     def processingDone(self, jobId):
@@ -390,6 +396,8 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
+        # TODO : DEBUG
+        self.emit("sendBeamStopDiodeAndCurrent", [float(self.channels["collectBeamStopDiode"].value()), self.machineCurrent])
 
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],

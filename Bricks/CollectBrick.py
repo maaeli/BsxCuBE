@@ -1,4 +1,4 @@
-import os, logging
+import os, logging, pprint, time
 
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
@@ -10,6 +10,18 @@ from PyQt4               import QtCore, QtGui, Qt
 from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
+
+# TODO : DEBUG
+from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
+        XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
+        XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
+from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
+        XSDataResultBioSaxsProcessOneFilev1_0, XSDataBioSaxsSample, \
+        XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0, XSDataResultBioSaxsSmartMergev1_0
+from XSDataSAS import XSDataInputSolutionScattering
+import PyTango
+import threading
+import numpy
 
 
 __category__ = "BsxCuBE"
@@ -51,7 +63,10 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("beamLostChanged", "beamLostChanged"),
                                              Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone") ],
+                                             Signal("collectDone", "collectDone"),
+                                             Signal("specCollectDone", "specCollectDone"),
+                                             Signal("sendProcessParams", "sendProcessParams"),
+                                             Signal("sendBeamStopDiodeAndCurrent", "sendBeamStopDiodeAndCurrent") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -393,6 +408,19 @@ class CollectBrick(Core.BaseBrick):
         self.radiationCheckBoxToggled(False)
         # TODO : DEBUG
 #        self.spectroCheckBoxToggled(False)
+        self.dat_filenames = {}
+        self.strTangoDevice1 = "DAU/edna/1"
+        self.ednaDeviceProxy1 = PyTango.DeviceProxy(self.strTangoDevice1)
+        self.ednaTangoCallbackThread = EdnaTangoCallbackThread(self.strTangoDevice1, self.ednaTangoSuccess1)
+        self.ednaTangoCallbackThread.start()
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_1"
+        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_3"
+        self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
+        self.xsdin = None
+        self.beamStopDiode = None
+        self.machineCurrent = None
+        self.xsdAverage = None
+
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -495,7 +523,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectNewFrameChanged(self, pValue):
         # TODO: DEBUG
-        logging.getLogger().info("In collectNewFrameChanged, pValue = %r" % pValue)
+        #logging.getLogger().info("In collectNewFrameChanged, pValue = %r" % pValue)
         filename0 = pValue.split(",")[0]
         #if os.path.dirname(filename0)[-4:] == "/raw":
         if os.path.dirname(filename0).endswith("/raw"):
@@ -509,7 +537,8 @@ class CollectBrick(Core.BaseBrick):
                 # TODO: DEBUG
                 logging.getLogger().info("Is collecting")
                 #self.getObject("collect").triggerEDNA(filename0, oneway = True)
-                self.collectObj.triggerEDNA(filename0, oneway = True)
+                #self.collectObj.triggerEDNA(filename0, oneway = True)
+                self.localTriggerEDNA(filename0)
                 message = "The frame '%s' was collected..." % filename0
                 logging.getLogger().info(message)
                 if self.robotCheckBox.isChecked():
@@ -563,6 +592,130 @@ class CollectBrick(Core.BaseBrick):
                         if feedBackFlag:
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+
+    # TODO: DEBUG
+    def sendProcessParams(self, processParamsXml):
+        #logging.info("In sendProcessParams")
+        self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0().parseString(processParamsXml)
+
+    # TODO: DEBUG
+    def sendBeamStopDiodeAndCurrent(self, beamStopDiodeAndCurrent):
+        #logging.info("In sendBeamStopDiodeAndCurrent: %r" % beamStopDiodeAndCurrent)
+        self.beamStopDiode = beamStopDiodeAndCurrent[0]
+        self.machineCurrent = beamStopDiodeAndCurrent[1]
+
+    # TODO: DEBUG
+    def ednaTangoSuccess1(self, event):
+        if event.attr_value is not None:
+            jobId = event.attr_value.value
+            logging.info("In ednaTangoSuccess1")
+            if jobId in self.dat_filenames:
+                filename = self.dat_filenames.pop(jobId)
+                logging.info("Processing Done from EDNA: %s -> %s", jobId, filename)
+                self.collectProcessingDone(filename)
+                if jobId.startswith(self.pluginMerge):
+                    strXsdout = self.ednaDeviceProxy1.getJobOutput(jobId)
+                    try:
+                        xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
+                    except:
+                        logging.error("Unable to parse string from Tango/EDNA")
+                    else:
+                        log = xsd.status.executiveSummary.value
+                        logging.info(log)
+                        # If autoRG has been used, launch the SAS pipeline (very time consuming)
+                        if xsd.autoRg is None:
+                            logging.info("SAS pipeline not executed")
+                        else:
+                            rgOut = xsd.autoRg
+                            filename = rgOut.filename.path.value
+                            logging.info("filename as input for SAS %s", filename)
+                            datapoint = numpy.loadtxt(filename)
+                            startPoint = rgOut.firstPointUsed.value
+                            q = datapoint[:, 0][startPoint:]
+                            I = datapoint[:, 1][startPoint:]
+                            s = datapoint[:, 2][startPoint:]
+                            mask = (q < 3)
+                            xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+                            #NbThreads=XSDataInteger(4))
+                            xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+                            xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+                            xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                            logging.info("Starting SAS pipeline for file %s", filename)
+                            sasJobId = self.ednaDeviceProxy1.startJob([self.pluginSAS, xsdin.marshal()])
+                            # self.dat_filenames[sasJobId] = filename
+#            else:
+#                logging.warning("processing Done from EDNA: %s -X-> None", jobId)
+
+    # TODO: DEBUG
+    def localTriggerEDNA(self, raw_filename):
+        """This is a local version of Collect.triggerEdna as a workaround for the Framework 4 communication problem"""
+        logging.info("Prepare EDNA input")
+        pars = self.getCollectPars(1)
+        if self.xsdin != None:
+            xsdin = self.xsdin.copy()
+            storageTemperature = 20.0
+            exposureTemperature = 20.0
+            if self.beamStopDiode == None:
+                logging.warning("No beamstop diode reading, using default value 0.0001")
+                collectBeamStopDiode = 0.0001
+            else:
+                collectBeamStopDiode = self.beamStopDiode
+            if self.machineCurrent == None:
+                logging.warning("No machine current reading, using default value 200.0")
+                machineCurrent = 200.0
+            else:
+                machineCurrent = self.machineCurrent
+
+            logging.info("Local trigger EDNA with filename %s", raw_filename)
+            raw_filename = str(raw_filename)
+            tmp, suffix = os.path.splitext(raw_filename)
+            tmp, base = os.path.split(tmp)
+            directory, local = os.path.split(tmp)
+            frame = ""
+            for c in base[-1::-1]:
+                if c.isdigit():
+                    frame = c + frame
+                else:
+                    break
+
+            xsdin.experimentSetup.storageTemperature = XSDataDouble(storageTemperature)
+            xsdin.experimentSetup.exposureTemperature = XSDataDouble(exposureTemperature)
+            xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
+            #xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
+            xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(collectBeamStopDiode))
+            # self.machineCurrent is already float
+            xsdin.experimentSetup.machineCurrent = XSDataDouble(machineCurrent)
+
+            xsdin.rawImage = XSDataImage(path = XSDataString(raw_filename))
+            xsdin.logFile = XSDataFile(path = XSDataString(os.path.join(directory, "misc", base + ".log")))
+            xsdin.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
+            xsdin.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
+            xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
+            # TODO : DEBUG
+    #        jobId = self.commands["startJob_sparta"]([self.pluginIntegrate, xsdin.marshal()])
+            jobId = self.ednaDeviceProxy1.startJob([self.pluginIntegrate, xsdin.marshal()])
+            self.dat_filenames[jobId] = xsdin.integratedCurve.path.value
+            logging.info("Processing job %s started", jobId)
+            #For debugging
+            xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
+            logging.info("Saving XML data to %s", xmlFilename)
+            xsdin.exportToFile(xmlFilename)
+            # Prepare input to SaxsSmartAverage
+#            sPrefix = pars["prefix"]
+#            pRunNumber = pars["runNumber"]
+#            pNumberFrames = pars["frameNumber"]
+#            pRadiationChecked = pars["radiationChecked"]
+#            pRadiationAbsolute = pars["radiationAbsolute"]
+#            pRadiationRelative = pars["radiationRelative"]
+#            ave_filename = os.path.join(directory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
+#            sub_filename = os.path.join(directory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
+#            self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
+#                                    inputCurves = [XSDataFile(path = XSDataString(os.path.join(directory, "1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
+#                                    mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
+#                                    subtractedCurve = XSDataFile(path = XSDataString(sub_filename)))
+#            if pRadiationChecked:
+#                self.xsdAverage.absoluteFidelity = XSDataDouble(float(pRadiationAbsolute))
+#                self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
 
 
     def beamLostChanged(self, pValue):
@@ -1126,6 +1279,15 @@ class CollectBrick(Core.BaseBrick):
 
         logging.info("   - collection started (mode: %s)" % mode)
 
+    def specCollectDone(self, xmlXsdAverage):
+        # Start smart averaging
+        logging.info("Spec collect done - starting averaging")
+        #logging.info(xmlXsdAverage)
+        xsdAverage = XSDataInputBioSaxsSmartMergev1_0().parseString(xmlXsdAverage)
+        jobId = self.ednaDeviceProxy1.startJob([self.pluginMerge, xmlXsdAverage])
+        self.dat_filenames[jobId] = xsdAverage.mergedCurve.path.value
+
+
     def collectDone(self):
         self.setCollectionStatus("done")
         self.setButtonState(0)
@@ -1322,3 +1484,20 @@ class CollectBrick(Core.BaseBrick):
                 j += 1
 
         return prefix, run, frame, extra, extension
+
+
+# TODO : DEBUG
+class EdnaTangoCallbackThread(threading.Thread):
+
+    def __init__(self, _deviceProxy, _successCallback = None, _failureCallback = None):
+        threading.Thread.__init__(self)
+        self._dev = PyTango.DeviceProxy(_deviceProxy)
+        if _successCallback != None:
+            self._dev.subscribe_event("jobSuccess", PyTango.EventType.CHANGE_EVENT, _successCallback, [])
+        if _failureCallback != None:
+            self._dev.subscribe_event("jobSuccess", PyTango.EventType.CHANGE_EVENT, _failureCallback, [])
+
+    def run(self):
+        bContinue = True
+        while bContinue:
+            time.sleep(1)
