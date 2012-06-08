@@ -298,6 +298,8 @@ class BsxSCWidget(Qt.QWidget):
     # Slots .  Overload these for behaviour if needed
     #
     def setPlateGeometry(self, plateGeometry):
+        #TODO: DEBUG
+        print ">> Set PlateGeometry to %r " % plateGeometry
         self.plateGeometry = plateGeometry
 
     def startSyringeForward(self):

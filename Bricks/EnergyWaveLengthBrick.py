@@ -36,7 +36,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def init(self):
         # The keV to Angstrom calc
-        self.hcOverE = 12.398
+        self.hcOverE = 12.3984
 
         self.vboxLayout = Qt.QVBoxLayout()
         self.hBox1Layout = Qt.QHBoxLayout()
@@ -220,7 +220,7 @@ class EnterWaveLength(Qt.QDialog):
 
     def __init__(self, pParent):
         # The keV to Angstrom calc
-        self.hcOverE = 12.398
+        self.hcOverE = 12.3984
         self.__parent = pParent
         self.__parent.waveLengthDialogOpen()
 

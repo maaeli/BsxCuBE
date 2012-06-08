@@ -16,7 +16,7 @@ class EnergyWaveLength(CObjectBase):
 
     def init(self):
         # The keV to Angstrom calc
-        self.hcOverE = 12.398
+        self.hcOverE = 12.3984
         self.deltaPilatus = 0.1
         # check that we have connection to Pilatus
         self.pilatusThreshold = self.channels.get("pilatus_threshold")

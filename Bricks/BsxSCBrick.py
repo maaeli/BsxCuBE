@@ -51,7 +51,9 @@ class BsxSCBrick(Core.BaseBrick):
 
             self._sampleChanger = sc
 
-            geometry = [ self._sampleChanger.getPlateInfo(i) for i in range(1, 4) ]
+            geometry = [ self._sampleChanger.getPlateInfo(i) for i in range(1, 3) ]
+            #TODO: DEBUG
+            print ">>>> geometry in sample_changer %r" % geometry
             self.SCWidget.setPlateGeometry(geometry)
 
             # redefine calls in SCWidget

@@ -4,6 +4,7 @@ import logging
 import numpy
 import gevent
 import time
+import pprint
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -100,6 +101,10 @@ class Collect(CObjectBase):
 
 
     def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
+        #TODO: DEBUG
+        self.showMessage(0, "entered collect call")
+        #TODO: DEBUG
+        logging.info("Starting collection now")
         try:
             self.storageTemperature = float(pStorageTemperature)
         except:
@@ -128,7 +133,8 @@ class Collect(CObjectBase):
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
         self.collectProcessData.set_value(pProcessData)
-
+        #TODO: DEBUG
+        logging.info("Prepare EDNA input")
         #Prepare EDNA input
         self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
         self.xsdin.sample.code = XSDataString(str(pCode))
@@ -163,12 +169,16 @@ class Collect(CObjectBase):
         else:
             self.lastPrefixRun = prefixRun
             logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
+        #TODO: DEBUG
+        logging.info("Starting spec Collect")
+        #TODO: DEBUG
+        self.showMessage(0, "calls spec collect")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
     def triggerEDNA(self, raw_filename):
         # TODO: DEBUG
-        logging.info("Trigger EDNA with filename %r" % raw_filename)
+        logging.info("Trigger EDNA with filename %s", raw_filename)
         raw_filename = str(raw_filename)
         tmp, suffix = os.path.splitext(raw_filename)
         tmp, base = os.path.split(tmp)
@@ -203,6 +213,10 @@ class Collect(CObjectBase):
         xsdin1d.exportToFile(xmlFilename)
 
     def specCollectDone(self, returned_value):
+        #TODO: DEBUG
+        self.showMessage(0, "spec collect done")
+        #TODO: DEBUG
+        logging.info("Spec Collect done")
         self.collecting = False
         # start EDNA to calculate average at the end
         jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
@@ -304,15 +318,18 @@ class Collect(CObjectBase):
             # we should check if enough volume is not available then go to next buffer in list
             tocollect = sample["buffer"][0]
             #TODO: DEBUG
-            print ">>> tocollect buffer_before %r" % tocollect
+            print ">>> tocollect buffer_before:"
+            pprint.pprint(tocollect)
         elif mode == "buffer_after":
             tocollect = sample["buffer"][0]
             #TODO: DEBUG
-            print ">>> tocollect buffer_after %r" % tocollect
+            print ">>> tocollect buffer_after:"
+            pprint.pprint(tocollect)
         else:
             tocollect = sample
             #TODO: DEBUG
-            print ">>> tocollect rest %r %r " % (mode, tocollect)
+            print ">>> tocollect rest mode = %r:" % mode
+            pprint.pprint(tocollect)
 
 
         self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
@@ -349,7 +366,10 @@ class Collect(CObjectBase):
         if tocollect["flow"]:
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
+                #TODO: DEBUG
+                self.showMessage(0, "start flowing asynch")
                 self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
+                self.showMessage(0, "return flowing asynch")
             except RuntimeError:
                 self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
         else:
@@ -362,7 +382,7 @@ class Collect(CObjectBase):
         # ==========================
         #  SETTING TRANSMISSION 
         # ========================== 
-        self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
+        #self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
         #self.__parent.emit("transmissionChanged", tocollect.transmission)
 
         # ==================================================
@@ -516,10 +536,14 @@ class Collect(CObjectBase):
 
     def collectWithRobot(self, *args):
         try:
+            #TODO: DEBUG
+            self.showMessage(0, "spawn collect Robot")
             self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
+            self.showMessage(0, "spawned collect Robot")
             try:
                 return self.__collectWithRobotProcedure.get()
             except:
                 self.showMessage(2, "collectWithRobot aborted !")
         finally:
             self.__collectWithRobotProcedure = None
+            self.showMessage(0, "Getting out of collectWithRobot")

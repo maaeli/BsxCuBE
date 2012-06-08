@@ -235,6 +235,8 @@ class BsxRobotBrick(Core.BaseBrick):
         geometry = [self._sampleChanger.getPlateInfo(i) for i in range(1, 3)]
         #TODO: DEBUG
         print ">>>> geometry from Robot %r" % geometry
+        logging.info('geometry: %s', geometry)
+        print ">>>> END DEBUG"
         logging.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title = 'Fill', display_volume = True, parent = self.brick_widget)
         ret = dialog.exec_()

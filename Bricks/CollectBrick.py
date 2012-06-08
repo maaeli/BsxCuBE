@@ -92,7 +92,7 @@ class CollectBrick(Core.BaseBrick):
 
     def init(self):
         # The keV to Angstrom calc
-        self.hcOverE = 12.398
+        self.hcOverE = 12.3984
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
@@ -305,20 +305,21 @@ class CollectBrick(Core.BaseBrick):
         self.brick_widget.layout().addLayout(self.hBoxLayout15)
 
         # Spectro Online
-        self.hBoxLayout151 = Qt.QHBoxLayout()
-        self.spectroCheckBox = Qt.QCheckBox("Spectro online", self.brick_widget)
-        self.spectroCheckBox.setFixedWidth(130)
-        Qt.QObject.connect(self.spectroCheckBox, Qt.SIGNAL("toggled(bool)"), self.spectroCheckBoxToggled)
-        self.hBoxLayout151.addWidget(self.spectroCheckBox)
-        self.extinctionCoefficentDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.extinctionCoefficentDoubleSpinBox.setRange(0.001, 99.998)
-        self.extinctionCoefficentDoubleSpinBox.setDecimals(3)
-        #TODO: - Change by reading from SPEC/File
-        self.extinctionCoefficentDoubleSpinBox.setValue(1.000)
-        self.extinctionCoefficentDoubleSpinBox.setSuffix(" (ml)*(1/mg)*(1/cm)")
-        self.extinctionCoefficentDoubleSpinBox.setToolTip("Extinction Coefficient")
-        self.hBoxLayout151.addWidget(self.extinctionCoefficentDoubleSpinBox)
-        self.brick_widget.layout().addLayout(self.hBoxLayout151)
+        #TODO: MOVE to Collect box
+#        self.hBoxLayout151 = Qt.QHBoxLayout()
+#        self.spectroCheckBox = Qt.QCheckBox("Spectro online", self.brick_widget)
+#        self.spectroCheckBox.setFixedWidth(130)
+#        Qt.QObject.connect(self.spectroCheckBox, Qt.SIGNAL("toggled(bool)"), self.spectroCheckBoxToggled)
+#        self.hBoxLayout151.addWidget(self.spectroCheckBox)
+#        self.extinctionCoefficentDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
+#        self.extinctionCoefficentDoubleSpinBox.setRange(0.001, 99.998)
+#        self.extinctionCoefficentDoubleSpinBox.setDecimals(3)
+#        #TODO: - Change by reading from SPEC/File
+#        self.extinctionCoefficentDoubleSpinBox.setValue(1.000)
+#        self.extinctionCoefficentDoubleSpinBox.setSuffix(" (ml)*(1/mg)*(1/cm)")
+#        self.extinctionCoefficentDoubleSpinBox.setToolTip("Extinction Coefficient")
+#        self.hBoxLayout151.addWidget(self.extinctionCoefficentDoubleSpinBox)
+#        self.brick_widget.layout().addLayout(self.hBoxLayout151)
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
@@ -390,7 +391,8 @@ class CollectBrick(Core.BaseBrick):
         self.prefixLineEditChanged(None)
         self.maskLineEditChanged(None)
         self.radiationCheckBoxToggled(False)
-        self.spectroCheckBoxToggled(False)
+        # TODO : DEBUG
+#        self.spectroCheckBoxToggled(False)
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -492,16 +494,22 @@ class CollectBrick(Core.BaseBrick):
             self.messageDialog(level, logmsg)
 
     def collectNewFrameChanged(self, pValue):
+        # TODO: DEBUG
+        logging.getLogger().info("In collectNewFrameChanged, pValue = %r" % pValue)
         filename0 = pValue.split(",")[0]
-        if os.path.dirname(filename0)[-4:] == "/raw":
-            directory = os.path.dirname(filename0)[:-4] + "/1d/"
+        #if os.path.dirname(filename0)[-4:] == "/raw":
+        if os.path.dirname(filename0).endswith("/raw"):
+            directory = os.path.join(os.path.dirname(filename0)[:-4], "1d")
         else:
-            directory = os.path.dirname(filename0) + "/1d/"
+            directory = os.path.join(os.path.dirname(filename0), "1d")
 
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
             if self._isCollecting:
-                self.getObject("collect").triggerEDNA(filename0, oneway = True)
+                # TODO: DEBUG
+                logging.getLogger().info("Is collecting")
+                #self.getObject("collect").triggerEDNA(filename0, oneway = True)
+                self.collectObj.triggerEDNA(filename0, oneway = True)
                 message = "The frame '%s' was collected..." % filename0
                 logging.getLogger().info(message)
                 if self.robotCheckBox.isChecked():
@@ -519,11 +527,18 @@ class CollectBrick(Core.BaseBrick):
                         ave_filename = directory + filename1 + "_ave.dat"
                 self.emitDisplayItemChanged(filename0)
             else:
+                # TODO: DEBUG
+                logging.getLogger().info("Is not collecting")
                 if os.path.exists(filename0):
-                    if filename0.split(".")[-1] != "dat":
-                        filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
+                    #if filename0.split(".")[-1] != "dat":
+                    if os.path.splitext(filename0)[1] != ".dat":
+                        #filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
+                        fileBaseName = os.path.splitext(os.path.basename(filename0))[0]
+                        filename1 = os.path.join(directory, fileBaseName + ".dat")
                         if os.path.exists(filename1):
                             filename0 += "," + filename1
+                    # TODO: DEBUG
+                    logging.getLogger().info("emitDisplayItemChanged: %r" % filename0)
                     self.emitDisplayItemChanged(filename0)
 
 #           TODO: This is how put in a breakpoint 
@@ -599,8 +614,8 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectObjectConnected(self, collect_obj):
-        self.collectObj = collect_obj
-        if self.collectObj is not None:
+        if collect_obj is not None:
+            self.collectObj = collect_obj
             self.collectObj.updateChannels(oneway = True)
 
 
@@ -949,8 +964,9 @@ class CollectBrick(Core.BaseBrick):
         self.radiationRelativeDoubleSpinBox.setEnabled(pValue)
         self.radiationAbsoluteDoubleSpinBox.setEnabled(pValue)
 
-    def spectroCheckBoxToggled(self, pValue):
-        self.extinctionCoefficentDoubleSpinBox.setEnabled(pValue)
+# TODO: DEBUG
+#    def spectroCheckBoxToggled(self, pValue):
+#        self.extinctionCoefficentDoubleSpinBox.setEnabled(pValue)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
@@ -1228,8 +1244,11 @@ class CollectBrick(Core.BaseBrick):
         self.normalisationDoubleSpinBox.setEnabled(enabled)
 
     def setButtonState(self, pOption):
+        # TODO : DEBUG
+#        buttons = (self.processCheckBox,
+#                   self.notifyCheckBox, self.robotCheckBox, self.spectroCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
         buttons = (self.processCheckBox,
-                   self.notifyCheckBox, self.robotCheckBox, self.spectroCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
+                   self.notifyCheckBox, self.robotCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
         def enable_buttons(*args):
             if len(args) == 1:
                 for button in buttons:
