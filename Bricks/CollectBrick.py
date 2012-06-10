@@ -75,14 +75,16 @@ class CollectBrick(Core.BaseBrick):
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
                                             []),
-                    "sample_changer": Connection("SampleChanger object",
-                                            [],
-                                            [],
-                                            "sample_changer_connected"),
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
                                             [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")],
                                             "connectedToEnergy"),
+                    "samplechanger": Connection("Sample Changer object",
+                                            [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
+                                             Signal('storageTemperatureChanged', 'storage_temperature_changed'),
+                                             Signal('stateChanged', 'state_changed'), ],
+                                            [],
+                                            "sample_changer_connected"),
                     "image_proxy": Connection("image proxy",
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                             [],
@@ -420,6 +422,8 @@ class CollectBrick(Core.BaseBrick):
         self.beamStopDiode = None
         self.machineCurrent = None
         self.xsdAverage = None
+        self.seuTemperature = None
+        self.storageTemperature = None
 
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
@@ -441,6 +445,22 @@ class CollectBrick(Core.BaseBrick):
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
 
+    def sample_changer_connected(self, pPeer):
+        if pPeer is not None:
+            self.scObject = pPeer
+            self.nbPlates = 3
+            self.plateInfos = [self.scObject.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
+            print "sample changer connected in CollectBrick>>>> %r" % self.plateInfos
+
+    def seu_temperature_changed(self, seuTemperature):
+        self.seuTemperature = seuTemperature
+
+    def storage_temperature_changed(self, storageTemperature):
+        self.storageTemperature = storageTemperature
+
+    def state_changed(self, state, status):
+        # not used, so we do not care
+        pass
 
     def image_proxy_connected(self, image_proxy):
         self.image_proxy = image_proxy
@@ -556,8 +576,6 @@ class CollectBrick(Core.BaseBrick):
                         ave_filename = directory + filename1 + "_ave.dat"
                 self.emitDisplayItemChanged(filename0)
             else:
-                # TODO: DEBUG
-                logging.getLogger().info("Is not collecting")
                 if os.path.exists(filename0):
                     #if filename0.split(".")[-1] != "dat":
                     if os.path.splitext(filename0)[1] != ".dat":
@@ -608,7 +626,6 @@ class CollectBrick(Core.BaseBrick):
     def ednaTangoSuccess1(self, event):
         if event.attr_value is not None:
             jobId = event.attr_value.value
-            logging.info("In ednaTangoSuccess1")
             if jobId in self.dat_filenames:
                 filename = self.dat_filenames.pop(jobId)
                 logging.info("Processing Done from EDNA: %s -> %s", jobId, filename)
@@ -653,14 +670,22 @@ class CollectBrick(Core.BaseBrick):
         pars = self.getCollectPars(1)
         if self.xsdin != None:
             xsdin = self.xsdin.copy()
-            storageTemperature = 20.0
-            exposureTemperature = 20.0
-            if self.beamStopDiode == None:
+            if self.storageTemperature is None:
+                logging.warning("No storage temperature reading, using default value 20")
+                storageTemperature = 20.0
+            else:
+                storageTemperature = self.storageTemperature
+            if self.exposureTemperature is None:
+                logging.warning("No exposure temperature reading, using default value 20")
+                storageTemperature = 20.0
+            else:
+                exposureTemperature = self.seuTemperature
+            if self.beamStopDiode is None:
                 logging.warning("No beamstop diode reading, using default value 0.0001")
                 collectBeamStopDiode = 0.0001
             else:
                 collectBeamStopDiode = self.beamStopDiode
-            if self.machineCurrent == None:
+            if self.machineCurrent is None:
                 logging.warning("No machine current reading, using default value 200.0")
                 machineCurrent = 200.0
             else:
@@ -771,14 +796,6 @@ class CollectBrick(Core.BaseBrick):
             self.collectObj = collect_obj
             self.collectObj.updateChannels(oneway = True)
 
-
-    def sample_changer_connected(self, sc):
-        #  How to read an attribute? You can't.
-        self._sampleChanger = sc
-        if sc is None:
-            return
-        self.nbPlates = 3
-        self.plateInfos = [sc.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
 
     def connectedToEnergy(self, pPeer):
         if pPeer is not None:

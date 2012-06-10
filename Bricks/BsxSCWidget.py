@@ -9,7 +9,7 @@ class BsxSCWidget(Qt.QWidget):
     def __init__(self, parent):
 
         self.__robotMoveState = 0
-        self.plateGeomery = []
+        self.plateGeometry = []
         self.lastWell = [1, 1, 1]
 
         Qt.QWidget.__init__(self, parent)
@@ -299,8 +299,15 @@ class BsxSCWidget(Qt.QWidget):
     #
     def setPlateGeometry(self, plateGeometry):
         #TODO: DEBUG
-        print ">> Set PlateGeometry to %r " % plateGeometry
-        self.plateGeometry = plateGeometry
+        print ">>> Set PlateGeometry to %r " % plateGeometry
+        if self.plateGeometry == []:
+            self.plateGeometry = plateGeometry
+        else:
+            # Workaround for bug in calling "Sample change connected" twice
+            for geometryArray in  plateGeometry:
+                if plateGeometry != '':
+                    self.plateGeometry.append(geometryArray)
+        print ">>> PlateGeometry is now %r " % self.plateGeometry
 
     def startSyringeForward(self):
         print "Starting syringe forward"

@@ -619,7 +619,10 @@
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
     </connection>
-    <connection role="sample_changer">
+    <connection role="samplechanger">
+      <signal name="seuTemperatureChanged"/>
+      <signal name="storageTemperatureChanged"/>
+      <signal name="stateChanged"/>
       <peer name="BsxCuBE/SampleChanger"/>
     </connection>
   </connections>

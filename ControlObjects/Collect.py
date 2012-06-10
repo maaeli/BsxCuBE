@@ -544,14 +544,10 @@ class Collect(CObjectBase):
 
     def collectWithRobot(self, *args):
         try:
-            #TODO: DEBUG
-            self.showMessage(0, "spawn collect Robot")
             self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
-            self.showMessage(0, "spawned collect Robot")
             try:
                 return self.__collectWithRobotProcedure.get()
             except:
                 self.showMessage(2, "collectWithRobot aborted !")
         finally:
             self.__collectWithRobotProcedure = None
-            self.showMessage(0, "Getting out of collectWithRobot")
