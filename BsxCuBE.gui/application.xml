@@ -595,6 +595,8 @@
       <signal name="collectBeamCenterXChanged"/>
       <signal name="collectBeamCenterYChanged"/>
       <signal name="collectNormalisationChanged"/>
+      <signal name="collectRadiationDamageChanged"/>
+      <signal name="collectAbsoluteRadiationDamageChanged"/>
       <signal name="collectProcessDataChanged"/>
       <signal name="collectNewFrameChanged"/>
       <signal name="checkBeamChanged"/>

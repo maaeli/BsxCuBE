@@ -57,6 +57,8 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectBeamCenterXChanged", "collectBeamCenterXChanged"),
                                              Signal("collectBeamCenterYChanged", "collectBeamCenterYChanged"),
                                              Signal("collectNormalisationChanged", "collectNormalisationChanged"),
+                                             Signal("collectRadiationDamageChanged", "collectRadiationDamageChanged"),
+                                             Signal("collectAbsoluteRadiationDamageChanged", "collectAbsoluteRadiationDamageChanged"),
                                              Signal("collectProcessDataChanged", "collectProcessDataChanged"),
                                              Signal("collectNewFrameChanged", "collectNewFrameChanged"),
                                              Signal("checkBeamChanged", "checkBeamChanged"),
@@ -451,6 +453,8 @@ class CollectBrick(Core.BaseBrick):
             self.nbPlates = 3
             self.plateInfos = [self.scObject.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
             print "sample changer connected in CollectBrick>>>> %r" % self.plateInfos
+            self.seuTemperature = self.scObject.getSEUTemperature()
+            self.storageTemperature = self.scObject.getSampleStorageTemperature()
 
     def seu_temperature_changed(self, seuTemperature):
         self.seuTemperature = seuTemperature
@@ -516,6 +520,15 @@ class CollectBrick(Core.BaseBrick):
 
     def collectNormalisationChanged(self, pValue):
         self.normalisationDoubleSpinBox.setValue(float(pValue))
+
+    def collectRadiationDamageChanged(self, pValue):
+        if pValue is not None:
+            self.radiationCheckBox.setChecked(pValue == "1")
+
+    def collectAbsoluteRadiationDamageChanged(self, pValue):
+        if pValue is not None:
+            self.radiationAbsoluteDoubleSpinBox.setValue(float(pValue))
+
 
     def collectProcessDataChanged(self, pValue):
         self.processCheckBox.setChecked(pValue == "1")
@@ -585,7 +598,7 @@ class CollectBrick(Core.BaseBrick):
                         if os.path.exists(filename1):
                             filename0 += "," + filename1
                     # TODO: DEBUG
-                    logging.getLogger().info("emitDisplayItemChanged: %r" % filename0)
+                    print "emitDisplayItemChanged: %r" % filename0
                     self.emitDisplayItemChanged(filename0)
 
 #           TODO: This is how put in a breakpoint 
@@ -675,11 +688,11 @@ class CollectBrick(Core.BaseBrick):
                 storageTemperature = 20.0
             else:
                 storageTemperature = self.storageTemperature
-            if self.exposureTemperature is None:
+            if self.seuTemperature is None:
                 logging.warning("No exposure temperature reading, using default value 20")
-                storageTemperature = 20.0
+                seuTemperature = 20.0
             else:
-                exposureTemperature = self.seuTemperature
+                seuTemperature = self.seuTemperature
             if self.beamStopDiode is None:
                 logging.warning("No beamstop diode reading, using default value 0.0001")
                 collectBeamStopDiode = 0.0001
@@ -704,7 +717,7 @@ class CollectBrick(Core.BaseBrick):
                     break
 
             xsdin.experimentSetup.storageTemperature = XSDataDouble(storageTemperature)
-            xsdin.experimentSetup.exposureTemperature = XSDataDouble(exposureTemperature)
+            xsdin.experimentSetup.exposureTemperature = XSDataDouble(seuTemperature)
             xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
             #xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
             xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(collectBeamStopDiode))
@@ -876,8 +889,8 @@ class CollectBrick(Core.BaseBrick):
                             "radiationChecked":self.radiationCheckBox.isChecked(),
                             "radiationRelative": float(self.radiationRelativeDoubleSpinBox.value()),
                             "radiationAbsolute": float(self.radiationAbsoluteDoubleSpinBox.value()),
-                            "SEUTemperature": self._sampleChanger.getSEUTemperature(),
-                            "storageTemperature": self._sampleChanger.getSampleStorageTemperature() }
+                            "SEUTemperature": self.seuTemperature,
+                            "storageTemperature": self.storageTemperature }
 
             robotpars = { "sampleType": str(self._collectRobotDialog.sampleTypeComboBox.currentText()),
                           "storageTemperature": float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value()),
@@ -970,8 +983,8 @@ class CollectBrick(Core.BaseBrick):
             collectpars.radiationChecked = self.radiationCheckBox.isChecked()
             collectpars.radiationRelative = self.radiationRelativeDoubleSpinBox.value()
             collectpars.radiationAbsolute = self.radiationAbsoluteDoubleSpinBox.value()
-            collectpars.SEUTemperature = self._sampleChanger.getSEUTemperature()
-            collectpars.storageTemperature = self._sampleChanger.getSampleStorageTemperature()
+            collectpars.SEUTemperature = self.seuTemperature
+            collectpars.storageTemperature = self.storageTemperature
 
 
            #=================================================
@@ -1282,8 +1295,8 @@ class CollectBrick(Core.BaseBrick):
                       self.radiationAbsoluteDoubleSpinBox.value(),
                       self.radiationRelativeDoubleSpinBox.value(),
                       processData,
-                      self._sampleChanger.getSEUTemperature(),
-                      self._sampleChanger.getSampleStorageTemperature())
+                      self.seuTemperature,
+                      self.storageTemperature)
 
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
@@ -1297,6 +1310,9 @@ class CollectBrick(Core.BaseBrick):
         logging.info("   - collection started (mode: %s)" % mode)
 
     def specCollectDone(self, xmlXsdAverage):
+        #TODO: Make this smarter
+        # Clear screen here
+        self.displayReset()
         # Start smart averaging
         logging.info("Spec collect done - starting averaging")
         #logging.info(xmlXsdAverage)
