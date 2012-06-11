@@ -242,7 +242,7 @@ class BsxRobotBrick(Core.BaseBrick):
         ret = dialog.exec_()
         if ret:
             selected_well = dialog.get_selected_well()
-            logging.info('filling from [plate, row, column] = %s', selected_well)
+            logging.info('filling from [plate, row, column,volume] = %s', selected_well)
             #TODO: DEBUG:
             print ">>> selected_well %r" % selected_well
             print ">>> 1, 2, 3, 4 "
