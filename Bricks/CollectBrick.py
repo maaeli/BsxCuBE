@@ -79,7 +79,7 @@ class CollectBrick(Core.BaseBrick):
                                             []),
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")],
                                             "connectedToEnergy"),
                     "samplechanger": Connection("Sample Changer object",
                                             [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
@@ -107,6 +107,7 @@ class CollectBrick(Core.BaseBrick):
         Core.BaseBrick.__init__(self, *args, **kargs)
         self._curveList = []
         self.lastCollectProcessingLog = None
+        self.__energy = None
 
 
     def init(self):
@@ -178,7 +179,7 @@ class CollectBrick(Core.BaseBrick):
         self.frameNumberLabel.setFixedWidth(130)
         self.hBoxLayout3.addWidget(self.frameNumberLabel)
         self.frameNumberSpinBox = LeadingZeroSpinBox(self.brick_widget, 2)
-        self.frameNumberSpinBox.setRange(1, 99)
+        self.frameNumberSpinBox.setRange(1, 999)
         self.hBoxLayout3.addWidget(self.frameNumberSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout3)
 
@@ -414,7 +415,9 @@ class CollectBrick(Core.BaseBrick):
 #        self.spectroCheckBoxToggled(False)
         self.dat_filenames = {}
         self.strTangoDevice1 = "DAU/edna/1"
+        self.strTangoDevice2 = "DAU/edna/2"
         self.ednaDeviceProxy1 = PyTango.DeviceProxy(self.strTangoDevice1)
+        self.ednaDeviceProxy2 = PyTango.DeviceProxy(self.strTangoDevice2)
         self.ednaTangoCallbackThread = EdnaTangoCallbackThread(self.strTangoDevice1, self.ednaTangoSuccess1)
         self.ednaTangoCallbackThread.start()
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_1"
@@ -671,7 +674,7 @@ class CollectBrick(Core.BaseBrick):
                             xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
                             xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
                             logging.info("Starting SAS pipeline for file %s", filename)
-                            sasJobId = self.ednaDeviceProxy1.startJob([self.pluginSAS, xsdin.marshal()])
+                            sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
                             # self.dat_filenames[sasJobId] = filename
 #            else:
 #                logging.warning("processing Done from EDNA: %s -X-> None", jobId)
@@ -811,7 +814,7 @@ class CollectBrick(Core.BaseBrick):
 
 
     def connectedToEnergy(self, pPeer):
-        if pPeer is not None:
+       if pPeer is not None:
             self.energyControlObject = pPeer
             # read energy when getting contact with CO Object
             self.__energy = float(self.energyControlObject.getEnergy())

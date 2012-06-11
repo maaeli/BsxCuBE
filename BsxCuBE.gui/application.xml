@@ -571,6 +571,7 @@
       <slot name="setEnergy"/>
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
+      <slot name="setPilatusFill"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="image_proxy">
@@ -706,6 +707,7 @@
       <slot name="setEnergy"/>
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
+      <slot name="setPilatusFill"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="login">

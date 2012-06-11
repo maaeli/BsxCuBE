@@ -5,4 +5,5 @@
    <channel name="collectWaveLength"  type="spec" uri="nela:exp" call="BSX_GLOBAL/collect/waveLength"/>  
    <channel name="pilatus_threshold"  type="tango" uri="bm29/pilatus/p0" call="energy_threshold"/>
    <channel name="pilatus_status" type="tango" uri="bm29/limaccds/p0" call="acq_status"/>
+   <channel name="fill_mode"  type="tango" uri="bm29/pilatus/p0" call="fill_mode"/>
 </object>

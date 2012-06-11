@@ -1,5 +1,6 @@
 import logging
 import math
+import time
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
@@ -7,7 +8,7 @@ class EnergyWaveLength(CObjectBase):
 
     signals = [Signal("energyChanged")]
 
-    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")]
+    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
@@ -24,6 +25,8 @@ class EnergyWaveLength(CObjectBase):
             logging.error("No connection to Pilatus")
         # Runnning = Nothing should be possible
         self.__pilatus_status = "Running"
+        # make another connection
+        self.pilatusFillMode = self.channels.get("fill_mode")
         # get spec motor as described in href and the corresponding energy.xml
         self.__energyMotor = self.objects["getEnergy"]
         if self.__energyMotor is not None:
@@ -31,6 +34,8 @@ class EnergyWaveLength(CObjectBase):
             self.__energyMotor.connect("positionChanged", self.newEnergy)
         else:
             logging.error("No connection to energy motor in spec")
+        # Connect to fill_mode and correct it back each time it changes
+        self.channels["fill_mode"].connect("update", self.fillModeChanged)
 
 
     def newEnergy(self, pValue):
@@ -59,6 +64,23 @@ class EnergyWaveLength(CObjectBase):
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
             self.pilatusThreshold.set_value(self.__energy)
 
+    def fillModeChanged(self, pValue):
+        # read value first
+        #TODO: DEBUG
+        print ">>>> fillModeChange"
+        mode = self.pilatusFillMode.value()
+        print "Got mode %s", mode
+        if mode != "ON" :
+            # Here we have a problem.. Wait until pilatus has settled and then act
+            while not self.pilatusReady() :
+                time.sleep(0.5)
+            #TODO: DEBUG
+            print ">>> now pilatus is ready - set fillMode correctly"
+            self.setPilatusFill()
+
+    def setPilatusFill(self):
+        # Just for safety set fill mode to ON => gapfill -1
+        self.pilatusFillMode.set_value("ON")
 
     def pilatusReady(self):
         # Check if Pilatus is ready

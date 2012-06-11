@@ -14,7 +14,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     connections = {"energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")],
                                             "connectedToEnergy"),
                    "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
@@ -124,6 +124,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def setEnergy(self, energyStr):
         if self.energyControlObject is not None:
             self.energyControlObject.setEnergy(energyStr)
+            # make sure you set gapfill as well
+            self.energyControlObject.setPilatusFill()
         else:
             logging.error("Could not set Energy to " + energyStr)
 
