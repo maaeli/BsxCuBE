@@ -479,7 +479,6 @@ class Collect(CObjectBase):
         self.lastSampleTime = time.time()
         prevSample = None
         runNumberSet = True
-
         # ==================================================
         #   MAIN LOOP on Samples
         # ==================================================        
@@ -504,10 +503,12 @@ class Collect(CObjectBase):
             if doFirstBuffer:
                 if sample["buffername"] != lastBuffer:
                     lastBuffer = sample["buffername"]
-                # need to increase run number
-                if not runNumberSet:
-                    pars["runNumber"] = self.nextRunNumber
+                if runNumberSet:
+                    # Using pars["runNumber"] from collect brick
                     runNumberSet = False
+                else:
+                    # need to increase run number
+                    pars["runNumber"] = self.nextRunNumber
                 self._collectOne(sample, pars, mode = "buffer_before")
 
             #
@@ -526,17 +527,21 @@ class Collect(CObjectBase):
             #
             # Collect sample
             #
-            if not runNumberSet:
+            if runNumberSet:
+                # Using pars["runNumber"] from collect brick
+                runNumberSet = False
+            else:
                 # need to increase run number
                 pars["runNumber"] = self.nextRunNumber
-                runNumberSet = False
             self._collectOne(sample, pars, mode = "sample")
 
             if pars["bufferAfter"]:
-                if not runNumberSet:
+                if runNumberSet:
+                    # Using pars["runNumber"] from collect brick
+                    runNumberSet = False
+                else:
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
-                    runNumberSet = False
                 self._collectOne(sample, pars, mode = "buffer_after")
 
             prevSample = sample
