@@ -430,6 +430,7 @@ class CollectBrick(Core.BaseBrick):
         self.xsdAverage = None
         self.seuTemperature = None
         self.storageTemperature = None
+        self.collectionStatus = None
 
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
@@ -1219,6 +1220,7 @@ class CollectBrick(Core.BaseBrick):
                     self.startCollectWithoutRobot()
 
     def setCollectionStatus(self, status, progress = None):
+        self.collectionStatus = status
         if status == "running":
             self._isCollecting = True
             self.abortPushButton.setEnabled(True)
@@ -1309,10 +1311,13 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectDone(self):
-        self.setCollectionStatus("done")
-        self.setButtonState(0)
-        if self.notifyCheckBox.isChecked():
-            Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+        #TODO : DEBUG
+        # Workaround for framework 4 sending collectDone signal five times...
+        if self.collectionStatus != "done":
+            self.setCollectionStatus("done")
+            self.setButtonState(0)
+            if self.notifyCheckBox.isChecked():
+                Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
@@ -1389,13 +1394,9 @@ class CollectBrick(Core.BaseBrick):
 
         # TODO : DEBUG
         if self.__isTesting:
-            logging.getLogger().info("Abort - isTesting == True")
             self.getObject("collect").testCollectAbort()
-            logging.getLogger().info("After testCollectAbort")
         else:
-            logging.getLogger().info("Abort - isTesting == False")
             self.getObject("collect").collectAbort()
-            logging.getLogger().info("After collectAbort")
 
         #if self.robotCheckBox.isChecked():
         #   self._collectRobot.abort()
@@ -1403,15 +1404,10 @@ class CollectBrick(Core.BaseBrick):
         #
         # Stop all timers 
         #
-#        if self.SPECBusyTimer.isActive():
-        logging.getLogger().info("Before SPECBusyTimerTimeOut")
         self.SPECBusyTimerTimeOut()
-        logging.getLogger().info("After SPECBusyTimerTimeOut")
 
         for timer in self._curveList:
-            logging.getLogger().info("Before timer.stop")
             timer.stop()
-            logging.getLogger().info("After timer.stop")
 
         self.setCollectionStatus("aborting")
         self._curveList = []
