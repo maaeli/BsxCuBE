@@ -627,13 +627,10 @@ class CollectBrick(Core.BaseBrick):
 
     # TODO: DEBUG
     def sendProcessParams(self, processParamsXml):
-        #logging.info("In sendProcessParams")
         self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0().parseString(processParamsXml)
 
     # TODO: DEBUG
     def sendMachineCurrent(self, machineCurrent):
-        print ">>> got machine current %r" % machineCurrent
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
         self.machineCurrent = machineCurrent
 
     # TODO: DEBUG
@@ -1190,18 +1187,11 @@ class CollectBrick(Core.BaseBrick):
             flag = True
 
             if os.path.isdir(directory):
-                # TODO : DEBUG
-                logging.info("Checking directory %s" % directory)
                 for filename in os.listdir(directory):
-                    logging.info("Checking filename %s" % filename)
                     if os.path.isfile(os.path.join(directory, filename)):
-                        logging.info("Filename exists %s" % filename)
-                        #if filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber) and not filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber + "_00"):
                         if filename.startswith(str(self.prefixLineEdit.text())):
-                            logging.info("Filename %s starts with prefix %s" % (filename, str(self.prefixLineEdit.text())))
                             # Check if we have a run number higher than the requested run number:
                             existingRunNumber = filename.split("_")[-2]
-                            logging.info("Existing run number %r" % existingRunNumber)
                             if int(existingRunNumber) >= int(runNumber):
                                 logging.info("Existing run number %r is higher than requested run rumber %r" % (existingRunNumber, runNumber))
                                 flag = False
@@ -1321,9 +1311,8 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         self.setCollectionStatus("done")
         self.setButtonState(0)
-        if self._feedBackFlag:
-            if self.notifyCheckBox.isChecked():
-                Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
+        if self.notifyCheckBox.isChecked():
+            Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
 
     def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
@@ -1398,10 +1387,15 @@ class CollectBrick(Core.BaseBrick):
 
         self._abortFlag = True
 
+        # TODO : DEBUG
         if self.__isTesting:
+            logging.getLogger().info("Abort - isTesting == True")
             self.getObject("collect").testCollectAbort()
+            logging.getLogger().info("After testCollectAbort")
         else:
+            logging.getLogger().info("Abort - isTesting == False")
             self.getObject("collect").collectAbort()
+            logging.getLogger().info("After collectAbort")
 
         #if self.robotCheckBox.isChecked():
         #   self._collectRobot.abort()
@@ -1409,11 +1403,15 @@ class CollectBrick(Core.BaseBrick):
         #
         # Stop all timers 
         #
-        if self.SPECBusyTimer.isActive():
-            self.SPECBusyTimerTimeOut()
+#        if self.SPECBusyTimer.isActive():
+        logging.getLogger().info("Before SPECBusyTimerTimeOut")
+        self.SPECBusyTimerTimeOut()
+        logging.getLogger().info("After SPECBusyTimerTimeOut")
 
         for timer in self._curveList:
+            logging.getLogger().info("Before timer.stop")
             timer.stop()
+            logging.getLogger().info("After timer.stop")
 
         self.setCollectionStatus("aborting")
         self._curveList = []
@@ -1437,25 +1435,50 @@ class CollectBrick(Core.BaseBrick):
 
     def setButtonState(self, pOption):
         # TODO : DEBUG
-#        buttons = (self.processCheckBox,
-#                   self.notifyCheckBox, self.robotCheckBox, self.spectroCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
-        buttons = (self.processCheckBox,
-                   self.notifyCheckBox, self.robotCheckBox, self.testPushButton, self.collectPushButton, self.abortPushButton)
-        def enable_buttons(*args):
+        widgets = (self.readOnlyCheckBox, \
+                   self.directoryLineEdit, \
+                   self.directoryPushButton, \
+                   self.prefixLineEdit, \
+                   self.runNumberSpinBox,
+                   self.frameNumberSpinBox, \
+                   self.timePerFrameSpinBox, \
+                   self.concentrationDoubleSpinBox, \
+                   self.commentsLineEdit, \
+                   self.codeLineEdit, \
+                   self.blParamsButton, \
+                   self.maskLineEdit, \
+                   self.maskDirectoryPushButton, \
+                   self.maskDisplayPushButton, \
+                   self.detectorDistanceDoubleSpinBox, \
+                   self.pixelSizeXDoubleSpinBox, \
+                   self.pixelSizeYDoubleSpinBox, \
+                   self.beamCenterXSpinBox, \
+                   self.beamCenterYSpinBox, \
+                   self.normalisationDoubleSpinBox, \
+                   self.radiationCheckBox, \
+                   self.radiationRelativeDoubleSpinBox, \
+                   self.radiationAbsoluteDoubleSpinBox, \
+                   self.processCheckBox, \
+                   self.notifyCheckBox, \
+                   self.checkBeamBox, \
+                   self.testPushButton, \
+                   self.collectPushButton, \
+                   self.robotCheckBox, \
+                   self.testPushButton, \
+                   self.abortPushButton)
+        def enable_widgets(*args):
             if len(args) == 1:
-                for button in buttons:
-                    button.setEnabled(args[0])
+                for widget in widgets:
+                    widget.setEnabled(args[0])
             else:
-                for i in range(len(buttons)):
-                    buttons[i].setEnabled(args[i])
+                for i in range(len(widgets)):
+                    widgets[i].setEnabled(args[i])
         if pOption == 0:     # normal      
-            enable_buttons(True)
+            enable_widgets(True)
             self.abortPushButton.setEnabled(False)
         elif pOption == 1:   # collecting
-            enable_buttons(False)
+            enable_widgets(False)
             self.abortPushButton.setEnabled(True)
-        elif pOption == 2:   # invalid parameters
-            enable_buttons(True, True, True, True, False, False, False)
 
         if self.abortPushButton.isEnabled():
             self.abortPushButton.setProperty("abortactive", "true")

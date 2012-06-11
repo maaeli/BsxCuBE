@@ -12,6 +12,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     properties = {}
 
+
+# TODO : DEBUG
     connections = {"energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
                                             [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")],
@@ -19,7 +21,12 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                    "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
-                                            "connectionToLogin")}
+                                            "connectionToLogin"),
+                   "enableDisable": Connection("Enable disable object",
+                                            [Signal("enableDisable", "enableDisable")],
+                                            [],
+                                            "connectionToEnableDisable")
+                   }
 
     signals = []
     slots = []
@@ -79,6 +86,9 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
 
+    def connectionToEnableDisable(self, pValue):
+        if pValue is not None:
+            self.brick_widget.setEnabled(pValue)
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
