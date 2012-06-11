@@ -1,6 +1,7 @@
 import logging
 import math
 import time
+import smtplib
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 
 
@@ -68,10 +69,19 @@ class EnergyWaveLength(CObjectBase):
         # read value first
         mode = self.pilatusFillMode.value()
         if mode != "ON" :
+            #TODO: DEBUG
+            # send a simple e-mail to ohlsson and petitdemange 
             # Here we have a problem.. Wait until pilatus has settled and then act
+            server = smtplib.SMTP("smtp.esrf.fr")
+            emailMessage = "From: nowhere@esrf.fr\r\nTo: ohlsson@esrf.fr\r\nSubject: ERROR : Pilatus OFF \r\n\r\nPlease check"
+            server.sendmail("nowhere@esrf,fr", "ohlsson@esrf.fr", emailMessage)
+            emailMessage = "From: nowhere@esrf.fr\r\nTo: sebastien.petitdemange@esrf.fr\r\nSubject: ERROR : Pilatus OFF \r\n\r\nPlease check"
+            server.sendmail("nowhere@esrf,fr", "sebastien.petitdemange@esrf.fr", emailMessage)
+            server.quit()
             while not self.pilatusReady() :
                 time.sleep(0.5)
             self.setPilatusFill()
+
 
     def setPilatusFill(self):
         # Just for safety set fill mode to ON => gapfill -1
