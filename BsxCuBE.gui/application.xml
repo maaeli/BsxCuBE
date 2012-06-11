@@ -580,6 +580,7 @@
       <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="collect">
+      <signal name="collectBeamStopDiodeChanged"/>
       <signal name="collectDirectoryChanged"/>
       <signal name="collectPrefixChanged"/>
       <signal name="collectRunNumberChanged"/>
@@ -605,6 +606,9 @@
       <signal name="collectProcessingDone"/>
       <signal name="collectProcessingLog"/>
       <signal name="collectDone"/>
+      <signal name="specCollectDone"/>
+      <signal name="sendProcessParams"/>
+      <signal name="sendMachineCurrent"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>

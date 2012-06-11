@@ -41,7 +41,8 @@ class CollectBrick(Core.BaseBrick):
     properties = {"expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
 
     connections = {"collect": Connection("Collect object",
-                                            [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
+                                            [Signal("collectBeamStopDiodeChanged", "collectBeamStopDiodeChanged"),
+                                             Signal("collectDirectoryChanged", "collectDirectoryChanged"),
                                              Signal("collectPrefixChanged", "collectPrefixChanged"),
                                              Signal("collectRunNumberChanged", "collectRunNumberChanged"),
                                              Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
@@ -68,7 +69,7 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectDone", "collectDone"),
                                              Signal("specCollectDone", "specCollectDone"),
                                              Signal("sendProcessParams", "sendProcessParams"),
-                                             Signal("sendBeamStopDiodeAndCurrent", "sendBeamStopDiodeAndCurrent") ],
+                                             Signal("sendMachineCurrent", "sendMachineCurrent") ],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -179,7 +180,7 @@ class CollectBrick(Core.BaseBrick):
         self.frameNumberLabel.setFixedWidth(130)
         self.hBoxLayout3.addWidget(self.frameNumberLabel)
         self.frameNumberSpinBox = LeadingZeroSpinBox(self.brick_widget, 2)
-        self.frameNumberSpinBox.setRange(1, 999)
+        self.frameNumberSpinBox.setRange(1, 99)
         self.hBoxLayout3.addWidget(self.frameNumberSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout3)
 
@@ -476,6 +477,9 @@ class CollectBrick(Core.BaseBrick):
         if spec != None:
             self.spec = spec
 
+    def collectBeamStopDiodeChanged(self, pValue):
+        self.beamStopDiode = float(pValue)
+
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
 
@@ -558,10 +562,7 @@ class CollectBrick(Core.BaseBrick):
             self.messageDialog(level, logmsg)
 
     def collectNewFrameChanged(self, pValue):
-        # TODO: DEBUG
-        #logging.getLogger().info("In collectNewFrameChanged, pValue = %r" % pValue)
         filename0 = pValue.split(",")[0]
-        #if os.path.dirname(filename0)[-4:] == "/raw":
         if os.path.dirname(filename0).endswith("/raw"):
             directory = os.path.join(os.path.dirname(filename0)[:-4], "1d")
         else:
@@ -570,9 +571,7 @@ class CollectBrick(Core.BaseBrick):
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
             if self._isCollecting:
-                # TODO: DEBUG
-                logging.getLogger().info("Is collecting")
-                #self.getObject("collect").triggerEDNA(filename0, oneway = True)
+                #TODO: DEBUG
                 #self.collectObj.triggerEDNA(filename0, oneway = True)
                 self.localTriggerEDNA(filename0)
                 message = "The frame '%s' was collected..." % filename0
@@ -593,7 +592,6 @@ class CollectBrick(Core.BaseBrick):
                 self.emitDisplayItemChanged(filename0)
             else:
                 if os.path.exists(filename0):
-                    #if filename0.split(".")[-1] != "dat":
                     if os.path.splitext(filename0)[1] != ".dat":
                         #filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
                         fileBaseName = os.path.splitext(os.path.basename(filename0))[0]
@@ -633,10 +631,10 @@ class CollectBrick(Core.BaseBrick):
         self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0().parseString(processParamsXml)
 
     # TODO: DEBUG
-    def sendBeamStopDiodeAndCurrent(self, beamStopDiodeAndCurrent):
-        #logging.info("In sendBeamStopDiodeAndCurrent: %r" % beamStopDiodeAndCurrent)
-        self.beamStopDiode = beamStopDiodeAndCurrent[0]
-        self.machineCurrent = beamStopDiodeAndCurrent[1]
+    def sendMachineCurrent(self, machineCurrent):
+        print ">>> got machine current %r" % machineCurrent
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        self.machineCurrent = machineCurrent
 
     # TODO: DEBUG
     def ednaTangoSuccess1(self, event):
@@ -741,22 +739,6 @@ class CollectBrick(Core.BaseBrick):
             xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
             logging.info("Saving XML data to %s", xmlFilename)
             xsdin.exportToFile(xmlFilename)
-            # Prepare input to SaxsSmartAverage
-#            sPrefix = pars["prefix"]
-#            pRunNumber = pars["runNumber"]
-#            pNumberFrames = pars["frameNumber"]
-#            pRadiationChecked = pars["radiationChecked"]
-#            pRadiationAbsolute = pars["radiationAbsolute"]
-#            pRadiationRelative = pars["radiationRelative"]
-#            ave_filename = os.path.join(directory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
-#            sub_filename = os.path.join(directory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
-#            self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
-#                                    inputCurves = [XSDataFile(path = XSDataString(os.path.join(directory, "1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
-#                                    mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
-#                                    subtractedCurve = XSDataFile(path = XSDataString(sub_filename)))
-#            if pRadiationChecked:
-#                self.xsdAverage.absoluteFidelity = XSDataDouble(float(pRadiationAbsolute))
-#                self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
 
 
     def beamLostChanged(self, pValue):
@@ -794,7 +776,7 @@ class CollectBrick(Core.BaseBrick):
             return
         try:
             logging.info(str(pValue))
-            self.image_proxy.load_files(str(pValue))
+            self.image_proxy.load_files(str(pValue), oneway = True)
         except Exception, e:
             logging.error("Could not read file " + str(pValue))
             logging.exception(e)
@@ -1204,17 +1186,29 @@ class CollectBrick(Core.BaseBrick):
         if not self.robotCheckBox.isChecked() or self.validParameters():
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()
+
             flag = True
 
             if os.path.isdir(directory):
+                # TODO : DEBUG
+                logging.info("Checking directory %s" % directory)
                 for filename in os.listdir(directory):
-                    if os.path.isfile(directory + "/" + filename):
-                        if filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber) and not filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber + "_00"):
-                            flag = False
-                            break
+                    logging.info("Checking filename %s" % filename)
+                    if os.path.isfile(os.path.join(directory, filename)):
+                        logging.info("Filename exists %s" % filename)
+                        #if filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber) and not filename.startswith(str(self.prefixLineEdit.text()) + "_" + runNumber + "_00"):
+                        if filename.startswith(str(self.prefixLineEdit.text())):
+                            logging.info("Filename %s starts with prefix %s" % (filename, str(self.prefixLineEdit.text())))
+                            # Check if we have a run number higher than the requested run number:
+                            existingRunNumber = filename.split("_")[-2]
+                            logging.info("Existing run number %r" % existingRunNumber)
+                            if int(existingRunNumber) >= int(runNumber):
+                                logging.info("Existing run number %r is higher than requested run rumber %r" % (existingRunNumber, runNumber))
+                                flag = False
+                                break
 
             if not flag:
-                flag = (Qt.QMessageBox.question(self.brick_widget, "Warning", "The run '%s' with prefix '%s' already exists in the directory '%s'. Overwrite it?" % (runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text()), Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
+                flag = (Qt.QMessageBox.question(self.brick_widget, "Warning", "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % (runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text()), Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
 
             if not flag:
                 return

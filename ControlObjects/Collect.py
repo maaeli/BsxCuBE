@@ -20,7 +20,7 @@ class Collect(CObjectBase):
                Signal("collectDone"),
                Signal("specCollectDone"),
                Signal("sendProcessParams"),
-               Signal("sendBeamStopDiodeAndCurrent")]
+               Signal("sendMachineCurrent")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -397,7 +397,7 @@ class Collect(CObjectBase):
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
         # TODO : DEBUG
-        self.emit("sendBeamStopDiodeAndCurrent", [float(self.channels["collectBeamStopDiode"].value()), self.machineCurrent])
+        self.emit("sendMachineCurrent", self.machineCurrent)
 
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
@@ -478,6 +478,7 @@ class Collect(CObjectBase):
 
         self.lastSampleTime = time.time()
         prevSample = None
+        runNumberSet = True
 
         # ==================================================
         #   MAIN LOOP on Samples
@@ -504,7 +505,9 @@ class Collect(CObjectBase):
                 if sample["buffername"] != lastBuffer:
                     lastBuffer = sample["buffername"]
                 # need to increase run number
-                pars["runNumber"] = self.nextRunNumber
+                if not runNumberSet:
+                    pars["runNumber"] = self.nextRunNumber
+                    runNumberSet = False
                 self._collectOne(sample, pars, mode = "buffer_before")
 
             #
@@ -523,13 +526,17 @@ class Collect(CObjectBase):
             #
             # Collect sample
             #
-            # need to increase run number
-            pars["runNumber"] = self.nextRunNumber
+            if not runNumberSet:
+                # need to increase run number
+                pars["runNumber"] = self.nextRunNumber
+                runNumberSet = False
             self._collectOne(sample, pars, mode = "sample")
 
             if pars["bufferAfter"]:
-                # need to increase run number
-                pars["runNumber"] = self.nextRunNumber
+                if not runNumberSet:
+                    # need to increase run number
+                    pars["runNumber"] = self.nextRunNumber
+                    runNumberSet = False
                 self._collectOne(sample, pars, mode = "buffer_after")
 
             prevSample = sample
@@ -543,11 +550,4 @@ class Collect(CObjectBase):
 
 
     def collectWithRobot(self, *args):
-        try:
-            self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
-            try:
-                return self.__collectWithRobotProcedure.get()
-            except:
-                self.showMessage(2, "collectWithRobot aborted !")
-        finally:
-            self.__collectWithRobotProcedure = None
+        self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)

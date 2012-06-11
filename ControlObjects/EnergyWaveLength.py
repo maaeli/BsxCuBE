@@ -66,16 +66,11 @@ class EnergyWaveLength(CObjectBase):
 
     def fillModeChanged(self, pValue):
         # read value first
-        #TODO: DEBUG
-        print ">>>> fillModeChange"
         mode = self.pilatusFillMode.value()
-        print "Got mode %s", mode
         if mode != "ON" :
             # Here we have a problem.. Wait until pilatus has settled and then act
             while not self.pilatusReady() :
                 time.sleep(0.5)
-            #TODO: DEBUG
-            print ">>> now pilatus is ready - set fillMode correctly"
             self.setPilatusFill()
 
     def setPilatusFill(self):
