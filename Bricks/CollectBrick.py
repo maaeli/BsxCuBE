@@ -110,7 +110,6 @@ class CollectBrick(Core.BaseBrick):
         self.lastCollectProcessingLog = None
         self.__energy = None
 
-
     def init(self):
         # The keV to Angstrom calc
         self.hcOverE = 12.3984
@@ -297,8 +296,8 @@ class CollectBrick(Core.BaseBrick):
         self.normalisationLabel.setFixedWidth(130)
         self.hBoxLayout13.addWidget(self.normalisationLabel)
         self.normalisationDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.normalisationDoubleSpinBox.setDecimals(7)
-        self.normalisationDoubleSpinBox.setRange(0.0001, 10000)
+        self.normalisationDoubleSpinBox.setDecimals(10)
+        self.normalisationDoubleSpinBox.setRange(0.0000001, 10000)
         self.hBoxLayout13.addWidget(self.normalisationDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout13)
 
@@ -426,11 +425,11 @@ class CollectBrick(Core.BaseBrick):
         self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
         self.xsdin = None
         self.beamStopDiode = None
-        self.machineCurrent = None
         self.xsdAverage = None
         self.seuTemperature = None
         self.storageTemperature = None
         self.collectionStatus = None
+        self.machineCurrent = None
 
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
@@ -741,7 +740,7 @@ class CollectBrick(Core.BaseBrick):
 
     def beamLostChanged(self, pValue):
         if pValue != None and pValue != "":
-            logging.getLogger().error("BEAM LOST: %s" % pValue)
+            logging.getLogger().warning("BEAM LOST: %s" % pValue)
 
     def checkBeamChanged(self, pValue):
         if pValue == 1:
@@ -1182,6 +1181,7 @@ class CollectBrick(Core.BaseBrick):
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
         if not self.robotCheckBox.isChecked() or self.validParameters():
+            self.displayReset()
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()
 
@@ -1190,7 +1190,7 @@ class CollectBrick(Core.BaseBrick):
             if os.path.isdir(directory):
                 for filename in os.listdir(directory):
                     if os.path.isfile(os.path.join(directory, filename)):
-                        if filename.startswith(str(self.prefixLineEdit.text())):
+                        if filename.startswith(str(self.prefixLineEdit.text())) and filename.split("_")[-1] != "00.edf":
                             # Check if we have a run number higher than the requested run number:
                             existingRunNumber = filename.split("_")[-2]
                             if int(existingRunNumber) >= int(runNumber):
@@ -1254,7 +1254,6 @@ class CollectBrick(Core.BaseBrick):
         # starts a single collection 
         self.setButtonState(1)
         self._abortFlag = False
-        self.displayReset()
 
         if self.processCheckBox.isChecked():
             processData = 1
@@ -1299,9 +1298,6 @@ class CollectBrick(Core.BaseBrick):
         logging.info("   - collection started (mode: %s)" % mode)
 
     def specCollectDone(self, xmlXsdAverage):
-        #TODO: Make this smarter
-        # Clear screen here
-        self.displayReset()
         # Start smart averaging
         logging.info("Spec collect done - starting averaging")
         #logging.info(xmlXsdAverage)
