@@ -5,6 +5,7 @@ import numpy
 import gevent
 import time
 import pprint
+import math
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -60,6 +61,7 @@ class Collect(CObjectBase):
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
+        self.deltaPilatus = 0.1
         #self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
         #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
         self.commands["initPlugin_sparta"](self.pluginIntegrate)
@@ -78,9 +80,26 @@ class Collect(CObjectBase):
             readMachCurrentValue.connect('update', self.currentChanged)
         # set up a channel
         self.channels["collectRunNumber"].connect("update", self.runNumberChanged)
+        # set up a channel for energy
+        self.__energyMotor = self.objects["getEnergy"]
+        if self.__energyMotor is not None:
+            # connect to the signals from the CO Object specmotor
+            self.__energyMotor.connect("positionChanged", self.newEnergy)
+        else:
+            logging.error("No connection to energy motor in spec")
+
+    def newEnergy(self, pValue):
+        #TODO: DEBUG
+        self.__energy = float(pValue)
+        self.channels["pilatus_threshold"].set_value(self.__energy)
+        print ">>>>> new Energy in Collect %r" % self.__energy
+        while not self.pilatusReady() :
+            time.sleep(0.5)
+
 
     def currentChanged(self, current):
         self.machineCurrent = current
+        self.emit("sendMachineCurrent", self.machineCurrent)
 
     def runNumberChanged(self, runNumber):
         # set new run number from Spec - Convert it to int
@@ -311,6 +330,14 @@ class Collect(CObjectBase):
             channel.update(channel.value())
 
 
+    def pilatusReady(self):
+        # Check if Pilatus is ready
+        self.__pilatus_status = self.channels["pilatus_status"].value()
+        if self.__pilatus_status == "Ready":
+            return True
+        else:
+            return False
+
     def showMessage(self, level, msg, notify = 0):
         self.emit("collectProcessingLog", level, msg, notify)
 
@@ -334,9 +361,25 @@ class Collect(CObjectBase):
         else:
             tocollect = sample
             #TODO: DEBUG
-            print ">>> tocollect rest mode = %r:" % mode
+            print ">>> tocollect sample"
             pprint.pprint(tocollect)
 
+
+        #
+        # set the energy if needed 
+        #
+        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+            #TODO: DEBUG
+            print ">>>>>  set energy to %r" % self.__energy
+            self.pilatusThreshold.set_value(self.__energy)
+            while not self.pilatusReady() :
+                time.sleep(0.5)
+
+        #
+        # SET gapfill on the Pilatus
+        #   
+        self.channels["fill_mode"].set_value("ON")
 
         self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
@@ -356,7 +399,6 @@ class Collect(CObjectBase):
         #  FILLING 
         # ==================================================        
         self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"]))
-
         try:
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
         except RuntimeError:
@@ -368,7 +410,6 @@ class Collect(CObjectBase):
         #  FLOW
         # ==================================================
         self.showMessage(0, "Setting Flow or Fix")
-
         if tocollect["flow"]:
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
@@ -396,9 +437,8 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
-        # TODO : DEBUG
+        # Send the machine current just before each run
         self.emit("sendMachineCurrent", self.machineCurrent)
-
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -466,6 +506,20 @@ class Collect(CObjectBase):
         # ASynchronous - Treated in sample Changer
         self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
 
+        # Open guillotine
+        self.commands["guillopen"]()
+        # count for 30s and then give alarm
+        count = 0
+        # wait  for "3" = open
+        while self.channels["guillstate"].value() != "3":
+            time.sleep(0.5)
+            if count > 60 :
+                self.showMessage(2, "Error when trying to open guillotine")
+                self.collectAbort()
+                break
+
+        #TODO: Be smarter than just open
+        self.commands["shopen"]()
 
         if pars["initialCleaning"]:
             self.showMessage(0, "Initial cleaning...")
