@@ -921,9 +921,8 @@ class CollectBrick(Core.BaseBrick):
                     sample["buffer"].append(bufferList[0])
                 else:
                     for bufferEntry in bufferList:
-                        if buffer["buffername"] == sample["buffername"]:
+                        if bufferEntry["buffername"] == sample["buffername"]:
                             sample["buffer"].append(bufferEntry)
-
             if robotpars["optimSEUtemp"]:
                 sampleList.sort(cmpSEUtemp)
             elif robotpars["optimCodeAndSEU"]:
