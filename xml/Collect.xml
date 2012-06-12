@@ -5,6 +5,7 @@
    <data name="uri"  value="orion:10000/FE/D/29" />
    
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
+   <object href="BsxCuBE/energy" role="getEnergy"/>
    
    <command name="startJob_slavia" type="tango" uri="DAU/edna/1" call="startJob" />
    <command name="initPlugin_slavia" type="tango" uri="DAU/edna/1" call="initPlugin" />
@@ -12,14 +13,22 @@
    <command name="startJob_sparta" type="tango" uri="DAU/edna/2" call="startJob"/>
    <command name="initPlugin_sparta" type="tango" uri="DAU/edna/2" call="initPlugin" />
    <command name="getJobOutput_sparta" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
-			     
+   <command name="guillopen" type="spec" call="guillopen"/>
+   <command name="shopen" type="tango" uri="bm29/bsh/1" call="Open"/>
+   
    <channel call="jobSuccess" type="tango" uri="DAU/edna/1"  name="jobSuccess_sparta"  /> 
    <channel call="jobFailure" type="tango" uri="DAU/edna/1"  name="jobFailure_sparta"  /> 
    <channel call="jobSuccess" type="tango" uri="DAU/edna/2"  name="jobSuccess_slavia" /> 
    <channel call="jobFailure" type="tango" uri="DAU/edna/2"  name="jobFailure_slavia" /> 
    
+   <channel name="fill_mode"  type="tango" uri="bm29/pilatus/p0" call="fill_mode"/>
+   <channel name="pilatus_threshold"  type="tango" uri="bm29/pilatus/p0" call="energy_threshold"/>
+   <channel name="pilatus_status" type="tango" uri="bm29/limaccds/p0" call="acq_status"/>
+   
    <command name="testCollect"           type="spec" call="testCollect"/>
-   <command name="collect"               type="spec" call="collect"/>	
+   <command name="collect"               type="spec" call="collect"/>
+   
+   <channel name="guillstate" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>	
    <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode" signal="collectBeamStopDiodeChanged"/>
    <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
    <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
