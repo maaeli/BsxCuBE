@@ -238,8 +238,6 @@ class Collect(CObjectBase):
 
     def specCollectDone(self, returned_value):
         #TODO: DEBUG
-        self.showMessage(0, "spec collect done")
-        #TODO: DEBUG
         logging.info("Spec Collect done")
         self.collecting = False
         self.emit("specCollectDone", self.xsdAverage.marshal())
@@ -350,19 +348,10 @@ class Collect(CObjectBase):
             # this will allow to use several buffers of same name for same sample
             # we should check if enough volume is not available then go to next buffer in list
             tocollect = sample["buffer"][0]
-            #TODO: DEBUG
-            print ">>> tocollect buffer_before:"
-            pprint.pprint(tocollect)
         elif mode == "buffer_after":
             tocollect = sample["buffer"][0]
-            #TODO: DEBUG
-            print ">>> tocollect buffer_after:"
-            pprint.pprint(tocollect)
         else:
             tocollect = sample
-            #TODO: DEBUG
-            print ">>> tocollect sample"
-            pprint.pprint(tocollect)
 
 
         #
@@ -435,7 +424,7 @@ class Collect(CObjectBase):
         # ==================================================
         #  PERFORM COLLECT
         # ==================================================
-        self.showMessage(0, "Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
+        self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         #self.emit(QtCore.SIGNAL("displayReset"))
         # Send the machine current just before each run
         self.emit("sendMachineCurrent", self.machineCurrent)
@@ -455,7 +444,7 @@ class Collect(CObjectBase):
         while self.collecting:
             time.sleep(1)
 
-        self.showMessage(0, "Finish collecting '%s'..." % pars["prefix"])
+        self.showMessage(0, "  - Finish collecting '%s'..." % pars["prefix"])
 
         # ======================
         #  WAIT FOR END OF FLOW 
