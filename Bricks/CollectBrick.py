@@ -677,7 +677,6 @@ class CollectBrick(Core.BaseBrick):
     # TODO: DEBUG
     def localTriggerEDNA(self, raw_filename):
         """This is a local version of Collect.triggerEdna as a workaround for the Framework 4 communication problem"""
-        logging.info("Prepare EDNA input")
         pars = self.getCollectPars(1)
         if self.xsdin != None:
             xsdin = self.xsdin.copy()
