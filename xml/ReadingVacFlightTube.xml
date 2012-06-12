@@ -1,7 +1,7 @@
 <object class = "Reading" username = "ReadingVacFlightTube" local="false">
 
-   <uri>id14/pir/71a</uri>
+   <uri>bm29/v-pir/71</uri>
 
-   <channel name="reading" type="taco" call="DevReadSigValues" polling="2000"/>
+   <channel name="reading" type="tango" call="Pressure" polling="2000"/>
 
 </object>	
