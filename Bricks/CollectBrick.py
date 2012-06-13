@@ -430,7 +430,8 @@ class CollectBrick(Core.BaseBrick):
         self.storageTemperature = None
         self.collectionStatus = None
         self.machineCurrent = None
-
+        self.edna1Dead = False
+        self.edna2Dead = False
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -618,6 +619,26 @@ class CollectBrick(Core.BaseBrick):
                             self._feedBackFlag = False
                             self.__isTesting = False
                             logging.getLogger().info("The data collection is done!")
+                            #TODO: DEBUG workaround ENDA problem
+                            # Check EDNA presence and warn if not there
+                            try:
+                                ednaState = self.ednaDeviceProxy1.State()
+                                print ">>>>>>> ednaState1 is %r" % ednaState
+                                self.edna1Dead = False
+                            except:
+                                logging.error("ENDA 1 is dead")
+                                self.setButtonState(0)
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
+                                self.edna1Dead = True
+                            try:
+                                ednaState = self.ednaDeviceProxy2.State()
+                                print ">>>>>>> ednaState2 is %r" % ednaState
+                                self.edna2Dead = False
+                            except:
+                                logging.error("ENDA 2 is dead")
+                                self.setButtonState(0)
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+                                self.edna2Dead = True
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
@@ -647,32 +668,46 @@ class CollectBrick(Core.BaseBrick):
                         xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
                     except:
                         logging.error("Unable to parse string from Tango/EDNA")
+                    log = xsd.status.executiveSummary.value
+                    logging.info(log)
+                    # If autoRG has been used, launch the SAS pipeline (very time consuming)
+                    if xsd.autoRg is None:
+                        logging.info("SAS pipeline not executed")
                     else:
-                        log = xsd.status.executiveSummary.value
-                        logging.info(log)
-                        # If autoRG has been used, launch the SAS pipeline (very time consuming)
-                        if xsd.autoRg is None:
-                            logging.info("SAS pipeline not executed")
-                        else:
-                            rgOut = xsd.autoRg
-                            filename = rgOut.filename.path.value
-                            logging.info("filename as input for SAS %s", filename)
-                            datapoint = numpy.loadtxt(filename)
-                            startPoint = rgOut.firstPointUsed.value
-                            q = datapoint[:, 0][startPoint:]
-                            I = datapoint[:, 1][startPoint:]
-                            s = datapoint[:, 2][startPoint:]
-                            mask = (q < 3)
-                            xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                            #NbThreads=XSDataInteger(4))
-                            xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                            xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-                            xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-                            logging.info("Starting SAS pipeline for file %s", filename)
-                            sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
-                            # self.dat_filenames[sasJobId] = filename
-#            else:
-#                logging.warning("processing Done from EDNA: %s -X-> None", jobId)
+                        rgOut = xsd.autoRg
+                        filename = rgOut.filename.path.value
+                        logging.info("filename as input for SAS %s", filename)
+                        datapoint = numpy.loadtxt(filename)
+                        startPoint = rgOut.firstPointUsed.value
+                        q = datapoint[:, 0][startPoint:]
+                        I = datapoint[:, 1][startPoint:]
+                        s = datapoint[:, 2][startPoint:]
+                        mask = (q < 3)
+                        xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+                        #NbThreads=XSDataInteger(4))
+                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                        logging.info("Starting SAS pipeline for file %s", filename)
+                        #TODO: DEBUG workaround ENDA problem
+                        try:
+                            ednaState = self.ednaDeviceProxy2.State()
+                            print ">>>>>>> ednaState2 is %r" % ednaState
+                            self.edna2Dead = False
+                        except:
+                            logging.error("ENDA 2 is dead")
+                            self.setButtonState(0)
+                            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+                            self.edna2Dead = True
+                        if not self.edna2Dead:
+                            try:
+                                sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
+                            except:
+                                logging.error("ENDA 2 is dead")
+                                self.setButtonState(0)
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+                                self.edna2Dead = True
+
 
     # TODO: DEBUG
     def localTriggerEDNA(self, raw_filename):
@@ -728,13 +763,31 @@ class CollectBrick(Core.BaseBrick):
             xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
             # TODO : DEBUG
     #        jobId = self.commands["startJob_sparta"]([self.pluginIntegrate, xsdin.marshal()])
-            jobId = self.ednaDeviceProxy1.startJob([self.pluginIntegrate, xsdin.marshal()])
-            self.dat_filenames[jobId] = xsdin.integratedCurve.path.value
-            logging.info("Processing job %s started", jobId)
-            #For debugging
-            xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
-            logging.info("Saving XML data to %s", xmlFilename)
-            xsdin.exportToFile(xmlFilename)
+            #TODO: DEBUG workaround ENDA problem
+            try:
+                ednaState = self.ednaDeviceProxy1.State()
+                print ">>>>>>> ednaState1 is %r" % ednaState
+                self.edna1Dead = False
+            except:
+                logging.error("ENDA 1 is dead")
+                self.setButtonState(0)
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
+                self.edna1Dead = True
+            if not self.edna1Dead:
+                try:
+                    jobId = self.ednaDeviceProxy1.startJob([self.pluginIntegrate, xsdin.marshal()])
+                    self.dat_filenames[jobId] = xsdin.integratedCurve.path.value
+                    logging.info("Processing job %s started", jobId)
+                    #For debugging
+                    xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
+                    logging.info("Saving XML data to %s", xmlFilename)
+                    xsdin.exportToFile(xmlFilename)
+                except:
+                    logging.error("ENDA 1 is dead")
+                    self.setButtonState(0)
+                    Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
+                    self.edna1Dead = True
+
 
 
     def beamLostChanged(self, pValue):
@@ -1174,6 +1227,28 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectPushButtonClicked(self):
+        #TODO: DEBUG workaround ENDA problem
+        # Check EDNA presence and warn if not there
+        try:
+            ednaState = self.ednaDeviceProxy1.State()
+            print ">>>>>>> ednaState1 is %r" % ednaState
+            self.edna1Dead = False
+        except:
+            logging.error("ENDA 1 is dead")
+            self.setButtonState(0)
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
+            self.edna1Dead = True
+            return
+        try:
+            ednaState = self.ednaDeviceProxy2.State()
+            print ">>>>>>> ednaState2 is %r" % ednaState
+            self.edna2Dead = False
+        except:
+            logging.error("ENDA 2 is dead")
+            self.setButtonState(0)
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+            self.edna2Dead = True
+            return
         # Check if pilatus is ready
         if not self.energyControlObject.pilatusReady():
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
