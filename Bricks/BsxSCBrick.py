@@ -87,7 +87,12 @@ class BsxSCBrick(Core.BaseBrick):
     def state_changed(self, state, status):
         if self._sampleChanger is None:
             return
-        cmdException = self._sampleChanger.getCommandException()
+        #TODO: DEBUG - work around
+        try:
+          cmdException = self._sampleChanger.getCommandException(timeout = 0.5)
+        except:
+          print "Could not read cmd exception within 0.5 s"
+          cmdException = ""
         self.SCWidget.setState(state, status, cmdException)
 
     def startSyringeForward(self):
