@@ -81,17 +81,18 @@ class BSSampleChanger(CObjectBase):
         self.channels["SampleType"].set_value(sample_type)
 
     def setSEUTemperature(self, temp):
-        self.channels["SEUTemperature"].set_value(temp)
-        self.wait()
+        self.commands["SEUTemperature"](temp)
+        self.wait(7200)
 
     def setStorageTemperature(self, temp):
-        self.channels["TemperatureSampleStorage"].set_value(temp)
-        self.wait()
+        self.commands["TemperatureSampleStorage"](temp)
+        self.wait(7200)
 
     def setViscosityLevel(self, level):
         self.channels["ViscosityLevel"].set_value(level)
 
     def fill(self, plate, row, column, volume):
+        print ">>> fill ", plate, row, column, volume
         self.commands['fill'](map(str, (plate, row, column, volume)))
 
     def flow(self, volume, t):
@@ -112,31 +113,32 @@ class BSSampleChanger(CObjectBase):
     def isExecuting(self):
         state = str(self.getState())
         if state:
-           return (state == "RUNNING")
+            return (state == "RUNNING")
         else:
-           return False
+            return False
 
     def doCleanProcedure(self):
         self.clean()
         self.wait()
 
 
-    def wait(self):
+    def wait(self, timeout = 240):
         loopCount = 0
         while self.isExecuting():
             loopCount = loopCount + 1
             time.sleep(0.5)
-            # check if a minute has passed
-            if loopCount > 120 :
+            # check if timeout*0.5 minutes has passed
+            if loopCount > timeout :
                 raise RuntimeError, "Timeout from Sample Changer"
 
         exception = self.getCommandException()
         if exception is not None and exception != "":
             raise RuntimeError, "Sample Changer exception: " + exception
 
+
     def doSetSEUTemperatureProcedure(self, temperature):
         self.setSEUTemperature(temperature)
-        self.wait()
+        self.wait(7200)
 
     def doFillProcedure(self, *args):
         self.fill(*args)

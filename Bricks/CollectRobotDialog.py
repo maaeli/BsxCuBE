@@ -135,7 +135,7 @@ class CollectRobotDialog(Qt.QDialog):
         self.storageTemperatureDoubleSpinBox.setSuffix(" C")
         self.storageTemperatureDoubleSpinBox.setDecimals(2)
         self.storageTemperatureDoubleSpinBox.setRange(4, 40)
-        self.storageTemperatureDoubleSpinBox.setValue(20)
+        self.storageTemperatureDoubleSpinBox.setValue(4)
         self.storageTemperatureDoubleSpinBox.setFixedWidth(self.PARAMETERS_WIDTH)
         self.hBoxLayout2.setAlignment(QtCore.Qt.AlignLeft)
         self.hBoxLayout2.addWidget(self.storageTemperatureDoubleSpinBox)
@@ -531,7 +531,6 @@ class CollectRobotDialog(Qt.QDialog):
                 dirname = os.path.split(self.__parent.collectpars.directory)
             except Exception, e:
                 print "Ignored Exception 5: " + str(e)
-                pass
 
         filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
 
@@ -640,13 +639,13 @@ class CollectRobotDialog(Qt.QDialog):
     def enableCheckBoxToggled(self, sampleID):
 
         if self.CBblock:
-              return
+            return
         try:
-           index = self.sampleIDs.index(sampleID)
-           checked = self.tableWidget.cellWidget(index, self.ENABLE_COLUMN).isChecked()
-           for col in range(0, self.tableWidget.columnCount()):
-               if col != self.ENABLE_COLUMN:
-                   self.tableWidget.cellWidget(index, col).setEnabled(checked)
+            index = self.sampleIDs.index(sampleID)
+            checked = self.tableWidget.cellWidget(index, self.ENABLE_COLUMN).isChecked()
+            for col in range(0, self.tableWidget.columnCount()):
+                if col != self.ENABLE_COLUMN:
+                    self.tableWidget.cellWidget(index, col).setEnabled(checked)
         except AttributeError:
             pass
 
@@ -752,7 +751,7 @@ class CollectRobotDialog(Qt.QDialog):
             sampleRow.SEUtemperature = table.cellWidget(i, self.TEMPERATURE_COLUMN).value()
             sampleRow.waittime = table.cellWidget(i, self.WAITTIME_COLUMN).value()
         else:
-            sampleRow.SEUtemperature = 20.0
+            sampleRow.SEUtemperature = 4.0
             sampleRow.waittime = 0.0
         sampleRow.title = sampleRow.getTitle()
 
@@ -886,6 +885,8 @@ class CollectRobotDialog(Qt.QDialog):
         # temperature SEU
         if sample.type != 'Buffer':
             temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
+            #TODO: DEBUG
+            print ">>>>>>> sample.SEUtemperature %r " % sample.SEUtemperature
             temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
 
 

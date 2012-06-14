@@ -3,7 +3,9 @@
   <channel type="tango" name="State"  polling="1000" slot="getState"/>
   <channel type="tango" name="Status" polling="1000"/>
   <channel type="tango" name="SEUTemperature" signal="seuTemperatureChanged" call="TemperatureSEU" polling="3000" slot="getSEUTemperature"/>
+  <command type="tango" name="SEUTemperature" call="waitTemperatureSEU" />
   <channel type="tango" name="TemperatureSampleStorage"/>
+  <command type="tango" name="TemperatureSampleStorage" call="waitTemperatureSample"/>
   <channel type="tango" name="StorageTemperature" signal="storageTemperatureChanged" call="TemperatureSampleStorage" polling="3000" slot="getSampleStorageTemperature"/>
   <channel type="tango" name="SampleType"/>
   <channel type="tango" name="ViscosityLevel"/>

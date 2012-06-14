@@ -131,12 +131,12 @@ class Collect(CObjectBase):
         try:
             self.storageTemperature = float(pStorageTemperature)
         except:
-            self.storageTemperature = 20
+            self.storageTemperature = 4
             logging.error("Could not read storage Temperature - Check sample changer connection")
         try:
             self.exposureTemperature = float(pSEUTemperature)
         except:
-            self.storageTemperature = 20
+            self.storageTemperature = 4
             logging.error("Could not read exposure Temperature - Check sample changer connection")
         self.collecting = True
         self.collectDirectory.set_value(pDirectory)
@@ -378,6 +378,7 @@ class Collect(CObjectBase):
         #  SETTING SEU TEMPERATURE
         # ==================================================                        
         # temperature is taken from sample (not from buffer) even if buffer is collected
+        self.showMessage(0, "Setting SEU temperature to '%s'..." % sample["SEUtemperature"])
         try:
             self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
         except RuntimeError:
@@ -387,11 +388,11 @@ class Collect(CObjectBase):
         # ==================================================
         #  FILLING 
         # ==================================================        
-        self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"]))
+        self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s' with volume '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"]))
         try:
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
-        except RuntimeError:
-            message = "Error when trying to fill from plate '%s', row '%s' and well '%s'. Aborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"])
+        except RuntimeError, ErrMsg:
+            message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], ErrMsg)
             self.showMessage(2, message, notify = 1)
             raise
 
@@ -464,7 +465,7 @@ class Collect(CObjectBase):
             try:
                 self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
             except RuntimeError:
-                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
 
         # ==================================================
         #  CLEANING

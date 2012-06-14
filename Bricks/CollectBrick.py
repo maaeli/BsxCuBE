@@ -670,43 +670,44 @@ class CollectBrick(Core.BaseBrick):
                         logging.error("Unable to parse string from Tango/EDNA")
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
+                    # TODO : DEBUG
                     # If autoRG has been used, launch the SAS pipeline (very time consuming)
-                    if xsd.autoRg is None:
-                        logging.info("SAS pipeline not executed")
-                    else:
-                        rgOut = xsd.autoRg
-                        filename = rgOut.filename.path.value
-                        logging.info("filename as input for SAS %s", filename)
-                        datapoint = numpy.loadtxt(filename)
-                        startPoint = rgOut.firstPointUsed.value
-                        q = datapoint[:, 0][startPoint:]
-                        I = datapoint[:, 1][startPoint:]
-                        s = datapoint[:, 2][startPoint:]
-                        mask = (q < 3)
-                        xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                        #NbThreads=XSDataInteger(4))
-                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-                        logging.info("Starting SAS pipeline for file %s", filename)
-                        #TODO: DEBUG workaround ENDA problem
-                        try:
-                            ednaState = self.ednaDeviceProxy2.State()
-                            print ">>>>>>> ednaState2 is %r" % ednaState
-                            self.edna2Dead = False
-                        except:
-                            logging.error("ENDA 2 is dead")
-                            self.setButtonState(0)
-                            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-                            self.edna2Dead = True
-                        if not self.edna2Dead:
-                            try:
-                                sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
-                            except:
-                                logging.error("ENDA 2 is dead")
-                                self.setButtonState(0)
-                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-                                self.edna2Dead = True
+#                    if xsd.autoRg is None:
+#                        logging.info("SAS pipeline not executed")
+#                    else:
+#                        rgOut = xsd.autoRg
+#                        filename = rgOut.filename.path.value
+#                        logging.info("filename as input for SAS %s", filename)
+#                        datapoint = numpy.loadtxt(filename)
+#                        startPoint = rgOut.firstPointUsed.value
+#                        q = datapoint[:, 0][startPoint:]
+#                        I = datapoint[:, 1][startPoint:]
+#                        s = datapoint[:, 2][startPoint:]
+#                        mask = (q < 3)
+#                        xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+#                        #NbThreads=XSDataInteger(4))
+#                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+#                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+#                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+#                        logging.info("Starting SAS pipeline for file %s", filename)
+#                        #TODO: DEBUG workaround ENDA problem
+#                        try:
+#                            ednaState = self.ednaDeviceProxy2.State()
+#                            print ">>>>>>> ednaState2 is %r" % ednaState
+#                            self.edna2Dead = False
+#                        except:
+#                            logging.error("ENDA 2 is dead")
+#                            self.setButtonState(0)
+#                            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+#                            self.edna2Dead = True
+#                        if not self.edna2Dead:
+#                            try:
+#                                sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
+#                            except:
+#                                logging.error("ENDA 2 is dead")
+#                                self.setButtonState(0)
+#                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
+#                                self.edna2Dead = True
 
 
     # TODO: DEBUG
@@ -1263,11 +1264,11 @@ class CollectBrick(Core.BaseBrick):
             if os.path.isdir(directory):
                 for filename in os.listdir(directory):
                     if os.path.isfile(os.path.join(directory, filename)):
-                        if filename.startswith(str(self.prefixLineEdit.text())) and filename.split("_")[-1] != "00.edf":
+                        if filename.startswith(str(self.prefixLineEdit.text())) and (filename.split("_")[-1] != "00.edf") and (filename.split("_")[-1] != "00.xml") :
                             # Check if we have a run number higher than the requested run number:
                             existingRunNumber = filename.split("_")[-2]
                             if int(existingRunNumber) >= int(runNumber):
-                                logging.info("Existing run number %r is higher than requested run rumber %r" % (existingRunNumber, runNumber))
+                                logging.info("Existing run number %r is higher than requested run number %r" % (existingRunNumber, runNumber))
                                 flag = False
                                 break
 

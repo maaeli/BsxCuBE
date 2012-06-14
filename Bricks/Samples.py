@@ -17,7 +17,7 @@ sample_pars = {
      'viscosity'  :     ['Low', str],
      'transmission' :   [100.0, float],
      'volume':          [10, int],
-     'SEUtemperature':  [20, float],
+     'SEUtemperature':  [4, float],
      'flow':            [False, ast.literal_eval],
      'recuperate':      [False, ast.literal_eval],
      'waittime':        [0.0, float],
