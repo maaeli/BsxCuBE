@@ -1606,10 +1606,10 @@ class CollectBrick(Core.BaseBrick):
 
 
 # TODO : DEBUG
-class EdnaTangoCallbackThread(threading.Thread):
+class EdnaTangoCallbackThread(QtCore.QThread):
 
     def __init__(self, _deviceProxy, _successCallback = None, _failureCallback = None):
-        threading.Thread.__init__(self)
+        QtCore.QThread.__init__(self)
         self._dev = PyTango.DeviceProxy(_deviceProxy)
         if _successCallback != None:
             self._dev.subscribe_event("jobSuccess", PyTango.EventType.CHANGE_EVENT, _successCallback, [])
@@ -1620,3 +1620,4 @@ class EdnaTangoCallbackThread(threading.Thread):
         bContinue = True
         while bContinue:
             time.sleep(1)
+
