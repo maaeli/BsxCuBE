@@ -1,4 +1,5 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
+from PyQt4 import QtCore
 import os
 import logging
 import numpy
@@ -15,13 +16,9 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
 from XSDataSAS import XSDataInputSolutionScattering
 
 class Collect(CObjectBase):
-    # TODO : DEBUG
     signals = [Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
-               Signal("collectDone"),
-               Signal("specCollectDone"),
-               Signal("sendProcessParams"),
-               Signal("sendMachineCurrent")]
+               Signal("collectDone")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -62,12 +59,31 @@ class Collect(CObjectBase):
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
         self.deltaPilatus = 0.1
-        #self.channels["jobSuccess_sparta"].connect("update", self.processingDone)
-        #self.channels["jobSuccess_slavia"].connect("update", self.processingDone)
-        self.commands["initPlugin_sparta"](self.pluginIntegrate)
-        self.commands["initPlugin_sparta"](self.pluginMerge)
-        self.commands["initPlugin_slavia"](self.pluginSAS)
+        try:
+            self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
+            #self.channels["jobFailure_edna1"].connect("update", self.processingDone)
+            self.commands["initPlugin_edna1"](self.pluginIntegrate)
+            self.commands["initPlugin_edna1"](self.pluginMerge)
+            self.edna1Dead = False
+        except:
+            logging.error("Unable to connect to EDNA 1")
+            message = "EDNA server 1 is dead, please restart EDNA 1"
+            self.showMessage(2, message, notify = 1)
+            logging.error("ENDA 1 is dead")
+            self.edna1Dead = True
 
+        #TODO: DEBUG - No EDNA 2 yet 13/6 2012
+#        try:
+#            self.channels["jobSuccess_edna2"].connect("update", self.processingDone)
+#            #self.channels["jobFailure_edna2"].connect("update", self.processingDone)
+#            self.commands["initPlugin_edna2"](self.pluginSAS)
+#            self.edna2Dead = False
+#        except:
+#            logging.error("Unable to connect to EDNA 2")
+#            message = "EDNA server 2 is dead, please restart EDNA 2"
+#            self.showMessage(2, message, notify = 1)
+#            logging.error("ENDA 2 is dead")
+#            self.edna2Dead = True
         # add a channel to read machine current (with polling)
         self.addChannel('tango',
                         'read_current_value',
@@ -89,17 +105,14 @@ class Collect(CObjectBase):
             logging.error("No connection to energy motor in spec")
 
     def newEnergy(self, pValue):
-        #TODO: DEBUG
         self.__energy = float(pValue)
         self.channels["pilatus_threshold"].set_value(self.__energy)
-        print ">>>>> new Energy in Collect %r" % self.__energy
         while not self.pilatusReady() :
             time.sleep(0.5)
 
 
     def currentChanged(self, current):
         self.machineCurrent = current
-        self.emit("sendMachineCurrent", self.machineCurrent)
 
     def runNumberChanged(self, runNumber):
         # set new run number from Spec - Convert it to int
@@ -195,7 +208,6 @@ class Collect(CObjectBase):
         #TODO: DEBUG
         logging.info("Starting spec Collect")
         #TODO: DEBUG
-        self.emit("sendProcessParams", self.xsdin.marshal())
         self.showMessage(0, "calls spec collect")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
@@ -220,30 +232,27 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
         # self.machineCurrent is already float
         self.xsdin.experimentSetup.machineCurrent = XSDataDouble(self.machineCurrent)
-        xsdin1d = self.xsdin.copy()
+        self.xsdin.rawImage = XSDataImage(path = XSDataString(raw_filename))
+        self.xsdin.logFile = XSDataFile(path = XSDataString(os.path.join(directory, "misc", base + ".log")))
+        self.xsdin.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
+        self.xsdin.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
+        self.xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
 
-        xsdin1d.rawImage = XSDataImage(path = XSDataString(raw_filename))
-        xsdin1d.logFile = XSDataFile(path = XSDataString(os.path.join(directory, "misc", base + ".log")))
-        xsdin1d.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
-        xsdin1d.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
-        xsdin1d.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
-
-        jobId = self.commands["startJob_sparta"]([self.pluginIntegrate, xsdin1d.marshal()])
-        self.dat_filenames[jobId] = xsdin1d.integratedCurve.path.value
+        jobId = self.commands["startJob_edna1"]([self.pluginIntegrate, self.xsdin.marshal()])
+        self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
         logging.info("Processing job %s started", jobId)
         #For debugging
         xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
         logging.info("Saving XML data to %s", xmlFilename)
-        xsdin1d.exportToFile(xmlFilename)
+        self.xsdin.exportToFile(xmlFilename)
 
     def specCollectDone(self, returned_value):
         #TODO: DEBUG
         logging.info("Spec Collect done")
         self.collecting = False
-        self.emit("specCollectDone", self.xsdAverage.marshal())
         # start EDNA to calculate average at the end
-#        jobId = self.commands["startJob_sparta"]([self.pluginMerge, self.xsdAverage.marshal()])
-#        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
+        jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
+        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
 
 
     def processingDone(self, jobId):
@@ -252,35 +261,56 @@ class Collect(CObjectBase):
             logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
-                strXsdout = self.commands["getJobOutput_sparta"](jobId)
                 try:
+                    strXsdout = self.commands["getJobOutput_edna1"](jobId)
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
+                    self.edna1Dead = False
                 except:
                     logging.error("Unable to parse string from Tango/EDNA")
-                else:
+                    message = "EDNA server 1 is dead, please restart EDNA 1"
+                    self.showMessage(2, message, notify = 1)
+                    logging.error("ENDA 1 is dead")
+                    self.edna1Dead = True
+                if not self.edna1Dead:
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
                     # Log on info on Pipeline
                     self.showMessage(0, "collectProcessingLog")
-                    # If autoRG has been used, launch the SAS pipeline (very time consuming)
-                    if xsd.autoRg is not None:
-                        rgOut = xsd.autoRg
-                        filename = rgOut.filename.path.value
-                        logging.info("filename as input for SAS %s", filename)
-                        datapoint = numpy.loadtxt(filename)
-                        startPoint = rgOut.firstPointUsed.value
-                        q = datapoint[:, 0][startPoint:]
-                        I = datapoint[:, 1][startPoint:]
-                        s = datapoint[:, 2][startPoint:]
-                        mask = (q < 3)
-                        xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                        #NbThreads=XSDataInteger(4))
-                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-                        logging.info("Starting SAS pipeline for file %s", filename)
-                        sasJobId = self.commands["startJob_slavia"]([self.pluginSAS, xsdin.marshal()])
-                        # self.dat_filenames[sasJobId] = filename
+                #TODO: DEBUG SAS pipeline to be put back
+                # If autoRG has been used, launch the SAS pipeline (very time consuming)
+#                if xsd.autoRg is None:
+#                    logging.info("SAS pipeline not executed")
+#                else:
+#                    rgOut = xsd.autoRg
+#                    filename = rgOut.filename.path.value
+#                    logging.info("filename as input for SAS %s", filename)
+#                    datapoint = numpy.loadtxt(filename)
+#                    startPoint = rgOut.firstPointUsed.value
+#                    q = datapoint[:, 0][startPoint:]
+#                    I = datapoint[:, 1][startPoint:]
+#                    s = datapoint[:, 2][startPoint:]
+#                    mask = (q < 3)
+#                    self.xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+#                    #NbThreads=XSDataInteger(4))
+#                    self.xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+#                    self.xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+#                    self.xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+#                    logging.info("Starting SAS pipeline for file %s", filename)
+#                    #TODO: DEBUG workaround EDNA problem
+#                    try:
+#                        ednaState = self.channels["state_edna2"].Value()
+#                        self.edna2Dead = False
+#                    except:
+#                        message = "EDNA server 2 is dead, please restart EDNA 2"
+#                        self.showMessage(2, message, notify = 1)
+#                        self.edna2Dead = True
+#                    if not self.edna2Dead:
+#                        try:
+#                            sasJobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
+#                        except:
+#                            message = "EDNA server 2 is dead, please restart EDNA 2"
+#                            self.showMessage(2, message, notify = 1)
+#                            logging.error("ENDA 2 is dead")
         else:
             logging.warning("processing Done from EDNA: %s -X-> None", jobId)
 
@@ -359,14 +389,12 @@ class Collect(CObjectBase):
         #
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            #TODO: DEBUG
-            print ">>>>>  set energy to %r" % self.__energy
             self.pilatusThreshold.set_value(self.__energy)
             while not self.pilatusReady() :
                 time.sleep(0.5)
 
         #
-        # SET gapfill on the Pilatus
+        # SET gapfill on the Pilatus (Even if not needed)
         #   
         self.channels["fill_mode"].set_value("ON")
 
@@ -426,9 +454,7 @@ class Collect(CObjectBase):
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
-        #self.emit(QtCore.SIGNAL("displayReset"))
-        # Send the machine current just before each run
-        self.emit("sendMachineCurrent", self.machineCurrent)
+        self.emit(QtCore.SIGNAL("displayReset"))
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],

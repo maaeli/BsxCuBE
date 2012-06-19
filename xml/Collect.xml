@@ -7,19 +7,22 @@
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    <object href="BsxCuBE/energy" role="getEnergy"/>
    
-   <command name="startJob_slavia" type="tango" uri="DAU/edna/1" call="startJob" />
-   <command name="initPlugin_slavia" type="tango" uri="DAU/edna/1" call="initPlugin" />
-   <command name="getJobOutput_slavia" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
-   <command name="startJob_sparta" type="tango" uri="DAU/edna/2" call="startJob"/>
-   <command name="initPlugin_sparta" type="tango" uri="DAU/edna/2" call="initPlugin" />
-   <command name="getJobOutput_sparta" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
+   <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />
+   <command name="initPlugin_edna1" type="tango" uri="DAU/edna/1" call="initPlugin" />
+   <command name="getJobOutput_edna1" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
+   <command name="startJob_edna2" type="tango" uri="DAU/edna/2" call="startJob"/>
+   <command name="initPlugin_edna2" type="tango" uri="DAU/edna/2" call="initPlugin" />
+   <command name="getJobOutput_edna2" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
+   
    <command name="guillopen" type="spec" call="guillopen"/>
    <command name="shopen" type="tango" uri="bm29/bsh/1" call="Open"/>
    
-   <channel call="jobSuccess" type="tango" uri="DAU/edna/1"  name="jobSuccess_sparta"  /> 
-   <channel call="jobFailure" type="tango" uri="DAU/edna/1"  name="jobFailure_sparta"  /> 
-   <channel call="jobSuccess" type="tango" uri="DAU/edna/2"  name="jobSuccess_slavia" /> 
-   <channel call="jobFailure" type="tango" uri="DAU/edna/2"  name="jobFailure_slavia" /> 
+   <channel name="jobSuccess_edna1"    type="tango"   uri="DAU/edna/1"  call="jobSuccess"/> 
+   <channel name="jobFailure_edna1"    type="tango"   uri="DAU/edna/1"  call="jobFailure"/> 
+   <channel name="state_edna1"         type="tango"   uri="DAU/edna/1"  call="State"/> 
+   <channel name="jobSuccess_edna2"    type="tango"   uri="DAU/edna/2"  call="jobSuccess"/> 
+   <channel name="jobFailure_edna2"    type="tango"   uri="DAU/edna/2"  call="jobFailure"/> 
+   <channel name="state_edna2"         type="tango"   uri="DAU/edna/2"  call="State"/> 
    
    <channel name="fill_mode"  type="tango" uri="bm29/pilatus/p0" call="fill_mode"/>
    <channel name="pilatus_threshold"  type="tango" uri="bm29/pilatus/p0" call="energy_threshold"/>
@@ -29,7 +32,7 @@
    <command name="collect"               type="spec" call="collect"/>
    
    <channel name="guillstate" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>	
-   <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode" signal="collectBeamStopDiodeChanged"/>
+   <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode"/>
    <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
    <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
    <channel name="collectRunNumber"      type="spec" call="BSX_GLOBAL/collect/runNumber" signal="collectRunNumberChanged"/>

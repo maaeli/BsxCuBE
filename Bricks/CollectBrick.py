@@ -11,18 +11,6 @@ from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
 
-# TODO : DEBUG
-from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
-        XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
-        XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
-from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
-        XSDataResultBioSaxsProcessOneFilev1_0, XSDataBioSaxsSample, \
-        XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0, XSDataResultBioSaxsSmartMergev1_0
-from XSDataSAS import XSDataInputSolutionScattering
-import PyTango
-import threading
-import numpy
-
 
 __category__ = "BsxCuBE"
 
@@ -41,8 +29,7 @@ class CollectBrick(Core.BaseBrick):
     properties = {"expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
 
     connections = {"collect": Connection("Collect object",
-                                            [Signal("collectBeamStopDiodeChanged", "collectBeamStopDiodeChanged"),
-                                             Signal("collectDirectoryChanged", "collectDirectoryChanged"),
+                                            [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
                                              Signal("collectPrefixChanged", "collectPrefixChanged"),
                                              Signal("collectRunNumberChanged", "collectRunNumberChanged"),
                                              Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
@@ -66,13 +53,11 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("beamLostChanged", "beamLostChanged"),
                                              Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone"),
-                                             Signal("specCollectDone", "specCollectDone"),
-                                             Signal("sendProcessParams", "sendProcessParams"),
-                                             Signal("sendMachineCurrent", "sendMachineCurrent") ],
+                                             Signal("collectDone", "collectDone")],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
+                                             Slot("setCheckBeam"),
                                              Slot("triggerEDNA")],
                                             "collectObjectConnected"),
                     "motoralignment": Connection("MotorAlignment object",
@@ -413,25 +398,9 @@ class CollectBrick(Core.BaseBrick):
         self.radiationCheckBoxToggled(False)
         # TODO : DEBUG
 #        self.spectroCheckBoxToggled(False)
-        self.dat_filenames = {}
-        self.strTangoDevice1 = "DAU/edna/1"
-        self.strTangoDevice2 = "DAU/edna/2"
-        self.ednaDeviceProxy1 = PyTango.DeviceProxy(self.strTangoDevice1)
-        self.ednaDeviceProxy2 = PyTango.DeviceProxy(self.strTangoDevice2)
-        self.ednaTangoCallbackThread = EdnaTangoCallbackThread(self.strTangoDevice1, self.ednaTangoSuccess1)
-        self.ednaTangoCallbackThread.start()
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_1"
-        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_3"
-        self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
-        self.xsdin = None
-        self.beamStopDiode = None
-        self.xsdAverage = None
         self.seuTemperature = None
         self.storageTemperature = None
         self.collectionStatus = None
-        self.machineCurrent = None
-        self.edna1Dead = False
-        self.edna2Dead = False
 
         self.SPECBusyTimer = Qt.QTimer(self.brick_widget)
         Qt.QObject.connect(self.SPECBusyTimer, Qt.SIGNAL("timeout()"), self.SPECBusyTimerTimeOut)
@@ -477,9 +446,6 @@ class CollectBrick(Core.BaseBrick):
     def exp_spec_connected(self, spec):
         if spec != None:
             self.spec = spec
-
-    def collectBeamStopDiodeChanged(self, pValue):
-        self.beamStopDiode = float(pValue)
 
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
@@ -572,9 +538,7 @@ class CollectBrick(Core.BaseBrick):
         if self.__lastFrame is None or self.__lastFrame != pValue:
             self.__lastFrame = pValue
             if self._isCollecting:
-                #TODO: DEBUG
-                #self.collectObj.triggerEDNA(filename0, oneway = True)
-                self.localTriggerEDNA(filename0)
+                self.collectObj.triggerEDNA(filename0, oneway = True)
                 message = "The frame '%s' was collected..." % filename0
                 logging.getLogger().info(message)
                 if self.robotCheckBox.isChecked():
@@ -619,175 +583,12 @@ class CollectBrick(Core.BaseBrick):
                             self._feedBackFlag = False
                             self.__isTesting = False
                             logging.getLogger().info("The data collection is done!")
-                            #TODO: DEBUG workaround ENDA problem
-                            # Check EDNA presence and warn if not there
-                            try:
-                                ednaState = self.ednaDeviceProxy1.State()
-                                print ">>>>>>> ednaState1 is %r" % ednaState
-                                self.edna1Dead = False
-                            except:
-                                logging.error("ENDA 1 is dead")
-                                self.setButtonState(0)
-                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
-                                self.edna1Dead = True
-                            try:
-                                ednaState = self.ednaDeviceProxy2.State()
-                                print ">>>>>>> ednaState2 is %r" % ednaState
-                                self.edna2Dead = False
-                            except:
-                                logging.error("ENDA 2 is dead")
-                                self.setButtonState(0)
-                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-                                self.edna2Dead = True
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
                         if feedBackFlag:
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
-
-    # TODO: DEBUG
-    def sendProcessParams(self, processParamsXml):
-        self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0().parseString(processParamsXml)
-
-    # TODO: DEBUG
-    def sendMachineCurrent(self, machineCurrent):
-        self.machineCurrent = machineCurrent
-
-    # TODO: DEBUG
-    def ednaTangoSuccess1(self, event):
-        if event.attr_value is not None:
-            jobId = event.attr_value.value
-            if jobId in self.dat_filenames:
-                filename = self.dat_filenames.pop(jobId)
-                logging.info("Processing Done from EDNA: %s -> %s", jobId, filename)
-                self.collectProcessingDone(filename)
-                if jobId.startswith(self.pluginMerge):
-                    strXsdout = self.ednaDeviceProxy1.getJobOutput(jobId)
-                    try:
-                        xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
-                    except:
-                        logging.error("Unable to parse string from Tango/EDNA")
-                    log = xsd.status.executiveSummary.value
-                    logging.info(log)
-                    # TODO : DEBUG
-                    # If autoRG has been used, launch the SAS pipeline (very time consuming)
-#                    if xsd.autoRg is None:
-#                        logging.info("SAS pipeline not executed")
-#                    else:
-#                        rgOut = xsd.autoRg
-#                        filename = rgOut.filename.path.value
-#                        logging.info("filename as input for SAS %s", filename)
-#                        datapoint = numpy.loadtxt(filename)
-#                        startPoint = rgOut.firstPointUsed.value
-#                        q = datapoint[:, 0][startPoint:]
-#                        I = datapoint[:, 1][startPoint:]
-#                        s = datapoint[:, 2][startPoint:]
-#                        mask = (q < 3)
-#                        xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-#                        #NbThreads=XSDataInteger(4))
-#                        xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-#                        xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-#                        xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-#                        logging.info("Starting SAS pipeline for file %s", filename)
-#                        #TODO: DEBUG workaround ENDA problem
-#                        try:
-#                            ednaState = self.ednaDeviceProxy2.State()
-#                            print ">>>>>>> ednaState2 is %r" % ednaState
-#                            self.edna2Dead = False
-#                        except:
-#                            logging.error("ENDA 2 is dead")
-#                            self.setButtonState(0)
-#                            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-#                            self.edna2Dead = True
-#                        if not self.edna2Dead:
-#                            try:
-#                                sasJobId = self.ednaDeviceProxy2.startJob([self.pluginSAS, xsdin.marshal()])
-#                            except:
-#                                logging.error("ENDA 2 is dead")
-#                                self.setButtonState(0)
-#                                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-#                                self.edna2Dead = True
-
-
-    # TODO: DEBUG
-    def localTriggerEDNA(self, raw_filename):
-        """This is a local version of Collect.triggerEdna as a workaround for the Framework 4 communication problem"""
-        pars = self.getCollectPars(1)
-        if self.xsdin != None:
-            xsdin = self.xsdin.copy()
-            if self.storageTemperature is None:
-                logging.warning("No storage temperature reading, using default value 20")
-                storageTemperature = 20.0
-            else:
-                storageTemperature = self.storageTemperature
-            if self.seuTemperature is None:
-                logging.warning("No exposure temperature reading, using default value 20")
-                seuTemperature = 20.0
-            else:
-                seuTemperature = self.seuTemperature
-            if self.beamStopDiode is None:
-                logging.warning("No beamstop diode reading, using default value 0.0001")
-                collectBeamStopDiode = 0.0001
-            else:
-                collectBeamStopDiode = self.beamStopDiode
-            if self.machineCurrent is None:
-                logging.warning("No machine current reading, using default value 200.0")
-                machineCurrent = 200.0
-            else:
-                machineCurrent = self.machineCurrent
-
-            logging.info("Local trigger EDNA with filename %s", raw_filename)
-            raw_filename = str(raw_filename)
-            tmp, suffix = os.path.splitext(raw_filename)
-            tmp, base = os.path.split(tmp)
-            directory, local = os.path.split(tmp)
-            frame = ""
-            for c in base[-1::-1]:
-                if c.isdigit():
-                    frame = c + frame
-                else:
-                    break
-
-            xsdin.experimentSetup.storageTemperature = XSDataDouble(storageTemperature)
-            xsdin.experimentSetup.exposureTemperature = XSDataDouble(seuTemperature)
-            xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
-            #xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-            xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(collectBeamStopDiode))
-            # self.machineCurrent is already float
-            xsdin.experimentSetup.machineCurrent = XSDataDouble(machineCurrent)
-
-            xsdin.rawImage = XSDataImage(path = XSDataString(raw_filename))
-            xsdin.logFile = XSDataFile(path = XSDataString(os.path.join(directory, "misc", base + ".log")))
-            xsdin.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
-            xsdin.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
-            xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
-            # TODO : DEBUG
-    #        jobId = self.commands["startJob_sparta"]([self.pluginIntegrate, xsdin.marshal()])
-            #TODO: DEBUG workaround ENDA problem
-            try:
-                ednaState = self.ednaDeviceProxy1.State()
-                print ">>>>>>> ednaState1 is %r" % ednaState
-                self.edna1Dead = False
-            except:
-                logging.error("ENDA 1 is dead")
-                self.setButtonState(0)
-                Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
-                self.edna1Dead = True
-            if not self.edna1Dead:
-                try:
-                    jobId = self.ednaDeviceProxy1.startJob([self.pluginIntegrate, xsdin.marshal()])
-                    self.dat_filenames[jobId] = xsdin.integratedCurve.path.value
-                    logging.info("Processing job %s started", jobId)
-                    #For debugging
-                    xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
-                    logging.info("Saving XML data to %s", xmlFilename)
-                    xsdin.exportToFile(xmlFilename)
-                except:
-                    logging.error("ENDA 1 is dead")
-                    self.setButtonState(0)
-                    Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
-                    self.edna1Dead = True
 
 
 
@@ -1228,28 +1029,6 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectPushButtonClicked(self):
-        #TODO: DEBUG workaround ENDA problem
-        # Check EDNA presence and warn if not there
-        try:
-            ednaState = self.ednaDeviceProxy1.State()
-            print ">>>>>>> ednaState1 is %r" % ednaState
-            self.edna1Dead = False
-        except:
-            logging.error("ENDA 1 is dead")
-            self.setButtonState(0)
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 1 is dead, please restart EDNA 1")
-            self.edna1Dead = True
-            return
-        try:
-            ednaState = self.ednaDeviceProxy2.State()
-            print ">>>>>>> ednaState2 is %r" % ednaState
-            self.edna2Dead = False
-        except:
-            logging.error("ENDA 2 is dead")
-            self.setButtonState(0)
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "EDNA server 2 is dead, please restart EDNA 2")
-            self.edna2Dead = True
-            return
         # Check if pilatus is ready
         if not self.energyControlObject.pilatusReady():
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
@@ -1370,15 +1149,6 @@ class CollectBrick(Core.BaseBrick):
             self.__isTesting = True
 
         logging.info("   - collection started (mode: %s)" % mode)
-
-    def specCollectDone(self, xmlXsdAverage):
-        # Start smart averaging
-        logging.info("Spec collect done - starting averaging")
-        #logging.info(xmlXsdAverage)
-        xsdAverage = XSDataInputBioSaxsSmartMergev1_0().parseString(xmlXsdAverage)
-        jobId = self.ednaDeviceProxy1.startJob([self.pluginMerge, xmlXsdAverage])
-        self.dat_filenames[jobId] = xsdAverage.mergedCurve.path.value
-
 
     def collectDone(self):
         #TODO : DEBUG
@@ -1603,21 +1373,3 @@ class CollectBrick(Core.BaseBrick):
                 j += 1
 
         return prefix, run, frame, extra, extension
-
-
-# TODO : DEBUG
-class EdnaTangoCallbackThread(QtCore.QThread):
-
-    def __init__(self, _deviceProxy, _successCallback = None, _failureCallback = None):
-        QtCore.QThread.__init__(self)
-        self._dev = PyTango.DeviceProxy(_deviceProxy)
-        if _successCallback != None:
-            self._dev.subscribe_event("jobSuccess", PyTango.EventType.CHANGE_EVENT, _successCallback, [])
-        if _failureCallback != None:
-            self._dev.subscribe_event("jobSuccess", PyTango.EventType.CHANGE_EVENT, _failureCallback, [])
-
-    def run(self):
-        bContinue = True
-        while bContinue:
-            time.sleep(1)
-
