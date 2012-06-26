@@ -885,8 +885,6 @@ class CollectRobotDialog(Qt.QDialog):
         # temperature SEU
         if sample.type != 'Buffer':
             temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
-            #TODO: DEBUG
-            print ">>>>>>> sample.SEUtemperature %r " % sample.SEUtemperature
             temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
 
 

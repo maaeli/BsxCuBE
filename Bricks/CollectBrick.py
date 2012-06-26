@@ -53,7 +53,8 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("beamLostChanged", "beamLostChanged"),
                                              Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone")],
+                                             Signal("collectDone", "collectDone"),
+                                             Signal("clearCurve", "clearCurve")],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -505,7 +506,6 @@ class CollectBrick(Core.BaseBrick):
         if pValue is not None:
             self.radiationAbsoluteDoubleSpinBox.setValue(float(pValue))
 
-
     def collectProcessDataChanged(self, pValue):
         self.processCheckBox.setChecked(pValue == "1")
 
@@ -514,19 +514,19 @@ class CollectBrick(Core.BaseBrick):
         print ">>>>>>>>>>>>>>>>>>>>>>>>>>> Collect Processing Done filename %r " % dat_filename
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
-        if self.last_dat is None : 
-                #TODO remove this hack ASAP (SO 27/9 11)
-                ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
+        if self.last_dat is None :
+            #TODO remove this hack ASAP (SO 27/9 11)
+            ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
+            logging.info("processing done, file is %r", dat_filename)
+            self.emitDisplayItemChanged(dat_filename)
+            self.last_dat = dat_filename
+        else:
+            if self.last_dat == dat_filename:
+                return
+            else:
                 logging.info("processing done, file is %r", dat_filename)
                 self.emitDisplayItemChanged(dat_filename)
-		self.last_dat = dat_filename
-	else:
-        	if self.last_dat == dat_filename: 
-			return
-		else:
-			logging.info("processing done, file is %r", dat_filename)
-                	self.emitDisplayItemChanged(dat_filename)
-                	self.last_dat = dat_filename
+                self.last_dat = dat_filename
 
 
     def collectProcessingLog(self, level, logmsg, notify):
@@ -545,6 +545,11 @@ class CollectBrick(Core.BaseBrick):
 
         if notify:
             self.messageDialog(level, logmsg)
+
+    def clearCurve(self):
+        #TODO: Debug
+        print ">>> clear Curve from Collect"
+        self.displayReset()
 
     def collectNewFrameChanged(self, pValue):
         filename0 = pValue.split(",")[0]
@@ -644,7 +649,6 @@ class CollectBrick(Core.BaseBrick):
         if self.image_proxy is None:
             return
         try:
-            logging.info(str(pValue))
             self.image_proxy.load_files(str(pValue), oneway = True)
         except Exception, e:
             logging.error("Could not read file " + str(pValue))
@@ -804,9 +808,6 @@ class CollectBrick(Core.BaseBrick):
 
             collectpars["flowTime"] = collectpars["timePerFrame"] * collectpars["frameNumber"] + collectpars["extraFlowTime"]
             collectpars["processData"] = 1 if collectpars["doProcess"] else 0
-
-            logging.info("sample type is %s" , collectpars["sampleType"])
-            logging.info("number of samples is %s" , len(collectpars["sampleList"]))
         else:
             collectpars = CollectPars()
 
@@ -1171,7 +1172,7 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
-        print ">>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
             self.setButtonState(0)

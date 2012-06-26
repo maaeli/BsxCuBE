@@ -605,6 +605,7 @@
       <signal name="collectProcessingDone"/>
       <signal name="collectProcessingLog"/>
       <signal name="collectDone"/>
+      <signal name="clearCurve"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>

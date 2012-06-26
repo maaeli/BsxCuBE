@@ -18,7 +18,8 @@ from XSDataSAS import XSDataInputSolutionScattering
 class Collect(CObjectBase):
     signals = [Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
-               Signal("collectDone")]
+               Signal("collectDone"),
+               Signal("clearCurve")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -41,6 +42,8 @@ class Collect(CObjectBase):
         self.storageTemperature = -374
         self.exposureTemperature = -374
         self.xsdAverage = None
+
+        self.__noThresholdmovePilatus = False
 
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
@@ -105,11 +108,13 @@ class Collect(CObjectBase):
             logging.error("No connection to energy motor in spec")
 
     def newEnergy(self, pValue):
-        self.__energy = float(pValue)
-        self.channels["pilatus_threshold"].set_value(self.__energy)
-        while not self.pilatusReady() :
-            time.sleep(0.5)
-
+        if not self.__noThresholdmovePilatus:
+            self.__energy = float(pValue)
+            self.__noThresholdmovePilatus = True
+            self.channels["pilatus_threshold"].set_value(self.__energy)
+            while not self.pilatusReady() :
+                time.sleep(0.5)
+            self.__noThresholdmovePilatus = False
 
     def currentChanged(self, current):
         self.machineCurrent = current
@@ -137,8 +142,6 @@ class Collect(CObjectBase):
 
 
     def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-        #TODO: DEBUG
-        self.showMessage(0, "entered collect call")
         #TODO: DEBUG
         logging.info("Starting collection now")
         try:
@@ -207,8 +210,6 @@ class Collect(CObjectBase):
             logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
         #TODO: DEBUG
         logging.info("Starting spec Collect")
-        #TODO: DEBUG
-        self.showMessage(0, "calls spec collect")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
@@ -276,8 +277,6 @@ class Collect(CObjectBase):
                 if not self.edna1Dead:
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
-                    # Log on info on Pipeline
-                    self.showMessage(0, "collectProcessingLog")
                 #TODO: DEBUG SAS pipeline to be put back
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
 #                if xsd.autoRg is None:
@@ -371,6 +370,7 @@ class Collect(CObjectBase):
 
 
     def _collectOne(self, sample, pars, mode = None):
+
         # ==================================================
         #  SETTING VISCOSITY
         # ==================================================
@@ -398,7 +398,6 @@ class Collect(CObjectBase):
         #   
         self.channels["fill_mode"].set_value("ON")
 
-        self.showMessage(0, "Setting viscosity to '%s'..." % tocollect["viscosity"])
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
             self.showMessage(2, "Error when trying to set viscosity to '%s'..." % tocollect["viscosity"])
 
@@ -427,22 +426,14 @@ class Collect(CObjectBase):
         # ==================================================
         #  FLOW
         # ==================================================
-        self.showMessage(0, "Setting Flow or Fix")
         if tocollect["flow"]:
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
-                #TODO: DEBUG
-                self.showMessage(0, "start flowing asynch")
                 self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
-                self.showMessage(0, "return flowing asynch")
             except RuntimeError:
                 self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
         else:
-            self.showMessage(0, "Fixing liquid position...")
             self.objects["sample_changer"].setLiquidPositionFixed(True)
-            self.showMessage(0, "  - liquid position fixed.")
-
-        self.showMessage(0, "Setting Flow or Fix done")
 
         # ==========================
         #  SETTING TRANSMISSION 
@@ -454,8 +445,8 @@ class Collect(CObjectBase):
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
-        # TODO : DEBUG
-        #self.emit(QtCore.SIGNAL("displayReset"))
+        # Clear 1D curve
+        self.emit("clearCurve")
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -509,10 +500,7 @@ class Collect(CObjectBase):
 
     def _collectWithRobot(self, pars):
         lastBuffer = ""
-        # 
         # Setting sample type
-        # ===================                                                
-        self.showMessage(0, "Setting sample type to '%s'..." % pars["sampleType"])
         # Synchronous - no exception handling
         self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
 
@@ -622,7 +610,7 @@ class Collect(CObjectBase):
         #---------------------------------- 
         self.showMessage(0, "The data collection is done!")
         # TODO : DEBUG
-        print ">>>>>>>>>>>>>>>>>>>>>>>>> The data collection is done!"
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> The data collection is done!"
         self.emit("collectDone")
 
 
