@@ -256,7 +256,9 @@ class Collect(CObjectBase):
 
 
     def processingDone(self, jobId):
-        if jobId in self.dat_filenames:
+        if not jobId in self.dat_filenames:
+            logging.warning("processing Done from EDNA: %s -X-> None", jobId)
+        else:
             filename = self.dat_filenames.pop(jobId)
             logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
@@ -311,8 +313,6 @@ class Collect(CObjectBase):
 #                            message = "EDNA server 2 is dead, please restart EDNA 2"
 #                            self.showMessage(2, message, notify = 1)
 #                            logging.error("ENDA 2 is dead")
-        else:
-            logging.warning("processing Done from EDNA: %s -X-> None", jobId)
 
     def _abortCollectWithRobot(self):
         if  self.__collectWithRobotProcedure is not None:
@@ -454,7 +454,8 @@ class Collect(CObjectBase):
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
-        self.emit(QtCore.SIGNAL("displayReset"))
+        # TODO : DEBUG
+        #self.emit(QtCore.SIGNAL("displayReset"))
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -620,7 +621,8 @@ class Collect(CObjectBase):
         # End of for sample loop
         #---------------------------------- 
         self.showMessage(0, "The data collection is done!")
-
+        # TODO : DEBUG
+        print ">>>>>>>>>>>>>>>>>>>>>>>>> The data collection is done!"
         self.emit("collectDone")
 
 

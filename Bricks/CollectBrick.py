@@ -117,6 +117,8 @@ class CollectBrick(Core.BaseBrick):
 
         self.__validParameters = [False, False, False]
 
+        #TODO: DEBUG
+	self.last_dat = None
         self.image_proxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
@@ -508,8 +510,24 @@ class CollectBrick(Core.BaseBrick):
         self.processCheckBox.setChecked(pValue == "1")
 
     def collectProcessingDone(self, dat_filename):
-        logging.info("processing done, file is %r", dat_filename)
-        self.emitDisplayItemChanged(dat_filename)
+        #TODO : DEBUG
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> Collect Processing Done filename %r " % dat_filename
+        #TODO remove this hack ASAP (SO 27/9 11)
+        ### HORRIBLE CODE
+        if self.last_dat is None : 
+                #TODO remove this hack ASAP (SO 27/9 11)
+                ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
+                logging.info("processing done, file is %r", dat_filename)
+                self.emitDisplayItemChanged(dat_filename)
+		self.last_dat = dat_filename
+	else:
+        	if self.last_dat == dat_filename: 
+			return
+		else:
+			logging.info("processing done, file is %r", dat_filename)
+                	self.emitDisplayItemChanged(dat_filename)
+                	self.last_dat = dat_filename
+
 
     def collectProcessingLog(self, level, logmsg, notify):
         # Level 0 = info, Level 1 = 
@@ -1153,6 +1171,7 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
+        print ">>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
             self.setButtonState(0)
