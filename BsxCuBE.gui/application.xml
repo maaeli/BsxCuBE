@@ -606,11 +606,14 @@
       <signal name="collectProcessingLog"/>
       <signal name="collectDone"/>
       <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="motoralignment">
@@ -642,9 +645,20 @@
   </connections>
 
   <connections id="AttenuatorsBrick1">
-    <connection role="Collect">
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <peer name="CollectBrick1"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
@@ -697,6 +711,21 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterMS"/>
     </connection>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
@@ -704,6 +733,21 @@
   </connections>
 
   <connections id="EnergyWaveLengthBrick1">
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
     <connection role="energy">
       <signal name="energyChanged"/>
       <slot name="setEnergy"/>
@@ -727,6 +771,21 @@
       <slot name="open"/>
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterSH"/>
+    </connection>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
@@ -870,6 +929,21 @@
       <slot name="open"/>
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterGuillotine"/>
+    </connection>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>

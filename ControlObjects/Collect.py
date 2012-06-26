@@ -19,12 +19,15 @@ class Collect(CObjectBase):
     signals = [Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
                Signal("collectDone"),
-               Signal("clearCurve")]
+               Signal("clearCurve"),
+               Signal("grayOut"),
+               Signal("transmissionChanged")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
              Slot("setCheckBeam"),
-             Slot("triggerEDNA")]
+             Slot("triggerEDNA"),
+             Slot("blockGUI")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
@@ -43,7 +46,6 @@ class Collect(CObjectBase):
         self.exposureTemperature = -374
         self.xsdAverage = None
 
-        self.__noThresholdmovePilatus = False
 
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
@@ -108,16 +110,16 @@ class Collect(CObjectBase):
             logging.error("No connection to energy motor in spec")
 
     def newEnergy(self, pValue):
-        if not self.__noThresholdmovePilatus:
-            self.__energy = float(pValue)
-            self.__noThresholdmovePilatus = True
-            self.channels["pilatus_threshold"].set_value(self.__energy)
-            while not self.pilatusReady() :
-                time.sleep(0.5)
-            self.__noThresholdmovePilatus = False
+        self.__energy = float(pValue)
+        self.channels["pilatus_threshold"].set_value(self.__energy)
+        while not self.pilatusReady() :
+            time.sleep(0.5)
 
     def currentChanged(self, current):
         self.machineCurrent = current
+
+    def blockGUI(self, block):
+        self.emit("grayOut", block)
 
     def runNumberChanged(self, runNumber):
         # set new run number from Spec - Convert it to int
@@ -208,8 +210,6 @@ class Collect(CObjectBase):
         else:
             self.lastPrefixRun = prefixRun
             logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
-        #TODO: DEBUG
-        logging.info("Starting spec Collect")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
@@ -248,8 +248,6 @@ class Collect(CObjectBase):
         self.xsdin.exportToFile(xmlFilename)
 
     def specCollectDone(self, returned_value):
-        #TODO: DEBUG
-        logging.info("Spec Collect done")
         self.collecting = False
         # start EDNA to calculate average at the end
         jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
@@ -438,15 +436,17 @@ class Collect(CObjectBase):
         # ==========================
         #  SETTING TRANSMISSION 
         # ========================== 
+        #TODO: Should work !!
         #self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
-        #self.__parent.emit("transmissionChanged", tocollect.transmission)
+        #self.emit("transmissionChanged", tocollect["transmission"])
 
         # ==================================================
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         # Clear 1D curve
-        self.emit("clearCurve")
+        # Commented out 26/6 2012 on order from Petra (SO)
+        #self.emit("clearCurve")
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -609,8 +609,6 @@ class Collect(CObjectBase):
         # End of for sample loop
         #---------------------------------- 
         self.showMessage(0, "The data collection is done!")
-        # TODO : DEBUG
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> The data collection is done!"
         self.emit("collectDone")
 
 

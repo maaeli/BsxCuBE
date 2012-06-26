@@ -3,11 +3,8 @@
    <uri>nela:exp</uri> 
 
    <command name="open" type="spec" call="msopen"/>
-			
    <command name="close" type="spec" call="msclose"/>
-   
-   <channel name="state" type="spec" call="BSX_GLOBAL/shutter/msstate"/>
-	
+   <channel name="state" type="spec" call="BSX_GLOBAL/shutter/msstate"/>	
    <channel name="status" type="spec" call="BSX_GLOBAL/shutter/msstatus"/>
 
 </object>	

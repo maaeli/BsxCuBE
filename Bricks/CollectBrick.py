@@ -54,12 +54,15 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
                                              Signal("collectDone", "collectDone"),
-                                             Signal("clearCurve", "clearCurve")],
+                                             Signal("clearCurve", "clearCurve"),
+                                             Signal("grayOut", "grayOut"),
+                                             Signal("transmissionChanged", "transmissionChanged")],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
                                              Slot("setCheckBeam"),
-                                             Slot("triggerEDNA")],
+                                             Slot("triggerEDNA"),
+                                             Slot("blockGUI")],
                                             "collectObjectConnected"),
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
@@ -547,8 +550,6 @@ class CollectBrick(Core.BaseBrick):
             self.messageDialog(level, logmsg)
 
     def clearCurve(self):
-        #TODO: Debug
-        print ">>> clear Curve from Collect"
         self.displayReset()
 
     def collectNewFrameChanged(self, pValue):
@@ -1020,7 +1021,7 @@ class CollectBrick(Core.BaseBrick):
 
     def testPushButtonClicked(self):
 
-        self.setButtonState(1)
+        self.collectObj.blockGUI(True)
         # For test allow 30s
         self.SPECBusyTimer.start(30000)
 
@@ -1111,12 +1112,23 @@ class CollectBrick(Core.BaseBrick):
     def startCollectWithRobot(self):
         # starts a series of individual collections
         #  blocks widget or whatever during the time of the collection
-        self.setButtonState(1)
+        self.collectObj.blockGUI(True)
         self._abortFlag = False
         self.startCollection(mode = "with robot")
         self._collectRobotDialog.clearHistory()
         self.getObject("collect").collectWithRobot(self.getCollectPars(), oneway = True)
 
+
+    def grayOut(self, pValue):
+        # if True - gray out if False - allow all buttons to be manipulated
+        if pValue is not None:
+            if pValue is True:
+                self.setButtonState(1)
+            else:
+                self.setButtonState(0)
+
+    def transmissionChanged(self, percentage):
+        pass
 
     def endCollectWithRobot(self):
         # should unblock things here at the end
@@ -1124,7 +1136,7 @@ class CollectBrick(Core.BaseBrick):
 
     def startCollectWithoutRobot(self):
         # starts a single collection 
-        self.setButtonState(1)
+        self.collectObj.blockGUI(True)
         self._abortFlag = False
 
         if self.processCheckBox.isChecked():
@@ -1175,7 +1187,7 @@ class CollectBrick(Core.BaseBrick):
         print ">>>>>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
-            self.setButtonState(0)
+            self.collectObj.blockGUI(False)
             if self.notifyCheckBox.isChecked():
                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
@@ -1252,7 +1264,6 @@ class CollectBrick(Core.BaseBrick):
 
         self._abortFlag = True
 
-        # TODO : DEBUG
         if self.__isTesting:
             self.getObject("collect").testCollectAbort()
         else:
@@ -1290,7 +1301,6 @@ class CollectBrick(Core.BaseBrick):
         self.normalisationDoubleSpinBox.setEnabled(enabled)
 
     def setButtonState(self, pOption):
-        # TODO : DEBUG
         widgets = (self.readOnlyCheckBox, \
                    self.directoryLineEdit, \
                    self.directoryPushButton, \
@@ -1322,6 +1332,7 @@ class CollectBrick(Core.BaseBrick):
                    self.robotCheckBox, \
                    self.testPushButton, \
                    self.abortPushButton)
+
         def enable_widgets(*args):
             if len(args) == 1:
                 for widget in widgets:
@@ -1352,7 +1363,7 @@ class CollectBrick(Core.BaseBrick):
 
         self._feedBackFlag = False
         self.__isTesting = False
-        self.setButtonState(0)
+        self.collectObj.blockGUI(False)
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
             logging.getLogger().warning("The frame was not collected or didn't appear on time! (%d,%d)" % (self._currentFrame, self._frameNumber))

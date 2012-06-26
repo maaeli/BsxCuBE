@@ -43,6 +43,20 @@ class ShutterBrick(Core.BaseBrick):
                                         [ Signal("stateChanged", "shutter_state_changed") ],
                                         [ Slot("open"), Slot("close") ],
                                         "connectionStatusChanged"),
+                   "collect": Connection("Collect object",
+                                            [Signal("collectProcessingDone", "collectProcessingDone"),
+                                             Signal("collectProcessingLog", "collectProcessingLog"),
+                                             Signal("collectDone", "collectDone"),
+                                             Signal("clearCurve", "clearCurve"),
+                                             Signal("grayOut", "grayOut"),
+                                             Signal("transmissionChanged", "transmissionChanged")],
+                                            [Slot("testCollect"),
+                                             Slot("collect"),
+                                             Slot("collectAbort"),
+                                             Slot("setCheckBeam"),
+                                             Slot("triggerEDNA"),
+                                             Slot("blockGUI")],
+                                            "collectObjectConnected"),
                    "login": Connection("Login object",
                                         [Signal("loggedIn", "loggedIn")],
                                         [],
@@ -96,15 +110,38 @@ class ShutterBrick(Core.BaseBrick):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
 
-
     # Logged In : True or False 
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
 
+    # connected to Collect
+    def collectObjectConnected(self, pValue):
+        pass
+
+    def collectProcessingDone(self, filename):
+        pass
+
+    def collectProcessingLog(self, level, logmsg, notify):
+        pass
+
+    def collectDone(self):
+        pass
+
+    def clearCurve(self):
+        pass
+
+    def grayOut(self, grayout):
+        if grayout is not None:
+            if grayout:
+                self.brick_widget.setEnabled(False)
+            else:
+                self.brick_widget.setEnabled(True)
+
+    def transmissionChanged(self, percentage):
+        pass
 
     def set_icons(self, icons):
         pass
-
 
     def shutterNameStateChanged(self, pValue):
         self.shutterName = pValue

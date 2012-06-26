@@ -1,7 +1,7 @@
 import logging
 import sip
 from Framework4.GUI import Core
-from Framework4.GUI.Core import Property, Connection, Signal
+from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtGui, Qt
 
 
@@ -24,10 +24,20 @@ class AttenuatorsBrick(Core.BaseBrick):
                                              Signal("attenuatorsFactorChanged", "attenuatorsFactorChanged")],
                                             [],
                                             "connectionStatusChanged"),
-                    "Collect": Connection("Collect object",
-                                             [Signal("transmissionChanged", "transmissionChanged")],
-                                             [],
-                                             "connectionStatusChanged"),
+                    "collect": Connection("Collect object",
+                                            [Signal("collectProcessingDone", "collectProcessingDone"),
+                                             Signal("collectProcessingLog", "collectProcessingLog"),
+                                             Signal("collectDone", "collectDone"),
+                                             Signal("clearCurve", "clearCurve"),
+                                             Signal("grayOut", "grayOut"),
+                                             Signal("transmissionChanged", "transmissionChanged")],
+                                            [Slot("testCollect"),
+                                             Slot("collect"),
+                                             Slot("collectAbort"),
+                                             Slot("setCheckBeam"),
+                                             Slot("triggerEDNA"),
+                                             Slot("blockGUI")],
+                                            "collectObjectConnected"),
                     "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                              [],
@@ -138,9 +148,35 @@ class AttenuatorsBrick(Core.BaseBrick):
             else:
                 self.currentTransmissionLineEdit.setText(self.__maskFormat % float(pValue) + self.__suffix)
 
+    # connected to Collect
+    def collectObjectConnected(self, pValue):
+        pass
+
+    def collectProcessingDone(self, filename):
+        pass
+
+    def collectProcessingLog(self, level, logmsg, notify):
+        pass
+
+    def collectDone(self):
+        pass
+
+    def clearCurve(self):
+        pass
+
+    def grayOut(self, grayout):
+        if grayout is not None:
+            if grayout:
+                self.newTransmissionComboBox.setEditable(False)
+                self.filtersPushButton.setEnabled(False)
+            else:
+                self.newTransmissionComboBox.setEditable(True)
+                self.filtersPushButton.setEnabled(True)
+
 
     def transmissionChanged(self, pValue):
-        self.getObject("attenuators").setTransmission(pValue)
+        print ">> Set Transmission to %r " % pValue
+        self.getObject("attenuators").setTransmission(float(pValue))
 
 
     def connectionStatusChanged(self, pPeer):

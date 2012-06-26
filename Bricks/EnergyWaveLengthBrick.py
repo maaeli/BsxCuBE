@@ -25,7 +25,21 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                    "enableDisable": Connection("Enable disable object",
                                             [Signal("enableDisable", "enableDisable")],
                                             [],
-                                            "connectionToEnableDisable")
+                                            "connectionToEnableDisable"),
+                    "collect": Connection("Collect object",
+                                            [Signal("collectProcessingDone", "collectProcessingDone"),
+                                             Signal("collectProcessingLog", "collectProcessingLog"),
+                                             Signal("collectDone", "collectDone"),
+                                             Signal("clearCurve", "clearCurve"),
+                                             Signal("grayOut", "grayOut"),
+                                             Signal("transmissionChanged", "transmissionChanged")],
+                                            [Slot("testCollect"),
+                                             Slot("collect"),
+                                             Slot("collectAbort"),
+                                             Slot("setCheckBeam"),
+                                             Slot("triggerEDNA"),
+                                             Slot("blockGUI")],
+                                            "collectObjectConnected")
                    }
 
     signals = []
@@ -89,6 +103,34 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def connectionToEnableDisable(self, pValue):
         if pValue is not None:
             self.brick_widget.setEnabled(pValue)
+
+    # connected to Collect
+    def collectObjectConnected(self, pValue):
+        pass
+
+    def collectProcessingDone(self, filename):
+        pass
+
+    def collectProcessingLog(self, level, logmsg, notify):
+        pass
+
+    def collectDone(self):
+        pass
+
+    def clearCurve(self):
+        pass
+
+    def grayOut(self, grayout):
+        if grayout is not None:
+            if grayout:
+                self.newEnergyPushButton.setEnabled(False)
+                self.newWaveLengthPushButton.setEnabled(False)
+            else:
+                self.newEnergyPushButton.setEnabled(True)
+                self.newWaveLengthPushButton.setEnabled(True)
+
+    def transmissionChanged(self, percentage):
+        pass
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
