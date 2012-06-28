@@ -275,6 +275,8 @@ class Collect(CObjectBase):
                 if not self.edna1Dead:
                     log = xsd.status.executiveSummary.value
                     logging.info(log)
+                    # Log on info on Pipeline
+                    self.showMessage(0, log)
                 #TODO: DEBUG SAS pipeline to be put back
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
 #                if xsd.autoRg is None:
