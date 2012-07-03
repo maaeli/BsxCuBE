@@ -1265,9 +1265,9 @@ class CollectBrick(Core.BaseBrick):
         self._abortFlag = True
 
         if self.__isTesting:
-            self.getObject("collect").testCollectAbort()
+            self.getObject("collect").testCollectAbort(oneway = True)
         else:
-            self.getObject("collect").collectAbort()
+            self.getObject("collect").collectAbort(oneway = True)
 
         #if self.robotCheckBox.isChecked():
         #   self._collectRobot.abort()
