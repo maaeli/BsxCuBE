@@ -66,6 +66,14 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Display"/>
   </properties>
+  <properties id="ReadingBrick3">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in flight tube"/>
+     <property name="fontSize" value="24"/>
+  </properties>
   <properties id="BsxFrameBrick1">
      <property name="flex" value="1"/>
   </properties>
@@ -266,6 +274,10 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Browse"/>
   </properties>
+  <properties id="WebBrowseBrick1">
+     <property name="url" value="http://pcantolinos:8080/ispyb"/>
+     <property name="flex" value="0"/>
+  </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
      <property name="valueThreshold" value="0.80000000000000004"/>
@@ -294,13 +306,11 @@
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
   </properties>
-  <properties id="ReadingBrick3">
-     <property name="flex" value="0"/>
-     <property name="valueThreshold" value="0.80000000000000004"/>
-     <property name="maskFormat" value="%1.1e"/>
-     <property name="suffix" value=" mbar"/>
-     <property name="toolTip" value="Vacuum in flight tube"/>
-     <property name="fontSize" value="24"/>
+  <properties id="ISPyBB">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="ISPyBB"/>
   </properties>
   <properties id="Misc">
      <property name="flex" value="0"/>
@@ -436,6 +446,13 @@
   </connections>
 
   <connections id="Display">
+  </connections>
+
+  <connections id="ReadingBrick3">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="BsxCuBE/ReadingVacFlightTube"/>
+    </connection>
   </connections>
 
   <connections id="BsxFrameBrick1">
@@ -799,6 +816,13 @@
   <connections id="BrowseTab">
   </connections>
 
+  <connections id="WebBrowseBrick1">
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
   <connections id="ReadingBrick1">
     <connection role="reading">
       <signal name="readingChanged"/>
@@ -825,11 +849,7 @@
     </connection>
   </connections>
 
-  <connections id="ReadingBrick3">
-    <connection role="reading">
-      <signal name="readingChanged"/>
-      <peer name="BsxCuBE/ReadingVacFlightTube"/>
-    </connection>
+  <connections id="ISPyBB">
   </connections>
 
   <connections id="Misc">
