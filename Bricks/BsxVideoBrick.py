@@ -36,11 +36,9 @@ class BsxVideoBrick(Core.BaseBrick):
             logging.info("Sample changer VIDEO connected")
 
             self._sampleChanger = sc
-            self.videoWidget.setAutoRefreshRate(50)
-            #TODO: REMOVE when working
-            #TODO:
-            self.videoWidget.setAutoRefresh(False)
-            #TODO: self.videoWidget.setAutoRefresh(Treu)
+            self.videoWidget.setAutoRefreshRate(20)
+            #self.videoWidget.setAutoRefresh(False)
+            self.videoWidget.setAutoRefresh(True)
 
             # override videoWidget calls
             self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
