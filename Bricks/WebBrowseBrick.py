@@ -35,14 +35,8 @@ class WebBrowseBrick(Core.BaseBrick):
         mainLayout = Qt.QHBoxLayout(self.brick_widget)
         mainLayout.addWidget(self.webViewer)
         self.brick_widget.setLayout(mainLayout)
-#        self.brick_widget.setLayout(Qt.QVBoxLayout())
-#        self.brick_widget.layout().setAlignment(QtCore.Qt.AlignTop)
-#        self.brick_widget.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
-
-#        self.hBoxLayout0 = Qt.QHBoxLayout()
-#        self.hBoxLayout0.addWidget(self.webViewer)
-#        self.brick_widget.layout().addLayout(self.hBoxLayout0)
-
+        self.brick_widget.setStyleSheet("border:1px solid;")
+        self.brick_widget.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
 
     def urlChanged(self, url):
         self.urlConfig = url
