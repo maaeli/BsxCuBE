@@ -510,8 +510,13 @@ class Collect(CObjectBase):
         #  Setting storage temperature
         # ============================
         self.showMessage(0, "Setting storage temperature to '%s' C..." % pars["storageTemperature"])
-        # ASynchronous - Treated in sample Changer
-        self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
+        try:
+            # ASynchronous - Treated in sample Changer
+            self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
+        except RuntimeError, ErrMsg:
+            message = "Error when trying set Storage Temperature.\nSampleChanger Error: %r\nAborting collection!" % ErrMsg
+            self.showMessage(2, message, notify = 1)
+            raise
 
         # Open guillotine
         self.commands["guillopen"]()
