@@ -694,22 +694,22 @@ class CollectBrick(Core.BaseBrick):
         #   - that the buffer assigned to a sample is existing
         #
 
-        pars = self.getCollectPars(robot = 1)
+        self.robotParams = self.getCollectPars(robot = 1)
         valid = True
 
-        if len(pars["sampleList"]) == 0:
+        if len(self.robotParams["sampleList"]) == 0:
             valid = False
             Qt.QMessageBox.information(self.brick_widget, "Warning", "No sample to collect in robot!")
         else:
             buffernames = []
 
-            for myBuffer in pars["bufferList"]:
+            for myBuffer in self.robotParams["bufferList"]:
                 # NOW myBuffers of same name are allowed.  But we should do something about it during collect
 
                 if myBuffer not in buffernames:
                     buffernames.append(myBuffer["buffername"])
 
-            for sample in pars["sampleList"]:
+            for sample in self.robotParams["sampleList"]:
                 if sample["buffername"] not in buffernames:
                     Qt.QMessageBox.information(self.brick_widget, "Warning", "Sample with no buffer assignment or buffer name does not exist")
                     valid = False
@@ -748,8 +748,7 @@ class CollectBrick(Core.BaseBrick):
                             "radiationChecked":self.radiationCheckBox.isChecked(),
                             "radiationRelative": float(self.radiationRelativeDoubleSpinBox.value()),
                             "radiationAbsolute": float(self.radiationAbsoluteDoubleSpinBox.value()),
-                            "SEUTemperature": self.seuTemperature,
-                            "storageTemperature": self.storageTemperature }
+                            "SEUTemperature": self.seuTemperature}
 
             robotpars = { "sampleType": str(self._collectRobotDialog.sampleTypeComboBox.currentText()),
                           "storageTemperature": float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value()),
@@ -1054,6 +1053,31 @@ class CollectBrick(Core.BaseBrick):
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
         if not self.robotCheckBox.isChecked() or self.validParameters():
+            # Check Temperature changes are not too big, warn otherwise
+            if self.robotCheckBox.isChecked():
+                # check temperature moving upwards - Storage temperature first - 1 degree move ...
+                oldTemp = self.scObject.getSampleStorageTemperature()
+                newTemp = float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value())
+                if newTemp > (oldTemp + 1.0) :
+                    answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
+                                 "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
+                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
+                    if answer == Qt.QMessageBox.No:
+                        return
+                # Check SEU Temperatures (max) - 4 degree move max...
+                oldTemp = self.scObject.getSEUTemperature()
+                newTemp = 0.0
+                for checkSample in self.robotParams["sampleList"]:
+                    if newTemp < checkSample["SEUtemperature"]:
+                        newTemp = checkSample["SEUtemperature"]
+                if newTemp > (oldTemp + 4.0):
+                    answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
+                                 "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
+                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
+                    if answer == Qt.QMessageBox.No:
+                        return
             self.displayReset()
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()
@@ -1072,7 +1096,10 @@ class CollectBrick(Core.BaseBrick):
                                 break
 
             if not flag:
-                flag = (Qt.QMessageBox.question(self.brick_widget, "Warning", "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % (runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text()), Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
+                flag = (Qt.QMessageBox.question(self.brick_widget, "Warning", \
+                                "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % \
+                                (runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text()), \
+                                Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
 
             if not flag:
                 return
@@ -1192,7 +1219,10 @@ class CollectBrick(Core.BaseBrick):
                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
 
-    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
+    def collect(self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , \
+                pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, \
+                pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, \
+                pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
         if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000 + 12000)
 
@@ -1366,7 +1396,8 @@ class CollectBrick(Core.BaseBrick):
         self.collectObj.blockGUI(False)
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
-            logging.getLogger().warning("The frame was not collected or didn't appear on time! (%d,%d)" % (self._currentFrame, self._frameNumber))
+            logging.getLogger().warning("The frame was not collected or didn't appear on time! (%d,%d)" % \
+                            (self._currentFrame, self._frameNumber))
 
     def getFilenameDetails(self, pFilename):
         pFilename = str(pFilename)
