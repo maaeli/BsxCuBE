@@ -102,23 +102,26 @@
   <properties id="CommandBrick3">
      <property name="flex" value="0"/>
      <property name="caption" value="Sample changer air"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute sample changer air"/>
+     <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute sample changer air"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="CommandBrick2">
      <property name="flex" value="0"/>
      <property name="caption" value="Sample alignment"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute sample alignment"/>
+     <property name="warningPopup" value="False"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute sample alignment"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="CommandBrick1">
      <property name="flex" value="0"/>
      <property name="caption" value="Quick realignment"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute quick realignment"/>
+     <property name="warningPopup" value="False"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute quick realignment"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="LogBrick1">
      <property name="flex" value="1"/>
@@ -128,23 +131,26 @@
   <properties id="CommandBrick6">
      <property name="flex" value="0"/>
      <property name="caption" value="Flight tube vacuum"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute flight tube vacuum"/>
+     <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute flight tube vacuum"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="CommandBrick5">
      <property name="flex" value="0"/>
      <property name="caption" value="Flight tube air"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute flight tube air"/>
+     <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute flight tube air"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="CommandBrick4">
      <property name="flex" value="0"/>
      <property name="caption" value="Sample changer vacuum"/>
-     <property name="parameter" value=""/>
-     <property name="toolTip" value="Execute sample changer vacuum"/>
+     <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
+     <property name="toolTip" value="Execute sample changer vacuum"/>
+     <property name="parameter" value=""/>
   </properties>
   <properties id="hbox1">
      <property name="flex" value="0"/>

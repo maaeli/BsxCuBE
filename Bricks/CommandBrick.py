@@ -14,7 +14,8 @@ class CommandBrick(Core.BaseBrick):
     properties = {"caption": Property("string", "Caption", "", "captionChanged"),
                   "parameter": Property("string", "Parameter", "", "parameterChanged"),
                   "toolTip": Property("string", "Tool tip", "", "toolTipChanged"),
-                  "expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
+                  "expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False),
+                  "warningPopup" : Property("boolean", "WarningPopup", "", "warningChanged", False)}
 
 
     connections = {"command": Connection("Command object",
@@ -35,6 +36,8 @@ class CommandBrick(Core.BaseBrick):
         self.__toolTip = ""
         self.__expertModeOnly = False
         self.__expertMode = False
+        self.__warning = False
+        self.__caption = ""
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
         self.commandPushButton = Qt.QPushButton(self.brick_widget)
@@ -43,6 +46,7 @@ class CommandBrick(Core.BaseBrick):
 
 
     def captionChanged(self, pValue):
+        self.__caption = pValue
         self.commandPushButton.setText(pValue)
 
 
@@ -59,8 +63,15 @@ class CommandBrick(Core.BaseBrick):
         self.__expertModeOnly = pValue
         self.expert_mode(self.__expertMode)
 
+    def warningChanged(self, pValue):
+        self.__warning = pValue
+
 
     def commandPushButtonClicked(self):
+        if self.__warning:
+            answer = Qt.QMessageBox.warning(self.brick_widget, "Warning", "You clicked on " + self.__caption + ".\nDo you really want to execute this command ?", Qt.QMessageBox.Ok, (Qt.QMessageBox.Cancel | Qt.QMessageBox.Default))
+            if answer == Qt.QMessageBox.Cancel:
+                return
         self.getObject("command").executeCommand(self.__parameter)
 
 
