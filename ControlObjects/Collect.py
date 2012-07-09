@@ -60,6 +60,8 @@ class Collect(CObjectBase):
         raise AttributeError, attr
 
     def init(self):
+        self.edna1Dead = None
+        self.edna2Dead = None
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
@@ -71,11 +73,7 @@ class Collect(CObjectBase):
             self.commands["initPlugin_edna1"](self.pluginMerge)
             self.edna1Dead = False
         except:
-            logging.error("Unable to connect to EDNA 1")
-            message = "EDNA server 1 is dead, please restart EDNA 1"
-            self.showMessage(2, message, notify = 1)
-            logging.error("ENDA 1 is dead")
-            self.edna1Dead = True
+            self.showMessageEdnaDead(1)
 
         #TODO: DEBUG - No EDNA 2 yet 13/6 2012
 #        try:
@@ -108,6 +106,24 @@ class Collect(CObjectBase):
             self.__energyMotor.connect("positionChanged", self.newEnergy)
         else:
             logging.error("No connection to energy motor in spec")
+
+    def showMessageEdnaDead(self, _ednaServerNumber):
+        if _ednaServerNumber == 1:
+            if self.edna1Dead:
+                return
+            self.edna1Dead = True
+        elif _ednaServerNumber == 2:
+            if self.edna2Dead:
+                return
+            self.edna2Dead = True
+        else:
+            self.showMessage(2, "ERROR! No such EDNA server: %d" % _ednaServerNumber)
+        logging.error("Unable to connect to EDNA %d" % _ednaServerNumber)
+        message = "EDNA server %d is dead, please restart EDNA %d" % (_ednaServerNumber, _ednaServerNumber)
+        self.showMessage(2, message, notify = 1)
+        logging.error("ENDA %d is dead" % _ednaServerNumber)
+
+
 
     def newEnergy(self, pValue):
         self.__energy = float(pValue)
@@ -238,21 +254,29 @@ class Collect(CObjectBase):
         self.xsdin.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
         self.xsdin.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
         self.xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
-
-        jobId = self.commands["startJob_edna1"]([self.pluginIntegrate, self.xsdin.marshal()])
-        self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
-        logging.info("Processing job %s started", jobId)
-        #For debugging
+        # Save EDNA input to file for reprocessing
         xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
         logging.info("Saving XML data to %s", xmlFilename)
         self.xsdin.exportToFile(xmlFilename)
+        # Run EDNA
+        try:
+            jobId = self.commands["startJob_edna1"]([self.pluginIntegrate, self.xsdin.marshal()])
+            self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+            logging.info("Processing job %s started", jobId)
+            self.edna1Dead = False
+        except:
+            self.showMessageEdnaDead(1)
+
 
     def specCollectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
-        jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
-        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
-
+        try:
+            jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
+            self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
+            self.edna1Dead = False
+        except:
+            self.showMessageEdnaDead(1)
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
@@ -408,8 +432,8 @@ class Collect(CObjectBase):
         self.showMessage(0, "Setting SEU temperature to '%s'..." % sample["SEUtemperature"])
         try:
             self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
-        except RuntimeError:
-            self.showMessage(2, "Error when setting SEU temperature ")
+        except RuntimeError, errMsg:
+            self.showMessage(2, "Error when setting SEU temperature. Error %r" % errMsg)
             raise
 
         # ==================================================
@@ -418,8 +442,8 @@ class Collect(CObjectBase):
         self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s' with volume '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"]))
         try:
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
-        except RuntimeError, ErrMsg:
-            message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], ErrMsg)
+        except RuntimeError, errMsg:
+            message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
             self.showMessage(2, message, notify = 1)
             raise
 
@@ -620,4 +644,10 @@ class Collect(CObjectBase):
 
 
     def collectWithRobot(self, *args):
-        self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
+        # if EDNA 1 is dead we do not collect !
+        if not self.edna1Dead:
+            self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
+        else:
+            message = "EDNA server 1 is dead, please restart EDNA 1"
+            self.showMessage(2, message, notify = 1)
+
