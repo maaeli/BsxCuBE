@@ -437,14 +437,6 @@ class CollectRobotDialog(Qt.QDialog):
         params.initialCleaning = self.initialCleaningCheckBox.isChecked()
         params.bufferMode = self.bufferModeComboBox.currentIndex()
 
-        #=================================================
-        # value for processData - THIS BELONGS TO THE MAIN BRICK
-        #=================================================
-        #if params.doProcess:  # in principle this is not necessary as True and False values should work.  
-        # TODO:  check this
-        #     params.processData = 1
-        #else:
-        #     params.processData = 0
 
         #=================================================
         #  buffer mode
@@ -544,7 +536,7 @@ class CollectRobotDialog(Qt.QDialog):
 
     def loadFile(self, filename):
         try:
-            pars = CollectPars(filename)
+            myPars = CollectPars(filename)
 
             self.clearConfiguration()
 
@@ -559,23 +551,23 @@ class CollectRobotDialog(Qt.QDialog):
             # General parameters
             # 
             self.CBblock = 1
-            self.setComboBox(self.sampleTypeComboBox, pars.sampleType)
+            self.setComboBox(self.sampleTypeComboBox, myPars.sampleType)
 
-            self.storageTemperatureDoubleSpinBox.setValue(float(pars.storageTemperature))
-            self.extraFlowTimeSpinBox.setValue(float(pars.extraFlowTime))
+            self.storageTemperatureDoubleSpinBox.setValue(float(myPars.storageTemperature))
+            self.extraFlowTimeSpinBox.setValue(float(myPars.extraFlowTime))
 
-            self.initialCleaningCheckBox.setChecked(pars.initialCleaning)
+            self.initialCleaningCheckBox.setChecked(myPars.initialCleaning)
 
             # These are saved by index
-            self.optimizationComboBox.setCurrentIndex(pars.optimization)
-            self.bufferModeComboBox.setCurrentIndex(pars.bufferMode)
+            self.optimizationComboBox.setCurrentIndex(myPars.optimization)
+            self.bufferModeComboBox.setCurrentIndex(myPars.bufferMode)
 
             self.historyText.clear()
-            self.historyText.setText(pars.history.strip())
+            self.historyText.setText(myPars.history.strip())
 
-            for buffer in  pars.bufferList:
+            for buffer in  myPars.bufferList:
                 self.addSampleRow(buffer)
-            for sample in  pars.sampleList:
+            for sample in  myPars.sampleList:
                 self.addSampleRow(sample)
 
             self.CBblock = 0
@@ -618,11 +610,11 @@ class CollectRobotDialog(Qt.QDialog):
             if quitsave:
                 return
 
-        pars = self.getCollectRobotPars(all = 1)
+        myPars = self.getCollectRobotPars(all = 1)
         history = self.historyText.toPlainText()
 
         try:
-            pars.save(filename , history)
+            myPars.save(filename , history)
             Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully saved!" % filename)
         except Exception, e:
             import traceback
@@ -898,7 +890,6 @@ class CollectRobotDialog(Qt.QDialog):
         concentration = table.cellWidget(index, self.CONCENTRATION_COLUMN)
         seutemperature = table.cellWidget(index, self.TEMPERATURE_COLUMN)
         bufcombo = table.cellWidget(index, self.BUFFERNAME_COLUMN)
-        waittime = table.cellWidget(index, self.WAITTIME_COLUMN)
 
         well_type = str(self.tableWidget.cellWidget(index, self.SAMPLETYPE_COLUMN).currentText())
 
@@ -925,7 +916,6 @@ class CollectRobotDialog(Qt.QDialog):
             waittimeSpinBox.setRange(0, 10000)
             self.tableWidget.setCellWidget(index, self.WAITTIME_COLUMN, waittimeSpinBox)
 
-            buffernames = []
             bufcombo.setEditable(False)
 
             if sample:
@@ -1058,26 +1048,3 @@ class CollectRobotDialog(Qt.QDialog):
 
     def closePushButtonClicked(self):
         self.accept()
-
-if __name__ == '__main__':
-    import sys
-    class Parent:
-        pass
-
-    from PyTango import DeviceProxy
-    sc = DeviceProxy("nela:20000/bm29/bssc/1")
-
-    app = Qt.QApplication(sys.argv)
-
-    bla = Parent()
-    bla._sampleChanger = sc
-    bla.nbPlates = 3
-    bla.plateInfos = [[8, 12, 12],
-                      [8, 12, 0],
-                      [4, 11, 3]]
-
-    wid = CollectRobotDialog(bla)
-    wid.setWindowTitle('Collect Robot')
-    wid.show()
-
-    sys.exit(app.exec_())
