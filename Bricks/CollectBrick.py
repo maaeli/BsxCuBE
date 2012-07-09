@@ -533,21 +533,25 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectProcessingLog(self, level, logmsg, notify):
+        #TODO : DEBUG
+        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> CollectProcessingLog logmsg %r " % logmsg
         # Level 0 = info, Level 1 = 
         if level == 0:
             logmethod = logging.info
         elif level == 2:
             logmethod = logging.error
 
+        #TODO remove this hack ASAP (SO 9/7 12)
+        ### HORRIBLE CODE
         if logmsg != self.lastCollectProcessingLog:
             for line in logmsg.split(os.linesep):
                 logmethod(line.rstrip())
+            if notify:
+                self.messageDialog(level, logmsg)
 
         self.lastCollectProcessingLog = logmsg
         self._collectRobotDialog.addHistory(level, logmsg)
 
-        if notify:
-            self.messageDialog(level, logmsg)
 
     def clearCurve(self):
         self.displayReset()
