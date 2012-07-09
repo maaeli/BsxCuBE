@@ -81,10 +81,12 @@ class BSSampleChanger(CObjectBase):
         self.channels["SampleType"].set_value(sample_type)
 
     def setSEUTemperature(self, temp):
+        # Note that this has a timeout in the SC as X minutes/degrees
         self.commands["SEUTemperature"](temp)
         self.wait(7200)
 
     def setStorageTemperature(self, temp):
+        # Note that this has a timeout in the SC as X minutes/degrees
         self.commands["TemperatureSampleStorage"](temp)
         self.wait(7200)
 
@@ -127,7 +129,7 @@ class BSSampleChanger(CObjectBase):
         while self.isExecuting():
             loopCount = loopCount + 1
             time.sleep(0.5)
-            # check if timeout*0.5 minutes has passed
+            # check if timeout*0.5 seconds has passed
             if loopCount > timeout :
                 raise RuntimeError, "Timeout from Sample Changer"
 
@@ -138,7 +140,6 @@ class BSSampleChanger(CObjectBase):
 
     def doSetSEUTemperatureProcedure(self, temperature):
         self.setSEUTemperature(temperature)
-        self.wait(7200)
 
     def doFillProcedure(self, *args):
         self.fill(*args)
