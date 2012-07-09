@@ -514,7 +514,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> Collect Processing Done filename %r " % dat_filename
+        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> Collect Processing Done filename %r " % dat_filename
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
         if self.last_dat is None :
@@ -534,7 +534,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingLog(self, level, logmsg, notify):
         #TODO : DEBUG
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> CollectProcessingLog logmsg %r " % logmsg
+        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> CollectProcessingLog logmsg %r " % logmsg
         # Level 0 = info, Level 1 = 
         if level == 0:
             logmethod = logging.info
@@ -1215,7 +1215,7 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
-        print ">>>>>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
+        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
             self.collectObj.blockGUI(False)
