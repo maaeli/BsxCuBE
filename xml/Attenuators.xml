@@ -1,13 +1,8 @@
 <object class = "Attenuators" username = "Attenuators">
-	
    <uri>nela:oh</uri>
-	
    <command name="toggleFilter" type="spec" call="attio"/>
-			
    <command name="setTransmission" type="spec" call="transmission"/>
-   
    <channel name="attenuatorsState" type="spec" call="MATT_STATE"/>
-	
    <channel name="attenuatorsFactor" type="spec" call="ATT_FACTOR"/>
 
    <data name="Aluminium 50 um" bits="1"/>
