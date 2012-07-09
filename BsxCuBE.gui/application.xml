@@ -110,7 +110,7 @@
   <properties id="CommandBrick2">
      <property name="flex" value="0"/>
      <property name="caption" value="Sample alignment"/>
-     <property name="warningPopup" value="False"/>
+     <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
      <property name="toolTip" value="Execute sample alignment"/>
      <property name="parameter" value=""/>
