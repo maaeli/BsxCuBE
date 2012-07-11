@@ -47,7 +47,6 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectNormalisationChanged", "collectNormalisationChanged"),
                                              Signal("collectRadiationDamageChanged", "collectRadiationDamageChanged"),
                                              Signal("collectAbsoluteRadiationDamageChanged", "collectAbsoluteRadiationDamageChanged"),
-                                             Signal("collectProcessDataChanged", "collectProcessDataChanged"),
                                              Signal("collectNewFrameChanged", "collectNewFrameChanged"),
                                              Signal("checkBeamChanged", "checkBeamChanged"),
                                              Signal("beamLostChanged", "beamLostChanged"),
@@ -334,8 +333,10 @@ class CollectBrick(Core.BaseBrick):
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
-        self.processCheckBox = Qt.QCheckBox("Process after collect", self.brick_widget)
-        self.hBoxLayout16.addWidget(self.processCheckBox)
+        self.pilatusCheckBox = Qt.QCheckBox("Energy adjust pilatus", self.brick_widget)
+        Qt.QObject.connect(self.pilatusCheckBox, Qt.SIGNAL("toggled(bool)"), self.pilatusCheckBoxToggled)
+        self.pilatusCheckBox.setChecked(True)
+        self.hBoxLayout16.addWidget(self.pilatusCheckBox)
         self.robotCheckBox = Qt.QCheckBox("Collect using robot", self.brick_widget)
         Qt.QObject.connect(self.robotCheckBox, Qt.SIGNAL("toggled(bool)"), self.robotCheckBoxToggled)
         self.hBoxLayout16.addWidget(self.robotCheckBox)
@@ -509,8 +510,6 @@ class CollectBrick(Core.BaseBrick):
         if pValue is not None:
             self.radiationAbsoluteDoubleSpinBox.setValue(float(pValue))
 
-    def collectProcessDataChanged(self, pValue):
-        self.processCheckBox.setChecked(pValue == "1")
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
@@ -740,7 +739,6 @@ class CollectBrick(Core.BaseBrick):
                             "currentConcentration": float(self.concentrationDoubleSpinBox.value()),
                             "currentComments":str(self.commentsLineEdit.text()),
                             "currentCode": str(self.codeLineEdit.text()),
-                            "doProcess":self.processCheckBox.isChecked(),
                             "mask":str(self.maskLineEdit.text()),
                             "detectorDistance": float(self.detectorDistanceDoubleSpinBox.value()),
                             "waveLength": float(self._waveLengthStr),
@@ -811,7 +809,8 @@ class CollectBrick(Core.BaseBrick):
             collectpars.update(robotpars)
 
             collectpars["flowTime"] = collectpars["timePerFrame"] * collectpars["frameNumber"] + collectpars["extraFlowTime"]
-            collectpars["processData"] = 1 if collectpars["doProcess"] else 0
+            # always processData
+            collectpars["processData"] = 1
         else:
             collectpars = CollectPars()
 
@@ -828,7 +827,6 @@ class CollectBrick(Core.BaseBrick):
             collectpars.currentComments = self.commentsLineEdit.text()
             collectpars.currentCode = self.codeLineEdit.text()
 
-            collectpars.doProcess = self.processCheckBox.isChecked()
 
             collectpars.mask = self.maskLineEdit.text()
             collectpars.detectorDistance = self.detectorDistanceDoubleSpinBox.value()
@@ -844,14 +842,9 @@ class CollectBrick(Core.BaseBrick):
             collectpars.SEUTemperature = self.seuTemperature
             collectpars.storageTemperature = self.storageTemperature
 
+            # always process data
+            collectpars.processData = 1
 
-           #=================================================
-           # Correct value for processData 
-           #=================================================
-            if collectpars.doProcess:  # in principle this is not necessary as True and False values should work.  TODO:  check this
-                collectpars.processData = 1
-            else:
-                collectpars.processData = 0
 
             #=================================================
             #  Calculate total flow time
@@ -1009,6 +1002,12 @@ class CollectBrick(Core.BaseBrick):
 #    def spectroCheckBoxToggled(self, pValue):
 #        self.extinctionCoefficentDoubleSpinBox.setEnabled(pValue)
 
+    def pilatusCheckBoxToggled(self, pValue):
+        if not pValue:
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus threshold unselecting not operational. Sorry...", Qt.QMessageBox.Ok)
+            self.pilatusCheckBox.setChecked(True)
+
+
     def robotCheckBoxToggled(self, pValue):
         if pValue:
             if self._collectRobotDialog.isVisible():
@@ -1060,7 +1059,7 @@ class CollectBrick(Core.BaseBrick):
             # Check Temperature changes are not too big, warn otherwise
             if self.robotCheckBox.isChecked():
                 # check temperature moving upwards - Storage temperature first - 1 degree move ...
-                oldTemp = self.scObject.getSampleStorageTemperature()
+                oldTemp = float(self.scObject.getSampleStorageTemperature())
                 newTemp = float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value())
                 if newTemp > (oldTemp + 1.0) :
                     answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
@@ -1070,7 +1069,7 @@ class CollectBrick(Core.BaseBrick):
                     if answer == Qt.QMessageBox.No:
                         return
                 # Check SEU Temperatures (max) - 4 degree move max...
-                oldTemp = self.scObject.getSEUTemperature()
+                oldTemp = float(self.scObject.getSEUTemperature())
                 newTemp = 0.0
                 for checkSample in self.robotParams["sampleList"]:
                     if newTemp < checkSample["SEUtemperature"]:
@@ -1170,10 +1169,8 @@ class CollectBrick(Core.BaseBrick):
         self.collectObj.blockGUI(True)
         self._abortFlag = False
 
-        if self.processCheckBox.isChecked():
-            processData = 1
-        else:
-            processData = 0
+        # always process
+        processData = 1
 
         self.startCollection(mode = "no robot")
 
@@ -1358,7 +1355,6 @@ class CollectBrick(Core.BaseBrick):
                    self.radiationCheckBox, \
                    self.radiationRelativeDoubleSpinBox, \
                    self.radiationAbsoluteDoubleSpinBox, \
-                   self.processCheckBox, \
                    self.notifyCheckBox, \
                    self.checkBeamBox, \
                    self.testPushButton, \
@@ -1397,7 +1393,12 @@ class CollectBrick(Core.BaseBrick):
 
         self._feedBackFlag = False
         self.__isTesting = False
-        self.collectObj.blockGUI(False)
+        try:
+            self.collectObj.blockGUI(oneway = True)
+        except Exception, e:
+            logging.error("Could not connect to COServer")
+            logging.exception(e)
+
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
             logging.getLogger().warning("The frame was not collected or didn't appear on time! (%d,%d)" % \
