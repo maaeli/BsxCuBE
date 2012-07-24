@@ -603,6 +603,7 @@ class CollectBrick(Core.BaseBrick):
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
                         logging.getLogger().info("The data collection is done!")
+                        self.collectObj.blockGUI(False)
                     else:
                         feedBackFlag = self._feedBackFlag
                         if self.robotCheckBox.isChecked():
@@ -610,6 +611,7 @@ class CollectBrick(Core.BaseBrick):
                             self._feedBackFlag = False
                             self.__isTesting = False
                             logging.getLogger().info("The data collection is done!")
+                            self.collectObj.blockGUI(False)
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
@@ -1056,10 +1058,17 @@ class CollectBrick(Core.BaseBrick):
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
         if not self.robotCheckBox.isChecked() or self.validParameters():
-            # Check Temperature changes are not too big, warn otherwise
+            # Check Temperature changes are not too big when doing robot collection
             if self.robotCheckBox.isChecked():
                 # check temperature moving upwards - Storage temperature first - 1 degree move ...
-                oldTemp = float(self.scObject.getSampleStorageTemperature())
+                oldTemp = 100.0
+                if self.scObject.getSampleStorageTemperature() != "":
+                    try:
+                        oldTemp = float(self.scObject.getSampleStorageTemperature())
+                    except:
+                        oldTemp = 100.0
+                else:
+                    logging.getLogger().warning("Can not get current Storage temperature from Sample Changer")
                 newTemp = float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value())
                 if newTemp > (oldTemp + 1.0) :
                     answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
@@ -1069,18 +1078,22 @@ class CollectBrick(Core.BaseBrick):
                     if answer == Qt.QMessageBox.No:
                         return
                 # Check SEU Temperatures (max) - 4 degree move max...
-                oldTemp = float(self.scObject.getSEUTemperature())
-                newTemp = 0.0
-                for checkSample in self.robotParams["sampleList"]:
-                    if newTemp < checkSample["SEUtemperature"]:
-                        newTemp = checkSample["SEUtemperature"]
-                if newTemp > (oldTemp + 4.0):
-                    answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
+                oldTemp = 100.0
+                if self.scObject.getSEUTemperature() != "":
+                    oldTemp = float(self.scObject.getSEUTemperature())
+                    newTemp = 0.0
+                    for checkSample in self.robotParams["sampleList"]:
+                        if newTemp < checkSample["SEUtemperature"]:
+                            newTemp = checkSample["SEUtemperature"]
+                    if newTemp > (oldTemp + 4.0):
+                        answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
                                  "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
                                  " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
                                  Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
-                    if answer == Qt.QMessageBox.No:
-                        return
+                        if answer == Qt.QMessageBox.No:
+                            return
+                else:
+                    logging.getLogger().warning("Can not get current SEU temperature from Sample Changer")
             self.displayReset()
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()
@@ -1355,6 +1368,7 @@ class CollectBrick(Core.BaseBrick):
                    self.radiationCheckBox, \
                    self.radiationRelativeDoubleSpinBox, \
                    self.radiationAbsoluteDoubleSpinBox, \
+                   self.pilatusCheckBox, \
                    self.notifyCheckBox, \
                    self.checkBeamBox, \
                    self.testPushButton, \
@@ -1394,7 +1408,7 @@ class CollectBrick(Core.BaseBrick):
         self._feedBackFlag = False
         self.__isTesting = False
         try:
-            self.collectObj.blockGUI(oneway = True)
+            self.collectObj.blockGUI(False)
         except Exception, e:
             logging.error("Could not connect to COServer")
             logging.exception(e)
