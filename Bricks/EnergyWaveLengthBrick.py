@@ -1,4 +1,4 @@
-import logging
+import logging, time
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Connection, Signal, Slot
 from PyQt4 import Qt
@@ -16,7 +16,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 # TODO : DEBUG
     connections = {"energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")],
                                             "connectedToEnergy"),
                    "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
@@ -38,7 +38,8 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                                              Slot("collectAbort"),
                                              Slot("setCheckBeam"),
                                              Slot("triggerEDNA"),
-                                             Slot("blockGUI")],
+                                             Slot("blockGUI"),
+                                             Slot("blockEnergyAdjust")],
                                             "collectObjectConnected")
                    }
 
@@ -175,7 +176,12 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def setEnergy(self, energyStr):
         if self.energyControlObject is not None:
+            # Before setting energy - Block Update via motor
+            self.energyControlObject.blockMotorEnergyAdjust(True)
             self.energyControlObject.setEnergy(energyStr)
+            while not self.energyControlObject.pilatusReady():
+                time.sleep(0.5)
+            self.energyControlObject.blockMotorEnergyAdjust(False)
             # make sure you set gapfill as well
             self.energyControlObject.setPilatusFill()
         else:

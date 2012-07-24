@@ -27,7 +27,8 @@ class Collect(CObjectBase):
              Slot("collectAbort"),
              Slot("setCheckBeam"),
              Slot("triggerEDNA"),
-             Slot("blockGUI")]
+             Slot("blockGUI"),
+             Slot("blockEnergyAdjust")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
@@ -45,6 +46,8 @@ class Collect(CObjectBase):
         self.storageTemperature = -374
         self.exposureTemperature = -374
         self.xsdAverage = None
+
+        self.__energyAdjust = True
 
 
         # get machdevice from config file
@@ -127,15 +130,20 @@ class Collect(CObjectBase):
 
     def newEnergy(self, pValue):
         self.__energy = float(pValue)
-        self.channels["pilatus_threshold"].set_value(self.__energy)
-        while not self.pilatusReady() :
-            time.sleep(0.5)
+        if self.__energyAdjust:
+            self.channels["pilatus_threshold"].set_value(self.__energy)
+            while not self.pilatusReady() :
+                time.sleep(0.5)
 
     def currentChanged(self, current):
         self.machineCurrent = current
 
     def blockGUI(self, block):
         self.emit("grayOut", block)
+
+    def blockEnergyAdjust(self, pValue):
+        # True or false for following energy with Pilatus
+        self.__energyAdjust = pValue
 
     def runNumberChanged(self, runNumber):
         # set new run number from Spec - Convert it to int
@@ -413,9 +421,10 @@ class Collect(CObjectBase):
         #
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            self.pilatusThreshold.set_value(self.__energy)
-            while not self.pilatusReady() :
-                time.sleep(0.5)
+            if self.__energyAdjust:
+                self.pilatusThreshold.set_value(self.__energy)
+                while not self.pilatusReady() :
+                    time.sleep(0.5)
 
         #
         # SET gapfill on the Pilatus (Even if not needed)

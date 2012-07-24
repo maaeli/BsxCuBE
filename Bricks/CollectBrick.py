@@ -61,14 +61,15 @@ class CollectBrick(Core.BaseBrick):
                                              Slot("collectAbort"),
                                              Slot("setCheckBeam"),
                                              Slot("triggerEDNA"),
-                                             Slot("blockGUI")],
+                                             Slot("blockGUI"),
+                                             Slot("blockEnergyAdjust")],
                                             "collectObjectConnected"),
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
                                             []),
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")],
                                             "connectedToEnergy"),
                     "samplechanger": Connection("Sample Changer object",
                                             [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
@@ -116,12 +117,16 @@ class CollectBrick(Core.BaseBrick):
         self.__isTesting = False
         self.__expertModeOnly = False
         self.__expertMode = False
+        self.energyControlObject = None
+        self.collectObj = None
 
 
         self.__validParameters = [False, False, False]
 
         #TODO: DEBUG
-	self.last_dat = None
+        self.last_dat = None
+        #TODO: DEBUG - Note that I have started
+        rc = os.system("touch /tmp/.BsxCuBE.GUIStart")
         self.image_proxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
@@ -1006,9 +1011,17 @@ class CollectBrick(Core.BaseBrick):
 
     def pilatusCheckBoxToggled(self, pValue):
         if not pValue:
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus threshold unselecting not operational. Sorry...", Qt.QMessageBox.Ok)
-            self.pilatusCheckBox.setChecked(True)
-
+            # not follow value
+            if self.energyControlObject is not None:
+                self.energyControlObject.energyAdjustPilatus(False)
+            if self.collectObj is not None:
+                self.collectObj.blockEnergyAdjust(False)
+        else:
+            # normal behavior
+            if self.energyControlObject is not None:
+                self.energyControlObject.energyAdjustPilatus(True)
+            if self.collectObj is not None:
+                self.collectObj.blockEnergyAdjust(True)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:

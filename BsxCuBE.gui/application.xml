@@ -595,6 +595,8 @@
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
       <slot name="setPilatusFill"/>
+      <slot name="energyAdjustPilatus"/>
+      <slot name="blockMotorEnergyAdjust"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="image_proxy">
@@ -637,6 +639,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="motoralignment">
@@ -681,6 +684,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
@@ -747,6 +751,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
@@ -769,6 +774,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="energy">
@@ -777,6 +783,8 @@
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
       <slot name="setPilatusFill"/>
+      <slot name="energyAdjustPilatus"/>
+      <slot name="blockMotorEnergyAdjust"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="login">
@@ -808,6 +816,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">
@@ -969,6 +978,7 @@
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
       <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
     <connection role="login">

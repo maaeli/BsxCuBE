@@ -8,21 +8,20 @@ class EnergyWaveLength(CObjectBase):
 
     signals = [Signal("energyChanged")]
 
-    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill")]
+    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
         # Threshold in keV (to change the sensitivity)
         self.__pilatusThreshold = 12.00
+        self.__energyAdjust = True
+        self.__blockMotorEnergyAdjust = False
+        self.pilatusThreshold = None
 
     def init(self):
         # The keV to Angstrom calc
         self.hcOverE = 12.3984
         self.deltaPilatus = 0.1
-        # check that we have connection to Pilatus
-        self.pilatusThreshold = self.channels.get("pilatus_threshold")
-        if  self.pilatusThreshold is None:
-            logging.error("No connection to Pilatus")
         # Runnning = Nothing should be possible
         self.__pilatus_status = "Running"
         # make another connection
@@ -51,7 +50,17 @@ class EnergyWaveLength(CObjectBase):
             return
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            self.pilatusThreshold.set_value(self.__energy)
+            if self.__energyAdjust:
+                if self.__blockMotorEnergyAdjust is False:
+                    #TODO: DEBUG
+                    print ">> changing energy by motor"
+                    # if not set Threshold, try to connect it now
+                    if  self.pilatusThreshold is None:
+                        self.pilatusThreshold = self.channels.get("pilatus_threshold")
+                        if self.pilatusThreshold is None:
+                            logging.error("Tried and failed to connect to Pilatus")
+                        else:
+                            self.pilatusThreshold.set_value(self.__energy)
 
     def getEnergy(self):
         return self.__energyMotor.position()
@@ -62,7 +71,14 @@ class EnergyWaveLength(CObjectBase):
         # Check if we need and can set new Energy on Pilatus first.
         self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            self.pilatusThreshold.set_value(self.__energy)
+            if self.__energyAdjust:
+                # if not set Threshold, try to connect it now
+                if  self.pilatusThreshold is None:
+                    self.pilatusThreshold = self.channels.get("pilatus_threshold")
+                    if self.pilatusThreshold is None:
+                        logging.error("Tried and failed to connect to Pilatus")
+                    else:
+                        self.pilatusThreshold.set_value(self.__energy)
 
     def fillModeChanged(self, pValue):
         # read value first
@@ -76,6 +92,14 @@ class EnergyWaveLength(CObjectBase):
     def setPilatusFill(self):
         # Just for safety set fill mode to ON => gapfill -1
         self.pilatusFillMode.set_value("ON")
+
+    def energyAdjustPilatus(self, pValue):
+        # True or false for following energy with Pilatus
+        self.__energyAdjust = pValue
+
+    def blockMotorEnergyAdjust(self, pValue):
+        # True or false for following energy with Pilatus
+        self.__blockMotorEnergyAdjust = pValue
 
     def pilatusReady(self):
         # Check if Pilatus is ready
