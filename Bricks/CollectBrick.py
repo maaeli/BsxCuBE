@@ -1063,10 +1063,7 @@ class CollectBrick(Core.BaseBrick):
                 # check temperature moving upwards - Storage temperature first - 1 degree move ...
                 oldTemp = 100.0
                 if self.scObject.getSampleStorageTemperature() != "":
-                    try:
-                        oldTemp = float(self.scObject.getSampleStorageTemperature())
-                    except:
-                        oldTemp = 100.0
+                    oldTemp = float(self.scObject.getSampleStorageTemperature())
                 else:
                     logging.getLogger().warning("Can not get current Storage temperature from Sample Changer")
                 newTemp = float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value())
@@ -1081,19 +1078,19 @@ class CollectBrick(Core.BaseBrick):
                 oldTemp = 100.0
                 if self.scObject.getSEUTemperature() != "":
                     oldTemp = float(self.scObject.getSEUTemperature())
-                    newTemp = 0.0
-                    for checkSample in self.robotParams["sampleList"]:
-                        if newTemp < checkSample["SEUtemperature"]:
-                            newTemp = checkSample["SEUtemperature"]
-                    if newTemp > (oldTemp + 4.0):
-                        answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
+                else:
+                    logging.getLogger().warning("Can not get current SEU temperature from Sample Changer")
+                newTemp = 0.0
+                for checkSample in self.robotParams["sampleList"]:
+                    if newTemp < checkSample["SEUtemperature"]:
+                        newTemp = checkSample["SEUtemperature"]
+                if newTemp > (oldTemp + 4.0):
+                    answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
                                  "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
                                  " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
                                  Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
-                        if answer == Qt.QMessageBox.No:
-                            return
-                else:
-                    logging.getLogger().warning("Can not get current SEU temperature from Sample Changer")
+                    if answer == Qt.QMessageBox.No:
+                        return
             self.displayReset()
             directory = str(self.directoryLineEdit.text()) + "/raw"
             runNumber = "%03d" % self.runNumberSpinBox.value()
