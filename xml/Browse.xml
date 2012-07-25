@@ -1,7 +1,3 @@
 <object class = "Browse" username = "Browse">
-   <uri>nela:exp</uri>	
-   <channel name="browseType" type="spec"     call="BSX_GLOBAL/browse/type"/>
-   <channel name="browseLocation" type="spec" call="BSX_GLOBAL/browse/location"/>
-</object>	
 
-
+</object>

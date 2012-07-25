@@ -501,8 +501,6 @@
 
   <connections id="BrowseBrick1">
     <connection role="browse">
-      <signal name="browseTypeChanged"/>
-      <signal name="browseLocationChanged"/>
       <peer name="BsxCuBE/Browse"/>
     </connection>
     <connection role="login">

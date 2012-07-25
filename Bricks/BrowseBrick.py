@@ -11,8 +11,7 @@ class BrowseBrick(Core.BaseBrick):
 
     properties = {"enableType": Property("boolean", "Enable type", "", "enableTypeChanged", True)}
     connections = {"browse": Connection("Browse object",
-                                        [Signal("browseTypeChanged", "browseTypeChanged"),
-                                         Signal("browseLocationChanged", "browseLocationChanged")],
+                                        [],
                                         [],
                                         "connectionStatusChanged"),
                     "image_proxy": Connection("image proxy",
@@ -136,14 +135,6 @@ class BrowseBrick(Core.BaseBrick):
     # Logged In : True or False 
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
-
-    def browseTypeChanged(self, pValue):
-        if pValue is not None:
-            self.typeComboBox.setCurrentIndex(int(pValue))
-
-    def browseLocationChanged(self, pValue):
-        if pValue is not None:
-            self.locationLineEdit.setText(pValue)
 
     def connectionStatusChanged(self, pPeer):
         pass
