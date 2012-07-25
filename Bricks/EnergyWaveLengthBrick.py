@@ -177,11 +177,14 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def setEnergy(self, energyStr):
         if self.energyControlObject is not None:
             # Before setting energy - Block Update via motor
-            self.energyControlObject.blockMotorEnergyAdjust(True)
+            #TODO: DEBUG - Continue
+            #self.energyControlObject.blockMotorEnergyAdjust(True)
+            #TODO: DEBUG
             self.energyControlObject.setEnergy(energyStr)
-            while not self.energyControlObject.pilatusReady():
-                time.sleep(0.5)
-            self.energyControlObject.blockMotorEnergyAdjust(False)
+            #TODO - Try to make this work
+            #while not self.energyControlObject.pilatusReady():
+            #    time.sleep(0.5)
+            # self.energyControlObject.blockMotorEnergyAdjust(False)
             # make sure you set gapfill as well
             self.energyControlObject.setPilatusFill()
         else:

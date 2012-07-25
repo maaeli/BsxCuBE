@@ -132,8 +132,6 @@ class Collect(CObjectBase):
         self.__energy = float(pValue)
         if self.__energyAdjust:
             self.channels["pilatus_threshold"].set_value(self.__energy)
-            while not self.pilatusReady() :
-                time.sleep(0.5)
 
     def currentChanged(self, current):
         self.machineCurrent = current
