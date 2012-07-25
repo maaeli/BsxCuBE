@@ -102,6 +102,7 @@ class CollectBrick(Core.BaseBrick):
     def init(self):
         # The keV to Angstrom calc
         self.hcOverE = 12.3984
+        self.deltaPilatus = 0.1
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
@@ -1022,6 +1023,10 @@ class CollectBrick(Core.BaseBrick):
                 self.energyControlObject.energyAdjustPilatus(True)
             if self.collectObj is not None:
                 self.collectObj.blockEnergyAdjust(True)
+            # Put back Energy if connected
+            if self.energyControlObject is not None:
+                self.__energy = float(self.energyControlObject.getEnergy())
+                self.energyControlObject.setEnergy(self.__energy)
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
