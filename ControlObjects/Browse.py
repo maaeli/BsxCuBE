@@ -14,8 +14,8 @@ class Browse(CObjectBase):
 
 
     def init(self):
-        self.channels["browseType"].connect("update", self.browseLocationChanged)
-        self.channels["browseLocation"].connect("update", self.browseTypeChanged)
+        self.channels["browseType"].connect("update", self.browseTypeChanged)
+        self.channels["browseLocation"].connect("update", self.browseLocationChanged)
 
     def browseTypeChanged(self, pValue):
         self.emit("browseTypeChanged", pValue)
