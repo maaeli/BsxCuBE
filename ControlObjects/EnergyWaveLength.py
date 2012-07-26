@@ -8,14 +8,13 @@ class EnergyWaveLength(CObjectBase):
 
     signals = [Signal("energyChanged")]
 
-    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")]
+    slots = [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")]
 
     def __init__(self, *args, **kwargs):
         CObjectBase.__init__(self, *args, **kwargs)
         # Threshold in keV (to change the sensitivity)
         self.__pilatusThreshold = 12.00
         self.__energyAdjust = True
-        self.__blockMotorEnergyAdjust = False
         self.pilatusThreshold = None
 
     def init(self):
@@ -29,29 +28,30 @@ class EnergyWaveLength(CObjectBase):
         # get spec motor as described in href and the corresponding energy.xml
         self.__energyMotor = self.objects["getEnergy"]
         if self.__energyMotor is not None:
-            # connect to the signals from the CO Object specmotor
-            self.__energyMotor.connect("positionChanged", self.newEnergy)
+            # connect to the [Only if MOVING or ON] - to avoid constant upgrades
+            self.__energyMotor.connect("stateChanged", self.newEnergy)
         else:
             logging.error("No connection to energy motor in spec")
         # Connect to fill_mode and correct it back each time it changes
         self.channels["fill_mode"].connect("update", self.fillModeChanged)
 
 
-    def newEnergy(self, pValue):
-        self.__energy = float(pValue)
-        # Calculate wavelength
-        wavelength = self.hcOverE / self.__energy
-        wavelengthStr = "%.4f" % wavelength
-        # set value of BSX_GLOBAL
-        self.channels["collectWaveLength"].set_value(wavelengthStr)
-        self.emit("energyChanged", pValue)
-        # if in movement already, just return....
-        if not self.pilatusReady():
-            return
-        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
-        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            if self.__energyAdjust:
-                if self.__blockMotorEnergyAdjust is False:
+    def newEnergy(self, pState):
+        if pState == 'ON':
+            pValue = self.__energyMotor.position()
+            self.__energy = float(pValue)
+            # Calculate wavelength
+            wavelength = self.hcOverE / self.__energy
+            wavelengthStr = "%.4f" % wavelength
+            # set value of BSX_GLOBAL
+            self.channels["collectWaveLength"].set_value(wavelengthStr)
+            self.emit("energyChanged", pValue)
+            # if in movement already, just return....
+            if not self.pilatusReady():
+                return
+            self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+            if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+                if self.__energyAdjust:
                     #TODO: DEBUG
                     print ">> changing energy by motor"
                     # if not set Threshold, try to connect it now
@@ -61,6 +61,11 @@ class EnergyWaveLength(CObjectBase):
                             logging.error("Tried and failed to connect to Pilatus")
                         else:
                             self.pilatusThreshold.set_value(self.__energy)
+                    else :
+                        self.pilatusThreshold.set_value(self.__energy)
+
+    def getPilatusThreshold(self):
+        return float(self.channels["pilatus_threshold"].value())
 
     def getEnergy(self):
         return self.__energyMotor.position()
@@ -79,6 +84,8 @@ class EnergyWaveLength(CObjectBase):
                         logging.error("Tried and failed to connect to Pilatus")
                     else:
                         self.pilatusThreshold.set_value(self.__energy)
+                else:
+                    self.pilatusThreshold.set_value(self.__energy)
 
     def fillModeChanged(self, pValue):
         # read value first
@@ -88,7 +95,6 @@ class EnergyWaveLength(CObjectBase):
                 time.sleep(0.5)
             self.setPilatusFill()
 
-
     def setPilatusFill(self):
         # Just for safety set fill mode to ON => gapfill -1
         self.pilatusFillMode.set_value("ON")
@@ -96,10 +102,6 @@ class EnergyWaveLength(CObjectBase):
     def energyAdjustPilatus(self, pValue):
         # True or false for following energy with Pilatus
         self.__energyAdjust = pValue
-
-    def blockMotorEnergyAdjust(self, pValue):
-        # True or false for following energy with Pilatus
-        self.__blockMotorEnergyAdjust = pValue
 
     def pilatusReady(self):
         # Check if Pilatus is ready

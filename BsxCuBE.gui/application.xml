@@ -398,9 +398,6 @@
 
   <connections id="CalibrationDiamondBrick1">
     <connection role="calibration">
-      <signal name="calibrationStatusChanged"/>
-      <signal name="newPositionChanged"/>
-      <slot name="executeCalibration"/>
       <peer name="BsxCuBE/CalibrationDiamond"/>
     </connection>
   </connections>
@@ -594,7 +591,6 @@
       <slot name="pilatusReady"/>
       <slot name="setPilatusFill"/>
       <slot name="energyAdjustPilatus"/>
-      <slot name="blockMotorEnergyAdjust"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="image_proxy">
@@ -782,7 +778,6 @@
       <slot name="pilatusReady"/>
       <slot name="setPilatusFill"/>
       <slot name="energyAdjustPilatus"/>
-      <slot name="blockMotorEnergyAdjust"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="login">

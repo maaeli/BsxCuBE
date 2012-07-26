@@ -69,7 +69,7 @@ class CollectBrick(Core.BaseBrick):
                                             []),
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")],
                                             "connectedToEnergy"),
                     "samplechanger": Connection("Sample Changer object",
                                             [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
@@ -81,6 +81,10 @@ class CollectBrick(Core.BaseBrick):
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                             [],
                                             "image_proxy_connected"),
+                    "energyBrick": Connection("Energy Brick connection",
+                                            [Signal("adjustPilatusThreshold", "adjustPilatusThreshold")],
+                                            [],
+                                            "connectionToEnergyBrick"),
                     "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
@@ -429,6 +433,9 @@ class CollectBrick(Core.BaseBrick):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
 
+    # Connected to Energy Brick
+    def connectionToEnergyBrick(self, pPeer):
+        pass
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
@@ -681,13 +688,20 @@ class CollectBrick(Core.BaseBrick):
 
 
     def connectedToEnergy(self, pPeer):
-       if pPeer is not None:
-            self.energyControlObject = pPeer
-            # read energy when getting contact with CO Object
-            self.__energy = float(self.energyControlObject.getEnergy())
-            wavelength = self.hcOverE / self.__energy
-            wavelengthStr = "%.4f" % wavelength
-            self._waveLengthStr = wavelengthStr
+       if pPeer is None:
+           self.energyControlObject = None
+       else:
+           if self.energyControlObject is None:
+              self.energyControlObject = pPeer
+              # read energy when getting contact with CO Object
+              self.__energy = float(self.energyControlObject.getEnergy())
+              wavelength = self.hcOverE / self.__energy
+              wavelengthStr = "%.4f" % wavelength
+              self._waveLengthStr = wavelengthStr
+              # Set energy when connected
+              self.energyControlObject.setEnergy(self.__energy)
+
+
 
     def energyChanged(self, pValue):
         if pValue is not None:
@@ -1016,13 +1030,13 @@ class CollectBrick(Core.BaseBrick):
             if self.energyControlObject is not None:
                 self.energyControlObject.energyAdjustPilatus(False)
             if self.collectObj is not None:
-                self.collectObj.blockEnergyAdjust(False)
+                self.collectObj.blockEnergyAdjust(True)
         else:
             # normal behavior
             if self.energyControlObject is not None:
                 self.energyControlObject.energyAdjustPilatus(True)
             if self.collectObj is not None:
-                self.collectObj.blockEnergyAdjust(True)
+                self.collectObj.blockEnergyAdjust(False)
             # Put back Energy if connected
             if self.energyControlObject is not None:
                 self.__energy = float(self.energyControlObject.getEnergy())

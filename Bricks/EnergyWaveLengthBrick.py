@@ -12,11 +12,9 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     properties = {}
 
-
-# TODO : DEBUG
     connections = {"energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
-                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus"), Slot("blockMotorEnergyAdjust")],
+                                            [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")],
                                             "connectedToEnergy"),
                    "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
@@ -43,7 +41,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                                             "collectObjectConnected")
                    }
 
-    signals = []
+    signals = [Signal("adjustPilatusThreshold")]
     slots = []
 
 
@@ -176,15 +174,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     def setEnergy(self, energyStr):
         if self.energyControlObject is not None:
-            # Before setting energy - Block Update via motor
-            #TODO: DEBUG - Continue
-            #self.energyControlObject.blockMotorEnergyAdjust(True)
-            #TODO: DEBUG
             self.energyControlObject.setEnergy(energyStr)
-            #TODO - Try to make this work
-            #while not self.energyControlObject.pilatusReady():
-            #    time.sleep(0.5)
-            # self.energyControlObject.blockMotorEnergyAdjust(False)
             # make sure you set gapfill as well
             self.energyControlObject.setPilatusFill()
         else:

@@ -47,7 +47,7 @@ class Collect(CObjectBase):
         self.exposureTemperature = -374
         self.xsdAverage = None
 
-        self.__energyAdjust = True
+        self.__energyAdjust = False
 
 
         # get machdevice from config file
@@ -102,13 +102,6 @@ class Collect(CObjectBase):
             readMachCurrentValue.connect('update', self.currentChanged)
         # set up a channel
         self.channels["collectRunNumber"].connect("update", self.runNumberChanged)
-        # set up a channel for energy
-        self.__energyMotor = self.objects["getEnergy"]
-        if self.__energyMotor is not None:
-            # connect to the signals from the CO Object specmotor
-            self.__energyMotor.connect("positionChanged", self.newEnergy)
-        else:
-            logging.error("No connection to energy motor in spec")
 
     def showMessageEdnaDead(self, _ednaServerNumber):
         if _ednaServerNumber == 1:
@@ -126,12 +119,6 @@ class Collect(CObjectBase):
         self.showMessage(2, message, notify = 1)
         logging.error("ENDA %d is dead" % _ednaServerNumber)
 
-
-
-    def newEnergy(self, pValue):
-        self.__energy = float(pValue)
-        if self.__energyAdjust:
-            self.channels["pilatus_threshold"].set_value(self.__energy)
 
     def currentChanged(self, current):
         self.machineCurrent = current
@@ -387,14 +374,6 @@ class Collect(CObjectBase):
             channel.update(channel.value())
 
 
-    def pilatusReady(self):
-        # Check if Pilatus is ready
-        self.__pilatus_status = self.channels["pilatus_status"].value()
-        if self.__pilatus_status == "Ready":
-            return True
-        else:
-            return False
-
     def showMessage(self, level, msg, notify = 0):
         self.emit("collectProcessingLog", level, msg, notify)
 
@@ -417,11 +396,12 @@ class Collect(CObjectBase):
         #
         # set the energy if needed 
         #
-        self.__currentPilatusThreshold = float(self.channels["pilatus_threshold"].value())
+        self.__energy = self.objects["energy"].getEnergy()
+        self.__currentPilatusThreshold = self.objects["energy"].getPilatusThreshold()
         if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
             if self.__energyAdjust:
-                self.pilatusThreshold.set_value(self.__energy)
-                while not self.pilatusReady() :
+                self.objects["energy"].setEnergy(self.__energy)
+                while not self.objects["energy"].pilatusReady() :
                     time.sleep(0.5)
 
         #
