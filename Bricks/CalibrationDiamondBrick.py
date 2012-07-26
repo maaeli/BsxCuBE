@@ -13,9 +13,8 @@ class CalibrationDiamondBrick(Core.BaseBrick):
 
 
     connections = {"calibration": Connection("Calibration object",
-                                            [Signal("calibrationStatusChanged", "calibrationStatusChanged"),
-                                             Signal("newPositionChanged", "newPositionChanged")],
-                                            [Slot("executeCalibration")],
+                                            [],
+                                            [],
                                             "calibrationObjectConnected")}
 
     signals = []
@@ -60,29 +59,8 @@ class CalibrationDiamondBrick(Core.BaseBrick):
 
     def commandPushButtonClicked(self):
         self.__setPosition = True
-        self.calibration_object.executeCalibration(self.__parameter)
 
 
-    def calibrationStatusChanged(self, pValue):
-        messageList = pValue.split(",", 2)
-        if len(messageList) == 2:
-            if messageList[0] == "0":   # command info
-                logging.getLogger().info(messageList[1])
-            elif messageList[0] == "1":     # command warning
-                logging.getLogger().warning(messageList[1])
-            elif messageList[0] == "2":     # command error
-                logging.getLogger().error(messageList[1])
-
-
-    def newPositionChanged(self, pValue):
-        self.__newPosition = pValue
-        if self.__setPosition:
-            self.__setPosition = False
-            if self.__newPosition == -1:
-                Qt.QMessageBox.information(self.brick_widget, "Info", "Not enough counts to calculate the inflexion point of the diamond!")
-            elif self.__newPosition > 0:
-                if Qt.QMessageBox.question(self.brick_widget, "Info", "Do you accept '%s' as the inflexion point?" % self.__newPosition, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
-                    self.getObject("calibration").setPosition(self.__newPosition)
 
 
     def expert_mode(self, expert):
