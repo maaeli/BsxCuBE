@@ -5,7 +5,7 @@
    <data name="uri"  value="orion:10000/FE/D/29" />
    
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
-   <object href="BsxCuBE/energy" role="getEnergy"/>
+   <object href="BsxCuBE/EnergyWaveLength" role="energy"/>
    
    <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />
    <command name="initPlugin_edna1" type="tango" uri="DAU/edna/1" call="initPlugin" />
@@ -25,8 +25,6 @@
    <channel name="state_edna2"         type="tango"   uri="DAU/edna/2"  call="State"/> 
    
    <channel name="fill_mode"  type="tango" uri="bm29/pilatus/p0" call="fill_mode"/>
-   <channel name="pilatus_threshold"  type="tango" uri="bm29/pilatus/p0" call="energy_threshold"/>
-   <channel name="pilatus_status" type="tango" uri="bm29/limaccds/p0" call="acq_status"/>
    
    <command name="testCollect"           type="spec" call="testCollect"/>
    <command name="collect"               type="spec" call="collect"/>
