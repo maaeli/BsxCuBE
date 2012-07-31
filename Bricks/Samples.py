@@ -1,6 +1,8 @@
 import logging
+import types
 import re, ast
 from copy import copy
+from lxml import etree
 
 #  Default values
 sample_pars = {
@@ -39,8 +41,23 @@ def valdict(indict, idx):
     return a
 
 
-class Sample:
+def node_to_members(node, obj):
+  for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
+    if value in ("false", "true"):
+      # to avoid poor Alejandro changing stuff on his side,
+      # convert those to booleans
+      value = bool(value.title())
+    else:
+      # be smart and use conversion helper
+      try:
+        value = sample_pars[tag][-1](value)
+      except KeyError:
+        value = general_pars[tag][-1](value)
+    print "inserting member", tag, value, type(value)
+    setattr(obj, tag, value)
 
+
+class Sample:
     __xmlformat = """
 <%(type)s>
   <sampledesc>
@@ -65,8 +82,6 @@ class Sample:
   </collectpars>
 </%(type)s>
     """
-
-
     def __init__(self, copysample = None):
         if copysample:
             self.__dict__ = copy (copysample.__dict__)
@@ -85,6 +100,7 @@ class Sample:
         else:
             return self.__xmlformat % self.__dict__
 
+
 class CollectPars(list):
     __xmlformat = """
 <general>
@@ -96,13 +112,13 @@ class CollectPars(list):
      <bufferMode>%(bufferMode)s</bufferMode>
 </general>
     """
-
     def __init__(self, filename = None):
         # initialize
         self.__dict__.update(valdict(general_pars, 0))
 
         self.sampleList = SampleList()
         self.bufferList = SampleList()
+        self.history = ""
 
         if filename:
             self.loadFromXML(filename)
@@ -114,11 +130,17 @@ class CollectPars(list):
             return self.__xmlformat % self.__dict__
 
     def loadFromXML(self, filename):
-        bufstr = open(filename).read()
+        # filename can be a string, in this case the file is opened then read,
+        # or 'filename' can be a file object
+        if type(filename) == types.StringType:
+          bufstr = open(filename).read()
+        else:
+          bufstr = filename.read()
+          bufstr=bufstr.replace("\000", "") 
         self.searchXML(bufstr , self)
 
     def searchXML(self, xmlstr, destobj):
-        retag = re.compile('\<(?P<key>.*?)\>(?P<value>.*?)\<\/(?P=key)\>', re.DOTALL | re.MULTILINE)
+        """retag = re.compile('\<(?P<key>.*?)\>(?P<value>.*?)\<\/(?P=key)\>', re.DOTALL | re.MULTILINE)
 
         cursor = 0
         mat = retag.search(xmlstr, cursor)
@@ -154,9 +176,29 @@ class CollectPars(list):
                     logging.getLogger().error("Got Exception: " + str(e) + "When interpreting value")
             cursor = mat.end()
             mat = retag.search(xmlstr, cursor)
+        """
+        xml_tree = etree.fromstring(xmlstr)
+        for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general")]:
+            setattr(self, tag, value)
+        buffers = xml_tree.xpath("//Buffer")
+        for buffer in buffers:
+            sample = Sample()
+            sample.type = "Buffer"
+            self.bufferList.append(sample)
+            # let's consider there is only one sampledesc and collectpars per buffer
+            node_to_members(buffer.xpath("./sampledesc")[0], sample)
+            node_to_members(buffer.xpath("./collectpars")[0], sample)
+        samples = xml_tree.xpath("//Sample")
+        for sample_node in samples:
+            sample = Sample()
+            sample.type = "Sample"
+            self.sampleList.append(sample)
+            # let's consider there is only one sampledesc and collectpars per sample
+            node_to_members(buffer.xpath("./sampledesc")[0], sample)
+            node_to_members(sample_node.xpath("./sampledesc")[0], sample)
+            node_to_members(sample_node.xpath("./collectpars")[0], sample)
 
     def save(self, filename, history, format = "xml"):
-
         # start
         bufstr = "<bsxcube>"
 
