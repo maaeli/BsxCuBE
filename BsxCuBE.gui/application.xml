@@ -647,7 +647,7 @@
       <signal name="seuTemperatureChanged"/>
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
-      <peer name="BsxCuBE/SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger (local)"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
@@ -697,7 +697,7 @@
       <signal name="seuTemperatureChanged"/>
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
-      <peer name="BsxCuBE/SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger (local)"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
@@ -853,7 +853,7 @@
 
   <connections id="BsxVideoBrick1">
     <connection role="samplechanger">
-      <peer name="BsxCuBE/SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger (local)"/>
     </connection>
   </connections>
 
