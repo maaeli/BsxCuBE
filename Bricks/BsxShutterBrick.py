@@ -1,13 +1,21 @@
+"""BsxShutter brick - Changed from ShutterBrick by SO from FW4 22/8 2012 
+"""
+
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, PropertyGroup, Connection, Signal, Slot
+
 from PyQt4 import Qt, QtGui
+import os
 import logging
 import sip
 
+
+__author__ = "Matias Guijarro"
+__version__ = 1.0
 __category__ = "General"
 
 
-class ShutterBrick(Core.BaseBrick):
+class BsxShutterBrick(Core.BaseBrick):
     description = 'Simple class to display and control a shutter'
 
     properties = {"icons": PropertyGroup("Icons", "Select icons for different elements", "set_icons",
@@ -40,10 +48,10 @@ class ShutterBrick(Core.BaseBrick):
 
 
     connections = {"shutter": Connection("Shutter object",
-                                        [ Signal("stateChanged", "shutter_state_changed") ],
-                                        [ Slot("open"), Slot("close") ],
-                                        "connectionStatusChanged"),
-                   "collect": Connection("Collect object",
+                                          [ Signal("stateChanged", "shutter_state_changed") ],
+                                          [ Slot("open"), Slot("close") ],
+                                          "connectionStatusChanged"),
+                    "collect": Connection("Collect object",
                                             [Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
                                              Signal("collectDone", "collectDone"),
@@ -62,6 +70,7 @@ class ShutterBrick(Core.BaseBrick):
                                         [Signal("loggedIn", "loggedIn")],
                                         [],
                                         "connectionToLogin")}
+
 
     # TACO Shutterstate
 #    shutterState = {"unknown": Qt.QColor(0x64, 0x64, 0x64),
@@ -90,6 +99,7 @@ class ShutterBrick(Core.BaseBrick):
                     "unknown": Qt.QColor(0x64, 0x64, 0x64),
                     "error": Qt.QColor(0xff, 0x0, 0x0)}
 
+
     def __init__(self, *args, **kwargs):
         Core.BaseBrick.__init__(self, *args, **kwargs)
 
@@ -106,7 +116,7 @@ class ShutterBrick(Core.BaseBrick):
         Qt.QObject.connect(self.shutter_cmd, Qt.SIGNAL("clicked()"), self.shutter_cmd_clicked)
 
 
-    # When connected to Login, then block the brick
+   # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
@@ -144,6 +154,8 @@ class ShutterBrick(Core.BaseBrick):
     def set_icons(self, icons):
         pass
 
+
+
     def shutterNameStateChanged(self, pValue):
         self.shutterName = pValue
         self.shutter_state.setToolTip("Current '%s' shutter state" % self.shutterName)
@@ -151,7 +163,7 @@ class ShutterBrick(Core.BaseBrick):
 
         # force redisplay of state so the shutter name is displayed.
         if state is None:
-            state = "unknown"
+            state = 'unknown'
         self.shutter_state_changed(state)
 
 
@@ -176,6 +188,7 @@ class ShutterBrick(Core.BaseBrick):
             self.brick_widget.setLayout(Qt.QVBoxLayout())
         self.brick_widget.layout().addWidget(self.shutter_state)
         self.brick_widget.layout().addWidget(self.shutter_cmd)
+
 
 
     def shutter_state_changed(self, state):
@@ -212,8 +225,12 @@ class ShutterBrick(Core.BaseBrick):
 
 
     def connectionStatusChanged(self, pPeer):
-        pass
+        self.brick_widget.setEnabled(pPeer is not None)
+        if pPeer is not None:
+            pPeer.connect("ready", self.enable)
 
+    def enable(self, arg):
+        self.brick_widget.setEnabled(arg)
 
     def shutter_cmd_clicked(self):
         if self.shutter_cmd.text() == "Open":
