@@ -244,7 +244,7 @@
      <property name="pack" value="start"/>
      <property name="caption" value="2D"/>
   </properties>
-  <properties id="ShutterBrick3">
+  <properties id="BsxShutterBrick3">
      <property name="flex" value="0"/>
      <property name="shutter_name" value="ms"/>
      <property name="orientation" value="Landscape"/>
@@ -258,7 +258,7 @@
   <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="ShutterBrick1">
+  <properties id="BsxShutterBrick1">
      <property name="flex" value="0"/>
      <property name="shutter_name" value="sh"/>
      <property name="orientation" value="Landscape"/>
@@ -382,7 +382,7 @@
      <property name="y2AxisLabel" value=""/>
      <property name="showPrintButton" value="True"/>
   </properties>
-  <properties id="ShutterBrick2">
+  <properties id="BsxShutterBrick2">
      <property name="flex" value="0"/>
      <property name="shutter_name" value="guillotine"/>
      <property name="orientation" value="Landscape"/>
@@ -725,7 +725,7 @@
   <connections id="2D">
   </connections>
 
-  <connections id="ShutterBrick3">
+  <connections id="BsxShutterBrick3">
     <connection role="shutter">
       <signal name="stateChanged"/>
       <slot name="open"/>
@@ -789,7 +789,7 @@
     </connection>
   </connections>
 
-  <connections id="ShutterBrick1">
+  <connections id="BsxShutterBrick1">
     <connection role="shutter">
       <signal name="stateChanged"/>
       <slot name="open"/>
@@ -951,7 +951,7 @@
     </connection>
   </connections>
 
-  <connections id="ShutterBrick2">
+  <connections id="BsxShutterBrick2">
     <connection role="shutter">
       <signal name="stateChanged"/>
       <slot name="open"/>
