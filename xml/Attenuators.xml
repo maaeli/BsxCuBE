@@ -9,5 +9,5 @@
    <data name="Aluminium 100 um" bits="2"/>
    <data name="Aluminium 150 um" bits="4 8"/>
    <data name="Aluminium 500 um" bits="32"/>
-   <data name="Aluminium 1 um" bits="16 64 128"/>
+   <data name="Aluminium 1 mm" bits="16 64 128"/>
 </object>	
