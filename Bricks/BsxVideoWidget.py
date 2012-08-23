@@ -157,10 +157,10 @@ class BsxVideoWidget(Qt.QWidget):
         self.updateFrame()
 
     def updateFrame(self):
-        #TODO: Need to clean this
-        #if type(self.image).__name__ == "list":
-        #    logging.error("Got a list instead of a numpy.ndarray as image" + str(self.image))
-        #    return
+        #TODO: Need to clean this - Should not appear since 22/8 2012 SO
+        if type(self.image).__name__ == "list":
+            logging.error("Got a list instead of a numpy.ndarray as image" + str(self.image))
+            return
         self.imagePixmap = Qt.QPixmap()
         self.imagePixmap.loadFromData(self.image, self.imageFormat)
 
