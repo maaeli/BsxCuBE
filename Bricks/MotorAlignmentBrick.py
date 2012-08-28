@@ -109,7 +109,7 @@ class MotorAlignmentDialog(Qt.QDialog):
             hBoxLayout.addWidget(pushButton)
             i += 1
 
-        self.parametersHBoxLayout1 = Qt.QHBoxLayout(self)
+        self.parametersHBoxLayout1 = Qt.QHBoxLayout()
         self.stepLabel = Qt.QLabel("Step", self)
         self.stepLabel.setFixedWidth(80)
         self.parametersHBoxLayout1.addWidget(self.stepLabel)
