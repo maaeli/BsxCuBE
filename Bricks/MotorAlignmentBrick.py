@@ -92,10 +92,9 @@ class MotorAlignmentDialog(Qt.QDialog):
         self.parametersGroupBox = Qt.QGroupBox("Parameters", self)
         self.parametersGroupBox.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.parametersVBoxLayout = Qt.QVBoxLayout(self.parametersGroupBox)
+        self.parametersVBoxLayout.setSpacing(0)
         self.layout().addWidget(self.parametersGroupBox)
 
-        self.parametersVBoxLayout0 = Qt.QVBoxLayout(self.parametersGroupBox)
-        self.parametersVBoxLayout0.setSpacing(0)
 
         i = 0
         for name, signal, label in self.__motorsList:
@@ -110,9 +109,6 @@ class MotorAlignmentDialog(Qt.QDialog):
             hBoxLayout.addWidget(pushButton)
             i += 1
 
-
-        self.parametersVBoxLayout1 = Qt.QVBoxLayout(self.parametersGroupBox)
-
         self.parametersHBoxLayout1 = Qt.QHBoxLayout(self)
         self.stepLabel = Qt.QLabel("Step", self)
         self.stepLabel.setFixedWidth(80)
@@ -123,13 +119,12 @@ class MotorAlignmentDialog(Qt.QDialog):
         self.stepDoubleSpinBox.setRange(0.1, 1)
         self.stepDoubleSpinBox.setToolTip("Current step")
         self.parametersHBoxLayout1.addWidget(self.stepDoubleSpinBox)
-        self.parametersVBoxLayout1.layout().addLayout(self.parametersHBoxLayout1)
+        self.parametersVBoxLayout.layout().addLayout(self.parametersHBoxLayout1)
 
         self.collectTestFrameCheckBox = Qt.QCheckBox("Collect test frame", self)
         self.collectTestFrameCheckBox.setChecked(True)
         self.collectTestFrameCheckBox.setToolTip("Enable/disable collection of a test frame after moving motor")
-        self.parametersVBoxLayout1.addWidget(self.collectTestFrameCheckBox)
-        self.parametersVBoxLayout.addLayout(self.parametersVBoxLayout1)
+        self.parametersVBoxLayout.addWidget(self.collectTestFrameCheckBox)
 
         self.tableWidget = TableWidget(0, 2, self)
         self.tableWidget.setHorizontalHeaderLabels(["Motor", "Position"])
