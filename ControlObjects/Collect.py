@@ -1,11 +1,9 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
-from PyQt4 import QtCore
 import os
 import logging
 import numpy
-import gevent
 import time
-import pprint
+import gevent
 import math
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
@@ -71,25 +69,20 @@ class Collect(CObjectBase):
         self.deltaPilatus = 0.1
         try:
             self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
-            #self.channels["jobFailure_edna1"].connect("update", self.processingDone)
+            self.channels["jobFailure_edna1"].connect("update", self.processingDone)
             self.commands["initPlugin_edna1"](self.pluginIntegrate)
             self.commands["initPlugin_edna1"](self.pluginMerge)
             self.edna1Dead = False
-        except:
+        except Exception:
             self.showMessageEdnaDead(1)
 
-        #TODO: DEBUG - No EDNA 2 yet 13/6 2012
-#        try:
-#            self.channels["jobSuccess_edna2"].connect("update", self.processingDone)
-#            #self.channels["jobFailure_edna2"].connect("update", self.processingDone)
-#            self.commands["initPlugin_edna2"](self.pluginSAS)
-#            self.edna2Dead = False
-#        except:
-#            logging.error("Unable to connect to EDNA 2")
-#            message = "EDNA server 2 is dead, please restart EDNA 2"
-#            self.showMessage(2, message, notify = 1)
-#            logging.error("ENDA 2 is dead")
-#            self.edna2Dead = True
+        try:
+            self.channels["jobSuccess_edna2"].connect("update", self.processingDone)
+            self.channels["jobFailure_edna2"].connect("update", self.processingDone)
+            self.commands["initPlugin_edna2"](self.pluginSAS)
+            self.edna2Dead = False
+        except Exception:
+            self.showMessageEdnaDead(2)
         # add a channel to read machine current (with polling)
         self.addChannel('tango',
                         'read_current_value',
@@ -114,10 +107,12 @@ class Collect(CObjectBase):
             self.edna2Dead = True
         else:
             self.showMessage(2, "ERROR! No such EDNA server: %d" % _ednaServerNumber)
-        logging.error("Unable to connect to EDNA %d" % _ednaServerNumber)
+        message = "Unable to connect to EDNA %d" % _ednaServerNumber
+        logging.error(message)
         message = "EDNA server %d is dead, please restart EDNA %d" % (_ednaServerNumber, _ednaServerNumber)
         self.showMessage(2, message, notify = 1)
-        logging.error("ENDA %d is dead" % _ednaServerNumber)
+        messsage = "ENDA %d is dead" % _ednaServerNumber
+        logging.error(message)
 
 
     def currentChanged(self, current):
@@ -157,12 +152,12 @@ class Collect(CObjectBase):
         logging.info("Starting collection now")
         try:
             self.storageTemperature = float(pStorageTemperature)
-        except:
+        except Exception:
             self.storageTemperature = 4
             logging.error("Could not read storage Temperature - Check sample changer connection")
         try:
             self.exposureTemperature = float(pSEUTemperature)
-        except:
+        except Exception:
             self.storageTemperature = 4
             logging.error("Could not read exposure Temperature - Check sample changer connection")
         self.collecting = True
@@ -183,7 +178,6 @@ class Collect(CObjectBase):
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
         self.collectProcessData.set_value(pProcessData)
-        #TODO: DEBUG
         logging.info("Prepare EDNA input")
         #Prepare EDNA input
         self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
@@ -226,9 +220,9 @@ class Collect(CObjectBase):
         # TODO: DEBUG
         logging.info("Trigger EDNA with filename %s", raw_filename)
         raw_filename = str(raw_filename)
-        tmp, suffix = os.path.splitext(raw_filename)
+        tmp, _ = os.path.splitext(raw_filename)
         tmp, base = os.path.split(tmp)
-        directory, local = os.path.split(tmp)
+        directory, _ = os.path.split(tmp)
         frame = ""
         for c in base[-1::-1]:
             if c.isdigit():
@@ -257,7 +251,7 @@ class Collect(CObjectBase):
             self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
             logging.info("Processing job %s started", jobId)
             self.edna1Dead = False
-        except:
+        except Exception:
             self.showMessageEdnaDead(1)
 
 
@@ -268,12 +262,14 @@ class Collect(CObjectBase):
             jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
             self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
             self.edna1Dead = False
-        except:
+        except Exception:
             self.showMessageEdnaDead(1)
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
-            logging.warning("processing Done from EDNA: %s -X-> None", jobId)
+            # Two special "jobId" are ignored
+            if jobId != "No job succeeded (yet)" and jobId != "No job Failed (yet)":
+                logging.warning("processing Done from EDNA: %s -X-> None", jobId)
         else:
             filename = self.dat_filenames.pop(jobId)
             logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
@@ -283,7 +279,7 @@ class Collect(CObjectBase):
                     strXsdout = self.commands["getJobOutput_edna1"](jobId)
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
                     self.edna1Dead = False
-                except:
+                except Exception:
                     logging.error("Unable to parse string from Tango/EDNA")
                     message = "EDNA server 1 is dead, please restart EDNA 1"
                     self.showMessage(2, message, notify = 1)
@@ -294,41 +290,33 @@ class Collect(CObjectBase):
                     logging.info(log)
                     # Log on info on Pipeline
                     self.showMessage(0, log)
-                #TODO: DEBUG SAS pipeline to be put back
+
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
-#                if xsd.autoRg is None:
-#                    logging.info("SAS pipeline not executed")
-#                else:
-#                    rgOut = xsd.autoRg
-#                    filename = rgOut.filename.path.value
-#                    logging.info("filename as input for SAS %s", filename)
-#                    datapoint = numpy.loadtxt(filename)
-#                    startPoint = rgOut.firstPointUsed.value
-#                    q = datapoint[:, 0][startPoint:]
-#                    I = datapoint[:, 1][startPoint:]
-#                    s = datapoint[:, 2][startPoint:]
-#                    mask = (q < 3)
-#                    self.xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-#                    #NbThreads=XSDataInteger(4))
-#                    self.xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-#                    self.xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-#                    self.xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-#                    logging.info("Starting SAS pipeline for file %s", filename)
-#                    #TODO: DEBUG workaround EDNA problem
-#                    try:
-#                        ednaState = self.channels["state_edna2"].Value()
-#                        self.edna2Dead = False
-#                    except:
-#                        message = "EDNA server 2 is dead, please restart EDNA 2"
-#                        self.showMessage(2, message, notify = 1)
-#                        self.edna2Dead = True
-#                    if not self.edna2Dead:
-#                        try:
-#                            sasJobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
-#                        except:
-#                            message = "EDNA server 2 is dead, please restart EDNA 2"
-#                            self.showMessage(2, message, notify = 1)
-#                            logging.error("ENDA 2 is dead")
+                if xsd.autoRg is None:
+                    logging.info("SAS pipeline not executed")
+                else:
+                    rgOut = xsd.autoRg
+                    filename = rgOut.filename.path.value
+                    logging.info("filename as input for SAS %s", filename)
+                    datapoint = numpy.loadtxt(filename)
+                    startPoint = rgOut.firstPointUsed.value
+                    q = datapoint[:, 0][startPoint:]
+                    I = datapoint[:, 1][startPoint:]
+                    s = datapoint[:, 2][startPoint:]
+                    mask = (q < 3)
+                    self.xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+                    #NbThreads=XSDataInteger(4))
+                    self.xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+                    self.xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+                    self.xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                    logging.info("Starting SAS pipeline for file %s", filename)
+                    try:
+                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
+                        self.dat_filenames[jobId] = self.xsdAverage.xsdin.path.value
+                        self.edna2Dead = False
+                    except Exception:
+                        self.showMessageEdnaDead(2)
+
 
     def _abortCollectWithRobot(self):
         if  self.__collectWithRobotProcedure is not None:
