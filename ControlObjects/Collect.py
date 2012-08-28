@@ -312,7 +312,7 @@ class Collect(CObjectBase):
                     logging.info("Starting SAS pipeline for file %s", filename)
                     try:
                         jobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
-                        self.dat_filenames[jobId] = self.xsdAverage.xsdin.path.value
+                        self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna2Dead = False
                     except Exception:
                         self.showMessageEdnaDead(2)
