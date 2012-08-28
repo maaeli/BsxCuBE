@@ -87,13 +87,13 @@ class BsxSCBrick(Core.BaseBrick):
     def state_changed(self, state, status):
         if self._sampleChanger is None:
             return
-        #TODO: DEBUG - work around
+        #TODO: Need to understand why this exception is triggered five times
         try:
             cmdException = self._sampleChanger.getCommandException(timeout = 0.5)
         except:
-            print "Could not read cmd exception within 0.5 s"
+            print "Could not read sample changer CommandException state: %s, status: %s" % (state, status)
             cmdException = ""
-            self.SCWidget.setState(state, status, cmdException)
+        self.SCWidget.setState(state, status, cmdException)
 
     def startSyringeForward(self):
         self._sampleChanger.moveSyringeForward(5)
