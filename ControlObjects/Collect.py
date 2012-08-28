@@ -39,7 +39,7 @@ class Collect(CObjectBase):
         self.lastPrefixRun = None
         self.ednaJob = None
         self.dat_filenames = {}
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_1"
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_3"
         self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
 
