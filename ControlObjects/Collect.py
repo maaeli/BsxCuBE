@@ -5,6 +5,7 @@ import numpy
 import time
 import gevent
 import math
+import pprint
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -37,6 +38,7 @@ class Collect(CObjectBase):
         self.lastPrefixRun = None
         self.ednaJob = None
         self.dat_filenames = {}
+        self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_3"
         self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
@@ -111,7 +113,7 @@ class Collect(CObjectBase):
         logging.error(message)
         message = "EDNA server %d is dead, please restart EDNA %d" % (_ednaServerNumber, _ednaServerNumber)
         self.showMessage(2, message, notify = 1)
-        messsage = "ENDA %d is dead" % _ednaServerNumber
+        message = "ENDA %d is dead" % _ednaServerNumber
         logging.error(message)
 
 
@@ -217,8 +219,6 @@ class Collect(CObjectBase):
 
 
     def triggerEDNA(self, raw_filename):
-        # TODO: DEBUG
-        logging.info("Trigger EDNA with filename %s", raw_filename)
         raw_filename = str(raw_filename)
         tmp, _ = os.path.splitext(raw_filename)
         tmp, base = os.path.split(tmp)
@@ -251,6 +251,7 @@ class Collect(CObjectBase):
             self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
             logging.info("Processing job %s started", jobId)
             self.edna1Dead = False
+            self.jobSubmitted = True
         except Exception:
             self.showMessageEdnaDead(1)
 
@@ -262,6 +263,7 @@ class Collect(CObjectBase):
             jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
             self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
             self.edna1Dead = False
+            self.jobSubmitted = True
         except Exception:
             self.showMessageEdnaDead(1)
 
@@ -269,7 +271,9 @@ class Collect(CObjectBase):
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
             if jobId != "No job succeeded (yet)" and jobId != "No job Failed (yet)":
-                logging.warning("processing Done from EDNA: %s -X-> None", jobId)
+                # and react only if jobs have been submitted
+                if self.jobSubmitted:
+                    logging.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
         else:
             filename = self.dat_filenames.pop(jobId)
             logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
@@ -314,6 +318,7 @@ class Collect(CObjectBase):
                         jobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
                         self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna2Dead = False
+                        self.jobSubmitted = True
                     except Exception:
                         self.showMessageEdnaDead(2)
 
@@ -396,7 +401,6 @@ class Collect(CObjectBase):
         # SET gapfill on the Pilatus (Even if not needed)
         #   
         self.channels["fill_mode"].set_value("ON")
-
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
             self.showMessage(2, "Error when trying to set viscosity to '%s'..." % tocollect["viscosity"])
 
