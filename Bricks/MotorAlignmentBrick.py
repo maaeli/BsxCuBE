@@ -149,7 +149,6 @@ class MotorAlignmentDialog(Qt.QDialog):
                 i = self.tableWidget.rowCount()
                 self.tableWidget.insertRow(i)
                 self.tableWidget.setCellWidget(i, 0, Qt.QLabel(Qt.QString(name)))
-                self.tableWidget.setCellWidget(i, 1, Qt.QLabel("??? mm"))
 
         for i in range(0, self.tableWidget.rowCount()):
             self.__parent.getObject("motoralignment").getMotorPosition(str(self.tableWidget.cellWidget(i, 0).text()))
