@@ -130,8 +130,9 @@ class CollectBrick(Core.BaseBrick):
 
         #TODO: DEBUG
         self.last_dat = None
-        #TODO: DEBUG - Note that I have started
-        rc = os.system("touch /tmp/.BsxCuBE.GUIStart")
+        #TODO: DEBUG - Note that I have started - And make sure another process starting it will not generate error
+        os.system("touch /tmp/.BsxCuBE.GUIStart")
+        os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
         self.image_proxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
