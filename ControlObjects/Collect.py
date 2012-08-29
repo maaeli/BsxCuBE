@@ -131,6 +131,26 @@ class Collect(CObjectBase):
         # set new run number from Spec - Convert it to int
         self.nextRunNumber = int(runNumber)
 
+    def prepareEdnaInput(self, pPrefix, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames = 1, pTimePerFrame = 123456.0):
+        # fill up self.xsdin
+        logging.info("Prepare EDNA input")
+        self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
+        self.xsdin.sample.code = XSDataString(str(pCode))
+        self.xsdin.sample.comments = XSDataString(str(pComments))
+
+        xsdExperiment = self.xsdin.experimentSetup
+        xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
+        xsdExperiment.detectorDistance = XSDataLength(value = float(pDetectorDistance))
+        xsdExperiment.pixelSize_1 = XSDataLength(value = float(pPixelSizeX) * 1.0e-6)
+        xsdExperiment.pixelSize_2 = XSDataLength(value = float(pPixelSizeY) * 1.0e-6)
+        xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
+        xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
+        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength) * 1.0e-10)
+        xsdExperiment.maskFile = XSDataImage(path = XSDataString(str(pMaskFile)))
+        xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
+        xsdExperiment.frameMax = XSDataInteger(int(pNumberFrames))
+        xsdExperiment.exposureTime = XSDataTime(float(pTimePerFrame))
+
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
@@ -146,6 +166,7 @@ class Collect(CObjectBase):
         self.collectBeamCenterX.set_value(pBeamCenterX)
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
+        self.prepareEdnaInput(pPrefix, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation)
         self.commands["testCollect"]()
 
 
@@ -180,24 +201,9 @@ class Collect(CObjectBase):
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
         self.collectProcessData.set_value(pProcessData)
-        logging.info("Prepare EDNA input")
-        #Prepare EDNA input
-        self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
-        self.xsdin.sample.code = XSDataString(str(pCode))
-        self.xsdin.sample.comments = XSDataString(str(pComments))
 
-        xsdExperiment = self.xsdin.experimentSetup
-        xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
-        xsdExperiment.detectorDistance = XSDataLength(value = float(pDetectorDistance))
-        xsdExperiment.pixelSize_1 = XSDataLength(value = float(pPixelSizeX) * 1.0e-6)
-        xsdExperiment.pixelSize_2 = XSDataLength(value = float(pPixelSizeY) * 1.0e-6)
-        xsdExperiment.beamCenter_1 = XSDataDouble(float(pBeamCenterX))
-        xsdExperiment.beamCenter_2 = XSDataDouble(float(pBeamCenterY))
-        xsdExperiment.wavelength = XSDataWavelength(float(pWaveLength) * 1.0e-10)
-        xsdExperiment.maskFile = XSDataImage(path = XSDataString(str(pMaskFile)))
-        xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
-        xsdExperiment.frameMax = XSDataInteger(int(pNumberFrames))
-        xsdExperiment.exposureTime = XSDataTime(float(pTimePerFrame))
+        self.prepareEdnaInput(pPrefix, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame)
+
 
         sPrefix = str(pPrefix)
         ave_filename = os.path.join(pDirectory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
