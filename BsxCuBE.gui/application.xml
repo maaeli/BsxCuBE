@@ -12,11 +12,9 @@
      <property name="toolTip" value="Execute calibration of diamond"/>
      <property name="expertModeOnly" value="True"/>
   </properties>
-  <properties id="MotorAlignmentBrick1">
+  <properties id="BrowseBrick1">
      <property name="flex" value="0"/>
-     <property name="caption" value="Mini-hutch slit alignment"/>
-     <property name="toolTip" value="Execute mini-hutch slit alignment"/>
-     <property name="expertModeOnly" value="True"/>
+     <property name="enableType" value="True"/>
   </properties>
   <properties id="tabbox1">
      <property name="flex" value="1"/>
@@ -29,30 +27,38 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Beamline"/>
   </properties>
-  <properties id="OHScan">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="Optics"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="defaultScale" value="linear"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="15"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
-  </properties>
-  <properties id="vgroupbox1">
+  <properties id="BsxShutterBrick3">
      <property name="flex" value="0"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Login Box"/>
+     <property name="shutter_name" value="ms"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
+  </properties>
+  <properties id="BsxShutterBrick2">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="guillotine"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
+  </properties>
+  <properties id="BsxShutterBrick1">
+     <property name="flex" value="0"/>
+     <property name="shutter_name" value="sh"/>
+     <property name="orientation" value="Landscape"/>
+     <propertygroup name="icons">
+       <property name="opened" value=""/>
+       <property name="closed" value=""/>
+     </propertygroup>
+     <property name="show_button" value="True"/>
+     <property name="show_state" value="True"/>
   </properties>
   <properties id="ReprocessTab">
      <property name="flex" value="1"/>
@@ -95,9 +101,11 @@
      <property name="toolTip" value="Execute experimental hutch 1 slit alignment"/>
      <property name="expertModeOnly" value="True"/>
   </properties>
-  <properties id="BrowseBrick1">
+  <properties id="MotorAlignmentBrick1">
      <property name="flex" value="0"/>
-     <property name="enableType" value="True"/>
+     <property name="caption" value="Mini-hutch slit alignment"/>
+     <property name="toolTip" value="Execute mini-hutch slit alignment"/>
+     <property name="expertModeOnly" value="True"/>
   </properties>
   <properties id="CommandBrick3">
      <property name="flex" value="0"/>
@@ -203,6 +211,31 @@
      <property name="pack" value="start"/>
      <property name="caption" value="EH Scan"/>
   </properties>
+  <properties id="vgroupbox1">
+     <property name="flex" value="0"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Login Box"/>
+  </properties>
+  <properties id="OHScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Optics"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="15"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
   <properties id="splitter1">
      <property name="flex" value="0"/>
   </properties>
@@ -244,41 +277,19 @@
      <property name="pack" value="start"/>
      <property name="caption" value="2D"/>
   </properties>
-  <properties id="BsxShutterBrick3">
-     <property name="flex" value="0"/>
-     <property name="shutter_name" value="ms"/>
-     <property name="orientation" value="Landscape"/>
-     <propertygroup name="icons">
-       <property name="opened" value=""/>
-       <property name="closed" value=""/>
-     </propertygroup>
-     <property name="show_button" value="True"/>
-     <property name="show_state" value="True"/>
-  </properties>
   <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
-  </properties>
-  <properties id="BsxShutterBrick1">
-     <property name="flex" value="0"/>
-     <property name="shutter_name" value="sh"/>
-     <property name="orientation" value="Landscape"/>
-     <propertygroup name="icons">
-       <property name="opened" value=""/>
-       <property name="closed" value=""/>
-     </propertygroup>
-     <property name="show_button" value="True"/>
-     <property name="show_state" value="True"/>
   </properties>
   <properties id="BsxCuBE">
      <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value="tonic92"/>
   </properties>
-  <properties id="BrowseTab">
+  <properties id="Operation">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Browse"/>
+     <property name="caption" value="Operation"/>
   </properties>
   <properties id="WebBrowseBrick1">
      <property name="url" value="http://pcantolinos:8080/ispyb"/>
@@ -346,17 +357,11 @@
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="1D">
+  <properties id="BrowseTab">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="1D"/>
-  </properties>
-  <properties id="Operation">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="Operation"/>
+     <property name="caption" value="Browse"/>
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
@@ -382,16 +387,11 @@
      <property name="y2AxisLabel" value=""/>
      <property name="showPrintButton" value="True"/>
   </properties>
-  <properties id="BsxShutterBrick2">
-     <property name="flex" value="0"/>
-     <property name="shutter_name" value="guillotine"/>
-     <property name="orientation" value="Landscape"/>
-     <propertygroup name="icons">
-       <property name="opened" value=""/>
-       <property name="closed" value=""/>
-     </propertygroup>
-     <property name="show_button" value="True"/>
-     <property name="show_state" value="True"/>
+  <properties id="1D">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="1D"/>
   </properties>
     <connections id="CollectTab">
   </connections>
@@ -402,11 +402,17 @@
     </connection>
   </connections>
 
-  <connections id="MotorAlignmentBrick1">
-    <connection role="motoralignment">
-      <signal name="motorPositionChanged"/>
-      <slot name="moveMotor"/>
-      <peer name="BsxCuBE/MotorAlignmentSM"/>
+  <connections id="BrowseBrick1">
+    <connection role="browse">
+      <peer name="BsxCuBE/Browse"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="image_proxy">
+      <slot name="load_files"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
   </connections>
 
@@ -416,33 +422,91 @@
   <connections id="BeamlineTab">
   </connections>
 
-  <connections id="OHScan">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
+  <connections id="BsxShutterBrick3">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="BsxCuBE/ShutterMS"/>
     </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-      <peer name="BsxCuBE/optscan"/>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 
-  <connections id="vgroupbox1">
+  <connections id="BsxShutterBrick2">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="BsxCuBE/ShutterGuillotine"/>
+    </connection>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
+  </connections>
+
+  <connections id="BsxShutterBrick1">
+    <connection role="shutter">
+      <signal name="stateChanged"/>
+      <slot name="open"/>
+      <slot name="close"/>
+      <peer name="BsxCuBE/ShutterSH"/>
+    </connection>
+    <connection role="collect">
+      <signal name="collectProcessingDone"/>
+      <signal name="collectProcessingLog"/>
+      <signal name="collectDone"/>
+      <signal name="clearCurve"/>
+      <signal name="grayOut"/>
+      <signal name="transmissionChanged"/>
+      <slot name="testCollect"/>
+      <slot name="collect"/>
+      <slot name="collectAbort"/>
+      <slot name="setCheckBeam"/>
+      <slot name="triggerEDNA"/>
+      <slot name="blockGUI"/>
+      <slot name="blockEnergyAdjust"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
   </connections>
 
   <connections id="ReprocessTab">
@@ -496,17 +560,11 @@
     </connection>
   </connections>
 
-  <connections id="BrowseBrick1">
-    <connection role="browse">
-      <peer name="BsxCuBE/Browse"/>
-    </connection>
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
-    <connection role="image_proxy">
-      <slot name="load_files"/>
-      <peer name="BsxCuBE/image_proxy"/>
+  <connections id="MotorAlignmentBrick1">
+    <connection role="motoralignment">
+      <signal name="motorPositionChanged"/>
+      <slot name="moveMotor"/>
+      <peer name="BsxCuBE/MotorAlignmentSM"/>
     </connection>
   </connections>
 
@@ -584,6 +642,9 @@
   </connections>
 
   <connections id="CollectBrick1">
+    <connection role="energyBrick">
+      <signal name="adjustPilatusThreshold"/>
+    </connection>
     <connection role="energy">
       <signal name="energyChanged"/>
       <slot name="setEnergy"/>
@@ -617,7 +678,6 @@
       <signal name="collectNormalisationChanged"/>
       <signal name="collectRadiationDamageChanged"/>
       <signal name="collectAbsoluteRadiationDamageChanged"/>
-      <signal name="collectProcessDataChanged"/>
       <signal name="collectNewFrameChanged"/>
       <signal name="checkBeamChanged"/>
       <signal name="beamLostChanged"/>
@@ -656,6 +716,35 @@
   </connections>
 
   <connections id="EH">
+  </connections>
+
+  <connections id="vgroupbox1">
+  </connections>
+
+  <connections id="OHScan">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="BsxCuBE/optscan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
   </connections>
 
   <connections id="splitter1">
@@ -697,7 +786,7 @@
       <signal name="seuTemperatureChanged"/>
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
-      <peer name="BsxCuBE/SampleChanger (local)"/>
+      <peer name="BsxCuBE/SampleChanger"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
@@ -723,35 +812,6 @@
   </connections>
 
   <connections id="2D">
-  </connections>
-
-  <connections id="BsxShutterBrick3">
-    <connection role="shutter">
-      <signal name="stateChanged"/>
-      <slot name="open"/>
-      <slot name="close"/>
-      <peer name="BsxCuBE/ShutterMS"/>
-    </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
   </connections>
 
   <connections id="EnergyWaveLengthBrick1">
@@ -789,39 +849,10 @@
     </connection>
   </connections>
 
-  <connections id="BsxShutterBrick1">
-    <connection role="shutter">
-      <signal name="stateChanged"/>
-      <slot name="open"/>
-      <slot name="close"/>
-      <peer name="BsxCuBE/ShutterSH"/>
-    </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
-  </connections>
-
   <connections id="BsxCuBE">
   </connections>
 
-  <connections id="BrowseTab">
+  <connections id="Operation">
   </connections>
 
   <connections id="WebBrowseBrick1">
@@ -916,10 +947,7 @@
     </connection>
   </connections>
 
-  <connections id="1D">
-  </connections>
-
-  <connections id="Operation">
+  <connections id="BrowseTab">
   </connections>
 
   <connections id="FeedbackBrick1">
@@ -951,33 +979,7 @@
     </connection>
   </connections>
 
-  <connections id="BsxShutterBrick2">
-    <connection role="shutter">
-      <signal name="stateChanged"/>
-      <slot name="open"/>
-      <slot name="close"/>
-      <peer name="BsxCuBE/ShutterGuillotine"/>
-    </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
+  <connections id="1D">
   </connections>
 
   

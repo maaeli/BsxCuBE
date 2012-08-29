@@ -37,7 +37,9 @@ class BsxVideoBrick(Core.BaseBrick):
 
             self._sampleChanger = sc
             self.videoWidget.setAutoRefreshRate(50)
-            self.videoWidget.setAutoRefresh(True)
+            #TODO: DEBUG Can not take video signal at the same time as doing something else
+            #self.videoWidget.setAutoRefresh(True)
+            self.videoWidget.setAutoRefresh(False)
 
             # override videoWidget calls
             self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
