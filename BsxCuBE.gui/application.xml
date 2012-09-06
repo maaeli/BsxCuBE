@@ -786,7 +786,7 @@
       <signal name="seuTemperatureChanged"/>
       <signal name="storageTemperatureChanged"/>
       <signal name="stateChanged"/>
-      <peer name="BsxCuBE/SampleChanger"/>
+      <peer name="BsxCuBE/SampleChanger (local)"/>
     </connection>
     <connection role="login">
       <signal name="loggedIn"/>
