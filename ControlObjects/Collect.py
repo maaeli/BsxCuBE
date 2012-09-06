@@ -242,6 +242,8 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
+        #DEBUG: REMOVE
+        print "Beamstop diode is %r" % self.xsdin.experimentSetup.beamStopDiode.value
         # self.machineCurrent is already float
         self.xsdin.experimentSetup.machineCurrent = XSDataDouble(self.machineCurrent)
         self.xsdin.rawImage = XSDataImage(path = XSDataString(raw_filename))
@@ -298,10 +300,13 @@ class Collect(CObjectBase):
                     logging.error("ENDA 1 is dead")
                     self.edna1Dead = True
                 if not self.edna1Dead:
-                    log = xsd.status.executiveSummary.value
-                    logging.info(log)
-                    # Log on info on Pipeline
-                    self.showMessage(0, log)
+                    if xsd.status is not None:
+                        log = xsd.status.executiveSummary.value
+                        logging.info(log)
+                        # Log on info on Pipeline
+                        self.showMessage(0, log)
+                    else:
+                        self.showMessage(2,"EDNA1 has a problem - Please check", notify = 1)
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
                 if xsd.autoRg is None:
@@ -419,7 +424,7 @@ class Collect(CObjectBase):
         self.showMessage(0, "Setting SEU temperature to '%s'..." % sample["SEUtemperature"])
         try:
             self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
-        except RuntimeError, errMsg:
+        except Exception, errMsg:
             self.showMessage(2, "Error when setting SEU temperature. Error %r" % errMsg)
             raise
 
@@ -429,7 +434,7 @@ class Collect(CObjectBase):
         self.showMessage(0, "Filling (%s) from plate '%s', row '%s' and well '%s' with volume '%s'..." % (mode, tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"]))
         try:
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
-        except RuntimeError, errMsg:
+        except Exception, errMsg:
             message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
             self.showMessage(2, message, notify = 1)
             raise
@@ -441,7 +446,7 @@ class Collect(CObjectBase):
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
                 self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
-            except RuntimeError:
+            except Exception:
                 self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
         else:
             self.objects["sample_changer"].setLiquidPositionFixed(True)
@@ -485,7 +490,7 @@ class Collect(CObjectBase):
             self.showMessage(0, "Waiting for end of flow...")
             try:
                 self.objects["sample_changer"].wait()
-            except RuntimeError:
+            except Exception:
                 self.showMessage(2, "Error when waiting for end of flow...")
 
         # =============
@@ -495,7 +500,7 @@ class Collect(CObjectBase):
             self.showMessage(0, "Recuperating to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
             try:
                 self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
-            except RuntimeError:
+            except Exception:
                 self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
 
         # ==================================================
@@ -505,7 +510,7 @@ class Collect(CObjectBase):
 
         try:
             self.objects["sample_changer"].doCleanProcedure()
-        except RuntimeError:
+        except Exception:
             message = "Error when trying to clean. Aborting collection!"
             self.showMessage(2, message, notify = 1)
             raise
@@ -524,7 +529,7 @@ class Collect(CObjectBase):
         try:
             # ASynchronous - Treated in sample Changer
             self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
-        except RuntimeError, ErrMsg:
+        except Exception, ErrMsg:
             message = "Error when trying set Storage Temperature.\nSampleChanger Error: %r\nAborting collection!" % ErrMsg
             self.showMessage(2, message, notify = 1)
             raise
@@ -548,7 +553,7 @@ class Collect(CObjectBase):
             self.showMessage(0, "Initial cleaning...")
             try:
                 self.objects["sample_changer"].doCleanProcedure()
-            except RuntimeError:
+            except Exception:
                 message = "Error when trying to clean. Aborting collection!"
                 self.showMessage(2, message, notify = 1)
                 raise
