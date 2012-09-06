@@ -131,7 +131,7 @@ class Collect(CObjectBase):
         # set new run number from Spec - Convert it to int
         self.nextRunNumber = int(runNumber)
 
-    def prepareEdnaInput(self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames = 1, pTimePerFrame = 1234567):
+    def prepareEdnaInput(self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame):
         # fill up self.xsdin
         logging.info("Prepare EDNA input")
         self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
@@ -166,7 +166,10 @@ class Collect(CObjectBase):
         self.collectBeamCenterX.set_value(pBeamCenterX)
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
-        self.prepareEdnaInput(pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation)
+        # note that pTimePerFrame is 1.0 s and number of frames is 1
+        pNumberFrames = 1
+        pTimePerFrame = 1.0
+        self.prepareEdnaInput(pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame)
         self.commands["testCollect"]()
 
 
@@ -201,7 +204,6 @@ class Collect(CObjectBase):
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
         self.collectProcessData.set_value(pProcessData)
-
         self.prepareEdnaInput(pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame)
 
 
