@@ -37,10 +37,9 @@ class BsxVideoBrick(Core.BaseBrick):
 
             self._sampleChanger = sc
             self.videoWidget.setAutoRefreshRate(50)
-            #TODO: DEBUG Can not take video signal at the same time as doing something else
-            #self.videoWidget.setAutoRefresh(True)
-            self.videoWidget.setAutoRefresh(False)
-
+            #TODO: Make a callback setting 
+            #self.videoWidget.setCallbacks(new_image=self._sampleChanger.getImageJPG,
+            #                              get_liquid_pos=)
             # override videoWidget calls
             self.videoWidget.getNewImage = self._sampleChanger.getImageJPG
             self.videoWidget.getCurrentLiquidPosition = self._sampleChanger.getCurrentLiquidPosition
@@ -48,6 +47,9 @@ class BsxVideoBrick(Core.BaseBrick):
             self.videoWidget.setBeamLocation = self._sampleChanger.setBeamLocation
             self.videoWidget.exceptionCallback = self.exceptionCallback
 
+            #TODO: DEBUG Can not take video signal at the same time as doing something else
+            self.videoWidget.setAutoRefresh(True)
+            #self.videoWidget.setAutoRefresh(False)
         else:
             logging.info("Sample changer VIDEO NOT connected")
             self.videoWidget.setAutoRefresh(False)

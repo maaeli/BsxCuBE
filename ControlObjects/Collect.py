@@ -14,6 +14,7 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0, XSDataResultBioSaxsSmartMergev1_0
 from XSDataSAS import XSDataInputSolutionScattering
 
+logger = logging.getLogger("Collect")
 class Collect(CObjectBase):
     signals = [Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
@@ -40,7 +41,7 @@ class Collect(CObjectBase):
         self.dat_filenames = {}
         self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
-        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_3"
+        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
         self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
 
         self.storageTemperature = -374
@@ -110,11 +111,11 @@ class Collect(CObjectBase):
         else:
             self.showMessage(2, "ERROR! No such EDNA server: %d" % _ednaServerNumber)
         message = "Unable to connect to EDNA %d" % _ednaServerNumber
-        logging.error(message)
+        logger.error(message)
         message = "EDNA server %d is dead, please restart EDNA %d" % (_ednaServerNumber, _ednaServerNumber)
         self.showMessage(2, message, notify = 1)
         message = "ENDA %d is dead" % _ednaServerNumber
-        logging.error(message)
+        logger.error(message)
 
 
     def currentChanged(self, current):
@@ -133,7 +134,7 @@ class Collect(CObjectBase):
 
     def prepareEdnaInput(self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame):
         # fill up self.xsdin
-        logging.info("Prepare EDNA input")
+        logger.info("Prepare EDNA input")
         self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
         self.xsdin.sample.code = XSDataString(str(pCode))
         self.xsdin.sample.comments = XSDataString(str(pComments))
@@ -175,17 +176,17 @@ class Collect(CObjectBase):
 
     def collect(self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
         #TODO: DEBUG
-        logging.info("Starting collection now")
+        logger.info("Starting collection now")
         try:
             self.storageTemperature = float(pStorageTemperature)
         except Exception:
             self.storageTemperature = 4
-            logging.error("Could not read storage Temperature - Check sample changer connection")
+            logger.error("Could not read storage Temperature - Check sample changer connection")
         try:
             self.exposureTemperature = float(pSEUTemperature)
         except Exception:
             self.storageTemperature = 4
-            logging.error("Could not read exposure Temperature - Check sample changer connection")
+            logger.error("Could not read exposure Temperature - Check sample changer connection")
         self.collecting = True
         self.collectDirectory.set_value(pDirectory)
         self.collectPrefix.set_value(pPrefix)
@@ -219,10 +220,10 @@ class Collect(CObjectBase):
             self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
         prefixRun = "%s_%03d" % (sPrefix, pRunNumber)
         if (self.lastPrefixRun == prefixRun):
-            logging.error("Collecting the same run again %s_%03d", sPrefix, pRunNumber)
+            logger.error("Collecting the same run again %s_%03d", sPrefix, pRunNumber)
         else:
             self.lastPrefixRun = prefixRun
-            logging.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
+            logger.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
@@ -242,8 +243,6 @@ class Collect(CObjectBase):
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
         self.xsdin.experimentSetup.beamStopDiode = XSDataDouble(float(self.channels["collectBeamStopDiode"].value()))
-        #DEBUG: REMOVE
-        print "Beamstop diode is %r" % self.xsdin.experimentSetup.beamStopDiode.value
         # self.machineCurrent is already float
         self.xsdin.experimentSetup.machineCurrent = XSDataDouble(self.machineCurrent)
         self.xsdin.rawImage = XSDataImage(path = XSDataString(raw_filename))
@@ -253,13 +252,13 @@ class Collect(CObjectBase):
         self.xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
         # Save EDNA input to file for reprocessing
         xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
-        logging.info("Saving XML data to %s", xmlFilename)
+        logger.info("Saving XML data to %s", xmlFilename)
         self.xsdin.exportToFile(xmlFilename)
         # Run EDNA
         try:
             jobId = self.commands["startJob_edna1"]([self.pluginIntegrate, self.xsdin.marshal()])
             self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
-            logging.info("Processing job %s started", jobId)
+            logger.info("Processing job %s started", jobId)
             self.edna1Dead = False
             self.jobSubmitted = True
         except Exception:
@@ -280,65 +279,93 @@ class Collect(CObjectBase):
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
-            if jobId != "No job succeeded (yet)" and jobId != "No job Failed (yet)":
-                # and react only if jobs have been submitted
+            if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
+                # and react only if jobs have been submitted (to avoid spurious events)
                 if self.jobSubmitted:
-                    logging.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
+                    logger.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
         else:
             filename = self.dat_filenames.pop(jobId)
-            logging.info("processing Done from EDNA: %s -> %s", jobId, filename)
+            logger.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
                 try:
                     strXsdout = self.commands["getJobOutput_edna1"](jobId)
+                except Exception:
+                    self.edna1Dead = True
+                    message = "Tango/EDNA 1 is not responding !"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    return
+                try:
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
                     self.edna1Dead = False
                 except Exception:
-                    logging.error("Unable to parse string from Tango/EDNA")
-                    message = "EDNA server 1 is dead, please restart EDNA 1"
-                    self.showMessage(2, message, notify = 1)
-                    logging.error("ENDA 1 is dead")
-                    self.edna1Dead = True
-                if not self.edna1Dead:
-                    if xsd.status is not None:
-                        log = xsd.status.executiveSummary.value
-                        logging.info(log)
-                        # Log on info on Pipeline
-                        self.showMessage(0, log)
-                    else:
-                        self.showMessage(2,"EDNA1 has a problem - Please check", notify = 1)
+                    message = "Unable to parse string from Tango/EDNA 1"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    # no neeed to continue 
+                    return
+                if xsd.status is not None:
+                    log = xsd.status.executiveSummary.value
+                    # Log on info on Pipeline
+                    loglog = []
+                    for line in log.split(os.linesep):
+                        if line.startswith("Fidelity"):
+                            w = line.split()
+                            try:
+                                f = float(w[-1])
+                            except Exception:
+                                loglog.append(line)
+                            else:
+                                if f == 0.:
+                                    loglog.append("-log10 " + " ".join(w[:-1]) + " infinity")
+                                else:
+                                    loglog.append("-log10 " + " ".join(w[:-1]) + " " + str(-math.log(f)))
+                        else:
+                            loglog.append(line)
+                    self.showMessage(0, os.linesep.join(loglog))
+                else:
+                    self.showMessage(2, "EDNA1 has a problem - No Executive Summary - Please check")
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
-                if xsd.autoRg is None:
-                    logging.info("SAS pipeline not executed")
-                else:
-                    rgOut = xsd.autoRg
-                    filename = rgOut.filename.path.value
-                    logging.info("filename as input for SAS %s", filename)
-                    datapoint = numpy.loadtxt(filename)
-                    startPoint = rgOut.firstPointUsed.value
-                    q = datapoint[:, 0][startPoint:]
-                    I = datapoint[:, 1][startPoint:]
-                    s = datapoint[:, 2][startPoint:]
-                    mask = (q < 3)
-                    self.xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                    #NbThreads=XSDataInteger(4))
-                    self.xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                    self.xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-                    self.xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-                    logging.info("Starting SAS pipeline for file %s", filename)
-                    try:
-                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, self.xsdin.marshal()])
-                        self.dat_filenames[jobId] = rgOut.filename.path.value
-                        self.edna2Dead = False
-                        self.jobSubmitted = True
-                    except Exception:
-                        self.showMessageEdnaDead(2)
+#                if xsd.autoRg is None:
+#                    logger.info("SAS pipeline not executed")
+#                else:
+#                    rgOut = xsd.autoRg
+#                    filename = rgOut.filename.path.value
+#                    logger.info("filename as input for SAS %s", filename)
+#                    datapoint = numpy.loadtxt(filename)
+#                    startPoint = rgOut.firstPointUsed.value
+#                    q = datapoint[:, 0][startPoint:]
+#                    I = datapoint[:, 1][startPoint:]
+#                    s = datapoint[:, 2][startPoint:]
+#                    mask = (q < 3)
+#                    xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+#                    #NbThreads=XSDataInteger(4))
+#                    xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+#                    xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+#                    xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+#                    logger.info("Starting SAS pipeline for file %s", filename)
+#                    try:
+#                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, xsdin.marshal()])
+#                        self.dat_filenames[jobId] = rgOut.filename.path.value
+#                        self.edna2Dead = False
+#                        self.jobSubmitted = True
+#                    except Exception, errMsg:
+#                        message = "Error when trying to start EDNA 2: \n%r" % errMsg
+#                        self.showMessage(2, message)
+#                        self.showMessageEdnaDead(2)
 
 
     def _abortCollectWithRobot(self):
+        #TODO: See if we actually come here
+        print "---- Aborting Collection with Robot"
+        # And stop the run
+        self.emit("collectDone")
         if  self.__collectWithRobotProcedure is not None:
             self.__collectWithRobotProcedure.kill()
+
+
 
     def collectFailed(self, error):
         """Callback when collect is aborted in spec (CTRL-C or error)"""
@@ -346,20 +373,16 @@ class Collect(CObjectBase):
         self._abortCollectWithRobot()
 
     def collectAbort(self):
-        logging.info("sending abort to stop spec collection")
-        #TODO: understand what this is doing SO 13/3
-        self.abortCollect.set_value(1)
+        logger.info("sending abort to stop spec collection")
 
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
-        # self.commands["collect"].abort()
+        #self.commands["collect"].abort()
 
         self._abortCollectWithRobot()
 
 
     def testCollectAbort(self):
-        logging.info("sending abort to stop spec test collection")
-        self.abortCollect.set_value(1)
-
+        logger.info("sending abort to stop spec test collection")
         #self.commands["testCollect"].abort()
 
     def setCheckBeam(self, flag):
@@ -415,7 +438,10 @@ class Collect(CObjectBase):
         #   
         self.channels["fill_mode"].set_value("ON")
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
-            self.showMessage(2, "Error when trying to set viscosity to '%s'..." % tocollect["viscosity"])
+            self.showMessage(2, "Error when trying to set viscosity to '%s'...\nAborting collection!" % tocollect["viscosity"])
+            self.collectAbort()
+            # allow time to abort
+            time.sleep(5)
 
         # ==================================================
         #  SETTING SEU TEMPERATURE
@@ -425,8 +451,10 @@ class Collect(CObjectBase):
         try:
             self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
         except Exception, errMsg:
-            self.showMessage(2, "Error when setting SEU temperature. Error %r" % errMsg)
-            raise
+            self.showMessage(2, "Error when setting SEU temperature. Error: %r\nAborting collection!" % errMsg)
+            self.collectAbort()
+            # allow time to abort
+            time.sleep(5)
 
         # ==================================================
         #  FILLING 
@@ -436,8 +464,10 @@ class Collect(CObjectBase):
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
         except Exception, errMsg:
             message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
-            self.showMessage(2, message, notify = 1)
-            raise
+            self.showMessage(2, message)
+            self.collectAbort()
+            # allow time to abort
+            time.sleep(5)
 
         # ==================================================
         #  FLOW
@@ -447,7 +477,10 @@ class Collect(CObjectBase):
             try:
                 self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
             except Exception:
-                self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
+                self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)...\nAborting collection!" % (tocollect["volume"], pars["flowTime"]))
+                self.collectAbort()
+                # allow time to abort
+                time.sleep(5)
         else:
             self.objects["sample_changer"].setLiquidPositionFixed(True)
 
@@ -491,7 +524,10 @@ class Collect(CObjectBase):
             try:
                 self.objects["sample_changer"].wait()
             except Exception:
-                self.showMessage(2, "Error when waiting for end of flow...")
+                self.showMessage(2, "Error when waiting for end of flow...\nAborting collection!")
+                self.collectAbort()
+                # allow time to abort
+                time.sleep(5)
 
         # =============
         #  RECUPERATE 
@@ -501,7 +537,10 @@ class Collect(CObjectBase):
             try:
                 self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
             except Exception:
-                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' well '%s'...\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+                self.collectAbort()
+                # allow time to abort
+                time.sleep(5)
 
         # ==================================================
         #  CLEANING
@@ -512,8 +551,10 @@ class Collect(CObjectBase):
             self.objects["sample_changer"].doCleanProcedure()
         except Exception:
             message = "Error when trying to clean. Aborting collection!"
-            self.showMessage(2, message, notify = 1)
-            raise
+            self.showMessage(2, message)
+            self.collectAbort()
+            # allow time to abort
+            time.sleep(5)
 
 
     def _collectWithRobot(self, pars):
@@ -542,7 +583,8 @@ class Collect(CObjectBase):
         while self.channels["guillstate"].value() != "3":
             time.sleep(0.5)
             if count > 60 :
-                self.showMessage(2, "Error when trying to open guillotine")
+                message = "Error when trying to open guillotine. Aborting collection!"
+                self.showMessage(2, message)
                 self.collectAbort()
                 break
 
@@ -555,8 +597,10 @@ class Collect(CObjectBase):
                 self.objects["sample_changer"].doCleanProcedure()
             except Exception:
                 message = "Error when trying to clean. Aborting collection!"
-                self.showMessage(2, message, notify = 1)
-                raise
+                self.showMessage(2, message)
+                self.collectAbort()
+                # wait for abort to work
+                time.sleep(5)
 
         self.lastSampleTime = time.time()
         prevSample = None

@@ -1,5 +1,4 @@
 import os, logging, pprint, time
-
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
@@ -11,7 +10,7 @@ from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
 
-
+logger = logging.getLogger("CollectBrick")
 __category__ = "BsxCuBE"
 
 # Compare outside class
@@ -124,7 +123,8 @@ class CollectBrick(Core.BaseBrick):
         self.__expertMode = False
         self.energyControlObject = None
         self.collectObj = None
-
+        self.contact = False
+        self.loginDone = False
 
         self.__validParameters = [False, False, False]
 
@@ -309,18 +309,18 @@ class CollectBrick(Core.BaseBrick):
 
         # Radiation Damage 
         self.hBoxLayout15 = Qt.QHBoxLayout()
-        self.radiationCheckBox = Qt.QCheckBox("Radiation damage", self.brick_widget)
-        self.radiationCheckBox.setFixedWidth(130)
+        self.radiationCheckBox = Qt.QCheckBox("Radiation damage (10^-f)", self.brick_widget)
+        self.radiationCheckBox.setFixedWidth(160)
         Qt.QObject.connect(self.radiationCheckBox, Qt.SIGNAL("toggled(bool)"), self.radiationCheckBoxToggled)
         self.hBoxLayout15.addWidget(self.radiationCheckBox)
         self.radiationRelativeDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.radiationRelativeDoubleSpinBox.setRange(0.0, 1.0)
-        self.radiationRelativeDoubleSpinBox.setDecimals(10)
+        self.radiationRelativeDoubleSpinBox.setRange(0.0, 500.)
+        self.radiationRelativeDoubleSpinBox.setDecimals(2)
         self.radiationRelativeDoubleSpinBox.setToolTip("Relative Similarity")
         self.hBoxLayout15.addWidget(self.radiationRelativeDoubleSpinBox)
         self.radiationAbsoluteDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
-        self.radiationAbsoluteDoubleSpinBox.setRange(0.0, 1.0)
-        self.radiationAbsoluteDoubleSpinBox.setDecimals(10)
+        self.radiationAbsoluteDoubleSpinBox.setRange(0.0, 500.)
+        self.radiationAbsoluteDoubleSpinBox.setDecimals(2)
         self.radiationAbsoluteDoubleSpinBox.setToolTip("Absolute Similarity")
         self.hBoxLayout15.addWidget(self.radiationAbsoluteDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout15)
@@ -427,7 +427,6 @@ class CollectBrick(Core.BaseBrick):
         self._sampleChangerDisplayMessage = ""
 
         self.setWidgetState()
-        self.setButtonState(0)
 
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
@@ -440,6 +439,7 @@ class CollectBrick(Core.BaseBrick):
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
+        self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
     def sample_changer_connected(self, pPeer):
@@ -581,7 +581,7 @@ class CollectBrick(Core.BaseBrick):
             if self._isCollecting:
                 self.collectObj.triggerEDNA(filename0, oneway = True)
                 message = "The frame '%s' was collected..." % filename0
-                logging.getLogger().info(message)
+                logger.info(message)
                 if self.robotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory(0, message)
 
@@ -616,7 +616,7 @@ class CollectBrick(Core.BaseBrick):
                     if self.__isTesting:
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
-                        logging.getLogger().info("The data collection is done!")
+                        logger.info("The data collection is done!")
                         self.collectObj.blockGUI(False)
                     else:
                         feedBackFlag = self._feedBackFlag
@@ -624,7 +624,7 @@ class CollectBrick(Core.BaseBrick):
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
-                            logging.getLogger().info("The data collection is done!")
+                            logger.info("The data collection is done!")
                             self.collectObj.blockGUI(False)
                         else:
                             if self.SPECBusyTimer.isActive():
@@ -637,7 +637,7 @@ class CollectBrick(Core.BaseBrick):
 
     def beamLostChanged(self, pValue):
         if pValue != None and pValue != "":
-            logging.getLogger().warning("BEAM LOST: %s" % pValue)
+            logger.warning("BEAM LOST: %s" % pValue)
 
     def checkBeamChanged(self, pValue):
         if pValue == 1:
@@ -684,23 +684,27 @@ class CollectBrick(Core.BaseBrick):
 
     def collectObjectConnected(self, collect_obj):
         if collect_obj is not None:
+            # we reconnected.. Let us put back light if out
+            self.setButtonState(0)
+            self.brick_widget.setEnabled(self.loginDone)
             self.collectObj = collect_obj
             self.collectObj.updateChannels(oneway = True)
 
 
     def connectedToEnergy(self, pPeer):
-       if pPeer is None:
-           self.energyControlObject = None
-       else:
-           if self.energyControlObject is None:
-              self.energyControlObject = pPeer
-              # read energy when getting contact with CO Object
-              self.__energy = float(self.energyControlObject.getEnergy())
-              wavelength = self.hcOverE / self.__energy
-              wavelengthStr = "%.4f" % wavelength
-              self._waveLengthStr = wavelengthStr
-              # Set energy when connected
-              self.energyControlObject.setEnergy(self.__energy)
+        if pPeer is None:
+            self.energyControlObject = None
+        else:
+            if self.energyControlObject is None:
+                self.energyControlObject = pPeer
+                self.contact = True
+                # read energy when getting contact with CO Object
+                self.__energy = float(self.energyControlObject.getEnergy())
+                wavelength = self.hcOverE / self.__energy
+                wavelengthStr = "%.4f" % wavelength
+                self._waveLengthStr = wavelengthStr
+                # Set energy when connected
+                self.energyControlObject.setEnergy(self.__energy)
 
 
 
@@ -743,6 +747,22 @@ class CollectBrick(Core.BaseBrick):
 
         return valid
 
+    def getRadiationRelativeLinear(self):
+        val = float(self.radiationRelativeDoubleSpinBox.value())
+        if val == 0.:
+            return 0
+        else:
+            return 10 ** (-val)
+
+    def getRadiationAbsoluteLinear(self):
+        val = float(self.radiationAbsoluteDoubleSpinBox.value())
+        if val == 0.:
+            return 0
+        else:
+            return 10 ** (-val)
+
+
+
     def getFileInfo(self):
         generalParsWidget = self
         filepars = CollectPars()
@@ -771,8 +791,8 @@ class CollectBrick(Core.BaseBrick):
                             "beamCenterY": int(self.beamCenterYSpinBox.value()),
                             "normalisation": float(self.normalisationDoubleSpinBox.value()),
                             "radiationChecked":self.radiationCheckBox.isChecked(),
-                            "radiationRelative": float(self.radiationRelativeDoubleSpinBox.value()),
-                            "radiationAbsolute": float(self.radiationAbsoluteDoubleSpinBox.value()),
+                            "radiationRelative": self.getRadiationRelativeLinear(),
+                            "radiationAbsolute": self.getRadiationAbsoluteLinear(),
                             "SEUTemperature": self.seuTemperature}
 
             robotpars = { "sampleType": str(self._collectRobotDialog.sampleTypeComboBox.currentText()),
@@ -860,8 +880,8 @@ class CollectBrick(Core.BaseBrick):
             collectpars.beamCenterY = self.beamCenterYSpinBox.value()
             collectpars.normalisation = self.normalisationDoubleSpinBox.value()
             collectpars.radiationChecked = self.radiationCheckBox.isChecked()
-            collectpars.radiationRelative = self.radiationRelativeDoubleSpinBox.value()
-            collectpars.radiationAbsolute = self.radiationAbsoluteDoubleSpinBox.value()
+            collectpars.radiationRelative = self.getRadiationRelativeLinear()
+            collectpars.radiationAbsolute = self.getRadiationAbsoluteLinear()
             collectpars.SEUTemperature = self.seuTemperature
             collectpars.storageTemperature = self.storageTemperature
 
@@ -1087,6 +1107,15 @@ class CollectBrick(Core.BaseBrick):
 
     def collectPushButtonClicked(self):
         # Check if pilatus is ready
+        if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
+            if self.contact:
+                logger.warning("Lost contact with Pilatus")
+            self.contact = False
+            return
+        else:
+            if not self.contact:
+                logger.warning("Found Pilatus again")
+                self.contact = True
         if not self.energyControlObject.pilatusReady():
             Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
             return
@@ -1098,7 +1127,7 @@ class CollectBrick(Core.BaseBrick):
                 if self.scObject.getSampleStorageTemperature() != "":
                     oldTemp = float(self.scObject.getSampleStorageTemperature())
                 else:
-                    logging.getLogger().warning("Can not get current Storage temperature from Sample Changer")
+                    logger.warning("Can not get current Storage temperature from Sample Changer")
                 newTemp = float(self._collectRobotDialog.storageTemperatureDoubleSpinBox.value())
                 if newTemp > (oldTemp + 1.0) :
                     answer = Qt.QMessageBox.question(self.brick_widget, "Question", \
@@ -1112,7 +1141,7 @@ class CollectBrick(Core.BaseBrick):
                 if self.scObject.getSEUTemperature() != "":
                     oldTemp = float(self.scObject.getSEUTemperature())
                 else:
-                    logging.getLogger().warning("Can not get current SEU temperature from Sample Changer")
+                    logger.warning("Can not get current SEU temperature from Sample Changer")
                 newTemp = 0.0
                 for checkSample in self.robotParams["sampleList"]:
                     if newTemp < checkSample["SEUtemperature"]:
@@ -1235,8 +1264,8 @@ class CollectBrick(Core.BaseBrick):
                       self.beamCenterYSpinBox.value(),
                       self.normalisationDoubleSpinBox.value(),
                       self.radiationCheckBox.isChecked(),
-                      self.radiationAbsoluteDoubleSpinBox.value(),
-                      self.radiationRelativeDoubleSpinBox.value(),
+                      self.getRadiationAbsoluteLinear(),
+                      self.getRadiationRelativeLinear(),
                       processData,
                       self.seuTemperature,
                       self.storageTemperature)
@@ -1255,11 +1284,12 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
-        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> in collectDone"
+        print ">>>>>>>>>>>>> in collectDone %s " % self.collectionStatus
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
             self.collectObj.blockGUI(False)
             if self.notifyCheckBox.isChecked():
+                #TODO: Can we "spawn this"  to avoid stopping updating the 
                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
 
 
@@ -1333,8 +1363,8 @@ class CollectBrick(Core.BaseBrick):
             if answer == Qt.QMessageBox.No:
                 return
 
-        logging.getLogger().info("Aborting!")
-        logging.getLogger().warning("Wait for current action to finish...")
+        logger.info("Aborting!")
+        logger.warning("Wait for current action to finish...")
 
         self._abortFlag = True
 
@@ -1445,7 +1475,7 @@ class CollectBrick(Core.BaseBrick):
 
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
-            logging.getLogger().warning("The frame was not collected or didn't appear on time! (%d,%d)" % \
+            logger.warning("The frame was not collected or didn't appear on time! (%d,%d)" % \
                             (self._currentFrame, self._frameNumber))
 
     def getFilenameDetails(self, pFilename):
