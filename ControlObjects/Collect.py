@@ -42,7 +42,7 @@ class Collect(CObjectBase):
         self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
-        self.pluginSAS = "EDPluginControlSolutionScatteringv0_3"
+        self.pluginSAS = "EDPluginControlSolutionScatteringv0_4"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -328,33 +328,33 @@ class Collect(CObjectBase):
                     self.showMessage(2, "EDNA1 has a problem - No Executive Summary - Please check")
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
-#                if xsd.autoRg is None:
-#                    logger.info("SAS pipeline not executed")
-#                else:
-#                    rgOut = xsd.autoRg
-#                    filename = rgOut.filename.path.value
-#                    logger.info("filename as input for SAS %s", filename)
-#                    datapoint = numpy.loadtxt(filename)
-#                    startPoint = rgOut.firstPointUsed.value
-#                    q = datapoint[:, 0][startPoint:]
-#                    I = datapoint[:, 1][startPoint:]
-#                    s = datapoint[:, 2][startPoint:]
-#                    mask = (q < 3)
-#                    xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-#                    #NbThreads=XSDataInteger(4))
-#                    xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-#                    xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-#                    xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
-#                    logger.info("Starting SAS pipeline for file %s", filename)
-#                    try:
-#                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, xsdin.marshal()])
-#                        self.dat_filenames[jobId] = rgOut.filename.path.value
-#                        self.edna2Dead = False
-#                        self.jobSubmitted = True
-#                    except Exception, errMsg:
-#                        message = "Error when trying to start EDNA 2: \n%r" % errMsg
-#                        self.showMessage(2, message)
-#                        self.showMessageEdnaDead(2)
+                if xsd.autoRg is None:
+                    logger.info("SAS pipeline not executed")
+                else:
+                    rgOut = xsd.autoRg
+                    filename = rgOut.filename.path.value
+                    logger.info("filename as input for SAS %s", filename)
+                    datapoint = numpy.loadtxt(filename)
+                    startPoint = rgOut.firstPointUsed.value
+                    q = datapoint[:, 0][startPoint:]
+                    I = datapoint[:, 1][startPoint:]
+                    s = datapoint[:, 2][startPoint:]
+                    mask = (q < 3)
+                    xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
+                    #NbThreads=XSDataInteger(4))
+                    xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
+                    xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
+                    xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                    logger.info("Starting SAS pipeline for file %s", filename)
+                    try:
+                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, xsdin.marshal()])
+                        self.dat_filenames[jobId] = rgOut.filename.path.value
+                        self.edna2Dead = False
+                        self.jobSubmitted = True
+                    except Exception, errMsg:
+                        message = "Error when trying to start EDNA 2: \n%r" % errMsg
+                        self.showMessage(2, message)
+                        self.showMessageEdnaDead(2)
 
 
     def _abortCollectWithRobot(self):
