@@ -10,7 +10,7 @@ class BiosaxsClient:
         self.client = Client('http://160.103.210.4:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl', transport = self.httpAuthenticatedToolsForAutoprocessingWebService)
 
     def getExperimentsByProposalId(self, proposalId):
-        response = self.client.service.findExperimentByPosposalId(3092)
+        response = self.client.service.findExperimentByPosposalId(3124)
         experiments = []
         for experiment in response:
             experiments.append(Experiment(experiment))

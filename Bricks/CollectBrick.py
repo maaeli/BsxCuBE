@@ -130,9 +130,6 @@ class CollectBrick(Core.BaseBrick):
 
         #TODO: DEBUG
         self.last_dat = None
-        #TODO: DEBUG - Note that I have started - And make sure another process starting it will not generate error
-        os.system("touch /tmp/.BsxCuBE.GUIStart")
-        os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
         self.image_proxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
@@ -450,6 +447,9 @@ class CollectBrick(Core.BaseBrick):
             print "sample changer connected in CollectBrick>>>> %r" % self.plateInfos
             self.seuTemperature = self.scObject.getSEUTemperature()
             self.storageTemperature = self.scObject.getSampleStorageTemperature()
+            #TODO: DEBUG - Note the time of [reconnect or connect to Sample Changer] (used by starting mechanism)
+            os.system("touch /tmp/.BsxCuBE.GUIStart")
+            os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
 
     def seu_temperature_changed(self, seuTemperature):
         self.seuTemperature = seuTemperature
@@ -689,7 +689,6 @@ class CollectBrick(Core.BaseBrick):
             self.brick_widget.setEnabled(self.loginDone)
             self.collectObj = collect_obj
             self.collectObj.updateChannels(oneway = True)
-
 
     def connectedToEnergy(self, pPeer):
         if pPeer is None:

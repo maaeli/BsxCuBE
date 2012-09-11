@@ -8,7 +8,7 @@ from PyQt4 import QtGui, Qt
 __category__ = "General"
 
 
-class AttenuatorsBrick(Core.BaseBrick):
+class BsxAttenuatorsBrick(Core.BaseBrick):
 
 
     properties = {"maskFormat": Property("string", "Mask format", "", "maskFormatChanged"),
@@ -50,7 +50,7 @@ class AttenuatorsBrick(Core.BaseBrick):
 
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
-
+        self.bsxAttenuator = None
 
     def init(self):
         self.__filtersDialog = None
@@ -65,7 +65,7 @@ class AttenuatorsBrick(Core.BaseBrick):
         self.hBoxLayout.addWidget(self.transmissionLabel)
 
         self.currentTransmissionLineEdit = Qt.QLineEdit(self.brick_widget)
-        self.currentTransmissionLineEdit.setEnabled(False)
+        self.currentTransmissionLineEdit.setEnabled(True)
         self.currentTransmissionLineEdit.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.currentTransmissionLineEdit.setToolTip("Current transmission")
         self.hBoxLayout.addWidget(self.currentTransmissionLineEdit)
@@ -84,6 +84,7 @@ class AttenuatorsBrick(Core.BaseBrick):
         Qt.QObject.connect(self.filtersPushButton, Qt.SIGNAL("clicked()"), self.filtersPushButtonClicked)
 
         self.newTransmissionComboBoxChanged(None)
+
 
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
@@ -136,6 +137,8 @@ class AttenuatorsBrick(Core.BaseBrick):
 
 
     def attenuatorsStateChanged(self, pValue):
+        #TODO: DEBUG
+        print ">>> Got Value from attenuator State changed to %r" % pValue
         if self.__filtersDialog is not None:
             self.__filtersDialog.filtersChanged(pValue)
 
@@ -176,12 +179,23 @@ class AttenuatorsBrick(Core.BaseBrick):
 
 
     def transmissionChanged(self, pValue):
-        print ">> Set Transmission to %r " % pValue
         self.getObject("attenuators").setTransmission(float(pValue))
 
 
     def connectionStatusChanged(self, pPeer):
-        pass
+        if pPeer is not None:
+            self.bsxAttenuator = pPeer
+            #TODO : DEBUG
+            currentTransmission = self.bsxAttenuator.getAttenuatorsFactor()
+            print "Got transmission as %r" % currentTransmission
+            if currentTransmission == "":
+                self.currentTransmissionLineEdit.setText(self.__suffix)
+            else:
+                if self.__maskFormat == "":
+                    self.currentTransmissionLineEdit.setText(str(float(currentTransmission)) + self.__suffix)
+                else:
+                    self.currentTransmissionLineEdit.setText(self.__maskFormat % float(currentTransmission) + self.__suffix)
+
 
 
     def newTransmissionComboBoxChanged(self, pValue):
@@ -198,7 +212,7 @@ class AttenuatorsBrick(Core.BaseBrick):
     def newTransmissionComboBoxReturnPressed(self):
         if self.newTransmissionComboBox.lineEdit().hasAcceptableInput():
             logging.getLogger().info("Setting transmission to " + self.newTransmissionComboBox.currentText() + " %...")
-            self.getObject("attenuators").setTransmission(float(self.newTransmissionComboBox.currentText()))
+            self.bsxAttenuator.setTransmission(float(self.newTransmissionComboBox.currentText()))
             self.newTransmissionComboBox.clearEditText()
 
 
@@ -207,7 +221,7 @@ class AttenuatorsBrick(Core.BaseBrick):
             logging.getLogger().info("Enabling filter '" + pFilter + "'...")
         else:
             logging.getLogger().info("Disabling filter '" + pFilter + "'...")
-        self.getObject("attenuators").toggleFilter(pValue)
+        self.bsxAttenuator.toggleFilter(pValue)
 
 
     def filtersPushButtonClicked(self):
@@ -215,12 +229,12 @@ class AttenuatorsBrick(Core.BaseBrick):
             self.__filtersDialog.activateWindow()
             self.__filtersDialog.raise_()
         else:
-            attenuatorsList = self.getObject("attenuators").getAttenuatorsList()
+            attenuatorsList = self.bsxAttenuator.getAttenuatorsList()
             if attenuatorsList is None:
                 Qt.QMessageBox.information(self.brick_widget, "Info", "There are no attenuators specified!")
             else:
                 self.__filtersDialog = FiltersDialog(self, attenuatorsList)
-                self.__filtersDialog.filtersChanged(self.getObject("attenuators").getAttenuatorsState())
+                self.__filtersDialog.filtersChanged(self.bsxAttenuator.getAttenuatorsState())
                 self.__filtersDialog.show()
 
 

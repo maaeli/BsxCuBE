@@ -16,7 +16,7 @@
       <tabpanel id='tab_CollectTab'><vbox id="CollectTab" orient="vertical">
   <hbox qwidget="true" id="CollectBrick1" brick="true"><script src="CollectBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="BsxShutterBrick1" brick="true"><script src="BsxShutterBrick" tau="false"/></hbox>
-<hbox qwidget="true" id="AttenuatorsBrick1" brick="true"><script src="AttenuatorsBrick" tau="false"/></hbox>
+<hbox qwidget="true" id="BsxAttenuatorsBrick1" brick="true"><script src="BsxAttenuatorsBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="EnergyWaveLengthBrick1" brick="true"><script src="EnergyWaveLengthBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>

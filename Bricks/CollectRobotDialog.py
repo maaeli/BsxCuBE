@@ -4,6 +4,7 @@ import cStringIO
 import BiosaxsForBsxCubeWidget
 import logging
 import os.path, time
+import pprint
 
 rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
@@ -536,7 +537,7 @@ class CollectRobotDialog(Qt.QDialog):
 
         self.loadFile(filename)
 
-    def loadFile(self, filename):
+    def loadFile(self, filename, fromIspyB = False):
         try:
             myPars = CollectPars(filename)
 
@@ -574,11 +575,17 @@ class CollectRobotDialog(Qt.QDialog):
 
             self.CBblock = 0
             self.filename = filename
-
-            Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
+            pprint.pprint(filename)
+            if fromIspyB:
+                Qt.QMessageBox.information(self, "Info", "The data from ISPyB was successfully loaded!")
+            else:
+                Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
         except Exception, e:
             logging.exception('Cannot load collection parameters file. \n')
-            Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
+            if fromIspyB:
+                Qt.QMessageBox.critical(self, "Error", "Error when loading data from ISPyB!")
+            else:
+                Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
     def saveAsPushButtonClicked(self):
         filename = Qt.QFileDialog.getSaveFileName(self, "Choose a file to save", self.filename, "XML File (*.xml)")
@@ -595,23 +602,24 @@ class CollectRobotDialog(Qt.QDialog):
         self.fileLineEdit.setText(filename)
         self.saveFile(filename)
 
-   
+
     def loadFromISPyBButtonClicked(self):
         Widget = QtGui.QDialog()
         bsx_ispyb_widget = BiosaxsForBsxCubeWidget.Ui_Widget()
-        bsx_ispyb_widget.setupUi(Widget)  
+        bsx_ispyb_widget.setupUi(Widget)
         Widget.exec_()
-        
-        if bsx_ispyb_widget.response:
-          #f = open("/tmp/output.xml", "w"); f.write(bsx_ispyb_widget.response); f.close()
-          # create a file-like object and pass it to the standard functions
-          xmlfile = cStringIO.StringIO(bsx_ispyb_widget.response)
-          try:
-            self.loadFile(xmlfile)
-          finally:
-            self.filename = ""
+        #bsx_ispyb_widget.onRefreshDataButtonClicked()
 
-        
+        if bsx_ispyb_widget.response:
+            #f = open("/tmp/output.xml", "w"); f.write(bsx_ispyb_widget.response); f.close()
+            # create a file-like object and pass it to the standard functions
+            xmlfile = cStringIO.StringIO(bsx_ispyb_widget.response)
+            try:
+                self.loadFile(xmlfile, fromIspyB = True)
+            finally:
+                self.filename = ""
+
+
     def savePushButtonClicked(self, filename = None):
         if self.filename == "" or not os.path.isfile(self.filename):
             self.saveAsPushButtonClicked()
@@ -1065,7 +1073,7 @@ class CollectRobotDialog(Qt.QDialog):
         self.accept()
 
 if __name__ == '__main__':
-  app=QtGui.QApplication([])
+  app = QtGui.QApplication([])
 
   class NullObj:
     def __getattr__(self, attr):
@@ -1074,7 +1082,7 @@ if __name__ == '__main__':
   parent = NullObj()
 
   d = CollectRobotDialog(parent)
- 
+
   d.show()
 
   app.exec_()

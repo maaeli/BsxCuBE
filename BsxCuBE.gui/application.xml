@@ -244,7 +244,7 @@
      <property name="notification" value="switch to tab"/>
      <property name="caption" value=""/>
   </properties>
-  <properties id="AttenuatorsBrick1">
+  <properties id="BsxAttenuatorsBrick1">
      <property name="flex" value="0"/>
      <property name="maskFormat" value="%3.5f"/>
      <property name="suffix" value=" %"/>
@@ -753,7 +753,7 @@
   <connections id="tabbox2">
   </connections>
 
-  <connections id="AttenuatorsBrick1">
+  <connections id="BsxAttenuatorsBrick1">
     <connection role="collect">
       <signal name="collectProcessingDone"/>
       <signal name="collectProcessingLog"/>
@@ -777,7 +777,7 @@
     <connection role="attenuators">
       <signal name="attenuatorsStateChanged"/>
       <signal name="attenuatorsFactorChanged"/>
-      <peer name="BsxCuBE/Attenuators"/>
+      <peer name="BsxCuBE/BsxAttenuators"/>
     </connection>
   </connections>
 

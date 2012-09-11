@@ -77,6 +77,8 @@ class Ui_Widget(object):
         self.retranslateUi(Widget)
         QtCore.QMetaObject.connectSlotsByName(Widget)
 
+        self.onRefreshDataButtonClicked()
+
 
     def onLoadPlatesButtonClicked(self):
         plateIds = self.getSelection()
