@@ -73,8 +73,7 @@ class Collect(CObjectBase):
         try:
             self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
             self.channels["jobFailure_edna1"].connect("update", self.processingDone)
-            self.commands["initPlugin_edna1"](self.pluginIntegrate)
-            self.commands["initPlugin_edna1"](self.pluginMerge)
+            self.commands["initPlugin_edna1"](self.pluginSAS)
             self.edna1Dead = False
         except Exception:
             self.showMessageEdnaDead(1)
@@ -82,7 +81,9 @@ class Collect(CObjectBase):
         try:
             self.channels["jobSuccess_edna2"].connect("update", self.processingDone)
             self.channels["jobFailure_edna2"].connect("update", self.processingDone)
-            self.commands["initPlugin_edna2"](self.pluginSAS)
+            self.commands["initPlugin_edna2"](self.pluginIntegrate)
+            self.commands["initPlugin_edna2"](self.pluginMerge)
+
             self.edna2Dead = False
         except Exception:
             self.showMessageEdnaDead(2)
@@ -256,25 +257,25 @@ class Collect(CObjectBase):
         self.xsdin.exportToFile(xmlFilename)
         # Run EDNA
         try:
-            jobId = self.commands["startJob_edna1"]([self.pluginIntegrate, self.xsdin.marshal()])
+            jobId = self.commands["startJob_edna2"]([self.pluginIntegrate, self.xsdin.marshal()])
             self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
             logger.info("Processing job %s started", jobId)
             self.edna1Dead = False
             self.jobSubmitted = True
         except Exception:
-            self.showMessageEdnaDead(1)
+            self.showMessageEdnaDead(2)
 
 
     def specCollectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
         try:
-            jobId = self.commands["startJob_edna1"]([self.pluginMerge, self.xsdAverage.marshal()])
+            jobId = self.commands["startJob_edna2"]([self.pluginMerge, self.xsdAverage.marshal()])
             self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
-            self.edna1Dead = False
+            self.edna2Dead = False
             self.jobSubmitted = True
         except Exception:
-            self.showMessageEdnaDead(1)
+            self.showMessageEdnaDead(2)
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
@@ -289,18 +290,18 @@ class Collect(CObjectBase):
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
                 try:
-                    strXsdout = self.commands["getJobOutput_edna1"](jobId)
+                    strXsdout = self.commands["getJobOutput_edna2"](jobId)
                 except Exception:
-                    self.edna1Dead = True
-                    message = "Tango/EDNA 1 is not responding !"
+                    self.edna2Dead = True
+                    message = "Tango/EDNA 2 is not responding !"
                     logger.error(message)
                     self.showMessage(2, message)
                     return
                 try:
                     xsd = XSDataResultBioSaxsSmartMergev1_0.parseString(strXsdout)
-                    self.edna1Dead = False
+                    self.edna2Dead = False
                 except Exception:
-                    message = "Unable to parse string from Tango/EDNA 1"
+                    message = "Unable to parse string from Tango/EDNA 2"
                     logger.error(message)
                     self.showMessage(2, message)
                     # no neeed to continue 
@@ -325,7 +326,7 @@ class Collect(CObjectBase):
                             loglog.append(line)
                     self.showMessage(0, os.linesep.join(loglog))
                 else:
-                    self.showMessage(2, "EDNA1 has a problem - No Executive Summary - Please check")
+                    self.showMessage(2, "EDNA 2 has a problem - No Executive Summary - Please check")
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
                 if xsd.autoRg is None:
@@ -347,14 +348,14 @@ class Collect(CObjectBase):
                     xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
                     logger.info("Starting SAS pipeline for file %s", filename)
                     try:
-                        jobId = self.commands["startJob_edna2"]([self.pluginSAS, xsdin.marshal()])
+                        jobId = self.commands["startJob_edna1"]([self.pluginSAS, xsdin.marshal()])
                         self.dat_filenames[jobId] = rgOut.filename.path.value
-                        self.edna2Dead = False
+                        self.edna1Dead = False
                         self.jobSubmitted = True
                     except Exception, errMsg:
-                        message = "Error when trying to start EDNA 2: \n%r" % errMsg
+                        message = "Error when trying to start EDNA 1: \n%r" % errMsg
                         self.showMessage(2, message)
-                        self.showMessageEdnaDead(2)
+                        self.showMessageEdnaDead(1)
 
 
     def _abortCollectWithRobot(self):
@@ -680,10 +681,10 @@ class Collect(CObjectBase):
 
 
     def collectWithRobot(self, *args):
-        # if EDNA 1 is dead we do not collect !
-        if not self.edna1Dead:
+        # if EDNA 2 is dead we do not collect !
+        if not self.edna2Dead:
             self.__collectWithRobotProcedure = gevent.spawn(self._collectWithRobot, *args)
         else:
-            message = "EDNA server 1 is dead, please restart EDNA 1"
+            message = "EDNA server 2 is dead, please restart EDNA 2"
             self.showMessage(2, message, notify = 1)
 

@@ -10,6 +10,7 @@
    <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />
    <command name="initPlugin_edna1" type="tango" uri="DAU/edna/1" call="initPlugin" />
    <command name="getJobOutput_edna1" type="tango" uri="DAU/edna/1" call="getJobOutput"/>
+   
    <command name="startJob_edna2" type="tango" uri="DAU/edna/2" call="startJob"/>
    <command name="initPlugin_edna2" type="tango" uri="DAU/edna/2" call="initPlugin" />
    <command name="getJobOutput_edna2" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
@@ -20,6 +21,7 @@
    <channel name="jobSuccess_edna1"    type="tango"   uri="DAU/edna/1"  call="jobSuccess"/> 
    <channel name="jobFailure_edna1"    type="tango"   uri="DAU/edna/1"  call="jobFailure"/> 
    <channel name="state_edna1"         type="tango"   uri="DAU/edna/1"  call="State"/> 
+   
    <channel name="jobSuccess_edna2"    type="tango"   uri="DAU/edna/2"  call="jobSuccess"/> 
    <channel name="jobFailure_edna2"    type="tango"   uri="DAU/edna/2"  call="jobFailure"/> 
    <channel name="state_edna2"         type="tango"   uri="DAU/edna/2"  call="State"/> 
