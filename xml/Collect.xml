@@ -51,6 +51,7 @@
    <channel name="collectNormalisation"  type="spec" call="BSX_GLOBAL/collect/normalisation" signal="collectNormalisationChanged"/>
    <channel name="collectRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/radiationDamage" signal="collectRadiationDamageChanged"/>
    <channel name="collectAbsoluteRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/absoluteRadiationDamage" signal="collectAbsoluteRadiationDamageChanged"/>
+   <channel name="collectRelativeRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/relativeRadiationDamage" signal="collectRelativeRadiationDamageChanged"/>
    <channel name="collectProcessData"    type="spec" call="BSX_GLOBAL/collect/processData" signal="collectProcessDataChanged"/>
    <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>			
    <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>			

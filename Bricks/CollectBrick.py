@@ -45,6 +45,7 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectBeamCenterYChanged", "collectBeamCenterYChanged"),
                                              Signal("collectNormalisationChanged", "collectNormalisationChanged"),
                                              Signal("collectRadiationDamageChanged", "collectRadiationDamageChanged"),
+                                             Signal("collectRelativeRadiationDamageChanged", "collectRelativeRadiationDamageChanged"),
                                              Signal("collectAbsoluteRadiationDamageChanged", "collectAbsoluteRadiationDamageChanged"),
                                              Signal("collectNewFrameChanged", "collectNewFrameChanged"),
                                              Signal("checkBeamChanged", "checkBeamChanged"),
@@ -521,6 +522,9 @@ class CollectBrick(Core.BaseBrick):
         if pValue is not None:
             self.radiationAbsoluteDoubleSpinBox.setValue(float(pValue))
 
+    def collectRelativeRadiationDamageChanged(self, pValue):
+        if pValue is not None:
+            self.radiationRelativeDoubleSpinBox.setValue(float(pValue))
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
