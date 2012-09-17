@@ -2,6 +2,7 @@ import logging, time
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Connection, Signal, Slot
 from PyQt4 import Qt
+import os
 
 
 __category__ = "General"
@@ -98,6 +99,9 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
+            #TODO: DEBUG - Timestamp for all working - Test to put it here [as late as possible] (used by starting mechanism)
+            os.system("touch /tmp/.BsxCuBE.GUIStart")
+            os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
 
     def connectionToEnableDisable(self, pValue):
         if pValue is not None:

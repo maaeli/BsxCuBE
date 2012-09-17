@@ -447,9 +447,6 @@ class CollectBrick(Core.BaseBrick):
             print "sample changer connected in CollectBrick>>>> %r" % self.plateInfos
             self.seuTemperature = self.scObject.getSEUTemperature()
             self.storageTemperature = self.scObject.getSampleStorageTemperature()
-            #TODO: DEBUG - Note the time of [reconnect or connect to Sample Changer] (used by starting mechanism)
-            os.system("touch /tmp/.BsxCuBE.GUIStart")
-            os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
 
     def seu_temperature_changed(self, seuTemperature):
         self.seuTemperature = seuTemperature
