@@ -137,10 +137,19 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
 
 
     def attenuatorsStateChanged(self, pValue):
-        #TODO: DEBUG
-        print ">>> Got Value from attenuator State changed to %r" % pValue
         if self.__filtersDialog is not None:
             self.__filtersDialog.filtersChanged(pValue)
+        # Need to take the new value for Transmission
+        if self.bsxAttenuator is not None:
+            currentTransmission = self.bsxAttenuator.getAttenuatorsFactor()
+            if currentTransmission == "":
+                self.currentTransmissionLineEdit.setText(self.__suffix)
+            else:
+                if self.__maskFormat == "":
+                    self.currentTransmissionLineEdit.setText(str(float(currentTransmission)) + self.__suffix)
+                else:
+                    self.currentTransmissionLineEdit.setText(self.__maskFormat % float(currentTransmission) + self.__suffix)
+
 
 
     def attenuatorsFactorChanged(self, pValue):
@@ -173,9 +182,11 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
             if grayout:
                 self.newTransmissionComboBox.setEditable(False)
                 self.filtersPushButton.setEnabled(False)
+                self.currentTransmissionLineEdit.setEnabled(False)
             else:
                 self.newTransmissionComboBox.setEditable(True)
                 self.filtersPushButton.setEnabled(True)
+                self.currentTransmissionLineEdit.setEnabled(True)
 
 
     def transmissionChanged(self, pValue):
@@ -185,9 +196,7 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
     def connectionStatusChanged(self, pPeer):
         if pPeer is not None:
             self.bsxAttenuator = pPeer
-            #TODO : DEBUG
             currentTransmission = self.bsxAttenuator.getAttenuatorsFactor()
-            print "Got transmission as %r" % currentTransmission
             if currentTransmission == "":
                 self.currentTransmissionLineEdit.setText(self.__suffix)
             else:
