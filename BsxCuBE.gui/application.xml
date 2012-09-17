@@ -365,7 +365,7 @@
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
-     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, svensson@esrf.fr, ohlsson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, ohlsson@esrf.fr, svensson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr"/>
      <property name="send_icon" value=""/>
   </properties>
   <properties id="EHScan">
