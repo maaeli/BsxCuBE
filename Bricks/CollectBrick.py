@@ -10,8 +10,20 @@ from LeadingZeroSpinBox  import LeadingZeroSpinBox
 
 from Samples             import CollectPars
 
+
+from pydispatch import dispatcher
+
 logger = logging.getLogger("CollectBrick")
+
 __category__ = "BsxCuBE"
+
+
+def main_window_visible(_):
+    # Helping the starter to know when the main window is visible
+    os.system("touch /tmp/.BsxCuBE.GUIStart")
+    os.system("chmod 777 /tmp/.BsxCuBE.GUIStart >/dev/null 2>&1")
+
+dispatcher.connect(main_window_visible, "__main_window_visible__")
 
 # Compare outside class
 def cmpSEUtemp(a, b):
@@ -353,6 +365,9 @@ class CollectBrick(Core.BaseBrick):
         self.robotCheckBox = Qt.QCheckBox("Collect using robot", self.brick_widget)
         Qt.QObject.connect(self.robotCheckBox, Qt.SIGNAL("toggled(bool)"), self.robotCheckBoxToggled)
         self.hBoxLayout16.addWidget(self.robotCheckBox)
+        self.hplcCheckBox = Qt.QCheckBox("Collect using HPLC", self.brick_widget)
+        Qt.QObject.connect(self.hplcCheckBox, Qt.SIGNAL("toggled(bool)"), self.hplcCheckBoxToggled)
+        self.hBoxLayout16.addWidget(self.hplcCheckBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout16)
 
         self.hBoxLayout17 = Qt.QHBoxLayout()
@@ -363,6 +378,12 @@ class CollectBrick(Core.BaseBrick):
         self.checkBeamBox.setChecked(True)
         Qt.QObject.connect(self.checkBeamBox, Qt.SIGNAL("toggled(bool)"), self.checkBeamBoxToggled)
         self.hBoxLayout17.addWidget(self.checkBeamBox)
+        self.dummyLabel = Qt.QLabel(" ")
+#        
+#                self.collectStatusLabel = Qt.QLabel("Collection status:")
+#        self.collectStatusLabel.setAlignment(QtCore.Qt.AlignRight)
+#        self.collectStatus = Qt.QLabel("")
+        self.hBoxLayout17.addWidget(self.dummyLabel)
         self.brick_widget.layout().addLayout(self.hBoxLayout17)
 
         self.hBoxLayout18 = Qt.QHBoxLayout()
@@ -541,14 +562,14 @@ class CollectBrick(Core.BaseBrick):
         if self.last_dat is None :
             #TODO remove this hack ASAP (SO 27/9 11)
             ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
-            logging.info("processing done, file is %r", dat_filename)
+            logger.info("processing done, file is %r", dat_filename)
             self.emitDisplayItemChanged(dat_filename)
             self.last_dat = dat_filename
         else:
             if self.last_dat == dat_filename:
                 return
             else:
-                logging.info("processing done, file is %r", dat_filename)
+                logger.info("processing done, file is %r", dat_filename)
                 self.emitDisplayItemChanged(dat_filename)
                 self.last_dat = dat_filename
 
@@ -558,9 +579,9 @@ class CollectBrick(Core.BaseBrick):
         #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> CollectProcessingLog logmsg %r " % logmsg
         # Level 0 = info, Level 1 = 
         if level == 0:
-            logmethod = logging.info
+            logmethod = logger.info
         elif level == 2:
-            logmethod = logging.error
+            logmethod = logger.error
 
         #TODO remove this hack ASAP (SO 9/7 12)
         ### HORRIBLE CODE
@@ -679,8 +700,8 @@ class CollectBrick(Core.BaseBrick):
         try:
             self.image_proxy.load_files(str(pValue), oneway = True)
         except Exception, e:
-            logging.error("Could not read file " + str(pValue))
-            logging.exception(e)
+            logger.error("Could not read file " + str(pValue))
+            logger.exception(e)
 
     def y_curves_data(self, pPeer):
         pass
@@ -864,7 +885,7 @@ class CollectBrick(Core.BaseBrick):
         else:
             collectpars = CollectPars()
 
-            logging.info("   - reading collection parameters")
+            logger.info("   - reading collection parameters")
             #
             #  I should actually separate values so that each widget represents a certain data in a clear way
             #
@@ -1072,6 +1093,7 @@ class CollectBrick(Core.BaseBrick):
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
+            # We put it on.. Inform user that Collect using HPLC will be unselcted
             if self._collectRobotDialog.isVisible():
                 self._collectRobotDialog.activateWindow()
                 self._collectRobotDialog.raise_()
@@ -1079,6 +1101,12 @@ class CollectBrick(Core.BaseBrick):
                 self._collectRobotDialog.show()
         else:
             self._collectRobotDialog.hide()
+
+    def hplcCheckBoxToggled(self, pValue):
+        if pValue:
+            #TODO; Continue to do something
+            pass
+
 
     def checkBeamBoxToggled(self, pValue):
         self.collectObj.setCheckBeam(pValue)
@@ -1173,7 +1201,7 @@ class CollectBrick(Core.BaseBrick):
                             # Check if we have a run number higher than the requested run number:
                             existingRunNumber = filename.split("_")[-2]
                             if int(existingRunNumber) >= int(runNumber):
-                                logging.info("Existing run number %r is higher than requested run number %r" % (existingRunNumber, runNumber))
+                                logger.info("Existing run number %r is higher than requested run number %r" % (existingRunNumber, runNumber))
                                 flag = False
                                 break
 
@@ -1289,7 +1317,7 @@ class CollectBrick(Core.BaseBrick):
         if mode == "test":
             self.__isTesting = True
 
-        logging.info("   - collection started (mode: %s)" % mode)
+        logger.info("   - collection started (mode: %s)" % mode)
 
     def collectDone(self):
         #TODO : DEBUG
@@ -1346,7 +1374,7 @@ class CollectBrick(Core.BaseBrick):
         try:
             self.image_proxy.erase_curves()
         except Exception, e:
-            logging.exception(e)
+            logger.exception(e)
 
     def messageDialog(self, pType, pMessage):
         if pType == 0:
@@ -1480,8 +1508,8 @@ class CollectBrick(Core.BaseBrick):
         try:
             self.collectObj.blockGUI(False)
         except Exception, e:
-            logging.error("Could not connect to COServer")
-            logging.exception(e)
+            logger.error("Could not connect to COServer")
+            logger.exception(e)
 
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
