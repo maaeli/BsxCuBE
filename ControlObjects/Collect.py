@@ -216,7 +216,7 @@ class Collect(CObjectBase):
         ave_filename = os.path.join(pDirectory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
         sub_filename = os.path.join(pDirectory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
-                                inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%02d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
+                                inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%05d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
                                 mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
                                 subtractedCurve = XSDataFile(path = XSDataString(sub_filename)))
         if pRadiationChecked:

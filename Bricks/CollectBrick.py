@@ -181,8 +181,8 @@ class CollectBrick(Core.BaseBrick):
         self.frameNumberLabel = Qt.QLabel("Frame #", self.brick_widget)
         self.frameNumberLabel.setFixedWidth(130)
         self.hBoxLayout3.addWidget(self.frameNumberLabel)
-        self.frameNumberSpinBox = LeadingZeroSpinBox(self.brick_widget, 2)
-        self.frameNumberSpinBox.setRange(1, 99)
+        self.frameNumberSpinBox = LeadingZeroSpinBox(self.brick_widget, 5)
+        self.frameNumberSpinBox.setRange(1, 99999)
         self.hBoxLayout3.addWidget(self.frameNumberSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout3)
 

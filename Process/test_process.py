@@ -152,7 +152,7 @@ def Reprocess(pDetector, pOperation, pDirectory, pPrefix, pRunNumber, pFrameFirs
                                 except:
                                     frameList.append(frame)
         else:   # reprocess was launched from BsxCuBE while collecting data
-            frameList = ["%02d" % int(pFrameLast)]
+            frameList = ["%05d" % int(pFrameLast)]
 
         if len(frameList) == 0:
             showMessage(3, "There are no frames for run '%s'!" % runNumber)
