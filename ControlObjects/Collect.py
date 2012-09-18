@@ -21,7 +21,8 @@ class Collect(CObjectBase):
                Signal("collectDone"),
                Signal("clearCurve"),
                Signal("grayOut"),
-               Signal("transmissionChanged")]
+               Signal("transmissionChanged"),
+               Signal("machineCurrentChanged")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -121,6 +122,8 @@ class Collect(CObjectBase):
 
     def currentChanged(self, current):
         self.machineCurrent = current
+        # Give this to the CollectBrick
+        self.emit("machineCurrentChanged", current)
 
     def blockGUI(self, block):
         self.emit("grayOut", block)
@@ -329,9 +332,15 @@ class Collect(CObjectBase):
                     self.showMessage(2, "EDNA 2 has a problem - No Executive Summary - Please check")
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
-                if xsd.autoRg is None:
-                    logger.info("SAS pipeline not executed")
+                if xsd.subtractedCurve is None:
+                    logger.info("SAS pipeline not executed: no subtracted curve")
                 else:
+                    if xsd.autoRg is None:
+                        logger.info("SAS pipeline not executed as autoRg previously failed")
+                        return
+                    if xsd.gnom is None:
+                        logger.info("SAS pipeline not executed: no datGnom data present")
+                        return
                     rgOut = xsd.autoRg
                     filename = rgOut.filename.path.value
                     logger.info("filename as input for SAS %s", filename)

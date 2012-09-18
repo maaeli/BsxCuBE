@@ -436,6 +436,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -465,6 +466,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -494,6 +496,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -687,6 +690,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -761,6 +765,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -822,6 +827,7 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
+      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>

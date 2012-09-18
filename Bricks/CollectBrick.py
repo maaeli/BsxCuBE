@@ -28,7 +28,8 @@ class CollectBrick(Core.BaseBrick):
     properties = {"expertModeOnly": Property("boolean", "Expert mode only", "", "expertModeOnlyChanged", False)}
 
     connections = {"collect": Connection("Collect object",
-                                            [Signal("collectDirectoryChanged", "collectDirectoryChanged"),
+                                            [Signal("collectBeamStopDiodeChanged", "collectBeamStopDiodeChanged"),
+                                             Signal("collectDirectoryChanged", "collectDirectoryChanged"),
                                              Signal("collectPrefixChanged", "collectPrefixChanged"),
                                              Signal("collectRunNumberChanged", "collectRunNumberChanged"),
                                              Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
@@ -55,7 +56,8 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectDone", "collectDone"),
                                              Signal("clearCurve", "clearCurve"),
                                              Signal("grayOut", "grayOut"),
-                                             Signal("transmissionChanged", "transmissionChanged")],
+                                             Signal("transmissionChanged", "transmissionChanged"),
+                                             Signal("machineCurrentChanged", "machineCurrentChanged")],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -110,6 +112,8 @@ class CollectBrick(Core.BaseBrick):
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
+        self._machineCurrent = 0.0
+        self._diodeCurrent = 0.00
         self._frameNumber = 0
         self._feedBackFlag = False
         self._abortFlag = False
@@ -466,6 +470,9 @@ class CollectBrick(Core.BaseBrick):
         if spec != None:
             self.spec = spec
 
+    def collectBeamStopDiodeChanged(self, pValue):
+        self._diodeCurrent = pValue
+
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
 
@@ -581,7 +588,7 @@ class CollectBrick(Core.BaseBrick):
             self.__lastFrame = pValue
             if self._isCollecting:
                 self.collectObj.triggerEDNA(filename0, oneway = True)
-                message = "The frame '%s' was collected..." % filename0
+                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % (filename0, float(self._diodeCurrent), float(self._machineCurrent))
                 logger.info(message)
                 if self.robotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory(0, message)
@@ -1228,6 +1235,9 @@ class CollectBrick(Core.BaseBrick):
                 self.setButtonState(1)
             else:
                 self.setButtonState(0)
+
+    def machineCurrentChanged(self, pValue):
+        self._machineCurrent = pValue
 
     def transmissionChanged(self, percentage):
         pass
