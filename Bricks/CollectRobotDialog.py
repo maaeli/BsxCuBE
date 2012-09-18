@@ -583,7 +583,7 @@ class CollectRobotDialog(Qt.QDialog):
             else:
                 Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
         except Exception, e:
-            logging.exception('Cannot load collection parameters file. \n')
+            logger.exception('Cannot load collection parameters file. \n')
             if fromIspyB:
                 Qt.QMessageBox.critical(self, "Error", "Error when loading data from ISPyB!")
             else:
@@ -644,7 +644,7 @@ class CollectRobotDialog(Qt.QDialog):
         except Exception, e:
             import traceback
             traceback.print_exc()
-            logging.exception('Cannot save collection parameters file.\n')
+            logger.exception('Cannot save collection parameters file.\n')
             logger.error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to save file '%s'!" % filename)
 
