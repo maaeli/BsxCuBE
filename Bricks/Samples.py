@@ -1,6 +1,6 @@
 import logging
 import types
-import re, ast
+import ast
 from copy import copy
 from lxml import etree
 
@@ -44,19 +44,18 @@ def valdict(indict, idx):
 
 
 def node_to_members(node, obj):
-  for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
-    if value in ("false", "true"):
-      # to avoid poor Alejandro changing stuff on his side,
-      # convert those to booleans
-      value = bool(value.title())
-    else:
-      # be smart and use conversion helper
-      try:
-        value = sample_pars[tag][-1](value)
-      except KeyError:
-        value = general_pars[tag][-1](value)
-    print "inserting member", tag, value, type(value)
-    setattr(obj, tag, value)
+    for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
+        if value in ("false", "true"):
+            # to avoid Alejandro changing stuff on his side,
+            # convert those to booleans
+            value = bool(value.title())
+        else:
+            # be smart and use conversion helper
+            try:
+                value = sample_pars[tag][-1](value)
+            except KeyError:
+                value = general_pars[tag][-1](value)
+        setattr(obj, tag, value)
 
 
 class Sample:
@@ -135,10 +134,10 @@ class CollectPars(list):
         # filename can be a string, in this case the file is opened then read,
         # or 'filename' can be a file object
         if type(filename) == types.StringType:
-          bufstr = open(filename).read()
+            bufstr = open(filename).read()
         else:
-          bufstr = filename.read()
-          bufstr = bufstr.replace("\000", "")
+            bufstr = filename.read()
+            bufstr = bufstr.replace("\000", "")
         self.searchXML(bufstr , self)
 
     def searchXML(self, xmlstr, destobj):
