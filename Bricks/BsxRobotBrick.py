@@ -7,6 +7,8 @@ from Framework4.GUI.Core import Connection, Signal
 
 from PyQt4 import QtCore, QtGui, Qt
 
+logger = logging.getLogger("BsxRobotBrick")
+
 __category__ = "BsxCuBE"
 
 
@@ -185,7 +187,7 @@ class BsxRobotBrick(Core.BaseBrick):
         vBoxLayout.addLayout(buttonHBoxLayout)
 
         if dialog.exec_():
-            logging.getLogger().info("Setting storage temperature to '" + str(temperatureDoubleSpinBox.value()) + "'...")
+            logger.info("Setting storage temperature to '" + str(temperatureDoubleSpinBox.value()) + "'...")
             self.__sampleChangerDisplayFlag = True
             self.__sampleChangerDisplayMessage = "Error when trying to set storage temperature!"
             self._sampleChanger.setStorageTemperature(temperatureDoubleSpinBox.value())
@@ -226,7 +228,7 @@ class BsxRobotBrick(Core.BaseBrick):
         vBoxLayout.addLayout(buttonHBoxLayout)
 
         if dialog.exec_():
-            logging.getLogger().info("Setting SEU temperature to '" + str(temperatureDoubleSpinBox.value()) + "'...")
+            logger.info("Setting SEU temperature to '" + str(temperatureDoubleSpinBox.value()) + "'...")
             self.__sampleChangerDisplayFlag = True
             self.__sampleChangerDisplayMessage = "Error when trying to set SEU temperature!"
             self._sampleChanger.setSEUTemperature(temperatureDoubleSpinBox.value())
@@ -235,14 +237,14 @@ class BsxRobotBrick(Core.BaseBrick):
         geometry = [self._sampleChanger.getPlateInfo(i) for i in range(1, 3)]
         #TODO: DEBUG
         print ">>>> geometry from Robot %r" % geometry
-        logging.info('geometry: %s', geometry)
+        logger.info('geometry: %s', geometry)
         print ">>>> END DEBUG"
-        logging.debug('geometry: %s', geometry)
+        logger.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title = 'Fill', display_volume = True, parent = self.brick_widget)
         ret = dialog.exec_()
         if ret:
             selected_well = dialog.get_selected_well()
-            logging.info('filling from [plate, row, column,volume] = %s', selected_well)
+            logger.info('filling from [plate, row, column,volume] = %s', selected_well)
             #TODO: DEBUG:
             print ">>> selected_well %r" % selected_well
             print ">>> 1, 2, 3, 4 "
@@ -257,21 +259,21 @@ class BsxRobotBrick(Core.BaseBrick):
     def robotDryPushButtonClicked(self):
         dryTime, buttonOk = Qt.QInputDialog.getInteger(self.brick_widget, "Dry", "\nPlease, insert time of drying (seconds):", 15, 1, 60, 2)
         if buttonOk:
-            logging.getLogger().info("Drying robot...")
+            logger.info("Drying robot...")
             self.__sampleChangerDisplayFlag = True
             self.__sampleChangerDisplayMessage = "Error when trying to dry robot!"
             self._sampleChanger.dry(dryTime)
 
 
     def robotFixLiquidPositionPushButtonClicked(self):
-        logging.getLogger().info("Fixing liquid position...")
+        logger.info("Fixing liquid position...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to fix liquid position!"
         self._sampleChanger.setLiquidPositionFixed(True)
 
 
     def robotMoveBackwardPushButtonPressed(self):
-        logging.getLogger().info("Moving syringe backward...")
+        logger.info("Moving syringe backward...")
         self.__robotMoveState = 1
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to move syringe backward!"
@@ -284,14 +286,14 @@ class BsxRobotBrick(Core.BaseBrick):
 
 
     def robotStopPushButtonClicked(self):
-        logging.getLogger().info("Stopping syringe...")
+        logger.info("Stopping syringe...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to stop syringe!"
         self._sampleChanger.stopSyringe()
 
 
     def robotMovePushButtonClicked(self):
-        logging.getLogger().info("Moving syringe forward...")
+        logger.info("Moving syringe forward...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to move syringe forward!"
         self._sampleChanger.moveSyringeForward(5)
@@ -342,7 +344,7 @@ class BsxRobotBrick(Core.BaseBrick):
         vBoxLayout.addLayout(buttonHBoxLayout)
 
         if dialog.exec_():
-            logging.getLogger().info("Flowing '" + str(timeSpinBox.value()) + "' second(s)...")
+            logger.info("Flowing '" + str(timeSpinBox.value()) + "' second(s)...")
             self.__sampleChangerDisplayFlag = True
             self.__sampleChangerDisplayMessage = "Error when trying to flow!"
             self._sampleChanger.flowAll(timeSpinBox.value())
@@ -352,12 +354,12 @@ class BsxRobotBrick(Core.BaseBrick):
         geometry = [self._sampleChanger.getPlateInfo(i) for i in range(1, 3)]
         #TODO: DEBUG
         print ">>>> geometry from Robot %r" % geometry
-        logging.debug('geometry: %s', geometry)
+        logger.debug('geometry: %s', geometry)
         dialog = WellPickerDialog(geometry, title = 'Recuperate', parent = self.brick_widget)
         ret = dialog.exec_()
         if ret:
             selected_well = dialog.get_selected_well()
-            logging.info('recuperating from [plate, row, column] = %s', selected_well)
+            logger.info('recuperating from [plate, row, column] = %s', selected_well)
             #TODO: DEBUG:
             print ">>> selected_well %r" % selected_well
             print ">>> 1, 2, 3, 4 "
@@ -371,7 +373,7 @@ class BsxRobotBrick(Core.BaseBrick):
 
 
     def robotRestartWithHomingActionTriggered(self):
-        logging.getLogger().info("Restarting (with homing) the robot...")
+        logger.info("Restarting (with homing) the robot...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to restart (with homing) the robot!"
         self._sampleChanger.restart(True)
@@ -379,7 +381,7 @@ class BsxRobotBrick(Core.BaseBrick):
 
 
     def robotRestartWithoutHomingActionTriggered(self):
-        logging.getLogger().info("Restarting (without homing) the robot...")
+        logger.info("Restarting (without homing) the robot...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to restart (without homing) the robot!"
         self._sampleChanger.restart(False)
@@ -387,14 +389,14 @@ class BsxRobotBrick(Core.BaseBrick):
 
 
     def robotAbortPushButtonClicked(self):
-        logging.getLogger().info("Aborting the robot...")
+        logger.info("Aborting the robot...")
         self.__sampleChangerDisplayFlag = False
         self._sampleChanger.abort()
 
 
 
     def robotCleanPushButtonClicked(self):
-        logging.getLogger().info("Cleaning the robot...")
+        logger.info("Cleaning the robot...")
         self.__sampleChangerDisplayFlag = True
         self.__sampleChangerDisplayMessage = "Error when trying to clean the robot!"
         self._sampleChanger.clean()
@@ -455,11 +457,11 @@ class BsxRobotBrick(Core.BaseBrick):
             self.__sampleChangerDisplayFlag = True
 
     def storage_temperature_changed(self, temperature):
-        #logging.debug('storage temp: %r', temperature)
+        #logger.debug('storage temp: %r', temperature)
         self.robotStorageTemperatureLineEdit.setText("%02.2f C" % float(temperature))
 
     def seu_temperature_changed(self, temperature):
-        #logging.debug('seu temp: %r', temperature)
+        #logger.debug('seu temp: %r', temperature)
         self.robotSEUTemperatureLineEdit.setText("%02.2f C" % float(temperature))
 
 

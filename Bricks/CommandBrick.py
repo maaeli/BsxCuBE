@@ -3,6 +3,7 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import Qt
 
+logger = logging.getLogger("CommandBrick")
 
 __category__ = "General"
 
@@ -79,11 +80,11 @@ class CommandBrick(Core.BaseBrick):
         messageList = pValue.split(",", 2)
         if len(messageList) == 2:
             if messageList[0] == "0":   # command info
-                logging.getLogger().info(messageList[1])
+                logger.info(messageList[1])
             elif messageList[0] == "1":     # command warning
-                logging.getLogger().warning(messageList[1])
+                logger.warning(messageList[1])
             elif messageList[0] == "2":     # command error
-                logging.getLogger().error(messageList[1])
+                logger.error(messageList[1])
 
     def expert_mode(self, expert):
         self.__expertMode = expert

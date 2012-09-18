@@ -4,8 +4,9 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtGui, Qt
 
+logger = logging.getLogger("BsxAttenuatorBrick")
 
-__category__ = "General"
+__category__ = "BsxCuBE"
 
 
 class BsxAttenuatorsBrick(Core.BaseBrick):
@@ -220,16 +221,16 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
 
     def newTransmissionComboBoxReturnPressed(self):
         if self.newTransmissionComboBox.lineEdit().hasAcceptableInput():
-            logging.getLogger().info("Setting transmission to " + self.newTransmissionComboBox.currentText() + " %...")
+            logger.info("Setting transmission to " + self.newTransmissionComboBox.currentText() + " %...")
             self.bsxAttenuator.setTransmission(float(self.newTransmissionComboBox.currentText()))
             self.newTransmissionComboBox.clearEditText()
 
 
     def toggleFilter(self, pFilter, pChecked, pValue):
         if pChecked:
-            logging.getLogger().info("Enabling filter '" + pFilter + "'...")
+            logger.info("Enabling filter '" + pFilter + "'...")
         else:
-            logging.getLogger().info("Disabling filter '" + pFilter + "'...")
+            logger.info("Disabling filter '" + pFilter + "'...")
         self.bsxAttenuator.toggleFilter(pValue)
 
 
@@ -286,8 +287,8 @@ class FiltersDialog(Qt.QDialog):
                     self.__attenuatorsCheckBoxList[i].setChecked(pValue & self.__attenuatorsList[i][1])
                     self.__attenuatorsCheckBoxList[i].blockSignals(False)
             except Exception, e:
-                logging.getLogger().error("Error reading filter status '" + str(pValue) + "'!")
-                logging.getLogger().error("Full Exception: " + str(e))
+                logger.error("Error reading filter status '" + str(pValue) + "'!")
+                logger.error("Full Exception: " + str(e))
 
 
 

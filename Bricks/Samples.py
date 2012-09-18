@@ -4,6 +4,8 @@ import re, ast
 from copy import copy
 from lxml import etree
 
+logger = logging.getLogger("Samples")
+
 #  Default values
 sample_pars = {
      'type':            ['Sample', str],
@@ -136,7 +138,7 @@ class CollectPars(list):
           bufstr = open(filename).read()
         else:
           bufstr = filename.read()
-          bufstr=bufstr.replace("\000", "") 
+          bufstr = bufstr.replace("\000", "")
         self.searchXML(bufstr , self)
 
     def searchXML(self, xmlstr, destobj):
@@ -166,14 +168,14 @@ class CollectPars(list):
                 except Exception, e:
                     print "problem interpreting ", foundkey
                     print " value is ", mat.group('value')
-                    logging.getLogger().error("Got Exception: " + str(e) + "When interpreting value")
+                    logger.error("Got Exception: " + str(e) + "When interpreting value")
             elif foundkey in general_pars:
                 try:
                     destobj.__dict__[foundkey] = general_pars[foundkey][1](mat.group('value'))
                 except Exception, e:
                     print "problem interpreting ", foundkey
                     print " value is ", mat.group('value')
-                    logging.getLogger().error("Got Exception: " + str(e) + "When interpreting value")
+                    logger.error("Got Exception: " + str(e) + "When interpreting value")
             cursor = mat.end()
             mat = retag.search(xmlstr, cursor)
         """

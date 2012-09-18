@@ -4,7 +4,7 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
 
-
+logger = logging.getLogger("ReprocessBrick")
 __category__ = "BsxCuBE"
 
 
@@ -142,23 +142,23 @@ class ReprocessBrick(Core.BaseBrick):
                 self.SPECBusyTimer.stop()
                 self.__isReprocessing = False
                 self.setButtonState(0)
-                logging.getLogger().info(messageList[1])
+                logger.info(messageList[1])
                 if self.notifyCheckBox.isChecked():
                     Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       %s                                       \n" % messageList[1])
             elif messageList[0] == "1":     # reprocess info 
                 self.SPECBusyTimer.start(25000)
-                logging.getLogger().info(messageList[1])
+                logger.info(messageList[1])
             elif messageList[0] == "2":     # reprocess info with item to be displayed
                 self.SPECBusyTimer.start(25000)
-                logging.getLogger().info(messageList[1])
+                logger.info(messageList[1])
                 self.emit("displayItemChanged", messageList[2])
             elif messageList[0] == "3":     # reprocess warning
-                logging.getLogger().warning(messageList[1])
+                logger.warning(messageList[1])
             elif messageList[0] == "4":     # reprocess error
                 self.SPECBusyTimer.stop()
                 self.__isReprocessing = False
                 self.setButtonState(0)
-                logging.getLogger().error(messageList[1])
+                logger.error(messageList[1])
 
 
     def connectionStatusChanged(self, pPeer):
@@ -623,7 +623,7 @@ class ReprocessBrick(Core.BaseBrick):
         if Qt.QMessageBox.question(self.brick_widget, "Warning", "Are you sure that you want to reprocess data collection '" + str(self.prefixComboBox.currentText()) + "'?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes:
             self.setButtonState(1)
             self.SPECBusyTimer.start(20000)
-            logging.getLogger().info("Start reprocessing...")
+            logger.info("Start reprocessing...")
             self.emit("displayResetChanged")
             self.__isReprocessing = True
 
@@ -733,7 +733,7 @@ class ReprocessBrick(Core.BaseBrick):
         self.SPECBusyTimer.stop()
         self.__isReprocessing = False
         self.setButtonState(0)
-        logging.getLogger().info("Aborting data reprocess!")
+        logger.info("Aborting data reprocess!")
         self.getObject("reprocess").reprocessAbort()
 
 
@@ -766,7 +766,7 @@ class ReprocessBrick(Core.BaseBrick):
         self.SPECBusyTimer.stop()
         self.__isReprocessing = False
         self.setButtonState(0)
-        logging.getLogger().warning("The frame (or 1D curve) was not reprocessed or didn't appear on time!")
+        logger.warning("The frame (or 1D curve) was not reprocessed or didn't appear on time!")
 
 
 
@@ -790,7 +790,7 @@ class ReprocessBrick(Core.BaseBrick):
                                 except ValueError:
                                     items.append(prefix)
             except Exception, e:
-                logging.getLogger().error("Full Exception: " + str(e))
+                logger.error("Full Exception: " + str(e))
         items.sort()
         items.insert(0, "Select")
         currentText = self.prefixComboBox.currentText()
@@ -823,7 +823,7 @@ class ReprocessBrick(Core.BaseBrick):
                                     except ValueError:
                                         items.append(run)
                 except Exception, e:
-                    logging.getLogger().error("Full Exception: " + str(e))
+                    logger.error("Full Exception: " + str(e))
 
         items.sort()
         itemsSelect = []
@@ -862,7 +862,7 @@ class ReprocessBrick(Core.BaseBrick):
                                             except ValueError:
                                                 items.append(frame)
                     except Exception, e:
-                        logging.getLogger().error("Full Exception: " + str(e))
+                        logger.error("Full Exception: " + str(e))
         items.sort()
         items.insert(0, "Select")
         self.frameFirstComboBox.clear()

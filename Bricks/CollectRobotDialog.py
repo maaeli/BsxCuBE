@@ -6,6 +6,8 @@ import logging
 import os.path, time
 import pprint
 
+logger = logging.getLogger("CollectRobotDialog")
+
 rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
 class CollectRobotDialog(Qt.QDialog):
@@ -643,7 +645,7 @@ class CollectRobotDialog(Qt.QDialog):
             import traceback
             traceback.print_exc()
             logging.exception('Cannot save collection parameters file.\n')
-            logging.getLogger().error("Full Exception: " + str(e))
+            logger.error("Full Exception: " + str(e))
             Qt.QMessageBox.critical(self, "Error", "Error when trying to save file '%s'!" % filename)
 
 

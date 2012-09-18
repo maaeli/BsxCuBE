@@ -4,6 +4,8 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
 
+logger = logging.getLogger("BrowseBrick")
+
 __category__ = "BsxCuBE"
 
 
@@ -317,10 +319,10 @@ class BrowseBrick(Core.BaseBrick):
                                 except ValueError:
                                     items.append(prefix)
                 except Exception, e:
-                    logging.getLogger().error("Full Exception: " + str(e))
+                    logger.error("Full Exception: " + str(e))
         else:
             #TODO: Should implement HDF - But how ? SO 13/3 12
-            logging.getLogger().error("Unexpected HDF file")
+            logger.error("Unexpected HDF file")
         items.sort()
         items.insert(0, "All")
         currentText = self.prefixComboBox.currentText()
@@ -347,10 +349,10 @@ class BrowseBrick(Core.BaseBrick):
                                 except ValueError:
                                     items.append(run)
                 except Exception, e:
-                    logging.getLogger().error("Full Exception: " + str(e))
+                    logger.error("Full Exception: " + str(e))
         else:
             #TODO: Should implement HDF - But how ? SO 13/3 12
-            logging.getLogger().error("Unexpected HDF file")
+            logger.error("Unexpected HDF file")
         items.sort(reverse = True)
         items.insert(0, "All")
         currentText = self.runNumberComboBox.currentText()
@@ -376,10 +378,10 @@ class BrowseBrick(Core.BaseBrick):
                             except ValueError:
                                 items.append(extra)
                 except Exception, e:
-                    logging.getLogger().error("Full Exception: " + str(e))
+                    logger.error("Full Exception: " + str(e))
         else:
             #TODO: Should implement HDF - But how ? SO 13/3 12
-            logging.getLogger().error("Unexpected HDF file")
+            logger.error("Unexpected HDF file")
         items.sort()
         items.insert(0, "All")
         currentText = self.extraComboBox.currentText()
@@ -415,10 +417,10 @@ class BrowseBrick(Core.BaseBrick):
                                 if (self.prefixComboBox.currentIndex() == 0 or prefix == self.prefixComboBox.currentText()) and (self.runNumberComboBox.currentIndex() == 0 or self.runNumberComboBox.currentText() == run) and (self.extraComboBox.currentIndex() == 0 or extra == self.extraComboBox.currentText()):
                                     items.append(filename)
                 except Exception, e:
-                    logging.getLogger().error("Full Exception: " + str(e))
+                    logger.error("Full Exception: " + str(e))
         else:
             #TODO: Should implement HDF - But how ? SO 13/3 12
-            logging.getLogger().error("Unexpected HDF file")
+            logger.error("Unexpected HDF file")
         items.sort(reverse = True)
         itemsSelect = []
         for i in range(0, self.itemsListWidget.count()):

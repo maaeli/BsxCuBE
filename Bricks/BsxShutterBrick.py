@@ -9,10 +9,9 @@ import os
 import logging
 import sip
 
+logger = logging.getLogger("BsxShutterBrick")
 
-__author__ = "Matias Guijarro"
-__version__ = 1.0
-__category__ = "General"
+__category__ = "BsxCuBE"
 
 
 class BsxShutterBrick(Core.BaseBrick):
@@ -235,13 +234,13 @@ class BsxShutterBrick(Core.BaseBrick):
     def shutter_cmd_clicked(self):
         if self.shutter_cmd.text() == "Open":
             if self.shutterName is None:
-                logging.getLogger().info("Opening shutter...")
+                logger.info("Opening shutter...")
             else:
-                logging.getLogger().info("Opening '%s' shutter..." % self.shutterName)
+                logger.info("Opening '%s' shutter..." % self.shutterName)
             self.getObject('shutter').open()
         else:
             if self.shutterName is None:
-                logging.getLogger().info("Closing shutter...")
+                logger.info("Closing shutter...")
             else:
-                logging.getLogger().info("Closing '%s' shutter..." % self.shutterName)
+                logger.info("Closing '%s' shutter..." % self.shutterName)
             self.getObject('shutter').close()

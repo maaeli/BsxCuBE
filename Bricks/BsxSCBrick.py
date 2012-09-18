@@ -6,6 +6,8 @@ from Framework4.GUI.Core import Connection, Signal
 from BsxSCWidget import BsxSCWidget
 from PyQt4 import Qt
 
+logger = logging.getLogger("BsxSCBrick")
+
 __category__ = "BsxCuBE"
 
 class BsxSCBrick(Core.BaseBrick):
@@ -47,7 +49,7 @@ class BsxSCBrick(Core.BaseBrick):
 
     def sample_changer_connected(self, sc):
         if sc is not None:
-            logging.info("Sample Changer connected")
+            logger.info("Sample Changer connected")
 
             self._sampleChanger = sc
 
@@ -74,7 +76,7 @@ class BsxSCBrick(Core.BaseBrick):
             self.SCWidget.setSEUTemperature = self._sampleChanger.setSEUTemperature
             self.SCWidget.setState("READY", "Connected")
         else:
-            logging.info("Sample Changer NOT connected ")
+            logger.info("Sample Changer NOT connected ")
             self.SCWidget.setState("DISCONNECTED", "SC GUI not running?")
             return
 

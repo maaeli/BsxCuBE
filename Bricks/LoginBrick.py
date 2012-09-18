@@ -4,6 +4,8 @@ from PyQt4 import Qt, QtCore
 import ldap
 import logging
 
+logger = logging.getLogger("LoginBrick")
+
 __category__ = "General"
 
 class LoginBrick(Core.BaseBrick):
@@ -19,6 +21,7 @@ class LoginBrick(Core.BaseBrick):
 
 
     def init(self):
+        #TODO: DEBUG - Timestamp for all working - Test to put it here [as late as possible] (used by starting mechanism)
         self.__password = ""
         self.__username = "nobody"
         self.loginProxy = None
@@ -137,8 +140,8 @@ class LoginBrick(Core.BaseBrick):
             try:
                 self.ldapConnection.result(timeout = 0)
             except ldap.LDAPError, err:
-                logging.getLogger().debug("LdapLogin: reconnecting to LDAP server %s", self.ldapHost)
-                logging.getLogger().error("Got Exception: " + str(err) + "When interpreting value")
+                logger.debug("LdapLogin: reconnecting to LDAP server %s", self.ldapHost)
+                logger.error("Got Exception: " + str(err) + "When interpreting value")
                 self.ldapConnection = ldap.open(self.ldapHost)
 
 
@@ -149,7 +152,7 @@ class LoginBrick(Core.BaseBrick):
                 msg = ex[0]['desc']
             except (IndexError, KeyError, ValueError, TypeError):
                 msg = "generic LDAP error"
-        logging.getLogger().debug("LdapLogin: %s" % msg)
+        logger.debug("LdapLogin: %s" % msg)
         if ex is not None:
             self.reconnect()
         return (False, msg)
@@ -159,7 +162,7 @@ class LoginBrick(Core.BaseBrick):
         if self.ldapConnection is None:
             return self.cleanup(msg = "no LDAP server connection")
 
-        logging.getLogger().debug("LdapLogin: searching for %s" % username)
+        logger.debug("LdapLogin: searching for %s" % username)
         try:
             found = self.ldapConnection.search_s("ou=People,dc=esrf,dc=fr", \
                 ldap.SCOPE_ONELEVEL, "uid=" + username, ["uid"])
@@ -175,7 +178,7 @@ class LoginBrick(Core.BaseBrick):
         if password == "":
             return self.cleanup(msg = "invalid password for %s" % username)
 
-        logging.getLogger().debug("LdapLogin: validating %s" % username)
+        logger.debug("LdapLogin: validating %s" % username)
         handle = self.ldapConnection.simple_bind("uid=%s,ou=people,dc=esrf,dc=fr" % username, password)
         try:
             self.result = self.ldapConnection.result(handle)

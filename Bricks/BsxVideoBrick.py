@@ -7,6 +7,8 @@ from PyQt4 import Qt
 
 from BsxVideoWidget import BsxVideoWidget
 
+logger = logging.getLogger("BsxVideoBrick")
+
 __category__ = "BsxCuBE"
 
 class BsxVideoBrick(Core.BaseBrick):
@@ -29,11 +31,11 @@ class BsxVideoBrick(Core.BaseBrick):
         self.brick_widget.setLayout(mainLayout)
 
     def exceptionCallback(self, exception):
-        pass #logging.info("EXCEPTION:%r", exception)
+        pass #logger.info("EXCEPTION:%r", exception)
 
     def sample_changer_connected(self, sc):
         if sc is not None:
-            logging.info("Sample changer VIDEO connected")
+            logger.info("Sample changer VIDEO connected")
 
             self._sampleChanger = sc
             self.videoWidget.setAutoRefreshRate(50)
@@ -51,7 +53,7 @@ class BsxVideoBrick(Core.BaseBrick):
             self.videoWidget.setAutoRefresh(True)
             #self.videoWidget.setAutoRefresh(False)
         else:
-            logging.info("Sample changer VIDEO NOT connected")
+            logger.info("Sample changer VIDEO NOT connected")
             self.videoWidget.setAutoRefresh(False)
 
 

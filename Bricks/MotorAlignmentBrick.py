@@ -3,6 +3,8 @@ from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtGui, Qt
 
+logger = logging.getLogger("MotorAlignmentBrick")
+
 __category__ = "General"
 
 
@@ -70,7 +72,7 @@ class MotorAlignmentBrick(Core.BaseBrick):
             if motorsList is None:
                 Qt.QMessageBox.information(self.brick_widget, "Info", "There are no motors specified!")
             else:
-                logging.getLogger().debug('MotorAlignmentBrick: got motor list %s', motorsList)
+                logger.debug('MotorAlignmentBrick: got motor list %s', motorsList)
                 self.__motorAlignmentDialog = MotorAlignmentDialog(self, motorsList)
                 self.__motorAlignmentDialog.show()
 
@@ -171,7 +173,7 @@ class MotorAlignmentDialog(Qt.QDialog):
             step = self.stepDoubleSpinBox.value()
         else:
             step = -self.stepDoubleSpinBox.value()
-        logging.getLogger().info("Moving motor '%s' by '%s'..." % (pMotor, step))
+        logger.info("Moving motor '%s' by '%s'..." % (pMotor, step))
         self.__parent.getObject("motoralignment").moveMotor(pMotor, step)
         if self.collectTestFrameCheckBox.isChecked():
             self.__parent.emit("executeTestCollect")
