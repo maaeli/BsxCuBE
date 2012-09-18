@@ -6,6 +6,7 @@ import time
 import gevent
 import math
 import pprint
+import datetime
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -48,6 +49,8 @@ class Collect(CObjectBase):
         self.storageTemperature = -374
         self.exposureTemperature = -374
         self.xsdAverage = None
+        # The keV to Angstrom calc
+        self.hcOverE = 12.3984
 
         self.__energyAdjust = False
 
@@ -311,23 +314,10 @@ class Collect(CObjectBase):
                     return
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
-                    # Log on info on Pipeline
-                    loglog = []
-                    for line in log.split(os.linesep):
-                        if line.startswith("Fidelity"):
-                            w = line.split()
-                            try:
-                                f = float(w[-1])
-                            except Exception:
-                                loglog.append(line)
-                            else:
-                                if f == 0.:
-                                    loglog.append("-log10 " + " ".join(w[:-1]) + " infinity")
-                                else:
-                                    loglog.append("-log10 " + " ".join(w[:-1]) + " " + str(-math.log(f)))
-                        else:
-                            loglog.append(line)
-                    self.showMessage(0, os.linesep.join(loglog))
+                    if "Error" in log:
+                        self.showMessage(1, log)
+                    else:
+                        self.showMessage(0, log)
                 else:
                     self.showMessage(2, "EDNA 2 has a problem - No Executive Summary - Please check")
 
@@ -418,7 +408,7 @@ class Collect(CObjectBase):
 
 
     def _collectOne(self, sample, pars, mode = None):
-
+        timeBefore = datetime.datetime.now()
         # ==================================================
         #  SETTING VISCOSITY
         # ==================================================
@@ -497,9 +487,8 @@ class Collect(CObjectBase):
         # ==========================
         #  SETTING TRANSMISSION 
         # ========================== 
-        #TODO: Should work !!
-        #self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
-        #self.emit("transmissionChanged", tocollect["transmission"])
+        self.showMessage(0, "Setting transmission for plate '%s', row '%s' and well '%s' to %s%s..." % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["transmission"], "%"))
+        self.emit("transmissionChanged", tocollect["transmission"])
 
         # ==================================================
         #  PERFORM COLLECT
@@ -516,7 +505,6 @@ class Collect(CObjectBase):
                      pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
                      pars["radiationRelative"],
                      pars["processData"], pars["SEUTemperature"], pars["storageTemperature"])
-
         # wait for flowing if we started it
         if tocollect["flow"]:
             self.objects["sample_changer"].wait()
@@ -565,6 +553,29 @@ class Collect(CObjectBase):
             self.collectAbort()
             # allow time to abort
             time.sleep(5)
+
+        # We took a frame, now send info to ISPyB
+        #TODO: DEBUG
+        timeAfter = datetime.datetime.now()
+#        print "Preparing to send to ISPyB"
+#        print " Mode is %r" % mode
+#        files = []
+#        for i in range(1, pars["frameNumber"] + 1):
+#            files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
+#        print "FilePaths :"
+#        pprint.pprint(files)
+#        print "Exposure Temperature: %r " % pars["SEUTemperature"]
+#        print "Storage Temperature: %r " % pars["storageTemperature"]
+#        print "Time per frame %r " % pars["timePerFrame"]
+        print "Time before and after run : %r   %r " % (timeBefore, timeAfter)
+#        energy = self.hcOverE / float(pars["waveLength"])
+#        print "Energy in keV %r" % energy
+#        print "Detector distance %r" % pars["detectorDistance"]
+#        #print "Wait time %r" % 
+#        print "---------------COLLECT"
+#        pprint.pprint(pars)
+#        print "------  tocollect"
+#        pprint.pprint(tocollect)
 
 
     def _collectWithRobot(self, pars):
