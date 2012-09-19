@@ -12,8 +12,11 @@ from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
 from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataResultBioSaxsProcessOneFilev1_0, XSDataBioSaxsSample, \
-        XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0, XSDataResultBioSaxsSmartMergev1_0
-from XSDataSAS import XSDataInputSolutionScattering
+        XSDataBioSaxsExperimentSetup, XSDataInputBioSaxsSmartMergev1_0, \
+        XSDataResultBioSaxsSmartMergev1_0, XSDataInputBioSaxsToSASv1_0, \
+        XSDataResultBioSaxsToSASv1_0, XSDataResultBioSaxsHPLCv1_0, \
+        XSDataInputBioSaxsHPLCv1_0
+#from XSDataSAS import XSDataInputSolutionScattering
 
 logger = logging.getLogger("Collect")
 class Collect(CObjectBase):
@@ -33,9 +36,16 @@ class Collect(CObjectBase):
              Slot("blockEnergyAdjust")]
 
     def __init__(self, *args, **kwargs):
+
+        #
+        # HPCL or not
+        self.isHPLC = False
+
+
         CObjectBase.__init__(self, *args, **kwargs)
         self.__collectWithRobotProcedure = None
         self.xsdin = XSDataInputBioSaxsProcessOneFilev1_0(experimentSetup = XSDataBioSaxsExperimentSetup(), sample = XSDataBioSaxsSample())
+        self.xsdin_HPLC = XSDataInputBioSaxsHPLCv1_0(experimentSetup = XSDataBioSaxsExperimentSetup(), sample = XSDataBioSaxsSample())
         self.xsdin.rawImageSize = XSDataInteger(4093756)                     #Hardcoded for Pilatus
         self.xsdout = None
         self.lastPrefixRun = None
@@ -44,7 +54,8 @@ class Collect(CObjectBase):
         self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
-        self.pluginSAS = "EDPluginControlSolutionScatteringv0_4"
+        self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -74,6 +85,7 @@ class Collect(CObjectBase):
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
         self.deltaPilatus = 0.1
+
         try:
             self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
             self.channels["jobFailure_edna1"].connect("update", self.processingDone)
@@ -140,11 +152,12 @@ class Collect(CObjectBase):
         self.nextRunNumber = int(runNumber)
 
     def prepareEdnaInput(self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame):
-        # fill up self.xsdin
+        # fill up self.xsdinXSDataInputBioSaxsProcessOneFilev1_0
         logger.info("Prepare EDNA input")
-        self.xsdin.sample.concentration = XSDataDouble(float(pConcentration))
-        self.xsdin.sample.code = XSDataString(str(pCode))
-        self.xsdin.sample.comments = XSDataString(str(pComments))
+        sample = self.xsdin.sample
+        sample.concentration = XSDataDouble(float(pConcentration))
+        sample.code = XSDataString(str(pCode))
+        sample.comments = XSDataString(str(pComments))
 
         xsdExperiment = self.xsdin.experimentSetup
         xsdExperiment.detector = XSDataString("Pilatus")                    #Hardcoded for Pilatus
@@ -158,6 +171,9 @@ class Collect(CObjectBase):
         xsdExperiment.normalizationFactor = XSDataDouble(float(pNormalisation))
         xsdExperiment.frameMax = XSDataInteger(int(pNumberFrames))
         xsdExperiment.exposureTime = XSDataTime(float(pTimePerFrame))
+
+        self.xsdin_HPLC.sample = sample
+        self.xsdin_HPLC.experimentSetup = xsdExperiment
 
     def testCollect(self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation):
         self.collectDirectory.set_value(pDirectory)
@@ -333,18 +349,13 @@ class Collect(CObjectBase):
                         return
                     rgOut = xsd.autoRg
                     filename = rgOut.filename.path.value
+                    dest = os.path.join(os.path.dirname(os.path.dirname(filename)), "ednaSas",
+                                        os.path.splitext(os.path.basename(filename))[0])
+                    if not os.path.isdir(dest):
+                        os.makedirs(dest)
                     logger.info("filename as input for SAS %s", filename)
-                    datapoint = numpy.loadtxt(filename)
-                    startPoint = rgOut.firstPointUsed.value
-                    q = datapoint[:, 0][startPoint:]
-                    I = datapoint[:, 1][startPoint:]
-                    s = datapoint[:, 2][startPoint:]
-                    mask = (q < 3)
-                    xsdin = XSDataInputSolutionScattering(title = XSDataString(os.path.basename(filename)))
-                    #NbThreads=XSDataInteger(4))
-                    xsdin.experimentalDataQ = [ XSDataDouble(i / 10.0) for i in q[mask]] #pipeline expect A-1 not nm-1
-                    xsdin.experimentalDataValues = [ XSDataDouble(i) for i in I[mask]]
-                    xsdin.experimentalDataStdDev = [ XSDataDouble(i) for i in s[mask]]
+                    xsdin = XSDataInputBioSaxsToSASv1_0(subtractedCurve = rgOut.filename,
+                                                        destinationDirectory = XSDataFile(XSDataString(dest)))
                     logger.info("Starting SAS pipeline for file %s", filename)
                     try:
                         jobId = self.commands["startJob_edna1"]([self.pluginSAS, xsdin.marshal()])
@@ -355,6 +366,36 @@ class Collect(CObjectBase):
                         message = "Error when trying to start EDNA 1: \n%r" % errMsg
                         self.showMessage(2, message)
                         self.showMessageEdnaDead(1)
+            elif jobId.startswith(self.pluginSAS):
+                try:
+                    strXsdout = self.commands["getJobOutput_edna1"](jobId)
+                except Exception:
+                    self.edna1Dead = True
+                    message = "Tango/EDNA 1 (slavia) is not responding !"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    return
+                try:
+                    xsd = XSDataResultBioSaxsToSASv1_0.parseString(strXsdout)
+                    self.edna1Dead = False
+                except Exception:
+                    message = "Unable to parse string from Tango/EDNA 1 (slavia)"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    # no neeed to continue 
+                    return
+                if xsd.status is not None:
+                    log = xsd.status.executiveSummary.value
+                    if "Error" in log:
+                        self.showMessage(1, log)
+                    else:
+                        self.showMessage(0, log)
+                try:
+                    webPage = xsd.htmlPage.path.value
+                except:
+                    self.showMessage(1, "No we page provided by plugin SAS !!!")
+                    return
+                self.showMessage(2, "Please display this web page in BsxCube: %s." % webPage)
 
 
     def _abortCollectWithRobot(self):
@@ -576,6 +617,9 @@ class Collect(CObjectBase):
 #        pprint.pprint(pars)
 #        print "------  tocollect"
 #        pprint.pprint(tocollect)
+#        self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = 'mx1438', password = 'Rfo4-73')
+#        self.client = Client('http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl', transport = self.httpAuthenticatedToolsForAutoprocessingWebService)
+#        self.client.service.saveFrameSet(self.experimentId, param1, param2, param3, param4, param5, param6, param7, param8, param9)
 
 
     def _collectWithRobot(self, pars):
@@ -628,8 +672,10 @@ class Collect(CObjectBase):
         runNumberSet = True
         # ==================================================
         #   MAIN LOOP on Samples
-        # ==================================================        
+        # ==================================================
+        self.sampleNumber = 0
         for sample in pars["sampleList"]:
+            self.sampleNumber = self.sampleNumber + 1
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
