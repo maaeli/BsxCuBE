@@ -1,4 +1,4 @@
-import os, logging, pprint, time
+import os, logging, pprint, time, re
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
@@ -556,14 +556,16 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
-        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> Collect Processing Done filename %r " % dat_filename
+        print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
         if self.last_dat is None :
             #TODO remove this hack ASAP (SO 27/9 11)
             ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
             logger.info("processing done, file is %r", dat_filename)
-            self.emitDisplayItemChanged(dat_filename)
+            # Only display 1d images like XXXX/1d/<at least on char>.dat
+            if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
+                self.emitDisplayItemChanged(dat_filename)
             self.last_dat = dat_filename
         else:
             if self.last_dat == dat_filename:
@@ -576,7 +578,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingLog(self, level, logmsg, notify):
         #TODO : DEBUG
-        #print ">>>>>>>>>>>>>>>>>>>>>>>>>>> CollectProcessingLog logmsg %r " % logmsg
+        print ">>>>>>> CollectProcessingLog logmsg %r " % logmsg
         # Level 0 = info, Level 1 = 
         if level == 0:
             logmethod = logger.info
