@@ -86,7 +86,6 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
 
         self.newTransmissionComboBoxChanged(None)
 
-
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
@@ -186,6 +185,8 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
                 self.currentTransmissionLineEdit.setEnabled(False)
             else:
                 self.newTransmissionComboBox.setEditable(True)
+                # Put back Signal otherwise it is lost (maybe a bug) - SO 19/9 2012
+                Qt.QObject.connect(self.newTransmissionComboBox.lineEdit(), Qt.SIGNAL("returnPressed()"), self.newTransmissionComboBoxReturnPressed)
                 self.filtersPushButton.setEnabled(True)
                 self.currentTransmissionLineEdit.setEnabled(True)
 
@@ -221,9 +222,10 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
 
     def newTransmissionComboBoxReturnPressed(self):
         if self.newTransmissionComboBox.lineEdit().hasAcceptableInput():
-            logger.info("Setting transmission to " + self.newTransmissionComboBox.currentText() + " %...")
-            self.bsxAttenuator.setTransmission(float(self.newTransmissionComboBox.currentText()))
-            self.newTransmissionComboBox.clearEditText()
+            if self.newTransmissionComboBox.currentText() != "":
+                logger.info("Setting transmission to " + self.newTransmissionComboBox.currentText() + " %...")
+                self.bsxAttenuator.setTransmission(float(self.newTransmissionComboBox.currentText()))
+                self.newTransmissionComboBox.clearEditText()
 
 
     def toggleFilter(self, pFilter, pChecked, pValue):
