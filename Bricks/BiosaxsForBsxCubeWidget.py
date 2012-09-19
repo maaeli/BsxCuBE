@@ -1,16 +1,9 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'widget2.ui'
-#
-# Created: Thu Jul 26 10:42:50 2012
-#      by: PyQt4 UI code generator 4.9.4
-#
-# WARNING! All changes made in this file will be lost!
-
 from BiosaxsClient import BiosaxsClient
 from PyQt4 import QtCore, QtGui
+from Framework4.GUI.Core import Connection, Signal
 import os, sys
 
+__category__ = "BsxCuBE"
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -18,6 +11,13 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 class Ui_Widget(object):
+
+    properties = {}
+    connections = {"login": Connection("Login object",
+                            [Signal("loggedIn", "loggedIn")],
+                            [],
+                            "connectionToLogin")}
+
     def setupUi(self, Widget):
         Widget.setObjectName(_fromUtf8("Widget"))
         Widget.resize(596, 362)
@@ -79,6 +79,8 @@ class Ui_Widget(object):
 
         self.onRefreshDataButtonClicked()
 
+#    def userInfo(self, pUser, pPassword):
+#        print "------ Got user info %s %s " % (pUser, pPassword)
 
     def onLoadPlatesButtonClicked(self):
         plateIds = self.getSelection()
