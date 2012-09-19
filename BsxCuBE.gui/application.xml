@@ -177,6 +177,25 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Feedback"/>
   </properties>
+  <properties id="OHScan">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="Optics"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="15"/>
+     <property name="enableZoom" value="True"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
   <properties id="window1">
      <property name="minwidth" value="100"/>
      <property name="width" value="100"/>
@@ -205,44 +224,11 @@
      <property name="flex" value="0"/>
      <property name="expertModeOnly" value="True"/>
   </properties>
-  <properties id="EH">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="EH Scan"/>
-  </properties>
   <properties id="vgroupbox1">
      <property name="flex" value="0"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Login Box"/>
-  </properties>
-  <properties id="OHScan">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="Optics"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="defaultScale" value="linear"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="15"/>
-     <property name="enableZoom" value="True"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
-  </properties>
-  <properties id="splitter1">
-     <property name="flex" value="0"/>
-  </properties>
-  <properties id="tabbox2">
-     <property name="flex" value="1"/>
-     <property name="notification" value="switch to tab"/>
-     <property name="caption" value=""/>
   </properties>
   <properties id="BsxAttenuatorsBrick1">
      <property name="flex" value="0"/>
@@ -252,6 +238,20 @@
      <property name="maximumHistory" value="10"/>
      <property name="minimumValue" value="0.0"/>
      <property name="orientation" value="Landscape"/>
+  </properties>
+  <properties id="splitter1">
+     <property name="flex" value="0"/>
+  </properties>
+  <properties id="tabbox2">
+     <property name="flex" value="1"/>
+     <property name="notification" value="switch to tab"/>
+     <property name="caption" value=""/>
+  </properties>
+  <properties id="EH">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="EH Scan"/>
   </properties>
   <properties id="BsxSCBrick1">
      <property name="flex" value="0"/>
@@ -436,7 +436,6 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -466,7 +465,6 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -496,7 +494,6 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -631,6 +628,32 @@
   <connections id="hbox3">
   </connections>
 
+  <connections id="OHScan">
+    <connection role="y2_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+    </connection>
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="BsxCuBE/optscan"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="y2_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="Y">
+      <signal name="update"/>
+    </connection>
+    <connection role="Y2">
+      <signal name="update"/>
+    </connection>
+  </connections>
+
   <connections id="window1">
   </connections>
 
@@ -663,6 +686,7 @@
       <peer name="BsxCuBE/image_proxy"/>
     </connection>
     <connection role="collect">
+      <signal name="collectBeamStopDiodeChanged"/>
       <signal name="collectDirectoryChanged"/>
       <signal name="collectPrefixChanged"/>
       <signal name="collectRunNumberChanged"/>
@@ -680,6 +704,7 @@
       <signal name="collectBeamCenterYChanged"/>
       <signal name="collectNormalisationChanged"/>
       <signal name="collectRadiationDamageChanged"/>
+      <signal name="collectRelativeRadiationDamageChanged"/>
       <signal name="collectAbsoluteRadiationDamageChanged"/>
       <signal name="collectNewFrameChanged"/>
       <signal name="checkBeamChanged"/>
@@ -719,42 +744,7 @@
     </connection>
   </connections>
 
-  <connections id="EH">
-  </connections>
-
   <connections id="vgroupbox1">
-  </connections>
-
-  <connections id="OHScan">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-      <peer name="BsxCuBE/optscan"/>
-    </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
-    </connection>
-  </connections>
-
-  <connections id="splitter1">
-  </connections>
-
-  <connections id="tabbox2">
   </connections>
 
   <connections id="BsxAttenuatorsBrick1">
@@ -765,7 +755,6 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -784,6 +773,15 @@
       <signal name="attenuatorsFactorChanged"/>
       <peer name="BsxCuBE/BsxAttenuators"/>
     </connection>
+  </connections>
+
+  <connections id="splitter1">
+  </connections>
+
+  <connections id="tabbox2">
+  </connections>
+
+  <connections id="EH">
   </connections>
 
   <connections id="BsxSCBrick1">
@@ -827,7 +825,6 @@
       <signal name="clearCurve"/>
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
-      <signal name="machineCurrentChanged"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
