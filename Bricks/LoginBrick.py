@@ -204,6 +204,10 @@ class LoginBrick(Core.BaseBrick):
         self.logoutDialog = Qt.QMessageBox.critical(self.brick_widget, "Confirm logout", "Press OK to logout.", Qt.QMessageBox.Ok)
         self.logout()
 
+    def getUserInfo(self):
+        return (self.__username, self.__password)
+
+
     # Logout the user; reset the brick; changes from logout mode to login mode
     def logout(self):
         self.logoutButton.hide()
