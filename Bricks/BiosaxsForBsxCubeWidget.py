@@ -1,9 +1,5 @@
 from BiosaxsClient import BiosaxsClient
 from PyQt4 import QtCore, QtGui
-from Framework4.GUI.Core import Connection, Signal
-import os, sys
-
-__category__ = "BsxCuBE"
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -11,12 +7,6 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 class Ui_Widget(object):
-
-    properties = {}
-    connections = {"login": Connection("Login object",
-                            [Signal("loggedIn", "loggedIn")],
-                            [],
-                            "connectionToLogin")}
 
     def setupUi(self, Widget):
         Widget.setObjectName(_fromUtf8("Widget"))
@@ -100,14 +90,14 @@ class Ui_Widget(object):
             #plateIds.add(item.row())
             plateIds.add(self.experiment.getPlates()[item.row()].samplePlateId)
         #print item.row()
-        for id in plateIds:
-            print id
+        for myId in plateIds:
+            print myId
         return plateIds
 
 
     def onRefreshDataButtonClicked(self):
         #Clean comboBox
-        while (self.comboBox.count() <> 0):
+        while (self.comboBox.count() != 0):
             self.comboBox.removeItem(0)
 
         self.client = BiosaxsClient('mx1438', 'Rfo4-73')
@@ -151,16 +141,3 @@ class Ui_Widget(object):
         self.close_button.setText(QtGui.QApplication.translate("Widget", "Cancel", None, QtGui.QApplication.UnicodeUTF8))
         self.Load_plates_button.setText(QtGui.QApplication.translate("Widget", "Load Plates to Robot", None, QtGui.QApplication.UnicodeUTF8))
         self.refresh_data_button.setText(QtGui.QApplication.translate("Widget", "Refresh from ISPyB", None, QtGui.QApplication.UnicodeUTF8))
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    Widget = QtGui.QWidget()
-    ui = Ui_Widget()
-    ui.setupUi(Widget)
-    Widget.show()
-
-
-    sys.exit(app.exec_())
-

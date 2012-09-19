@@ -1,7 +1,6 @@
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 
-__category__ = "BsxCuBE"
 
 class BiosaxsClient:
 
@@ -36,7 +35,7 @@ class BiosaxsClient:
         response = self.client.service.findExperimentByProposalCode(code, number)
         experiments = []
         for experiment in response:
-                experiments.append(Experiment(experiment))
+            experiments.append(Experiment(experiment))
         return experiments
 
     def saveFrameSet(self, param1, param2, param3, param4, param5, param6, param7, param8, param9):
