@@ -90,6 +90,7 @@ class Collect(CObjectBase):
             self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
             self.channels["jobFailure_edna1"].connect("update", self.processingDone)
             self.commands["initPlugin_edna1"](self.pluginSAS)
+            self.commands["initPlugin_edna1"](self.pluginHPLC)
             self.edna1Dead = False
         except Exception:
             self.showMessageEdnaDead(1)
@@ -261,7 +262,6 @@ class Collect(CObjectBase):
                 frame = c + frame
             else:
                 break
-
         self.xsdin.experimentSetup.storageTemperature = XSDataDouble(self.storageTemperature)
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble(self.exposureTemperature)
         self.xsdin.experimentSetup.frameNumber = XSDataInteger(int(frame))
@@ -273,31 +273,42 @@ class Collect(CObjectBase):
         self.xsdin.normalizedImage = XSDataImage(path = XSDataString(os.path.join(directory, "2d", base + ".edf")))
         self.xsdin.integratedImage = XSDataImage(path = XSDataString(os.path.join(directory, "misc", base + ".ang")))
         self.xsdin.integratedCurve = XSDataFile(path = XSDataString(os.path.join(directory, "1d", base + ".dat")))
-        # Save EDNA input to file for reprocessing
+        # Save EDNA input to file for re-processing
         xmlFilename = os.path.splitext(raw_filename)[0] + ".xml"
         logger.info("Saving XML data to %s", xmlFilename)
         self.xsdin.exportToFile(xmlFilename)
         # Run EDNA
-        try:
-            jobId = self.commands["startJob_edna2"]([self.pluginIntegrate, self.xsdin.marshal()])
-            self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
-            logger.info("Processing job %s started", jobId)
-            self.edna1Dead = False
-            self.jobSubmitted = True
-        except Exception:
-            self.showMessageEdnaDead(2)
+        if self.isHPLC:
+            try:#HPLC mode on slavia
+                jobId = self.commands["startJob_edna1"]([self.pluginHPLC, self.xsdin.marshal()])
+                self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+                logger.info("Processing job %s started", jobId)
+                self.edna1Dead = False
+                self.jobSubmitted = True
+            except Exception:
+                self.showMessageEdnaDead(1)
+        else:#Simple integration on sparta
+            try:
+                jobId = self.commands["startJob_edna2"]([self.pluginIntegrate, self.xsdin.marshal()])
+                self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+                logger.info("Processing job %s started", jobId)
+                self.edna2Dead = False
+                self.jobSubmitted = True
+            except Exception:
+                self.showMessageEdnaDead(2)
 
 
     def specCollectDone(self, returned_value):
         self.collecting = False
         # start EDNA to calculate average at the end
-        try:
-            jobId = self.commands["startJob_edna2"]([self.pluginMerge, self.xsdAverage.marshal()])
-            self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
-            self.edna2Dead = False
-            self.jobSubmitted = True
-        except Exception:
-            self.showMessageEdnaDead(2)
+        if not self.isHPLC:
+            try:
+                jobId = self.commands["startJob_edna2"]([self.pluginMerge, self.xsdAverage.marshal()])
+                self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
+                self.edna2Dead = False
+                self.jobSubmitted = True
+            except Exception:
+                self.showMessageEdnaDead(2)
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
@@ -382,7 +393,7 @@ class Collect(CObjectBase):
                     message = "Unable to parse string from Tango/EDNA 1 (slavia)"
                     logger.error(message)
                     self.showMessage(2, message)
-                    # no neeed to continue 
+                    # no need to continue 
                     return
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
@@ -393,9 +404,34 @@ class Collect(CObjectBase):
                 try:
                     webPage = xsd.htmlPage.path.value
                 except:
-                    self.showMessage(1, "No we page provided by plugin SAS !!!")
+                    self.showMessage(1, "No web page provided by plugin SAS !!!")
                     return
                 self.showMessage(2, "Please display this web page in BsxCube: %s." % webPage)
+            elif jobId.startswith(self.pluginHPLC):#HPLC is on Slavia
+                try:
+                    strXsdout = self.commands["getJobOutput_edna1"](jobId)
+                except Exception:
+                    self.edna1Dead = True
+                    message = "Tango/EDNA 1 (Slavia) is not responding !"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    return
+                try:
+                    xsd = XSDataResultBioSaxsHPLCv1_0.parseString(strXsdout)
+                    self.edna1Dead = False
+                except Exception:
+                    message = "Unable to parse string from Tango/EDNA 1 (Slavia)"
+                    logger.error(message)
+                    self.showMessage(2, message)
+                    # no need to continue 
+                    return
+                if xsd.status is not None:
+                    log = xsd.status.executiveSummary.value
+                    if "Error" in log:
+                        self.showMessage(1, log)
+                    else:
+                        self.showMessage(0, log)
+
 
 
     def _abortCollectWithRobot(self):
@@ -425,6 +461,10 @@ class Collect(CObjectBase):
     def testCollectAbort(self):
         logger.info("sending abort to stop spec test collection")
         #self.commands["testCollect"].abort()
+
+    def setHPLC(self, pValue):
+        self.isHPLC = bool(pValue)
+        print "HPLC is now %s" % self.isHPLC
 
     def setCheckBeam(self, flag):
         if flag:

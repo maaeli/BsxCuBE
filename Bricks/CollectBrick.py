@@ -116,6 +116,7 @@ class CollectBrick(Core.BaseBrick):
         self._curveList = []
         self.lastCollectProcessingLog = None
         self.__energy = None
+        self.isHPLC = False
 
     def init(self):
         # The keV to Angstrom calc
@@ -142,6 +143,9 @@ class CollectBrick(Core.BaseBrick):
         self.collectObj = None
         self.contact = False
         self.loginDone = False
+
+        self.scObject = None
+        self.loginObject = None
 
         self.__validParameters = [False, False, False]
 
@@ -366,7 +370,7 @@ class CollectBrick(Core.BaseBrick):
         Qt.QObject.connect(self.robotCheckBox, Qt.SIGNAL("toggled(bool)"), self.robotCheckBoxToggled)
         self.hBoxLayout16.addWidget(self.robotCheckBox)
         self.hplcCheckBox = Qt.QCheckBox("Collect using HPLC", self.brick_widget)
-        Qt.QObject.connect(self.hplcCheckBox, Qt.SIGNAL("toggled(bool)"), self.hplcCheckBoxToggled)
+        Qt.QObject.connect(self.hplcCheckBox, Qt.SIGNAL("toggled(bool)"), self.CheckBoxToggledHPLC)
         self.hBoxLayout16.addWidget(self.hplcCheckBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout16)
 
@@ -454,6 +458,7 @@ class CollectBrick(Core.BaseBrick):
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
+            self.loginObject = pPeer
             self.brick_widget.setEnabled(False)
 
     # Connected to Energy Brick
@@ -1095,7 +1100,11 @@ class CollectBrick(Core.BaseBrick):
 
     def robotCheckBoxToggled(self, pValue):
         if pValue:
-            # We put it on.. Inform user that Collect using HPLC will be unselcted
+            # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
+            if self.isHPLC:
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok)
+                self.robotCheckBox.setChecked(False)
+                return
             if self._collectRobotDialog.isVisible():
                 self._collectRobotDialog.activateWindow()
                 self._collectRobotDialog.raise_()
@@ -1104,10 +1113,16 @@ class CollectBrick(Core.BaseBrick):
         else:
             self._collectRobotDialog.hide()
 
-    def hplcCheckBoxToggled(self, pValue):
-        if pValue:
-            #TODO; Continue to do something
-            pass
+    def CheckBoxToggledHPLC(self, pValue):
+        v = bool(pValue)
+        self.isHPLC = v
+        if v:
+            if self.robotCheckBox.isChecked():
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok)
+                self.hplcCheckBox.setChecked(False)
+                self.isHPLC = False
+                return
+        self.collectObj.setHPLC(v)
 
 
     def checkBeamBoxToggled(self, pValue):
