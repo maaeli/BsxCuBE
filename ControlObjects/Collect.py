@@ -648,7 +648,7 @@ class Collect(CObjectBase):
 #        print "Exposure Temperature: %r " % pars["SEUTemperature"]
 #        print "Storage Temperature: %r " % pars["storageTemperature"]
 #        print "Time per frame %r " % pars["timePerFrame"]
-        print "Time before and after run : %r   %r " % (timeBefore, timeAfter)
+        print ">>>Time before and after run : %r   %r " % (timeBefore, timeAfter)
 #        energy = self.hcOverE / float(pars["waveLength"])
 #        print "Energy in keV %r" % energy
 #        print "Detector distance %r" % pars["detectorDistance"]
