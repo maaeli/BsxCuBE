@@ -584,9 +584,11 @@ class CollectBrick(Core.BaseBrick):
     def collectProcessingLog(self, level, logmsg, notify):
         #TODO : DEBUG
         print ">>>>>>> CollectProcessingLog logmsg %r " % logmsg
-        # Level 0 = info, Level 1 = 
+        # Level 0 = info, Level 1 = Warning, Level 2 = Error 
         if level == 0:
             logmethod = logger.info
+        elif level == 1:
+            logmethod = logger.warning
         elif level == 2:
             logmethod = logger.error
 
