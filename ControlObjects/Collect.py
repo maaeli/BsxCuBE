@@ -464,7 +464,6 @@ class Collect(CObjectBase):
 
     def setHPLC(self, pValue):
         self.isHPLC = bool(pValue)
-        print "HPLC is now %s" % self.isHPLC
 
     def setCheckBeam(self, flag):
         if flag:

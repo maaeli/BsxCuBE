@@ -561,29 +561,43 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
-        print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
+        ##print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
         if self.last_dat is None :
             #TODO remove this hack ASAP (SO 27/9 11)
             ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
-            logger.info("processing done, file is %r", dat_filename)
+            logger.info("processing done, file is %s", dat_filename)
             # Only display 1d images like XXXX/1d/<at least on char>.dat
             if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
-                self.emitDisplayItemChanged(dat_filename)
+                #DEBUG: get file size
+                if os.path.exists(dat_filename):
+                    filesize = os.path.getsize(dat_filename)
+                    print ">>> File info 0 %r  %s " % (filesize, type(filesize))
+                    self.emitDisplayItemChanged(dat_filename)
+                else:
+                    logger.warning("processing done, could not display file %s", dat_filename)
             self.last_dat = dat_filename
         else:
             if self.last_dat == dat_filename:
                 return
             else:
-                logger.info("processing done, file is %r", dat_filename)
-                self.emitDisplayItemChanged(dat_filename)
+                logger.info("processing done, file is %s", dat_filename)
+                # Only display 1d images like XXXX/1d/<at least on char>.dat
+                if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
+                    #DEBUG: get file size
+                    if os.path.exists(dat_filename):
+                        filesize = os.path.getsize(dat_filename)
+                        print ">>> File info 1 %r  %s " % (filesize, type(filesize))
+                        self.emitDisplayItemChanged(dat_filename)
+                    else:
+                        logger.warning("processing done, could not display file %s", dat_filename)
                 self.last_dat = dat_filename
 
 
     def collectProcessingLog(self, level, logmsg, notify):
         #TODO : DEBUG
-        print ">>>>>>> CollectProcessingLog logmsg %r " % logmsg
+        ##print ">>>>>>> CollectProcessingLog logmsg %r " % logmsg
         # Level 0 = info, Level 1 = Warning, Level 2 = Error 
         if level == 0:
             logmethod = logger.info
@@ -633,18 +647,26 @@ class CollectBrick(Core.BaseBrick):
                         # Take away last _ piece
                         filename1 = "_".join(splitList[:-1])
                         ave_filename = directory + filename1 + "_ave.dat"
-                self.emitDisplayItemChanged(filename0)
+                #DEBUG: get file size
+                if os.path.exists(filename0):
+                    filesize = os.path.getsize(filename0)
+                    print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                    self.emitDisplayItemChanged(filename0)
+
             else:
                 if os.path.exists(filename0):
-                    if os.path.splitext(filename0)[1] != ".dat":
+                    if not filename0.endswith(".dat"):
                         #filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
                         fileBaseName = os.path.splitext(os.path.basename(filename0))[0]
                         filename1 = os.path.join(directory, fileBaseName + ".dat")
                         if os.path.exists(filename1):
                             filename0 += "," + filename1
-                    # TODO: DEBUG
+                                    #DEBUG: get file size
+                    filesize = os.path.getsize(filename0)
+                    print ">>> File info 2 %r  %s " % (filesize, type(filesize))
                     print "emitDisplayItemChanged: %r" % filename0
                     self.emitDisplayItemChanged(filename0)
+
 
 #           TODO: This is how put in a breakpoint 
 #           import pdb; pdb.set_trace()
@@ -1216,7 +1238,10 @@ class CollectBrick(Core.BaseBrick):
             if os.path.isdir(directory):
                 for filename in os.listdir(directory):
                     if os.path.isfile(os.path.join(directory, filename)):
-                        if filename.startswith(str(self.prefixLineEdit.text())) and (filename.split("_")[-1] != "00.edf") and (filename.split("_")[-1] != "00.xml") :
+                        if filename.startswith(str(self.prefixLineEdit.text())) and \
+                           (filename.split("_")[-1] != "00000.edf") \
+                           and (filename.split("_")[-1] != "00000.xml") \
+                           and (filename.split(".")[-1] != "h5") :
                             # Check if we have a run number higher than the requested run number:
                             existingRunNumber = filename.split("_")[-2]
                             if int(existingRunNumber) >= int(runNumber):
