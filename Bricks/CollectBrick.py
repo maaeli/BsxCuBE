@@ -648,7 +648,7 @@ class CollectBrick(Core.BaseBrick):
                         filename1 = "_".join(splitList[:-1])
                         ave_filename = directory + filename1 + "_ave.dat"
                 #DEBUG: get file size
-                if os.path.exists(filename0):
+
                     filesize = os.path.getsize(filename0)
                     print ">>> File info 3 %r  %s " % (filesize, type(filesize))
                     self.emitDisplayItemChanged(filename0)
@@ -661,11 +661,12 @@ class CollectBrick(Core.BaseBrick):
                         filename1 = os.path.join(directory, fileBaseName + ".dat")
                         if os.path.exists(filename1):
                             filename0 += "," + filename1
-                                    #DEBUG: get file size
-                    filesize = os.path.getsize(filename0)
-                    print ">>> File info 2 %r  %s " % (filesize, type(filesize))
-                    print "emitDisplayItemChanged: %r" % filename0
-                    self.emitDisplayItemChanged(filename0)
+                            #DEBUG: get file size
+                            if os.path.exists(filename0):
+                                filesize = os.path.getsize(filename0)
+                                print ">>> File info 2 %r  %s " % (filesize, type(filesize))
+                                print "emitDisplayItemChanged: %r" % filename0
+                                self.emitDisplayItemChanged(filename0)
 
 
 #           TODO: This is how put in a breakpoint 
@@ -1097,6 +1098,11 @@ class CollectBrick(Core.BaseBrick):
         self.emitDisplayItemChanged(str(self.maskLineEdit.text()))
 
     def radiationCheckBoxToggled(self, pValue):
+        if pValue:
+            if self.isHPLC:
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do Radiation Damage when HPLC is selected", Qt.QMessageBox.Ok)
+                self.radiationCheckBox.setChecked(False)
+                return
         self.radiationRelativeDoubleSpinBox.setEnabled(pValue)
         self.radiationAbsoluteDoubleSpinBox.setEnabled(pValue)
 
@@ -1143,6 +1149,11 @@ class CollectBrick(Core.BaseBrick):
         if v:
             if self.robotCheckBox.isChecked():
                 Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok)
+                self.hplcCheckBox.setChecked(False)
+                self.isHPLC = False
+                return
+            if self.radiationCheckBox.isChecked():
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a HPLC Collect when Radiation damage is selected", Qt.QMessageBox.Ok)
                 self.hplcCheckBox.setChecked(False)
                 self.isHPLC = False
                 return
