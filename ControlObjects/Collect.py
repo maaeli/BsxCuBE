@@ -56,6 +56,7 @@ class Collect(CObjectBase):
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_0"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -309,6 +310,14 @@ class Collect(CObjectBase):
                 self.jobSubmitted = True
             except Exception:
                 self.showMessageEdnaDead(2)
+        else:
+            # If HPLC we can now dump data
+            try:
+                jobId = self.commands["startJob_edna1"]([self.pluginFlushHPLC, self.xsdin.marshal()])
+                self.edna1Dead = False
+                self.jobSubmitted = True
+            except Exception:
+                self.showMessageEdnaDead(1)
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
