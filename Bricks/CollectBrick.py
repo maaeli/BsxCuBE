@@ -642,16 +642,24 @@ class CollectBrick(Core.BaseBrick):
                 self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
 
                 if not self.__isTesting:
+                    #DEBUG: get file size
+                    if os.path.exists(filename0):
+                        filesize = os.path.getsize(filename0)
+                        print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                        print "emitDisplayItemChanged: %r" % filename0
+                        self.emitDisplayItemChanged(filename0)
                     if self._currentFrame == self._frameNumber:
                         splitList = os.path.basename(filename0).split("_")
                         # Take away last _ piece
                         filename1 = "_".join(splitList[:-1])
                         ave_filename = directory + filename1 + "_ave.dat"
-                #DEBUG: get file size
+                        #DEBUG: get file size
+                        if os.path.exists(ave_filename):
+                            filesize = os.path.getsize(ave_filename)
+                            print ">>> File info 4 %r  %s " % (filesize, type(filesize))
+                            print "emitDisplayItemChanged: %r" % ave_filename
+                            self.emitDisplayItemChanged(ave_filename)
 
-                    filesize = os.path.getsize(filename0)
-                    print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                    self.emitDisplayItemChanged(filename0)
 
             else:
                 if os.path.exists(filename0):

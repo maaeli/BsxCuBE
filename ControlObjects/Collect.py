@@ -312,12 +312,7 @@ class Collect(CObjectBase):
                 self.showMessageEdnaDead(2)
         else:
             # If HPLC we can now dump data
-            try:
-                jobId = self.commands["startJob_edna1"]([self.pluginFlushHPLC, self.xsdin.marshal()])
-                self.edna1Dead = False
-                self.jobSubmitted = True
-            except Exception:
-                self.showMessageEdnaDead(1)
+            self.flushHPLC()
 
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
@@ -458,9 +453,19 @@ class Collect(CObjectBase):
         self.collecting = False
         self._abortCollectWithRobot()
 
+    def flushHPLC(self):
+        try:
+            jobId = self.commands["startJob_edna1"]([self.pluginFlushHPLC, self.xsdin.marshal()])
+            self.edna1Dead = False
+            self.jobSubmitted = True
+        except Exception:
+            self.showMessageEdnaDead(1)
+
+
     def collectAbort(self):
         logger.info("sending abort to stop spec collection")
-
+        if self.isHPLC:# If HPLC we can now dump data
+            self.flushHPLC()
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
         #self.commands["collect"].abort()
 
