@@ -37,6 +37,10 @@ class Collect(CObjectBase):
 
     def __init__(self, *args, **kwargs):
 
+        # username and password from login Brick
+        self.__username = None
+        self.__password = None
+
         #
         # HPCL or not
         self.isHPLC = False
@@ -144,6 +148,10 @@ class Collect(CObjectBase):
 
     def blockGUI(self, block):
         self.emit("grayOut", block)
+
+    def putUserInfo(self, username, password):
+        self.__username = username
+        self.__password = password
 
     def blockEnergyAdjust(self, pValue):
         # True or false for following energy with Pilatus
@@ -317,7 +325,7 @@ class Collect(CObjectBase):
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
-            if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
+            if jobId not in ["No job sucself.__passwordceeded (yet)", "No job Failed (yet)"]:
                 # and react only if jobs have been submitted (to avoid spurious events)
                 if self.jobSubmitted:
                     logger.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
@@ -410,6 +418,7 @@ class Collect(CObjectBase):
                 except:
                     self.showMessage(1, "No web page provided by plugin SAS !!!")
                     return
+                #TODO: need to be done automatically
                 self.showMessage(2, "Please display this web page in BsxCube: %s." % webPage)
             elif jobId.startswith(self.pluginHPLC):#HPLC is on Slavia
                 try:
@@ -671,8 +680,8 @@ class Collect(CObjectBase):
 #        print "------  tocollect"
 #        pprint.pprint(tocollect)
 #        self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = 'mx1438', password = 'Rfo4-73')
-#        self.client = Client('http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl', transport = self.httpAuthenticatedToolsForAutoprocessingWebService)
-#        self.client.service.saveFrameSet(self.experimentId, param1, param2, param3, param4, param5, param6, param7, param8, param9)
+
+#         saveFrameSet(self.experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, currentMachine)
 
 
     def _collectWithRobot(self, pars):

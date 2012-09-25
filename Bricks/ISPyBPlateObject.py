@@ -1,26 +1,25 @@
 from BiosaxsClient import BiosaxsClient
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
 
-class Ui_Widget(object):
+
+class ISPyBPlateObject(object):
+
 
     def setupUi(self, Widget):
-        Widget.setObjectName(_fromUtf8("Widget"))
+#        Qt.QWidget.__init__(self, *args, **kargs)
+        Widget.setObjectName("Widget")
         Widget.resize(596, 362)
 
         self.response = None
 
         self.label = QtGui.QLabel(Widget)
         self.label.setGeometry(QtCore.QRect(10, 60, 81, 16))
-        self.label.setObjectName(_fromUtf8("label"))
+        self.label.setObjectName("label")
 
         self.open_ISPYB_WUI_Button = QtGui.QPushButton(Widget)
         self.open_ISPYB_WUI_Button.setGeometry(QtCore.QRect(430, 80, 151, 23))
-        self.open_ISPYB_WUI_Button.setObjectName(_fromUtf8("open_ISPYB_WUI_Button"))
+        self.open_ISPYB_WUI_Button.setObjectName("open_ISPYB_WUI_Button")
         #self.open_ISPYB_WUI_Button.clicked.connect(self.open_ISPyB_WebWidget)
 
         self.tableWidget = QtGui.QTableWidget(Widget)
@@ -31,9 +30,9 @@ class Ui_Widget(object):
         self.tableWidget.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
         self.tableWidget.setRowCount(0)
         self.tableWidget.setColumnCount(3)
-        self.tableWidget.setObjectName(_fromUtf8("tableWidget"))
+        self.tableWidget.setObjectName("tableWidget")
         QtCore.QObject.connect(self.tableWidget, QtCore.SIGNAL("selectionChanged()"), self.getSelection)
-        QtCore.QObject.connect(self.tableWidget, QtCore.SIGNAL(_fromUtf8("itemSelectionChanged()")), self.getSelection)
+        QtCore.QObject.connect(self.tableWidget, QtCore.SIGNAL("itemSelectionChanged()"), self.getSelection)
 
         item = QtGui.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -43,23 +42,23 @@ class Ui_Widget(object):
         self.tableWidget.setHorizontalHeaderItem(2, item)
         self.label_2 = QtGui.QLabel(Widget)
         self.label_2.setGeometry(QtCore.QRect(10, 10, 181, 16))
-        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.label_2.setObjectName("label_2")
         self.close_button = QtGui.QPushButton(Widget)
         self.close_button.setGeometry(QtCore.QRect(430, 330, 141, 23))
-        self.close_button.setObjectName(_fromUtf8("close_button"))
+        self.close_button.setObjectName("close_button")
         self.Load_plates_button = QtGui.QPushButton(Widget)
         self.Load_plates_button.setGeometry(QtCore.QRect(140, 330, 141, 23))
-        self.Load_plates_button.setObjectName(_fromUtf8("Load_plates_button"))
+        self.Load_plates_button.setObjectName("Load_plates_button")
         self.Load_plates_button.clicked.connect(self.onLoadPlatesButtonClicked)
 
         self.comboBox = QtGui.QComboBox(Widget)
         self.comboBox.setGeometry(QtCore.QRect(10, 30, 411, 22))
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
+        self.comboBox.setObjectName(("comboBox"))
         QtCore.QObject.connect(self.comboBox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onExperimentChosen)
 
         self.refresh_data_button = QtGui.QPushButton(Widget)
         self.refresh_data_button.setGeometry(QtCore.QRect(430, 30, 151, 23))
-        self.refresh_data_button.setObjectName(_fromUtf8("refresh_data_button"))
+        self.refresh_data_button.setObjectName("refresh_data_button")
         self.refresh_data_button.clicked.connect(self.onRefreshDataButtonClicked)
 
         self.close_button.clicked.connect(self.onCloseButtonClicked)

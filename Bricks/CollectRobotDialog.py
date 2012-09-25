@@ -1,7 +1,8 @@
 from PyQt4   import Qt, QtCore, QtGui
 from Samples import *
 import cStringIO
-import BiosaxsForBsxCubeWidget
+#import BiosaxsForBsxCubeWidget
+from ISPyBPlateObject import ISPyBPlateObject
 import logging
 import os.path, time
 import pprint
@@ -607,15 +608,19 @@ class CollectRobotDialog(Qt.QDialog):
 
     def loadFromISPyBButtonClicked(self):
         Widget = QtGui.QDialog()
-        bsx_ispyb_widget = BiosaxsForBsxCubeWidget.Ui_Widget()
-        bsx_ispyb_widget.setupUi(Widget)
+        bsxIspybWidget = ISPyBPlateObject()
+        bsxIspybWidget.setupUi(Widget)
         Widget.exec_()
-        #bsx_ispyb_widget.onRefreshDataButtonClicked()
 
-        if bsx_ispyb_widget.response:
+
+#        self.__iSPyBPlate.show()
+#        self.__iSPyBPlate.activateWindow()
+#        self.__iSPyBPlate.raise_()
+
+        if bsxIspybWidget.response:
             #f = open("/tmp/output.xml", "w"); f.write(bsx_ispyb_widget.response); f.close()
             # create a file-like object and pass it to the standard functions
-            xmlfile = cStringIO.StringIO(bsx_ispyb_widget.response)
+            xmlfile = cStringIO.StringIO(bsxIspybWidget.response)
             try:
                 self.loadFile(xmlfile, fromIspyB = True)
             finally:

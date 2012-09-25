@@ -140,12 +140,14 @@ class CollectBrick(Core.BaseBrick):
         self.__expertModeOnly = False
         self.__expertMode = False
         self.energyControlObject = None
+        self.loginObject = None
+        self.__username = None
+        self.__password = None
         self.collectObj = None
         self.contact = False
         self.loginDone = False
 
         self.scObject = None
-        self.loginObject = None
 
         self.__validParameters = [False, False, False]
 
@@ -467,6 +469,19 @@ class CollectBrick(Core.BaseBrick):
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
+        if pValue:
+            # get password and username and send it to Collect Object
+            if self.loginObject is not None:
+                (self.__username, self.__password) = self.loginObject.getUserInfo()
+                if (self.__username is not None and self.__password is not None):
+                    if self.collectObj is not None:
+                        self.collectObj.putUserInfo(self.__username, self.__password)
+#                        (sampleCode, exposureTemperature, storageTemperature, timePerFrame, \
+#                           start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, \
+#                           currentMachine) = self.collectObj.getIspyByParams(self)
+            else:
+                self.__username = None
+                self.__password = None
         self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
