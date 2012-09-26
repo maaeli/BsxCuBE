@@ -69,7 +69,8 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("clearCurve", "clearCurve"),
                                              Signal("grayOut", "grayOut"),
                                              Signal("transmissionChanged", "transmissionChanged"),
-                                             Signal("machineCurrentChanged", "machineCurrentChanged")],
+                                             Signal("machineCurrentChanged", "machineCurrentChanged"),
+                                             Signal("newSASUrl", "newSASUrl")],
                                             [Slot("testCollect"),
                                              Slot("collect"),
                                              Slot("collectAbort"),
@@ -86,23 +87,24 @@ class CollectBrick(Core.BaseBrick):
                                             [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")],
                                             "connectedToEnergy"),
                     "samplechanger": Connection("Sample Changer object",
-                                            [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
-                                             Signal('storageTemperatureChanged', 'storage_temperature_changed'),
-                                             Signal('stateChanged', 'state_changed'), ],
+                                            [Signal('seuTemperatureChanged', 'seuTemperatureChanged'),
+                                             Signal('storageTemperatureChanged', 'storageTemperatureChanged'),
+                                             Signal('stateChanged', 'state_changed')],
                                             [],
-                                            "sample_changer_connected"),
+                                            "connectedToSC"),
                     "image_proxy": Connection("image proxy",
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                             [],
-                                            "image_proxy_connected"),
-                    "energyBrick": Connection("Energy Brick connection",
-                                            [Signal("adjustPilatusThreshold", "adjustPilatusThreshold")],
-                                            [],
-                                            "connectionToEnergyBrick"),
+                                            "connectedToImageProxy"),
+
                     "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
-                                            "connectionToLogin")}
+                                            "connectedToLogin"),
+                    "WebSAS": Connection("Web SAS Browser object",
+                                            [],
+                                            [Slot("setURL")],
+                                            "connectedToSAS")}
 
 
 
@@ -139,13 +141,15 @@ class CollectBrick(Core.BaseBrick):
         self.__isTesting = False
         self.__expertModeOnly = False
         self.__expertMode = False
+        self.loginDone = False
+        self.contact = False
         self.energyControlObject = None
         self.loginObject = None
         self.__username = None
         self.__password = None
         self.collectObj = None
-        self.contact = False
-        self.loginDone = False
+
+        self.sasWebObject = None
 
         self.scObject = None
 
@@ -153,7 +157,7 @@ class CollectBrick(Core.BaseBrick):
 
         #TODO: DEBUG
         self.last_dat = None
-        self.image_proxy = None
+        self.imageProxy = None
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
 
@@ -458,14 +462,15 @@ class CollectBrick(Core.BaseBrick):
         self.setWidgetState()
 
     # When connected to Login, then block the brick
-    def connectionToLogin(self, pPeer):
+    def connectedToLogin(self, pPeer):
         if pPeer is not None:
             self.loginObject = pPeer
             self.brick_widget.setEnabled(False)
 
-    # Connected to Energy Brick
-    def connectionToEnergyBrick(self, pPeer):
-        pass
+    # When connected SAS webdisplay
+    def connectedToSAS(self, pPeer):
+        if pPeer is not None:
+            self.sasWebObject = pPeer
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
@@ -485,7 +490,7 @@ class CollectBrick(Core.BaseBrick):
         self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
-    def sample_changer_connected(self, pPeer):
+    def connectedToSC(self, pPeer):
         if pPeer is not None:
             self.scObject = pPeer
             self.nbPlates = 3
@@ -494,18 +499,18 @@ class CollectBrick(Core.BaseBrick):
             self.seuTemperature = self.scObject.getSEUTemperature()
             self.storageTemperature = self.scObject.getSampleStorageTemperature()
 
-    def seu_temperature_changed(self, seuTemperature):
+    def seuTemperatureChanged(self, seuTemperature):
         self.seuTemperature = seuTemperature
 
-    def storage_temperature_changed(self, storageTemperature):
+    def storageTemperatureChanged(self, storageTemperature):
         self.storageTemperature = storageTemperature
 
     def state_changed(self, state, status):
         # not used, so we do not care
         pass
 
-    def image_proxy_connected(self, image_proxy):
-        self.image_proxy = image_proxy
+    def connectedToImageProxy(self, imageProxy):
+        self.imageProxy = imageProxy
 
     def exp_spec_connected(self, spec):
         if spec != None:
@@ -660,9 +665,12 @@ class CollectBrick(Core.BaseBrick):
                     #DEBUG: get file size
                     if os.path.exists(filename0):
                         filesize = os.path.getsize(filename0)
-                        print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                        print "emitDisplayItemChanged: %r" % filename0
-                        self.emitDisplayItemChanged(filename0)
+                        if filesize > 4000000:
+                            print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                            print "emitDisplayItemChanged: %r" % filename0
+                            self.emitDisplayItemChanged(filename0)
+                        else:
+                            print ">>> Not enough data 3 %s" % filesize
                     if self._currentFrame == self._frameNumber:
                         splitList = os.path.basename(filename0).split("_")
                         # Take away last _ piece
@@ -750,10 +758,10 @@ class CollectBrick(Core.BaseBrick):
     def emitDisplayItemChanged(self, pValue):
         self.emit("displayItemChanged", str(pValue))
 
-        if self.image_proxy is None:
+        if self.imageProxy is None:
             return
         try:
-            self.image_proxy.load_files(str(pValue), oneway = True)
+            self.imageProxy.load_files(str(pValue), oneway = True)
         except Exception, e:
             logger.error("Could not read file " + str(pValue))
             logger.exception(e)
@@ -1345,6 +1353,10 @@ class CollectBrick(Core.BaseBrick):
     def machineCurrentChanged(self, pValue):
         self._machineCurrent = pValue
 
+    def newSASUrl(self, url):
+        if self.sasWebObject is not None:
+            self.sasWebObject.setUrl(url)
+
     def transmissionChanged(self, percentage):
         pass
 
@@ -1447,10 +1459,10 @@ class CollectBrick(Core.BaseBrick):
 
     def displayReset(self):
         self.emit("displayResetChanged")
-        if self.image_proxy is None:
+        if self.imageProxy is None:
             return
         try:
-            self.image_proxy.erase_curves()
+            self.imageProxy.erase_curves()
         except Exception, e:
             logger.exception(e)
 

@@ -230,6 +230,12 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Login Box"/>
   </properties>
+  <properties id="SAS">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="SAS"/>
+  </properties>
   <properties id="BsxAttenuatorsBrick1">
      <property name="flex" value="0"/>
      <property name="maskFormat" value="%3.5f"/>
@@ -284,6 +290,10 @@
      <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value="tonic92"/>
+  </properties>
+  <properties id="WebBrowseBrick2">
+     <property name="url" value="about::blank"/>
+     <property name="flex" value="0"/>
   </properties>
   <properties id="Operation">
      <property name="flex" value="1"/>
@@ -668,9 +678,6 @@
   </connections>
 
   <connections id="CollectBrick1">
-    <connection role="energyBrick">
-      <signal name="adjustPilatusThreshold"/>
-    </connection>
     <connection role="energy">
       <signal name="energyChanged"/>
       <slot name="setEnergy"/>
@@ -684,6 +691,10 @@
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
       <peer name="BsxCuBE/image_proxy"/>
+    </connection>
+    <connection role="WebSAS">
+      <slot name="setURL"/>
+      <peer name="WebBrowseBrick2"/>
     </connection>
     <connection role="collect">
       <signal name="collectBeamStopDiodeChanged"/>
@@ -716,6 +727,7 @@
       <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
       <signal name="machineCurrentChanged"/>
+      <signal name="newSASUrl"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -745,6 +757,9 @@
   </connections>
 
   <connections id="vgroupbox1">
+  </connections>
+
+  <connections id="SAS">
   </connections>
 
   <connections id="BsxAttenuatorsBrick1">
@@ -847,12 +862,16 @@
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
     </connection>
-    <connection role="enableDisable">
-      <signal name="enableDisable"/>
-    </connection>
   </connections>
 
   <connections id="BsxCuBE">
+  </connections>
+
+  <connections id="WebBrowseBrick2">
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
   </connections>
 
   <connections id="Operation">

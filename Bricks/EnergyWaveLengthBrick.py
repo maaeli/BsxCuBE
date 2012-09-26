@@ -21,10 +21,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
                                             "connectionToLogin"),
-                   "enableDisable": Connection("Enable disable object",
-                                            [Signal("enableDisable", "enableDisable")],
-                                            [],
-                                            "connectionToEnableDisable"),
+
                     "collect": Connection("Collect object",
                                             [Signal("collectProcessingDone", "collectProcessingDone"),
                                              Signal("collectProcessingLog", "collectProcessingLog"),
@@ -42,7 +39,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                                             "collectObjectConnected")
                    }
 
-    signals = [Signal("adjustPilatusThreshold")]
+    signals = []
     slots = []
 
 
@@ -99,10 +96,6 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
-
-    def connectionToEnableDisable(self, pValue):
-        if pValue is not None:
-            self.brick_widget.setEnabled(pValue)
 
     # connected to Collect
     def collectObjectConnected(self, pValue):

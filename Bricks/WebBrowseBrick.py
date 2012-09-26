@@ -1,10 +1,8 @@
 import logging
-import os
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
 from PyQt4.QtWebKit import QWebView
-from PyQt4.QtGui import QApplication
 
 from PyQt4.QtCore import QUrl
 
@@ -23,7 +21,7 @@ class WebBrowseBrick(Core.BaseBrick):
                                         "connectionToLogin")}
 
     signals = []
-    slots = []
+    slots = [Slot("setURL")]
 
 
     def __init__(self, *args, **kargs):
@@ -39,6 +37,11 @@ class WebBrowseBrick(Core.BaseBrick):
         self.brick_widget.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
 
     def urlChanged(self, url):
+        self.urlConfig = url
+
+    def setUrl(self, url):
+        #TODO:DEBUG 
+        print "got url %s" % url
         self.urlConfig = url
 
    # When connected to Login, then block the brick

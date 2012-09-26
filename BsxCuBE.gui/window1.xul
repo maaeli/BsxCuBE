@@ -59,6 +59,7 @@
 <tab label='2D'/>
 <tab label='Robot'/>
 <tab label='ISPyBB'/>
+<tab label='SAS'/>
     </tabs>
     <tabpanels>
       <tabpanel id='tab_EH'><vbox id="EH" orient="vertical">
@@ -84,6 +85,10 @@
   </tabpanel>
 <tabpanel id='tab_ISPyBB'><vbox id="ISPyBB" orient="vertical">
   <hbox qwidget="true" id="WebBrowseBrick1" brick="true"><script src="WebBrowseBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_SAS'><vbox id="SAS" orient="vertical">
+  <hbox qwidget="true" id="WebBrowseBrick2" brick="true"><script src="WebBrowseBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
     </tabpanels>

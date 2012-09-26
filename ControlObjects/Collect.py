@@ -18,15 +18,42 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataInputBioSaxsHPLCv1_0
 #from XSDataSAS import XSDataInputSolutionScattering
 
+
+
 logger = logging.getLogger("Collect")
 class Collect(CObjectBase):
-    signals = [Signal("collectProcessingDone"),
+    signals = [Signal("collectBeamStopDiodeChanged"),
+               Signal("collectDirectoryChanged"),
+               Signal("collectPrefixChanged"),
+               Signal("collectRunNumberChanged"),
+               Signal("collectNumberFramesChanged"),
+               Signal("collectTimePerFrameChanged"),
+               Signal("collectTimePerFrameChanged"),
+               Signal("collectConcentrationChanged"),
+               Signal("collectCommentsChanged"),
+               Signal("collectCodeChanged"),
+               Signal("collectMaskFileChanged"),
+               Signal("collectDetectorDistanceChanged"),
+               Signal("collectWaveLengthChanged"),
+               Signal("collectPixelSizeXChanged"),
+               Signal("collectPixelSizeYChanged"),
+               Signal("collectBeamCenterXChanged"),
+               Signal("collectBeamCenterYChanged"),
+               Signal("collectNormalisationChanged"),
+               Signal("collectRadiationDamageChanged"),
+               Signal("collectRelativeRadiationDamageChanged"),
+               Signal("collectAbsoluteRadiationDamageChanged"),
+               Signal("collectNewFrameChanged"),
+               Signal("checkBeamChanged"),
+               Signal("beamLostChanged"),
+               Signal("collectProcessingDone"),
                Signal("collectProcessingLog"),
                Signal("collectDone"),
                Signal("clearCurve"),
                Signal("grayOut"),
                Signal("transmissionChanged"),
-               Signal("machineCurrentChanged")]
+               Signal("machineCurrentChanged"),
+               Signal("newSASUrl")]
     slots = [Slot("testCollect"),
              Slot("collect"),
              Slot("collectAbort"),
@@ -145,6 +172,11 @@ class Collect(CObjectBase):
         self.machineCurrent = current
         # Give this to the CollectBrick
         self.emit("machineCurrentChanged", current)
+
+    def sasWebDisplay(self, url):
+        #TODO:DEBUG
+        print "-In sasWebDisplay - received %s " % url
+        self.emit("newSASUrl", url)
 
     def blockGUI(self, block):
         self.emit("grayOut", block)
@@ -308,6 +340,8 @@ class Collect(CObjectBase):
 
 
     def specCollectDone(self, returned_value):
+        #TODO: DEBUG
+        print "----returned_value is %s " % returned_value
         self.collecting = False
         # start EDNA to calculate average at the end
         if not self.isHPLC:
@@ -420,6 +454,7 @@ class Collect(CObjectBase):
                     return
                 #TODO: need to be done automatically
                 self.showMessage(2, "Please display this web page in BsxCube: %s." % webPage)
+                self.sasWebDisplay("file://%s" % webPage)
             elif jobId.startswith(self.pluginHPLC):#HPLC is on Slavia
                 try:
                     strXsdout = self.commands["getJobOutput_edna1"](jobId)
