@@ -685,6 +685,7 @@ class CollectBrick(Core.BaseBrick):
 
                     else:
                         print ">>> Not seen file %s at all" % filename0
+
                     if self._currentFrame == self._frameNumber:
                         splitList = os.path.basename(filename0).split("_")
                         # Take away last _ piece
@@ -699,7 +700,7 @@ class CollectBrick(Core.BaseBrick):
                             self.emitDisplayItemChanged(ave_filename)
                         else:
                             #TODO: DEBUG
-                            print ">>> Not enough data on file 4 %s, only %s. We do not display it " % (ave_filename, filesize)
+                            print ">>> No file 4 %s seen. We do not display it " % ave_filename
 
 
             else:
@@ -718,7 +719,7 @@ class CollectBrick(Core.BaseBrick):
                                 self.emitDisplayItemChanged(filename0)
                             else:
                                 #TODO: DEBUG
-                                print ">>> Not enough data on file 2 %s, only %s. We do not display it " % (filename0, filesize)
+                                print ">>> No file 2 %s seen. We do not display it " % filename0
 
 
 
@@ -1383,7 +1384,11 @@ class CollectBrick(Core.BaseBrick):
         self._machineCurrent = pValue
 
     def newSASUrl(self, url):
+        #TODO: DEBUG
+        print "- newSASUrl - got url %s " % url
         if self.sasWebObject is not None:
+            #TODO: DEBUG
+            print "set URL on object"
             self.sasWebObject.setUrl(url)
 
     def transmissionChanged(self, percentage):
