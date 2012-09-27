@@ -453,7 +453,7 @@ class Collect(CObjectBase):
                     self.showMessage(1, "No web page provided by plugin SAS !!!")
                     return
                 #TODO: need to be done automatically
-                self.showMessage(2, "Please display this web page in BsxCube: %s." % webPage)
+                self.showMessage(1, "Please display this web page in BsxCube: %s." % webPage)
                 self.sasWebDisplay("file://%s" % webPage)
             elif jobId.startswith(self.pluginHPLC):#HPLC is on Slavia
                 try:
