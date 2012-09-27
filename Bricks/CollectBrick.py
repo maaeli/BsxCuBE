@@ -596,7 +596,7 @@ class CollectBrick(Core.BaseBrick):
                     print ">>> File info 0 %r  %s " % (filesize, type(filesize))
                     self.emitDisplayItemChanged(dat_filename)
                 else:
-                    logger.warning("processing done, could not display file %s", dat_filename)
+                    logger.warning("processing done but no file, will not display file %s", dat_filename)
             self.last_dat = dat_filename
         else:
             if self.last_dat == dat_filename:
@@ -611,7 +611,7 @@ class CollectBrick(Core.BaseBrick):
                         print ">>> File info 1 %r  %s " % (filesize, type(filesize))
                         self.emitDisplayItemChanged(dat_filename)
                     else:
-                        logger.warning("processing done, could not display file %s", dat_filename)
+                        logger.warning("processing done but no file, will not display file %s", dat_filename)
                 self.last_dat = dat_filename
 
 
@@ -662,7 +662,7 @@ class CollectBrick(Core.BaseBrick):
                 self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
 
                 if not self.__isTesting:
-                    #DEBUG: get file size
+                    #TODO: DEBUG: get file size
                     if os.path.exists(filename0):
                         filesize = os.path.getsize(filename0)
                         if filesize > 4000000:
@@ -670,7 +670,21 @@ class CollectBrick(Core.BaseBrick):
                             print "emitDisplayItemChanged: %r" % filename0
                             self.emitDisplayItemChanged(filename0)
                         else:
-                            print ">>> Not enough data 3 %s" % filesize
+                            #TODO: DEBUG
+                            print ">>> Not enough data on file 3 %s , only %s. We try again" % (filename0, filesize)
+                            #TODO: DEBUG - Take away when 1G is in place (29/7 2012 SO)
+                            time.sleep(0.3)
+                            filesize = os.path.getsize(filename0)
+                            if filesize > 4000000:
+                                print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                                print "emitDisplayItemChanged: %r" % filename0
+                                self.emitDisplayItemChanged(filename0)
+                            else:
+                                #TODO: DEBUG
+                                print ">>> Not enough data even after 0.3s wait on file 3 %s , only %s. We stop" % (filename0, filesize)
+
+                    else:
+                        print ">>> Not seen file %s at all" % filename0
                     if self._currentFrame == self._frameNumber:
                         splitList = os.path.basename(filename0).split("_")
                         # Take away last _ piece
@@ -679,9 +693,13 @@ class CollectBrick(Core.BaseBrick):
                         #DEBUG: get file size
                         if os.path.exists(ave_filename):
                             filesize = os.path.getsize(ave_filename)
+                            #TODO: DEBUG
                             print ">>> File info 4 %r  %s " % (filesize, type(filesize))
                             print "emitDisplayItemChanged: %r" % ave_filename
                             self.emitDisplayItemChanged(ave_filename)
+                        else:
+                            #TODO: DEBUG
+                            print ">>> Not enough data on file 4 %s, only %s. We do not display it " % (ave_filename, filesize)
 
 
             else:
@@ -698,6 +716,10 @@ class CollectBrick(Core.BaseBrick):
                                 print ">>> File info 2 %r  %s " % (filesize, type(filesize))
                                 print "emitDisplayItemChanged: %r" % filename0
                                 self.emitDisplayItemChanged(filename0)
+                            else:
+                                #TODO: DEBUG
+                                print ">>> Not enough data on file 2 %s, only %s. We do not display it " % (filename0, filesize)
+
 
 
 #           TODO: This is how put in a breakpoint 
@@ -1412,7 +1434,7 @@ class CollectBrick(Core.BaseBrick):
     def collectDone(self):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
-        print ">>>>>>>>>>>>> in collectDone %s " % self.collectionStatus
+        ##print ">>>>>>>>>>>>> in collectDone %s " % self.collectionStatus
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
             self.collectObj.blockGUI(False)
