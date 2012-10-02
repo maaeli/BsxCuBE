@@ -1314,9 +1314,9 @@ class CollectBrick(Core.BaseBrick):
                         if filename.startswith(str(self.prefixLineEdit.text())) and \
                            (filename.split("_")[-1] != "00000.edf") \
                            and (filename.split("_")[-1] != "00000.xml") \
-                           and (filename.split(".")[-1] != "h5") :
+                           and (filename.split(".")[-1] != "h5") \
+                           and (filename.split(".")[-1] != "json"):
                             # Check if we have a run number higher than the requested run number:
-                            #TODO: DEBUG
                             try:
                                 existingRunNumber = filename.split("_")[-2]
                                 if int(existingRunNumber) >= int(runNumber):
@@ -1324,6 +1324,11 @@ class CollectBrick(Core.BaseBrick):
                                     flag = False
                                     break
                             except IndexError:
+                                #TODO: DEBUG
+                                print ">>> got totally unexpected filename %s " % filename
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory, prefix or something else. Please rewrite run info", Qt.QMessageBox.Ok)
+                                raise RuntimeError, "Creating of filename from info not possible"
+                            except ValueError:
                                 #TODO: DEBUG
                                 print ">>> got totally unexpected filename %s " % filename
                                 Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory, prefix or something else. Please rewrite run info", Qt.QMessageBox.Ok)
