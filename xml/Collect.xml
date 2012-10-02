@@ -31,7 +31,7 @@
    <command name="testCollect"           type="spec" call="testCollect"/>
    <command name="collect"               type="spec" call="collect"/>
    
-   <channel name="guillstate" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>	
+   <channel name="guillstate" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>
    <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode" signal="collectBeamStopDiodeChanged"/>
    <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
    <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
@@ -39,22 +39,21 @@
    <channel name="collectNumberFrames"   type="spec" call="BSX_GLOBAL/collect/numberFrames" signal="collectNumberFramesChanged"/>
    <channel name="collectTimePerFrame"   type="spec" call="BSX_GLOBAL/collect/timePerFrame" signal="collectTimePerFrameChanged"/>
    <channel name="collectConcentration"  type="spec" call="BSX_GLOBAL/collect/concentration" signal="collectConcentrationChanged"/>
-   <channel name="collectComments"       type="spec" call="BSX_GLOBAL/collect/comments" signal="collectCommentsChanged"/>	
-   <channel name="collectCode"           type="spec" call="BSX_GLOBAL/collect/code" signal="collectCodeChanged"/>	
+   <channel name="collectComments"       type="spec" call="BSX_GLOBAL/collect/comments" signal="collectCommentsChanged"/>
+   <channel name="collectCode"           type="spec" call="BSX_GLOBAL/collect/code" signal="collectCodeChanged"/>
    <channel name="collectMaskFile"       type="spec" call="BSX_GLOBAL/collect/maskFile" signal="collectMaskFileChanged"/>
    <channel name="collectDetectorDistance" type="spec" call="BSX_GLOBAL/collect/detectorDistance" signal="collectDetectorDistanceChanged"/>
-   <channel name="collectWaveLength"     type="spec" call="BSX_GLOBAL/collect/waveLength" signal="collectWaveLengthChanged"/>		
+   <channel name="collectWaveLength"     type="spec" call="BSX_GLOBAL/collect/waveLength" signal="collectWaveLengthChanged"/>
    <channel name="collectPixelSizeX"     type="spec" call="BSX_GLOBAL/collect/pixelSizeX" signal="collectPixelSizeXChanged"/>
-   <channel name="collectPixelSizeY"     type="spec" call="BSX_GLOBAL/collect/pixelSizeY" signal="collectPixelSizeYChanged"/>	
+   <channel name="collectPixelSizeY"     type="spec" call="BSX_GLOBAL/collect/pixelSizeY" signal="collectPixelSizeYChanged"/>
    <channel name="collectBeamCenterX"    type="spec" call="BSX_GLOBAL/collect/beamCenterX" signal="collectBeamCenterXChanged"/>
-   <channel name="collectBeamCenterY"    type="spec" call="BSX_GLOBAL/collect/beamCenterY" signal="collectBeamCenterYChanged"/>	
+   <channel name="collectBeamCenterY"    type="spec" call="BSX_GLOBAL/collect/beamCenterY" signal="collectBeamCenterYChanged"/>
    <channel name="collectNormalisation"  type="spec" call="BSX_GLOBAL/collect/normalisation" signal="collectNormalisationChanged"/>
    <channel name="collectRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/radiationDamage" signal="collectRadiationDamageChanged"/>
    <channel name="collectAbsoluteRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/absoluteRadiationDamage" signal="collectAbsoluteRadiationDamageChanged"/>
    <channel name="collectRelativeRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/relativeRadiationDamage" signal="collectRelativeRadiationDamageChanged"/>
-   <channel name="collectProcessData"    type="spec" call="BSX_GLOBAL/collect/processData" signal="collectProcessDataChanged"/>
-   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>			
-   <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>			
+   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>
+   <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>
    <channel name="abortCollect"          type="spec" call="BSX_ABORT" signal="abortCollectChanged"/>
    <channel name="checkBeam"             type="spec" uri="nela:oh"  call="BSX_CHECKBEAM"/>
 </object>	
