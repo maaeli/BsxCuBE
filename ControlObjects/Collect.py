@@ -289,6 +289,21 @@ class Collect(CObjectBase):
         else:
             self.lastPrefixRun = prefixRun
             logger.info("Starting collect of run %s_%03d ", sPrefix, pRunNumber)
+        #
+        # set the energy if needed 
+        #
+        self.__energy = self.objects["energy"].getEnergy()
+        self.__currentPilatusThreshold = self.objects["energy"].getPilatusThreshold()
+        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
+            if self.__energyAdjust:
+                self.objects["energy"].setEnergy(self.__energy)
+                while not self.objects["energy"].pilatusReady() :
+                    time.sleep(0.5)
+
+        #
+        # SET gapfill on the Pilatus (Even if not needed)
+        #   
+        self.channels["fill_mode"].set_value("ON")
         self.commands["collect"](callback = self.specCollectDone, error_callback = self.collectFailed)
 
 
@@ -510,8 +525,10 @@ class Collect(CObjectBase):
         logger.info("sending abort to stop spec collection")
         if self.isHPLC:# If HPLC we can now dump data
             self.flushHPLC()
+
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
-        #self.commands["collect"].abort()
+        self.commands["collect"].abort()
+
 
         self._abortCollectWithRobot()
 
@@ -560,21 +577,6 @@ class Collect(CObjectBase):
             tocollect = sample
 
 
-        #
-        # set the energy if needed 
-        #
-        self.__energy = self.objects["energy"].getEnergy()
-        self.__currentPilatusThreshold = self.objects["energy"].getPilatusThreshold()
-        if math.fabs(self.__energy - self.__currentPilatusThreshold) > self.deltaPilatus:
-            if self.__energyAdjust:
-                self.objects["energy"].setEnergy(self.__energy)
-                while not self.objects["energy"].pilatusReady() :
-                    time.sleep(0.5)
-
-        #
-        # SET gapfill on the Pilatus (Even if not needed)
-        #   
-        self.channels["fill_mode"].set_value("ON")
         if self.objects["sample_changer"].setViscosityLevel(tocollect["viscosity"].lower()) == -1:
             self.showMessage(2, "Error when trying to set viscosity to '%s'...\nAborting collection!" % tocollect["viscosity"])
             self.collectAbort()
