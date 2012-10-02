@@ -104,7 +104,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     def displayItemChanged(self, _):
         pass
 
-    def displayResetChanged(self, _):
+    def displayResetChanged(self):
         pass
 
     def transmissionChanged(self, _):

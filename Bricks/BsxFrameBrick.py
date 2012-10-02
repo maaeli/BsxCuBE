@@ -76,7 +76,7 @@ class BsxFrameBrick(Core.BaseBrick):
             if f.endswith('.edf'):
                 self.frameDisplay.setDataSource(f)
 
-    def displayResetChanged(self, _):
+    def displayResetChanged(self):
         pass
 
     def transmissionChanged(self, _):

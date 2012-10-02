@@ -154,7 +154,7 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
                 self.currentTransmissionLineEdit.setText(self.__maskFormat % float(pValue) + self.__suffix)
 
     # connect to Display
-    def displayResetChanged(self, _):
+    def displayResetChanged(self):
         pass
 
     def displayItemChanged(self, _):

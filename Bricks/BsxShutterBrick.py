@@ -126,7 +126,7 @@ class BsxShutterBrick(Core.BaseBrick):
             else:
                 self.brick_widget.setEnabled(True)
 
-    def displayResetChanged(self, _):
+    def displayResetChanged(self):
         pass
 
     def displayItemChanged(self, _):

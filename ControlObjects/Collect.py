@@ -264,7 +264,6 @@ class Collect(CObjectBase):
         self.collectBeamCenterX.set_value(pBeamCenterX)
         self.collectBeamCenterY.set_value(pBeamCenterY)
         self.collectNormalisation.set_value(pNormalisation)
-        self.collectProcessData.set_value(pProcessData)
         self.prepareEdnaInput(pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame)
 
 
