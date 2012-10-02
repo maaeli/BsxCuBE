@@ -1218,19 +1218,24 @@ class CollectBrick(Core.BaseBrick):
     def checkBeamBoxToggled(self, pValue):
         self.collectObj.setCheckBeam(pValue)
 
-    def testPushButtonClicked(self):
+    def checkPilausReady(self):
         # Check if pilatus is ready
         if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
             if self.contact:
                 logger.warning("Lost contact with Pilatus")
             self.contact = False
-            return
+            return False
         else:
             if not self.contact:
                 logger.warning("Found Pilatus again")
                 self.contact = True
         if not self.energyControlObject.pilatusReady():
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later or try restarting the Pilatus", Qt.QMessageBox.Ok)
+            return False
+        return True
+
+    def testPushButtonClicked(self):
+        if not self.checkPilausReady():
             return
         self.grayOut(True)
         self.emit("grayOut", True)
@@ -1261,18 +1266,7 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectPushButtonClicked(self):
-        # Check if pilatus is ready
-        if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
-            if self.contact:
-                logger.warning("Lost contact with Pilatus")
-            self.contact = False
-            return
-        else:
-            if not self.contact:
-                logger.warning("Found Pilatus again")
-                self.contact = True
-        if not self.energyControlObject.pilatusReady():
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
+        if not self.checkPilausReady():
             return
         if not self.robotCheckBox.isChecked() or self.validParameters():
             # Check Temperature changes are not too big when doing robot collection

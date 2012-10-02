@@ -154,10 +154,10 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
                 self.currentTransmissionLineEdit.setText(self.__maskFormat % float(pValue) + self.__suffix)
 
     # connect to Display
-    def displayResetChanged(self):
+    def displayResetChanged(self, _):
         pass
 
-    def displayItemChanged(self):
+    def displayItemChanged(self, _):
         pass
 
     def grayOut(self, grayout):
