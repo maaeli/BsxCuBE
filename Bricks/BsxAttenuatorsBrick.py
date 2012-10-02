@@ -25,21 +25,13 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
                                              Signal("attenuatorsFactorChanged", "attenuatorsFactorChanged")],
                                             [],
                                             "connectionStatusChanged"),
-                    "collect": Connection("Collect object",
-                                            [Signal("collectProcessingDone", "collectProcessingDone"),
-                                             Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone"),
-                                             Signal("clearCurve", "clearCurve"),
-                                             Signal("grayOut", "grayOut"),
-                                             Signal("transmissionChanged", "transmissionChanged")],
-                                            [Slot("testCollect"),
-                                             Slot("collect"),
-                                             Slot("collectAbort"),
-                                             Slot("setCheckBeam"),
-                                             Slot("triggerEDNA"),
-                                             Slot("blockGUI"),
-                                             Slot("blockEnergyAdjust")],
-                                            "collectObjectConnected"),
+
+                   "display": Connection("Display object",
+                                    [Signal("displayResetChanged", "displayResetChanged"),
+                                    Signal("displayItemChanged", "displayItemChanged"),
+                                    Signal("transmissionChanged", "transmissionChanged"),
+                                    Signal("grayOut", "grayOut")],
+                                    []),
                     "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                              [],
@@ -161,20 +153,11 @@ class BsxAttenuatorsBrick(Core.BaseBrick):
             else:
                 self.currentTransmissionLineEdit.setText(self.__maskFormat % float(pValue) + self.__suffix)
 
-    # connected to Collect
-    def collectObjectConnected(self, pValue):
+    # connect to Display
+    def displayResetChanged(self):
         pass
 
-    def collectProcessingDone(self, filename):
-        pass
-
-    def collectProcessingLog(self, level, logmsg, notify):
-        pass
-
-    def collectDone(self):
-        pass
-
-    def clearCurve(self):
+    def displayItemChanged(self):
         pass
 
     def grayOut(self, grayout):

@@ -50,7 +50,6 @@ class Collect(CObjectBase):
                Signal("collectProcessingLog"),
                Signal("collectDone"),
                Signal("clearCurve"),
-               Signal("grayOut"),
                Signal("transmissionChanged"),
                Signal("machineCurrentChanged"),
                Signal("newSASUrl")]
@@ -59,7 +58,6 @@ class Collect(CObjectBase):
              Slot("collectAbort"),
              Slot("setCheckBeam"),
              Slot("triggerEDNA"),
-             Slot("blockGUI"),
              Slot("blockEnergyAdjust")]
 
     def __init__(self, *args, **kwargs):
@@ -177,9 +175,6 @@ class Collect(CObjectBase):
         #TODO:DEBUG
         print "-In sasWebDisplay - received %s " % url
         self.emit("newSASUrl", url)
-
-    def blockGUI(self, block):
-        self.emit("grayOut", block)
 
     def putUserInfo(self, username, password):
         self.__username = username

@@ -13,7 +13,9 @@ class BsxFrameBrick(Core.BaseBrick):
     properties = {}
     connections = {"display": Connection("Display object",
                                     [Signal("displayResetChanged", "displayResetChanged"),
-                                    Signal("displayItemChanged", "displayItemChanged")],
+                                    Signal("displayItemChanged", "displayItemChanged"),
+                                    Signal("transmissionChanged", "transmissionChanged"),
+                                    Signal("grayOut", "grayOut")],
                                     []),
                     "login": Connection("Login object",
                                     [Signal("loggedIn", "loggedIn")],
@@ -29,7 +31,7 @@ class BsxFrameBrick(Core.BaseBrick):
         Qt.QVBoxLayout(self.brick_widget)
         self.frameDisplay = QubDataImageDisplay(self.brick_widget, noAction = True, forcePopupSubWindow = True)
         # layout
-        # Next line will always have an error in Eclipse, even if it is correct.
+        #TODO:  Next line will always have an error in Eclipse, even if it is correct.
         self.frameDisplay.setSizePolicy(Qt.QSizePolicy.MinimumExpanding, Qt.QSizePolicy.MinimumExpanding)
         self.brick_widget.layout().addWidget(self.frameDisplay)
         # No foreground color change - all other left in
@@ -74,5 +76,11 @@ class BsxFrameBrick(Core.BaseBrick):
             if f.endswith('.edf'):
                 self.frameDisplay.setDataSource(f)
 
-    def displayResetChanged(self, *args):
-        return
+    def displayResetChanged(self, _):
+        pass
+
+    def transmissionChanged(self, _):
+        pass
+
+    def grayOut(self, _):
+        pass

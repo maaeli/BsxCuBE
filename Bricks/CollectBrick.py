@@ -67,7 +67,6 @@ class CollectBrick(Core.BaseBrick):
                                              Signal("collectProcessingLog", "collectProcessingLog"),
                                              Signal("collectDone", "collectDone"),
                                              Signal("clearCurve", "clearCurve"),
-                                             Signal("grayOut", "grayOut"),
                                              Signal("transmissionChanged", "transmissionChanged"),
                                              Signal("machineCurrentChanged", "machineCurrentChanged"),
                                              Signal("newSASUrl", "newSASUrl")],
@@ -76,7 +75,6 @@ class CollectBrick(Core.BaseBrick):
                                              Slot("collectAbort"),
                                              Slot("setCheckBeam"),
                                              Slot("triggerEDNA"),
-                                             Slot("blockGUI"),
                                              Slot("blockEnergyAdjust")],
                                             "collectObjectConnected"),
                     "motoralignment": Connection("MotorAlignment object",
@@ -110,7 +108,8 @@ class CollectBrick(Core.BaseBrick):
 
     signals = [Signal("displayResetChanged"),
                Signal("displayItemChanged"),
-               Signal("transmissionChanged")]
+               Signal("transmissionChanged"),
+               Signal("grayOut")]
     slots = []
 
     def __init__(self, *args, **kargs):
@@ -732,7 +731,8 @@ class CollectBrick(Core.BaseBrick):
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
                         logger.info("The data collection is done!")
-                        self.collectObj.blockGUI(False)
+                        self.grayOut(False)
+                        self.emit("grayOut", False)
                     else:
                         feedBackFlag = self._feedBackFlag
                         if self.robotCheckBox.isChecked():
@@ -740,7 +740,8 @@ class CollectBrick(Core.BaseBrick):
                             self._feedBackFlag = False
                             self.__isTesting = False
                             logger.info("The data collection is done!")
-                            self.collectObj.blockGUI(False)
+                            self.grayOut(False)
+                            self.emit("grayOut", False)
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
@@ -1218,8 +1219,21 @@ class CollectBrick(Core.BaseBrick):
         self.collectObj.setCheckBeam(pValue)
 
     def testPushButtonClicked(self):
-
-        self.collectObj.blockGUI(True)
+        # Check if pilatus is ready
+        if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
+            if self.contact:
+                logger.warning("Lost contact with Pilatus")
+            self.contact = False
+            return
+        else:
+            if not self.contact:
+                logger.warning("Found Pilatus again")
+                self.contact = True
+        if not self.energyControlObject.pilatusReady():
+            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later", Qt.QMessageBox.Ok)
+            return
+        self.grayOut(True)
+        self.emit("grayOut", True)
         # For test allow 30s
         self.SPECBusyTimer.start(30000)
 
@@ -1365,7 +1379,8 @@ class CollectBrick(Core.BaseBrick):
     def startCollectWithRobot(self):
         # starts a series of individual collections
         #  blocks widget or whatever during the time of the collection
-        self.collectObj.blockGUI(True)
+        self.grayOut(True)
+        self.emit("grayOut", True)
         self._abortFlag = False
         self.startCollection(mode = "with robot")
         self._collectRobotDialog.clearHistory()
@@ -1400,7 +1415,8 @@ class CollectBrick(Core.BaseBrick):
 
     def startCollectWithoutRobot(self):
         # starts a single collection 
-        self.collectObj.blockGUI(True)
+        self.grayOut(True)
+        self.emit("grayOut", True)
         self._abortFlag = False
 
         # always process
@@ -1449,7 +1465,8 @@ class CollectBrick(Core.BaseBrick):
         ##print ">>>>>>>>>>>>> in collectDone %s " % self.collectionStatus
         if self.collectionStatus != "done":
             self.setCollectionStatus("done")
-            self.collectObj.blockGUI(False)
+            self.grayOut(False)
+            self.emit("grayOut", False)
             if self.notifyCheckBox.isChecked():
                 #TODO: Can we "spawn this"  to avoid stopping updating the 
                 Qt.QMessageBox.information(self.brick_widget, "Info", "\n                       The data collection is done!                                       \n")
@@ -1629,12 +1646,8 @@ class CollectBrick(Core.BaseBrick):
 
         self._feedBackFlag = False
         self.__isTesting = False
-        try:
-            self.collectObj.blockGUI(False)
-        except Exception, e:
-            logger.error("Could not connect to COServer")
-            logger.exception(e)
-
+        self.grayOut(False)
+        self.emit("grayOut", False)
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
             logger.warning("The frame was not collected or didn't appear on time! (%d,%d)" % \

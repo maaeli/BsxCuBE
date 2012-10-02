@@ -13,30 +13,23 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     properties = {}
 
-    connections = {"energy": Connection("Energy object",
+    connections = { "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
                                             [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")],
                                             "connectedToEnergy"),
-                   "login": Connection("Login object",
+
+                    "login": Connection("Login object",
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
                                             "connectionToLogin"),
 
-                    "collect": Connection("Collect object",
-                                            [Signal("collectProcessingDone", "collectProcessingDone"),
-                                             Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone"),
-                                             Signal("clearCurve", "clearCurve"),
-                                             Signal("grayOut", "grayOut"),
-                                             Signal("transmissionChanged", "transmissionChanged")],
-                                            [Slot("testCollect"),
-                                             Slot("collect"),
-                                             Slot("collectAbort"),
-                                             Slot("setCheckBeam"),
-                                             Slot("triggerEDNA"),
-                                             Slot("blockGUI"),
-                                             Slot("blockEnergyAdjust")],
-                                            "collectObjectConnected")
+                   "display": Connection("Display object",
+                                    [Signal("displayResetChanged", "displayResetChanged"),
+                                    Signal("displayItemChanged", "displayItemChanged"),
+                                    Signal("transmissionChanged", "transmissionChanged"),
+                                    Signal("grayOut", "grayOut")],
+                                    []),
+
                    }
 
     signals = []
@@ -97,21 +90,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
 
-    # connected to Collect
-    def collectObjectConnected(self, pValue):
-        pass
-
-    def collectProcessingDone(self, filename):
-        pass
-
-    def collectProcessingLog(self, level, logmsg, notify):
-        pass
-
-    def collectDone(self):
-        pass
-
-    def clearCurve(self):
-        pass
+    # Connect to display
 
     def grayOut(self, grayout):
         if grayout is not None:
@@ -122,7 +101,13 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
                 self.newEnergyPushButton.setEnabled(True)
                 self.newWaveLengthPushButton.setEnabled(True)
 
-    def transmissionChanged(self, percentage):
+    def displayItemChanged(self, _):
+        pass
+
+    def displayResetChanged(self, _):
+        pass
+
+    def transmissionChanged(self, _):
         pass
 
     # Logged In : True or False 

@@ -50,21 +50,14 @@ class BsxShutterBrick(Core.BaseBrick):
                                           [ Signal("stateChanged", "shutter_state_changed") ],
                                           [ Slot("open"), Slot("close") ],
                                           "connectionStatusChanged"),
-                    "collect": Connection("Collect object",
-                                            [Signal("collectProcessingDone", "collectProcessingDone"),
-                                             Signal("collectProcessingLog", "collectProcessingLog"),
-                                             Signal("collectDone", "collectDone"),
-                                             Signal("clearCurve", "clearCurve"),
-                                             Signal("grayOut", "grayOut"),
-                                             Signal("transmissionChanged", "transmissionChanged")],
-                                            [Slot("testCollect"),
-                                             Slot("collect"),
-                                             Slot("collectAbort"),
-                                             Slot("setCheckBeam"),
-                                             Slot("triggerEDNA"),
-                                             Slot("blockGUI"),
-                                             Slot("blockEnergyAdjust")],
-                                            "collectObjectConnected"),
+
+                   "display": Connection("Display object",
+                                    [Signal("displayResetChanged", "displayResetChanged"),
+                                    Signal("displayItemChanged", "displayItemChanged"),
+                                    Signal("transmissionChanged", "transmissionChanged"),
+                                    Signal("grayOut", "grayOut")],
+                                    []),
+
                    "login": Connection("Login object",
                                         [Signal("loggedIn", "loggedIn")],
                                         [],
@@ -124,21 +117,7 @@ class BsxShutterBrick(Core.BaseBrick):
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
 
-    # connected to Collect
-    def collectObjectConnected(self, pValue):
-        pass
-
-    def collectProcessingDone(self, filename):
-        pass
-
-    def collectProcessingLog(self, level, logmsg, notify):
-        pass
-
-    def collectDone(self):
-        pass
-
-    def clearCurve(self):
-        pass
+    # Connect to display 
 
     def grayOut(self, grayout):
         if grayout is not None:
@@ -147,12 +126,17 @@ class BsxShutterBrick(Core.BaseBrick):
             else:
                 self.brick_widget.setEnabled(True)
 
-    def transmissionChanged(self, percentage):
+    def displayResetChanged(self, _):
+        pass
+
+    def displayItemChanged(self, _):
+        pass
+
+    def transmissionChanged(self, _):
         pass
 
     def set_icons(self, icons):
         pass
-
 
 
     def shutterNameStateChanged(self, pValue):

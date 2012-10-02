@@ -439,25 +439,15 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterMS"/>
     </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
     </connection>
   </connections>
 
@@ -468,25 +458,15 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterGuillotine"/>
     </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
     </connection>
   </connections>
 
@@ -497,25 +477,16 @@
       <slot name="close"/>
       <peer name="BsxCuBE/ShutterSH"/>
     </connection>
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
+      <peer name="CollectBrick1"/>
     </connection>
   </connections>
 
@@ -540,6 +511,8 @@
     <connection role="display">
       <signal name="displayResetChanged"/>
       <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
       <peer name="BrowseBrick1"/>
       <peer name="ReprocessBrick1"/>
       <peer name="CollectBrick1"/>
@@ -724,7 +697,6 @@
       <signal name="collectProcessingLog"/>
       <signal name="collectDone"/>
       <signal name="clearCurve"/>
-      <signal name="grayOut"/>
       <signal name="transmissionChanged"/>
       <signal name="machineCurrentChanged"/>
       <signal name="newSASUrl"/>
@@ -733,7 +705,6 @@
       <slot name="collectAbort"/>
       <slot name="setCheckBeam"/>
       <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
       <slot name="blockEnergyAdjust"/>
       <peer name="BsxCuBE/Collect"/>
     </connection>
@@ -763,22 +734,6 @@
   </connections>
 
   <connections id="BsxAttenuatorsBrick1">
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
@@ -787,6 +742,13 @@
       <signal name="attenuatorsStateChanged"/>
       <signal name="attenuatorsFactorChanged"/>
       <peer name="BsxCuBE/BsxAttenuators"/>
+    </connection>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
+      <peer name="CollectBrick1"/>
     </connection>
   </connections>
 
@@ -833,22 +795,6 @@
   </connections>
 
   <connections id="EnergyWaveLengthBrick1">
-    <connection role="collect">
-      <signal name="collectProcessingDone"/>
-      <signal name="collectProcessingLog"/>
-      <signal name="collectDone"/>
-      <signal name="clearCurve"/>
-      <signal name="grayOut"/>
-      <signal name="transmissionChanged"/>
-      <slot name="testCollect"/>
-      <slot name="collect"/>
-      <slot name="collectAbort"/>
-      <slot name="setCheckBeam"/>
-      <slot name="triggerEDNA"/>
-      <slot name="blockGUI"/>
-      <slot name="blockEnergyAdjust"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
     <connection role="energy">
       <signal name="energyChanged"/>
       <slot name="setEnergy"/>
@@ -861,6 +807,13 @@
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
+      <peer name="CollectBrick1"/>
     </connection>
   </connections>
 
