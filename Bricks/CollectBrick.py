@@ -1208,6 +1208,17 @@ class CollectBrick(Core.BaseBrick):
 
     def checkPilausReady(self):
         # Check if pilatus is ready
+        #TODO: DEBUG
+        if self.energyControlObject is None:
+            print ">>> No BsxCUBE contact with Pilatus"
+        else:
+            print ">> info on self.energyControlObject"
+            print dir(self.energyControlObject)
+            try:
+                testPilatus = self.energyControlObject.pilatusReady()
+            except:
+                raise
+            print ">>> Testing %s " % self.energyControlObject.pilatusReady()
         if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
             if self.contact:
                 logger.warning("Lost contact with Pilatus")
