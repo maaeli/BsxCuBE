@@ -349,8 +349,6 @@ class Collect(CObjectBase):
 
 
     def specCollectDone(self, returned_value):
-        #TODO: DEBUG
-        print "----returned_value is %s " % returned_value
         self.collecting = False
         # start EDNA to calculate average at the end
         if not self.isHPLC:
@@ -368,7 +366,7 @@ class Collect(CObjectBase):
     def processingDone(self, jobId):
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
-            if jobId not in ["No job sucself.__passwordceeded (yet)", "No job Failed (yet)"]:
+            if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
                 # and react only if jobs have been submitted (to avoid spurious events)
                 if self.jobSubmitted:
                     logger.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
@@ -392,7 +390,7 @@ class Collect(CObjectBase):
                     message = "Unable to parse string from Tango/EDNA 2"
                     logger.error(message)
                     self.showMessage(2, message)
-                    # no neeed to continue 
+                    # no need to continue 
                     return
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value

@@ -433,7 +433,7 @@ class CollectBrick(Core.BaseBrick):
                             #abortbutton[abortactive="false"] {background-color: #fff;color: black}\
                             #collect[status="ready"]   {background-color: #0f0;color: black;font-weight: bold; alignment: center}\
                             #collect[status="done"]    {background-color: #0f0;color: black;font-weight: bold; alignment: center}\
-                            #collect[status="busy"]    {background-color: yellow;color: black;font-weight: bold;alignment: center}\
+                            #collect[status="busy"]    {background-coldisplayItemChangedor: yellow;color: black;font-weight: bold;alignment: center}\
                             #collect[status="aborting"]  {background-color: magenta;color: black;font-weight: bold;alignment: center}\
                             #collect[status="running"] {background-color: yellow;color: black;font-weight: bold;alignment: center}')
 
@@ -593,7 +593,7 @@ class CollectBrick(Core.BaseBrick):
                 if os.path.exists(dat_filename):
                     filesize = os.path.getsize(dat_filename)
                     print ">>> File info 0 %r  %s " % (filesize, type(filesize))
-                    self.emitDisplayItemChanged(dat_filename)
+                    self.display1D(dat_filename)
                 else:
                     logger.warning("processing done but no file, will not display file %s", dat_filename)
             self.last_dat = dat_filename
@@ -608,7 +608,7 @@ class CollectBrick(Core.BaseBrick):
                     if os.path.exists(dat_filename):
                         filesize = os.path.getsize(dat_filename)
                         print ">>> File info 1 %r  %s " % (filesize, type(filesize))
-                        self.emitDisplayItemChanged(dat_filename)
+                        self.display1D(dat_filename)
                     else:
                         logger.warning("processing done but no file, will not display file %s", dat_filename)
                 self.last_dat = dat_filename
@@ -616,7 +616,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingLog(self, level, logmsg, notify):
         #TODO : DEBUG
-        ##print ">>>>>>> CollectProcessingLog logmsg %r " % logmsg
+        print ">>>>>>> CollectProcessingLog logmsg %r and level %d " % (logmsg, level)
         # Level 0 = info, Level 1 = Warning, Level 2 = Error 
         if level == 0:
             logmethod = logger.info
@@ -660,65 +660,54 @@ class CollectBrick(Core.BaseBrick):
 
                 self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
 
-                if not self.__isTesting:
-                    #TODO: DEBUG: get file size
+                # Waiting for the file to appear
+                t0 = time.time()
+                fileFound = False
+                while time.time() - t0 < 7:
+                    #TODO: DEBUG - Before we check existence/size, do a small sleep
+                    time.sleep(0.1)
                     if os.path.exists(filename0):
                         filesize = os.path.getsize(filename0)
                         if filesize > 4000000:
+                            time.sleep(0.1)
+                            # we got file
+                            fileFound = True
                             print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                            print "emitDisplayItemChanged: %r" % filename0
-                            self.emitDisplayItemChanged(filename0)
-                        else:
-                            #TODO: DEBUG
-                            print ">>> Not enough data on file 3 %s , only %s. We try again" % (filename0, filesize)
-                            #TODO: DEBUG - Take away when 1G is in place (29/7 2012 SO)
-                            time.sleep(0.3)
-                            filesize = os.path.getsize(filename0)
-                            if filesize > 4000000:
-                                print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                                print "emitDisplayItemChanged: %r" % filename0
-                                self.emitDisplayItemChanged(filename0)
-                            else:
-                                #TODO: DEBUG
-                                print ">>> Not enough data even after 0.3s wait on file 3 %s , only %s. We stop" % (filename0, filesize)
+                            print "display1D: %r" % filename0
+                            self.emit("displayItemChanged", filename0)
+                            break
+                    # before getting back, let us treat Qt events
+                    QtGui.qApp.processEvents()
+                if not fileFound:
+                    timestr = str(time.time() - t0)
+                    print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
 
+                if self._currentFrame == self._frameNumber:
+                    splitList = os.path.basename(filename0).split("_")
+                    # Take away last _ piece
+                    filename1 = "_".join(splitList[:-1])
+                    ave_filename = os.path.join(directory, filename1 + "_ave.dat")
+                    #DEBUG: get file size
+                    if os.path.exists(ave_filename):
+                        filesize = os.path.getsize(ave_filename)
+                        #TODO: DEBUG
+                        print ">>> File info 4 %r  %s " % (filesize, type(filesize))
+                        print "display1D: %r" % ave_filename
+                        self.display1D(ave_filename)
                     else:
-                        print ">>> Not seen file %s at all" % filename0
-
-                    if self._currentFrame == self._frameNumber:
-                        splitList = os.path.basename(filename0).split("_")
-                        # Take away last _ piece
-                        filename1 = "_".join(splitList[:-1])
-                        ave_filename = directory + filename1 + "_ave.dat"
-                        #DEBUG: get file size
-                        if os.path.exists(ave_filename):
-                            filesize = os.path.getsize(ave_filename)
-                            #TODO: DEBUG
-                            print ">>> File info 4 %r  %s " % (filesize, type(filesize))
-                            print "emitDisplayItemChanged: %r" % ave_filename
-                            self.emitDisplayItemChanged(ave_filename)
-                        else:
-                            #TODO: DEBUG
-                            print ">>> No file 4 %s seen. We do not display it " % ave_filename
-
-
+                        #TODO: DEBUG
+                        print ">>> No file 4 %s seen. We do not display it " % ave_filename
             else:
+
                 if os.path.exists(filename0):
                     if not filename0.endswith(".dat"):
-                        #filename1 = directory + os.path.basename(filename0).split(".")[0] + ".dat"
+                        self.emit("displayItemChanged", filename0)
                         fileBaseName = os.path.splitext(os.path.basename(filename0))[0]
                         filename1 = os.path.join(directory, fileBaseName + ".dat")
                         if os.path.exists(filename1):
-                            filename0 += "," + filename1
-                            #DEBUG: get file size
-                            if os.path.exists(filename0):
-                                filesize = os.path.getsize(filename0)
-                                print ">>> File info 2 %r  %s " % (filesize, type(filesize))
-                                print "emitDisplayItemChanged: %r" % filename0
-                                self.emitDisplayItemChanged(filename0)
-                            else:
-                                #TODO: DEBUG
-                                print ">>> No file 2 %s seen. We do not display it " % filename0
+                            print "display1D: %r" % filename1
+                            self.display1D(filename1)
+
 
 
 
@@ -779,8 +768,7 @@ class CollectBrick(Core.BaseBrick):
     def executeTestCollect(self):
         self.testPushButtonClicked()
 
-    def emitDisplayItemChanged(self, pValue):
-        self.emit("displayItemChanged", str(pValue))
+    def display1D(self, pValue):
 
         if self.imageProxy is None:
             return
@@ -788,7 +776,7 @@ class CollectBrick(Core.BaseBrick):
             self.imageProxy.load_files(str(pValue), oneway = True)
         except Exception, e:
             logger.error("Could not read file " + str(pValue))
-            logger.exception(e)
+            logger.error("Full Exception: " + str(e))
 
     def y_curves_data(self, pPeer):
         pass
@@ -1150,7 +1138,7 @@ class CollectBrick(Core.BaseBrick):
 
 
     def maskDisplayPushButtonClicked(self):
-        self.emitDisplayItemChanged(str(self.maskLineEdit.text()))
+        self.emit("displayItemChanged", str(self.maskLineEdit.text()))
 
     def radiationCheckBoxToggled(self, pValue):
         if pValue:
@@ -1514,7 +1502,7 @@ class CollectBrick(Core.BaseBrick):
         try:
             self.imageProxy.erase_curves()
         except Exception, e:
-            logger.exception(e)
+            logger.error("Full Exception: " + str(e))
 
     def messageDialog(self, pType, pMessage):
         if pType == 0:

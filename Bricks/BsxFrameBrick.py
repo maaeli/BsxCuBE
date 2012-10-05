@@ -71,6 +71,9 @@ class BsxFrameBrick(Core.BaseBrick):
         self.brick_widget.setEnabled(pValue)
 
     def displayItemChanged(self, files_string):
+        #import pdb;pdb.set_trace()
+        #TODO: DEBUG 
+        print ">> file_string %r " % files_string
         filesList = files_string.split(",")
         for f in filesList:
             if f.endswith('.edf'):
