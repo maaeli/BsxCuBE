@@ -6,14 +6,17 @@ from ISPyBPlateObject import ISPyBPlateObject
 import logging
 import os.path, time
 import pprint
+from BiosaxsClient import BiosaxsClient
 
-logger = logging.getLogger("CollectRobotDialog")
+
+logger = logging.getLogger("ISPyBCollectRobotDialog")
 
 rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 
-class CollectRobotDialog(Qt.QDialog):
+class ISPyBCollectRobotDialog(Qt.QDialog):
     def __init__(self, parent):
         self.__parent = parent     # Parent is CollectBrick 
+
         self.__copyLine = []
         self.__history = []
 
@@ -78,48 +81,66 @@ class CollectRobotDialog(Qt.QDialog):
 
         self.setWindowTitle("Collect using robot (configuration)")
         self.setLayout(Qt.QVBoxLayout())
-        self.groupBox = Qt.QGroupBox("Parameters", self)
+        self.groupBox = Qt.QGroupBox("ISPyB Parameters", self)
         self.groupBox.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Expanding)
         self.vBoxLayout = Qt.QVBoxLayout(self.groupBox)
         self.layout().addWidget(self.groupBox)
 
         self.hBoxLayout0 = Qt.QHBoxLayout()
 
-        self.fileLabel = Qt.QLabel("File", self)
-        self.fileLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
-        self.hBoxLayout0.addWidget(self.fileLabel)
-        self.fileLineEdit = Qt.QLineEdit(self)
-        self.fileLineEdit.setMaxLength(100)
-        self.fileLineEdit.setFixedWidth(400)
-        self.fileLineEdit.setEnabled(False)
+        #self.fileLabel = Qt.QLabel("File", self)
+        #self.fileLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
+        #self.hBoxLayout0.addWidget(self.fileLabel)
+        #self.fileLineEdit = Qt.QLineEdit(self)
+        #self.fileLineEdit.setMaxLength(100)
+        #self.fileLineEdit.setFixedWidth(400)
+        #self.fileLineEdit.setEnabled(False)
 
-        self.hBoxLayout0.setAlignment(QtCore.Qt.AlignLeft)
-        self.hBoxLayout0.addWidget(self.fileLineEdit)
+        #self.hBoxLayout0.setAlignment(QtCore.Qt.AlignLeft)
+        #self.hBoxLayout0.addWidget(self.fileLineEdit)
+
+        #Adding ISPyB Experiment Selector
+        # Load experiment button
+        self.refresh_data_button = Qt.QPushButton("Refresh", self)
+        self.refresh_data_button.setFixedWidth(100)
+        self.refresh_data_button.setGeometry(QtCore.QRect(280, 30, 50, 23))
+        self.refresh_data_button.setObjectName("refresh_data_button")
+        self.refresh_data_button.clicked.connect(self.onRefreshButtonClickedEvent)
+
+        # Experiment name comboBox
+        self.experimentsComboBox = QtGui.QComboBox(self)
+        self.experimentsComboBox.setGeometry(QtCore.QRect(10, 30, 300, 22))
+        self.experimentsComboBox.setObjectName("comboBox")
+        self.experimentsComboBox.setFixedWidth(500)
+        QtCore.QObject.connect(self.experimentsComboBox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onExperimentChosenEvent)
+
+        self.hBoxLayout0.addWidget(self.experimentsComboBox)
+        self.hBoxLayout0.addWidget(self.refresh_data_button)
 
         #self.filePushButton = Qt.QPushButton("...", self)        
         #self.filePushButton.setFixedWidth(25)
         #Qt.QObject.connect(self.filePushButton, Qt.SIGNAL("clicked()"), self.filePushButtonClicked)
         #self.hBoxLayout0.addWidget(self.filePushButton)
 
-        self.loadPushButton = Qt.QPushButton("Load", self)
-        self.loadPushButton.setFixedWidth(70)
-        Qt.QObject.connect(self.loadPushButton, Qt.SIGNAL("clicked()"), self.loadPushButtonClicked)
-        self.hBoxLayout0.addWidget(self.loadPushButton)
+        #self.loadPushButton = Qt.QPushButton("Load", self)
+        #self.loadPushButton.setFixedWidth(70)
+        #Qt.QObject.connect(self.loadPushButton, Qt.SIGNAL("clicked()"), self.loadPushButtonClicked)
+        #self.hBoxLayout0.addWidget(self.loadPushButton)
 
-        self.savePushButton = Qt.QPushButton("Save", self)
-        self.savePushButton.setFixedWidth(70)
-        Qt.QObject.connect(self.savePushButton, Qt.SIGNAL("clicked()"), self.savePushButtonClicked)
-        self.hBoxLayout0.addWidget(self.savePushButton)
+        #self.savePushButton = Qt.QPushButton("Save", self)
+        #self.savePushButton.setFixedWidth(70)
+        #Qt.QObject.connect(self.savePushButton, Qt.SIGNAL("clicked()"), self.savePushButtonClicked)
+        #self.hBoxLayout0.addWidget(self.savePushButton)
 
 
-        self.saveAsPushButton = Qt.QPushButton("Save as", self)
-        self.saveAsPushButton.setFixedWidth(70)
-        Qt.QObject.connect(self.saveAsPushButton, Qt.SIGNAL("clicked()"), self.saveAsPushButtonClicked)
-        self.hBoxLayout0.addWidget(self.saveAsPushButton)
+        #self.saveAsPushButton = Qt.QPushButton("Save as", self)
+        #self.saveAsPushButton.setFixedWidth(70)
+        #Qt.QObject.connect(self.saveAsPushButton, Qt.SIGNAL("clicked()"), self.saveAsPushButtonClicked)
+        #self.hBoxLayout0.addWidget(self.saveAsPushButton)
 
-        self.loadFromISPyBButton = Qt.QPushButton("Load from ISPyB", self)
-        Qt.QObject.connect(self.loadFromISPyBButton, Qt.SIGNAL("clicked()"), self.loadFromISPyBButtonClicked)
-        self.hBoxLayout0.addWidget(self.loadFromISPyBButton)
+        #self.loadFromISPyBButton = Qt.QPushButton("Load from ISPyB", self)
+        #Qt.QObject.connect(self.loadFromISPyBButton, Qt.SIGNAL("clicked()"), self.loadFromISPyBButtonClicked)
+        #self.hBoxLayout0.addWidget(self.loadFromISPyBButton)
 
         self.vBoxLayout.addLayout(self.hBoxLayout0)
 
@@ -230,28 +251,28 @@ class CollectRobotDialog(Qt.QDialog):
         # BUTTONS at END
         self.hBoxLayout8 = Qt.QHBoxLayout()
 
-        self.hBoxLayout8 = Qt.QHBoxLayout()
-        self.addPushButton = Qt.QPushButton("Add Sample", self)
-        Qt.QObject.connect(self.addPushButton, Qt.SIGNAL("clicked()"), self.addPushButtonClicked)
-        self.hBoxLayout8.addWidget(self.addPushButton)
+        #self.hBoxLayout8 = Qt.QHBoxLayout()
+        #self.addPushButton = Qt.QPushButton("Add Sample", self)
+        #Qt.QObject.connect(self.addPushButton, Qt.SIGNAL("clicked()"), self.addPushButtonClicked)
+        #self.hBoxLayout8.addWidget(self.addPushButton)
 
-        self.copyPushButton = Qt.QPushButton("Copy Sample", self)
-        Qt.QObject.connect(self.copyPushButton, Qt.SIGNAL("clicked()"), self.copyPushButtonClicked)
-        self.hBoxLayout8.addWidget(self.copyPushButton)
-        self.copyPushButton.setEnabled(0)
+        #self.copyPushButton = Qt.QPushButton("Copy Sample", self)
+        #Qt.QObject.connect(self.copyPushButton, Qt.SIGNAL("clicked()"), self.copyPushButtonClicked)
+        #self.hBoxLayout8.addWidget(self.copyPushButton)
+        #self.copyPushButton.setEnabled(0)
 
-        self.pastePushButton = Qt.QPushButton("Paste Sample", self)
-        Qt.QObject.connect(self.pastePushButton, Qt.SIGNAL("clicked()"), self.pastePushButtonClicked)
-        self.hBoxLayout8.addWidget(self.pastePushButton)
-        self.pastePushButton.setEnabled(0)
+        #self.pastePushButton = Qt.QPushButton("Paste Sample", self)
+        #Qt.QObject.connect(self.pastePushButton, Qt.SIGNAL("clicked()"), self.pastePushButtonClicked)
+        #self.hBoxLayout8.addWidget(self.pastePushButton)
+        #self.pastePushButton.setEnabled(0)
 
         self.layout().addLayout(self.hBoxLayout8)
 
         self.hBoxLayout9 = Qt.QHBoxLayout()
-        self.clearPushButton = Qt.QPushButton("Clear Configuration", self)
-        self.clearPushButton.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Fixed)
-        Qt.QObject.connect(self.clearPushButton, Qt.SIGNAL("clicked()"), self.clearConfigurationPushButtonClicked)
-        self.hBoxLayout9.addWidget(self.clearPushButton)
+        #self.clearPushButton = Qt.QPushButton("Clear Configuration", self)
+        #self.clearPushButton.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Fixed)
+        #Qt.QObject.connect(self.clearPushButton, Qt.SIGNAL("clicked()"), self.clearConfigurationPushButtonClicked)
+        #self.hBoxLayout9.addWidget(self.clearPushButton)
 
         self.closePushButton = Qt.QPushButton("Close", self)
         self.closePushButton.setSizePolicy(Qt.QSizePolicy.Expanding, Qt.QSizePolicy.Fixed)
@@ -520,32 +541,30 @@ class CollectRobotDialog(Qt.QDialog):
     #------------------------------------------------------------------------
     #  loadPushButton -  Load file with collection parameters and history
     #------------------------------------------------------------------------
-    def loadPushButtonClicked(self):
-        dirname = ""
-        if self.filename != "":
-            dirname = os.path.split(self.filename)[0]
-        else:
-            try:
-                dirname = os.path.split(self.__parent.collectpars.directory)
-            except Exception, e:
-                print "Ignored Exception 5: " + str(e)
+    #def loadPushButtonClicked(self):
+        #dirname = ""
+        #if self.filename != "":
+            #dirname = os.path.split(self.filename)[0]
+        #else:
+            #try:
+                #dirname = os.path.split(self.__parent.collectpars.directory)
+            #except Exception, e:
+                #print "Ignored Exception 5: " + str(e)
 
-        filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
+        #filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
 
-        if not filename:
-            return
+        #if not filename:
+            #return
 
-        self.fileLineEdit.setText(filename)
-        filename = str(filename)
+        #self.fileLineEdit.setText(filename)
+        #filename = str(filename)
 
-        self.loadFile(filename)
+        #self.loadFile(filename)
 
     def loadFile(self, filename, fromIspyB = False):
         try:
             myPars = CollectPars(filename)
-
             self.clearConfiguration()
-
             #  Clear first if load was succesful
             # 
             for sampleID in self.sampleIDs:
@@ -590,20 +609,20 @@ class CollectRobotDialog(Qt.QDialog):
             else:
                 Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
-    def saveAsPushButtonClicked(self):
-        filename = Qt.QFileDialog.getSaveFileName(self, "Choose a file to save", self.filename, "XML File (*.xml)")
-        if not filename:
-            return
+    #def saveAsPushButtonClicked(self):
+        #filename = Qt.QFileDialog.getSaveFileName(self, "Choose a file to save", self.filename, "XML File (*.xml)")
+        #if not filename:
+            #return
 
-        filename = str(filename)
+        #filename = str(filename)
 
-        if not str(filename).lower().endswith(".xml"):
-            filename += ".xml"
-            self.fileLineEdit.setText(filename)
+        #if not str(filename).lower().endswith(".xml"):
+            #filename += ".xml"
+            #self.fileLineEdit.setText(filename)
 
-        self.filename = filename
-        self.fileLineEdit.setText(filename)
-        self.saveFile(filename)
+        #self.filename = filename
+        #self.fileLineEdit.setText(filename)
+        #self.saveFile(filename)
 
 
     def loadFromISPyBButtonClicked(self):
@@ -627,11 +646,11 @@ class CollectRobotDialog(Qt.QDialog):
                 self.filename = ""
 
 
-    def savePushButtonClicked(self):
-        if self.filename == "" or not os.path.isfile(self.filename):
-            self.saveAsPushButtonClicked()
-        else:
-            self.saveFile(self.filename , askrewrite = False)
+    #def savePushButtonClicked(self, filename = None):
+        #if self.filename == "" or not os.path.isfile(self.filename):
+            #self.saveAsPushButtonClicked()
+        #else:
+            #self.saveFile(self.filename , askrewrite = False)
 
     def saveFile(self, filename, askrewrite = True):
 
@@ -674,7 +693,7 @@ class CollectRobotDialog(Qt.QDialog):
     @Qt.pyqtSlot(int)
     def bufferComboBoxChanged(self, sampleID):
         if self.CBblock:
-              return
+            return
 
         try:
             index = self.sampleIDs.index(sampleID)
@@ -692,7 +711,7 @@ class CollectRobotDialog(Qt.QDialog):
     @Qt.pyqtSlot(int)
     def typeComboBoxChanged(self, sampleID):
         if self.CBblock:
-              return
+            return
 
         try:
             index = self.sampleIDs.index(sampleID)
@@ -708,7 +727,7 @@ class CollectRobotDialog(Qt.QDialog):
     @Qt.pyqtSlot(int)
     def plateComboBoxChanged(self, sampleID):
         if self.CBblock:
-              return
+            return
 
         plateInfos = self.__parent.plateInfos
 
@@ -780,7 +799,6 @@ class CollectRobotDialog(Qt.QDialog):
         return sampleRow
 
     def addSampleRow(self, sample = None, index = -1):
-
         if sample is None:
             samp = Sample()
             if self.tableWidget.rowCount() == 0:
@@ -793,10 +811,11 @@ class CollectRobotDialog(Qt.QDialog):
         if index == -1:
             index = self.tableWidget.rowCount()
 
+
         self.createSampleRow(index)
         self.setSampleRow(index, samp)
 
-        self.copyPushButton.setEnabled(1)
+        #self.copyPushButton.setEnabled(1)
         self.tableWidget.setRangeSelected(Qt.QTableWidgetSelectionRange(0, 0, index - 1, len(self.column_headers) - 1), 0)
         self.tableWidget.setRangeSelected(Qt.QTableWidgetSelectionRange(index, 0, index, len(self.column_headers) - 1), 1)
         self.tableWidget.setCurrentCell(index, 0)
@@ -813,8 +832,7 @@ class CollectRobotDialog(Qt.QDialog):
     def setSampleRow(self, index, sample):
 
         tableWidget = self.tableWidget
-
-        plateInfos = self.__parent.plateInfos
+        #plateInfos = self.__parent.plateInfos
 
         # enable
         tableWidget.cellWidget(index, self.ENABLE_COLUMN).setChecked(sample.enable)
@@ -822,7 +840,6 @@ class CollectRobotDialog(Qt.QDialog):
         # type
         typeComboBox = tableWidget.cellWidget(index, self.SAMPLETYPE_COLUMN)
         self.setComboBox (typeComboBox, sample.type)
-
         # plate, row, well
         plateComboBox = tableWidget.cellWidget(index, self.PLATE_COLUMN)
         rowComboBox = tableWidget.cellWidget(index, self.ROW_COLUMN)
@@ -832,11 +849,11 @@ class CollectRobotDialog(Qt.QDialog):
         row = (sample.row   is not None) and (int(sample.row) - 1)   or 0
         well = (sample.well  is not None) and (int(sample.well) - 1)  or 0
 
-        if plate >= len(plateInfos) or plate < 0: plate = 0
+        #if plate >= len(plateInfos) or plate < 0: plate = 0
 
-        nplates = len(plateInfos)
-        nrows = int(plateInfos[plate][0])
-        nwells = int(plateInfos[plate][1])
+        nplates = 4#len(plateInfos)
+        nrows = 4#int(plateInfos[plate][0])
+        nwells = 12#int(plateInfos[plate][1])
 
         if row >= nrows  or row < 0:  row = 0
         if well >= nwells or well < 0: well = 0
@@ -863,7 +880,6 @@ class CollectRobotDialog(Qt.QDialog):
         # concentration
         concentrationDoubleSpinBox = tableWidget.cellWidget(index, self.CONCENTRATION_COLUMN)
         concentrationDoubleSpinBox.setValue(sample.concentration)
-
         # comments
         commentsLineEdit = tableWidget.cellWidget(index, self.COMMENTS_COLUMN)
         commentsLineEdit.setText(sample.comments)
@@ -871,14 +887,12 @@ class CollectRobotDialog(Qt.QDialog):
         # code 
         codeLineEdit = tableWidget.cellWidget(index, self.CODE_COLUMN)
         codeLineEdit.setText(sample.code)
-
         # viscosity
         viscosityComboBox = tableWidget.cellWidget(index, self.VISCOSITY_COLUMN)
         self.setComboBox(viscosityComboBox, sample.viscosity)
 
         # buffername
-        bufferComboBox = tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN)
-
+        #bufferComboBox = tableWidget.cellWidget(index, self.BUFFERNAME_COLUMN)
         if sample.type == "Buffer":
             if sample.buffername not in self.bufferNames:
                 self.bufferNames.append(sample.buffername)
@@ -891,7 +905,6 @@ class CollectRobotDialog(Qt.QDialog):
         # volume
         volumeDoubleSpinBox = tableWidget.cellWidget(index, self.VOLUME_COLUMN)
         volumeDoubleSpinBox.setValue(sample.volume)
-
         # flow
         flowCheckBox = tableWidget.cellWidget(index, self.FLOW_COLUMN)
         flowCheckBox.setChecked(sample.flow)
@@ -899,7 +912,6 @@ class CollectRobotDialog(Qt.QDialog):
         # recuperate
         recuperateCheckBox = tableWidget.cellWidget(index, self.RECUPERATE_COLUMN)
         recuperateCheckBox.setChecked(sample.recuperate)
-
         # waittime
         if sample.type != 'Buffer':
             waittimeSpinBox = tableWidget.cellWidget(index, self.WAITTIME_COLUMN)
@@ -908,7 +920,6 @@ class CollectRobotDialog(Qt.QDialog):
         if sample.type != 'Buffer':
             temperatureSEUDoubleSpinBox = tableWidget.cellWidget(index, self.TEMPERATURE_COLUMN)
             temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
-
 
         # final arrangementes
         self.formatLine(index, sample)
@@ -1063,8 +1074,8 @@ class CollectRobotDialog(Qt.QDialog):
         self.extraFlowTimeSpinBox.setValue(0)
         self.initialCleaningCheckBox.setChecked(1)
         self.bufferModeComboBox.setCurrentIndex(0)
-        self.copyPushButton.setEnabled(0)
-        self.pastePushButton.setEnabled(0)
+        #self.copyPushButton.setEnabled(0)
+        #self.pastePushButton.setEnabled(0)
 
         self.historyText.clear()
 
@@ -1079,16 +1090,46 @@ class CollectRobotDialog(Qt.QDialog):
     def closePushButtonClicked(self):
         self.accept()
 
+    #ISPyB Methods
+    def onRefreshButtonClickedEvent(self):
+        while (self.experimentsComboBox.count() != 0):
+            self.experimentsComboBox.removeItem(0)
+
+        self.client = BiosaxsClient('mx1438', 'Rfo4-73')
+        self.experiments = self.client.getExperimentsByProposalId(3124)
+
+        for experiment in self.experiments:
+            self.experimentsComboBox.addItem(experiment.experiment.name, experiment.experiment.experimentId)
+
+    def onExperimentChosenEvent(self):
+        plates = []
+        xmlfile = None
+        currentIndex = self.experimentsComboBox.currentIndex()
+        self.sampleIDs = []
+        self.sampleIDCount = 0
+        for  plate in self.experiments[currentIndex].getPlates():
+            plates.append(plate.samplePlateId)
+            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
+            if response != None:
+                xmlfile = cStringIO.StringIO(response)
+            try:
+                print "Trying to load file"
+                self.loadFile(xmlfile, fromIspyB = True)
+            finally:
+                self.filename = ""
+
 if __name__ == '__main__':
   app = QtGui.QApplication([])
 
   class NullObj:
     def __getattr__(self, attr):
       return NullObj()
-    #removed for eclipse warning removal
-    #parent = NullObj()
-    #d = CollectRobotDialog(parent)
 
-    #d.show()
+  #removed for eclipse warning removal
+  #parent = NullObj()
 
-    #app.exec_()
+#    d = ISPyBCollectRobotDialog(parent)
+#    
+#    d.show()
+#    
+#    app.exec_()

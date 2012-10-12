@@ -38,8 +38,8 @@ class BiosaxsClient:
             experiments.append(Experiment(experiment))
         return experiments
 
-    def saveFrameSet(self, param1, param2, param3, param4, param5, param6, param7, param8, param9):
-        self.client.service.saveFrameSet(self.experimentId, param1, param2, param3, param4, param5, param6, param7, param8, param9)
+    def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, currentMachine):
+        self.client.service.saveFrameSet(self.experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, currentMachine)
 
 
 class Experiment:

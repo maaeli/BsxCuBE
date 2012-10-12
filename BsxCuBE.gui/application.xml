@@ -660,10 +660,9 @@
       <slot name="energyAdjustPilatus"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
-    <connection role="image_proxy">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-      <peer name="BsxCuBE/image_proxy"/>
+    <connection role="BiosaxsClient">
+      <slot name="getRobotXML"/>
+      <peer name="BsxCuBE/BiosaxsClient"/>
     </connection>
     <connection role="WebSAS">
       <slot name="setURL"/>
@@ -724,6 +723,11 @@
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="image_proxy">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+      <peer name="BsxCuBE/image_proxy"/>
     </connection>
   </connections>
 

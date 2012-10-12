@@ -1,9 +1,9 @@
-import os, logging, pprint, time, re
+import os, logging, time, re
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
 from CollectRobotDialog  import CollectRobotDialog
-#from CollectRobotObject  import CollectRobotObject
+from ISPyBCollectRobotDialog import ISPyBCollectRobotDialog
 
 from PyQt4               import QtCore, QtGui, Qt
 from LeadingZeroSpinBox  import LeadingZeroSpinBox
@@ -99,6 +99,12 @@ class CollectBrick(Core.BaseBrick):
                                             [Signal("loggedIn", "loggedIn")],
                                             [],
                                             "connectedToLogin"),
+
+                    "BiosaxsClient": Connection("BiosaxsClient object",
+                                            [],
+                                            [Slot("getRobotXML")],
+                                            "connectedToBiosaxsClient"),
+
                     "WebSAS": Connection("Web SAS Browser object",
                                             [],
                                             [Slot("setURL")],
@@ -134,7 +140,8 @@ class CollectBrick(Core.BaseBrick):
         self._currentFrame = 0
         self._currentCurve = 0
         self._waveLengthStr = "0.0"
-        self._collectRobotDialog = CollectRobotDialog(self)
+        self._collectRobotDialog = None
+        self._ispybCollect = False
         self.__lastFrame = None
         self.__currentConcentration = None
         self.__isTesting = False
@@ -144,6 +151,7 @@ class CollectBrick(Core.BaseBrick):
         self.contact = False
         self.energyControlObject = None
         self.loginObject = None
+        self.biosaxsClientObject = None
         self.__username = None
         self.__password = None
         self.collectObj = None
@@ -367,13 +375,12 @@ class CollectBrick(Core.BaseBrick):
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
-        self.pilatusCheckBox = Qt.QCheckBox("Energy adjust pilatus", self.brick_widget)
-        Qt.QObject.connect(self.pilatusCheckBox, Qt.SIGNAL("toggled(bool)"), self.pilatusCheckBoxToggled)
-        self.pilatusCheckBox.setChecked(True)
-        self.hBoxLayout16.addWidget(self.pilatusCheckBox)
         self.robotCheckBox = Qt.QCheckBox("Collect using robot", self.brick_widget)
         Qt.QObject.connect(self.robotCheckBox, Qt.SIGNAL("toggled(bool)"), self.robotCheckBoxToggled)
         self.hBoxLayout16.addWidget(self.robotCheckBox)
+        self.ispybRobotCheckBox = Qt.QCheckBox("Collect with ISPyB", self.brick_widget)
+        Qt.QObject.connect(self.ispybRobotCheckBox, Qt.SIGNAL("toggled(bool)"), self.ispybRobotCheckBoxToggled)
+        self.hBoxLayout16.addWidget(self.ispybRobotCheckBox)
         self.hplcCheckBox = Qt.QCheckBox("Collect using HPLC", self.brick_widget)
         Qt.QObject.connect(self.hplcCheckBox, Qt.SIGNAL("toggled(bool)"), self.CheckBoxToggledHPLC)
         self.hBoxLayout16.addWidget(self.hplcCheckBox)
@@ -387,12 +394,10 @@ class CollectBrick(Core.BaseBrick):
         self.checkBeamBox.setChecked(True)
         Qt.QObject.connect(self.checkBeamBox, Qt.SIGNAL("toggled(bool)"), self.checkBeamBoxToggled)
         self.hBoxLayout17.addWidget(self.checkBeamBox)
-        self.dummyLabel = Qt.QLabel(" ")
-#        
-#                self.collectStatusLabel = Qt.QLabel("Collection status:")
-#        self.collectStatusLabel.setAlignment(QtCore.Qt.AlignRight)
-#        self.collectStatus = Qt.QLabel("")
-        self.hBoxLayout17.addWidget(self.dummyLabel)
+        self.pilatusCheckBox = Qt.QCheckBox("Energy adjust pilatus", self.brick_widget)
+        Qt.QObject.connect(self.pilatusCheckBox, Qt.SIGNAL("toggled(bool)"), self.pilatusCheckBoxToggled)
+        self.pilatusCheckBox.setChecked(True)
+        self.hBoxLayout17.addWidget(self.pilatusCheckBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout17)
 
         self.hBoxLayout18 = Qt.QHBoxLayout()
@@ -466,6 +471,11 @@ class CollectBrick(Core.BaseBrick):
             self.loginObject = pPeer
             self.brick_widget.setEnabled(False)
 
+    # When connected to the BiosaxsClient
+    def connectedToBiosaxsClient(self, pPeer):
+        if pPeer is not None:
+            self.biosaxsClientObject = pPeer
+
     # When connected SAS webdisplay
     def connectedToSAS(self, pPeer):
         if pPeer is not None:
@@ -483,9 +493,13 @@ class CollectBrick(Core.BaseBrick):
 #                        (sampleCode, exposureTemperature, storageTemperature, timePerFrame, \
 #                           start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, \
 #                           currentMachine) = self.collectObj.getIspyByParams(self)
+                #TODO: DEBUG
+                print "Now we are logged in as %s woith pwd %s " % (self.__username, self.__password)
+
             else:
                 self.__username = None
                 self.__password = None
+
         self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
@@ -653,12 +667,12 @@ class CollectBrick(Core.BaseBrick):
                 self.collectObj.triggerEDNA(filename0, oneway = True)
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % (filename0, float(self._diodeCurrent), float(self._machineCurrent))
                 logger.info(message)
-                if self.robotCheckBox.isChecked():
+                if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory(0, message)
 
                 self._currentFrame += 1
 
-                self.setCollectionStatus(status = "running", progress = [ self._currentFrame, self._frameNumber ])
+                self.setCollectionStatus("running")
 
                 # Waiting for the file to appear
                 t0 = time.time()
@@ -753,9 +767,9 @@ class CollectBrick(Core.BaseBrick):
     # When a macro in spec changes the value of SPEC_STATUS variable to busy
     def specStatusChanged(self, pValue):
         if pValue == "busy":
-            self.setCollectionStatus("busy", progress = None)
+            self.setCollectionStatus("busy")
         else:
-            self.setCollectionStatus("ready", progress = None)
+            self.setCollectionStatus("ready")
 
     def expertModeOnlyChanged(self, pValue):
         self.__expertModeOnly = pValue
@@ -930,6 +944,7 @@ class CollectBrick(Core.BaseBrick):
             bufferList = []
             sampleList = []
             robotpars.update({ "bufferList": bufferList, "sampleList": sampleList })
+
             for i in range(0, self._collectRobotDialog.tableWidget.rowCount()):
                 sample = self._collectRobotDialog.getSampleRow(i)
 
@@ -1172,19 +1187,54 @@ class CollectBrick(Core.BaseBrick):
                 self.energyControlObject.setEnergy(self.__energy)
 
     def robotCheckBoxToggled(self, pValue):
+
         if pValue:
+            # Inform that manual and ISPyB are not compatible
+            if self.ispybRobotCheckBox.isChecked():
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not collect data manually and with ISpYB", Qt.QMessageBox.Ok)
+                self.robotCheckBox.setChecked(False)
+                return
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok)
                 self.robotCheckBox.setChecked(False)
                 return
+            self._ispybCollect = False
+            self._collectRobotDialog = CollectRobotDialog(self)
             if self._collectRobotDialog.isVisible():
                 self._collectRobotDialog.activateWindow()
                 self._collectRobotDialog.raise_()
             else:
                 self._collectRobotDialog.show()
         else:
-            self._collectRobotDialog.hide()
+            if not self._collectRobotDialog is None:
+                self._collectRobotDialog.hide()
+            self._collectRobotDialog = None
+
+    def ispybRobotCheckBoxToggled(self, pValue):
+        if pValue:
+            # Inform that manual and ISPyB are not compatible
+            if self.robotCheckBox.isChecked():
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not collect data manually and with ISpYB", Qt.QMessageBox.Ok)
+                self.ispybRobotCheckBox.setChecked(False)
+                return
+            # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
+            if self.isHPLC:
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok)
+                self.ispybRobotCheckBox.setChecked(False)
+                return
+            self._ispybCollect = True
+            self._collectRobotDialog = ISPyBCollectRobotDialog(self)
+            if self._collectRobotDialog.isVisible():
+                self._collectRobotDialog.activateWindow()
+                self._collectRobotDialog.raise_()
+            else:
+                self._collectRobotDialog.show()
+        else:
+            if not self._collectRobotDialog is None:
+                self._collectRobotDialog.hide()
+            self._collectRobotDialog = None
+
 
     def CheckBoxToggledHPLC(self, pValue):
         v = bool(pValue)
@@ -1357,7 +1407,7 @@ class CollectBrick(Core.BaseBrick):
                 if flag:
                     self.startCollectWithoutRobot()
 
-    def setCollectionStatus(self, status, progress = None):
+    def setCollectionStatus(self, status):
         self.collectionStatus = status
         if status == "running":
             self._isCollecting = True
@@ -1528,8 +1578,8 @@ class CollectBrick(Core.BaseBrick):
             logging.warning(pMessage)
         elif pLevel == 2:
             logging.error(pMessage)
-
         self._collectRobotDialog.addHistory(pLevel, pMessage)
+
         if notify:
             self.messageDialog(pLevel, pMessage)
 
