@@ -102,7 +102,10 @@ class CollectBrick(Core.BaseBrick):
 
                     "BiosaxsClient": Connection("BiosaxsClient object",
                                             [],
-                                            [Slot("getRobotXML")],
+                                            [Slot("getRobotXML"),
+                                             Slot("getExperimentNamesByProposalCodeNumber"),
+                                             Slot("setUser"),
+                                             Slot("getRobotXMLByExperimentId")],
                                             "connectedToBiosaxsClient"),
 
                     "WebSAS": Connection("Web SAS Browser object",
@@ -151,7 +154,7 @@ class CollectBrick(Core.BaseBrick):
         self.contact = False
         self.energyControlObject = None
         self.loginObject = None
-        self.biosaxsClientObject = None
+#        self.biosaxsClientObject = None
         self.__username = None
         self.__password = None
         self.collectObj = None
@@ -473,8 +476,28 @@ class CollectBrick(Core.BaseBrick):
 
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient(self, pPeer):
-        if pPeer is not None:
-            self.biosaxsClientObject = pPeer
+        pass
+#        print "Biosaxs connected"
+
+#        if pPeer is not None:
+#            self.biosaxsClientObject = pPeer
+
+
+    def getRobotXMLByExperimentId(self, experimentId):
+        if self.getObject("BiosaxsClient") is not None:
+            return self.getObject("BiosaxsClient").getRobotXMLByExperimentId(experimentId)
+        else:
+            logger.warning("No connection to BiosaxsClient")
+            return None
+
+    def getExperimentNamesByProposalCodeNumber(self):
+        if self.getObject("BiosaxsClient") is not None:
+            print "Getting experiments from Control object for type: " + str(self.__enteredPropType) + " Number: " + str(self.__enteredPropNumber)
+            return self.getObject("BiosaxsClient").getExperimentNamesByProposalCodeNumber(self.__enteredPropType, self.__enteredPropNumber)
+        else:
+            logger.warning("No connection to BiosaxsClient")
+            return None
+
 
     # When connected SAS webdisplay
     def connectedToSAS(self, pPeer):
@@ -486,7 +509,7 @@ class CollectBrick(Core.BaseBrick):
         if pValue:
             # get password and username and send it to Collect Object
             if self.loginObject is not None:
-                (self.__username, self.__password) = self.loginObject.getUserInfo()
+                (self.__username, self.__password, self.__enteredPropType, self.__enteredPropNumber) = self.loginObject.getUserInfo()
                 if (self.__username is not None and self.__password is not None):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo(self.__username, self.__password)
@@ -494,8 +517,11 @@ class CollectBrick(Core.BaseBrick):
 #                           start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, \
 #                           currentMachine) = self.collectObj.getIspyByParams(self)
                 #TODO: DEBUG
-                print "Now we are logged in as %s woith pwd %s " % (self.__username, self.__password)
-
+                print "Now we are logged in as %s with pwd %s " % (self.__username, self.__password)
+                if self.getObject("BiosaxsClient") is not None:
+                    self.getObject("BiosaxsClient").setUser(self.__username, self.__password)
+                else:
+                    logger.warning("No connection to BiosaxsClient")
             else:
                 self.__username = None
                 self.__password = None
@@ -921,7 +947,8 @@ class CollectBrick(Core.BaseBrick):
                           "bufferMode": str(self._collectRobotDialog.bufferModeComboBox.currentIndex()),
                           "bufferFirst": False,
                           "bufferBefore": False,
-                          "bufferAfter": False }
+                          "bufferAfter": False,
+                          "collectISPYB": self._ispybCollect }
 
             filepars = { "runNumber": self.runNumberSpinBox.value(),
                          "frameNumber": self.frameNumberSpinBox.value() }
@@ -1317,9 +1344,10 @@ class CollectBrick(Core.BaseBrick):
     def collectPushButtonClicked(self):
         if not self.checkPilausReady():
             return
-        if not self.robotCheckBox.isChecked() or self.validParameters():
+        self.robotCollect = (self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked())
+        if not self.robotCollect or self.validParameters():
             # Check Temperature changes are not too big when doing robot collection
-            if self.robotCheckBox.isChecked():
+            if self.robotCollect:
                 # check temperature moving upwards - Storage temperature first - 1 degree move ...
                 oldTemp = 100.0
                 if self.scObject.getSampleStorageTemperature() != "":

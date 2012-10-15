@@ -50,8 +50,8 @@ class BsxVideoBrick(Core.BaseBrick):
             self.videoWidget.exceptionCallback = self.exceptionCallback
 
             #TODO: DEBUG Can not take video signal at the same time as doing something else
-            self.videoWidget.setAutoRefresh(True)
-            #self.videoWidget.setAutoRefresh(False)
+            #self.videoWidget.setAutoRefresh(True)
+            self.videoWidget.setAutoRefresh(False)
         else:
             logger.info("Sample changer VIDEO NOT connected")
             self.videoWidget.setAutoRefresh(False)

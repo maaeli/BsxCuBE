@@ -662,6 +662,9 @@
     </connection>
     <connection role="BiosaxsClient">
       <slot name="getRobotXML"/>
+      <slot name="getExperimentNamesByProposalCodeNumber"/>
+      <slot name="setUser"/>
+      <slot name="getRobotXMLByExperimentId"/>
       <peer name="BsxCuBE/BiosaxsClient"/>
     </connection>
     <connection role="WebSAS">

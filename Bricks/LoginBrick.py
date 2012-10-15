@@ -205,7 +205,7 @@ class LoginBrick(Core.BaseBrick):
         self.logout()
 
     def getUserInfo(self):
-        return (self.__username, self.__password)
+        return (self.__username, self.__password, self.enteredPropType, self.enteredPropNumber)
 
 
     # Logout the user; reset the brick; changes from logout mode to login mode

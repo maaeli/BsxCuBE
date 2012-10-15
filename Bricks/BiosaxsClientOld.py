@@ -2,7 +2,7 @@ from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 
 
-class BiosaxsClient:
+class BiosaxsClientOld:
 
 
     def __init__(self, user, password):

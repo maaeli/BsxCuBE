@@ -6,7 +6,6 @@ from ISPyBPlateObject import ISPyBPlateObject
 import logging
 import os.path, time
 import pprint
-from BiosaxsClient import BiosaxsClient
 
 
 logger = logging.getLogger("ISPyBCollectRobotDialog")
@@ -1095,11 +1094,11 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         while (self.experimentsComboBox.count() != 0):
             self.experimentsComboBox.removeItem(0)
 
-        self.client = BiosaxsClient('mx1438', 'Rfo4-73')
-        self.experiments = self.client.getExperimentsByProposalId(3124)
+        self.experimentNames = self.__parent.getExperimentNamesByProposalCodeNumber()
+        print self.experimentNames
+        for experiment in self.experimentNames:
+            self.experimentsComboBox.addItem(experiment[0], experiment[1])
 
-        for experiment in self.experiments:
-            self.experimentsComboBox.addItem(experiment.experiment.name, experiment.experiment.experimentId)
 
     def onExperimentChosenEvent(self):
         plates = []
@@ -1107,16 +1106,19 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         currentIndex = self.experimentsComboBox.currentIndex()
         self.sampleIDs = []
         self.sampleIDCount = 0
-        for  plate in self.experiments[currentIndex].getPlates():
-            plates.append(plate.samplePlateId)
-            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
-            if response != None:
-                xmlfile = cStringIO.StringIO(response)
-            try:
-                print "Trying to load file"
-                self.loadFile(xmlfile, fromIspyB = True)
-            finally:
-                self.filename = ""
+#        for  plate in self.experiments[currentIndex].getPlates():
+#            plates.append(plate.samplePlateId)
+#            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
+        response = self.__parent.getRobotXMLByExperimentId(self.experimentNames[currentIndex][1])
+        print "--------------------->"
+        print response
+        if response != None:
+            xmlfile = cStringIO.StringIO(response)
+        try:
+            print "Trying to load file"
+            self.loadFile(xmlfile, fromIspyB = True)
+        finally:
+            self.filename = ""
 
 if __name__ == '__main__':
   app = QtGui.QApplication([])

@@ -61,7 +61,6 @@ class Collect(CObjectBase):
              Slot("blockEnergyAdjust")]
 
     def __init__(self, *args, **kwargs):
-
         # username and password from login Brick
         self.__username = None
         self.__password = None
@@ -109,6 +108,8 @@ class Collect(CObjectBase):
         raise AttributeError, attr
 
     def init(self):
+
+
         self.edna1Dead = None
         self.edna2Dead = None
         self.collecting = False
@@ -693,6 +694,22 @@ class Collect(CObjectBase):
         # We took a frame, now send info to ISPyB
         #TODO: DEBUG
         timeAfter = datetime.datetime.now()
+
+        if True is not True:
+            #Just for testing
+            sampleCode = "BSA__B1__30"
+            exposureTemperature = "exposureTemperature"
+            storageTemperature = "storageTemperature"
+            timePerFrame = "timePerFrame"
+            timeStart = ""
+            timeEnd = ""
+            energy = "energy"
+            detectorDistance = "detectorDistance"
+            fileArray = "['/data/bm29/inhouse/Test/raw/jj_058_00001.dat', '/data/bm29/inhouse/Test/raw/jj_058_00002.dat', '/data/bm29/inhouse/Test/raw/jj_058_00003.dat']"
+            snapshotCapillary = "snapshotCapillar"
+            currentMachine = "currentMachine"
+            self.objects["biosaxs_client"].saveFrameSet("44", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+
 #        print "Preparing to send to ISPyB"
 #        print " Mode is %r" % mode
 #        files = []
@@ -723,6 +740,8 @@ class Collect(CObjectBase):
         # Synchronous - no exception handling
         self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
 
+
+        print "-------------------------> " + pars["collectISPYB"]
         # 
         #  Setting storage temperature
         # ============================
