@@ -661,7 +661,6 @@
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="BiosaxsClient">
-      <slot name="getRobotXML"/>
       <slot name="getExperimentNamesByProposalCodeNumber"/>
       <slot name="setUser"/>
       <slot name="getRobotXMLByExperimentId"/>

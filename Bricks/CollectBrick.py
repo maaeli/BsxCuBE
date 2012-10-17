@@ -764,7 +764,7 @@ class CollectBrick(Core.BaseBrick):
                         self.emit("grayOut", False)
                     else:
                         feedBackFlag = self._feedBackFlag
-                        if self.robotCheckBox.isChecked():
+                        if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
@@ -1257,6 +1257,8 @@ class CollectBrick(Core.BaseBrick):
                 self._collectRobotDialog.raise_()
             else:
                 self._collectRobotDialog.show()
+                #Populate list of experiments
+                self._collectRobotDialog.populateExperiments()
         else:
             if not self._collectRobotDialog is None:
                 self._collectRobotDialog.hide()
@@ -1283,7 +1285,7 @@ class CollectBrick(Core.BaseBrick):
     def checkBeamBoxToggled(self, pValue):
         self.collectObj.setCheckBeam(pValue)
 
-    def checkPilausReady(self):
+    def checkPilatusReady(self):
         # Check if pilatus is ready
         #TODO: DEBUG
         if self.energyControlObject is None:
@@ -1311,7 +1313,7 @@ class CollectBrick(Core.BaseBrick):
         return True
 
     def testPushButtonClicked(self):
-        if not self.checkPilausReady():
+        if not self.checkPilatusReady():
             return
         self.grayOut(True)
         self.emit("grayOut", True)
@@ -1342,7 +1344,8 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectPushButtonClicked(self):
-        if not self.checkPilausReady():
+        if not self.checkPilatusReady():
+            print "It seems not to be ready"
             return
         self.robotCollect = (self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked())
         if not self.robotCollect or self.validParameters():
@@ -1420,7 +1423,7 @@ class CollectBrick(Core.BaseBrick):
             if not flag:
                 return
 
-            if self.robotCheckBox.isChecked():
+            if self.robotCollect:
                 self.startCollectWithRobot()
             else:
                 if not (not self.__expertModeOnly or self.__expertMode):
@@ -1552,7 +1555,7 @@ class CollectBrick(Core.BaseBrick):
                 pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, \
                 pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, \
                 pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-        if not self.robotCheckBox.isChecked():
+        if not self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000 + 12000)
 
         self.__isTesting = False
@@ -1613,7 +1616,7 @@ class CollectBrick(Core.BaseBrick):
 
 
     def abortPushButtonClicked(self):
-        if self.robotCheckBox.isChecked():
+        if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
             answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Do you want to abort the ongoing data collection?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
             if answer == Qt.QMessageBox.No:
                 return
@@ -1689,6 +1692,8 @@ class CollectBrick(Core.BaseBrick):
                    self.testPushButton, \
                    self.collectPushButton, \
                    self.robotCheckBox, \
+                   self.ispybRobotCheckBox, \
+                   self.hplcCheckBox, \
                    self.testPushButton, \
                    self.abortPushButton)
 

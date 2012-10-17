@@ -632,8 +632,11 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         # Clear 1D curve
-        # Commented out 26/6 2012 on order from Petra (SO)
+        # Commented out 26/6 2012 on order by Petra The One (SO)
         #self.emit("clearCurve")
+
+        print tocollect
+        print pars
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -695,23 +698,35 @@ class Collect(CObjectBase):
         #TODO: DEBUG
         timeAfter = datetime.datetime.now()
 
-        if True is not True:
-            #Just for testing
-            sampleCode = "BSA__B1__30"
-            exposureTemperature = "exposureTemperature"
-            storageTemperature = "storageTemperature"
-            timePerFrame = "timePerFrame"
-            timeStart = ""
-            timeEnd = ""
-            energy = "energy"
-            detectorDistance = "detectorDistance"
-            fileArray = "['/data/bm29/inhouse/Test/raw/jj_058_00001.dat', '/data/bm29/inhouse/Test/raw/jj_058_00002.dat', '/data/bm29/inhouse/Test/raw/jj_058_00003.dat']"
-            snapshotCapillary = "snapshotCapillar"
-            currentMachine = "currentMachine"
-            self.objects["biosaxs_client"].saveFrameSet("44", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+#        if pars["collectISPYB"]:
+        try:
+            self.saveFrameToISPYP(pars, tocollect, timeBefore, timeAfter)
+            self.showMessage(0, "Data stored into ISPyB")
+        except Exception:
+            message = "Error when trying to send data to ISPyB!"
+            self.showMessage(2, message)
+#            print "----------------------------"
+#            print "Preparing to send to ISPyB"
+#            print " Mode is %r" % mode
+#
+#            files = []
+#            for i in range(1, pars["frameNumber"] + 1):
+#               files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
+#
+#            sampleCode = tocollect["code"]
+#            exposureTemperature = pars["SEUTemperature"]
+#            storageTemperature = pars["storageTemperature"]
+#            timePerFrame = pars["timePerFrame"]
+#            timeStart = timeBefore
+#            timeEnd = timeAfter
+#            energy = self.hcOverE / float(pars["waveLength"])
+#            detectorDistance = pars["detectorDistance"]
+#            fileArray = files
+#            #           fileArray = "['/data/bm29/inhouse/Test/raw/jj_058_00001.dat', '/data/bm29/inhouse/Test/raw/jj_058_00002.dat', '/data/bm29/inhouse/Test/raw/jj_058_00003.dat']"
+#            snapshotCapillary = "snapshotCapillar"
+#            currentMachine = "currentMachine"
+#            self.objects["biosaxs_client"].saveFrameSet("44", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
-#        print "Preparing to send to ISPyB"
-#        print " Mode is %r" % mode
 #        files = []
 #        for i in range(1, pars["frameNumber"] + 1):
 #            files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -720,7 +735,7 @@ class Collect(CObjectBase):
 #        print "Exposure Temperature: %r " % pars["SEUTemperature"]
 #        print "Storage Temperature: %r " % pars["storageTemperature"]
 #        print "Time per frame %r " % pars["timePerFrame"]
-        print ">>>Time before and after run : %r   %r " % (timeBefore, timeAfter)
+#        print ">>>Time before and after run : %r   %r " % (timeBefore, timeAfter)
 #        energy = self.hcOverE / float(pars["waveLength"])
 #        print "Energy in keV %r" % energy
 #        print "Detector distance %r" % pars["detectorDistance"]
@@ -729,10 +744,27 @@ class Collect(CObjectBase):
 #        pprint.pprint(pars)
 #        print "------  tocollect"
 #        pprint.pprint(tocollect)
-#        self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = 'mx1438', password = 'Rfo4-73')
 
-#         saveFrameSet(self.experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, currentMachine)
 
+    def saveFrameToISPYP(self, pars, tocollect, timeBefore, timeAfter):
+        print "----------------------------"
+        print "Preparing to send to ISPyB"
+
+        files = []
+        for i in range(1, pars["frameNumber"] + 1):
+            files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
+
+        sampleCode = tocollect["code"]
+        exposureTemperature = pars["SEUTemperature"]
+        storageTemperature = pars["storageTemperature"]
+        timePerFrame = pars["timePerFrame"]
+        timeStart = timeBefore
+        timeEnd = timeAfter
+        energy = self.hcOverE / float(pars["waveLength"])
+        detectorDistance = pars["detectorDistance"]
+        snapshotCapillary = "snapshotCapillar"
+        currentMachine = "currentMachine"
+        self.objects["biosaxs_client"].saveFrameSet(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
 
     def _collectWithRobot(self, pars):
         lastBuffer = ""
@@ -741,7 +773,8 @@ class Collect(CObjectBase):
         self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
 
 
-        print "-------------------------> " + pars["collectISPYB"]
+
+        print "-------------------------> " + str(pars["collectISPYB"])
         # 
         #  Setting storage temperature
         # ============================

@@ -1,8 +1,6 @@
 from PyQt4   import Qt, QtCore, QtGui
 from Samples import Sample, CollectPars, SampleList
 import cStringIO
-#import BiosaxsForBsxCubeWidget
-from ISPyBPlateObject import ISPyBPlateObject
 import logging
 import os.path, time
 import pprint
@@ -116,10 +114,6 @@ class CollectRobotDialog(Qt.QDialog):
         self.saveAsPushButton.setFixedWidth(70)
         Qt.QObject.connect(self.saveAsPushButton, Qt.SIGNAL("clicked()"), self.saveAsPushButtonClicked)
         self.hBoxLayout0.addWidget(self.saveAsPushButton)
-
-        self.loadFromISPyBButton = Qt.QPushButton("Load from ISPyB", self)
-        Qt.QObject.connect(self.loadFromISPyBButton, Qt.SIGNAL("clicked()"), self.loadFromISPyBButtonClicked)
-        self.hBoxLayout0.addWidget(self.loadFromISPyBButton)
 
         self.vBoxLayout.addLayout(self.hBoxLayout0)
 
@@ -606,25 +600,6 @@ class CollectRobotDialog(Qt.QDialog):
         self.saveFile(filename)
 
 
-    def loadFromISPyBButtonClicked(self):
-        Widget = QtGui.QDialog()
-        bsxIspybWidget = ISPyBPlateObject()
-        bsxIspybWidget.setupUi(Widget)
-        Widget.exec_()
-
-
-#        self.__iSPyBPlate.show()
-#        self.__iSPyBPlate.activateWindow()
-#        self.__iSPyBPlate.raise_()
-
-        if bsxIspybWidget.response:
-            #f = open("/tmp/output.xml", "w"); f.write(bsx_ispyb_widget.response); f.close()
-            # create a file-like object and pass it to the standard functions
-            xmlfile = cStringIO.StringIO(bsxIspybWidget.response)
-            try:
-                self.loadFile(xmlfile, fromIspyB = True)
-            finally:
-                self.filename = ""
 
 
     def savePushButtonClicked(self):

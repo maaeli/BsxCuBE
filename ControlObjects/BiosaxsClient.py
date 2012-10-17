@@ -5,7 +5,6 @@ from suds.transport.http import HttpAuthenticated
 class BiosaxsClient(CObjectBase):
     signals = []
     slots = [
-             Slot("getRobotXML"),
              Slot("getExperimentNamesByProposalCodeNumber"),
              Slot("setUser"),
              Slot("getRobotXMLByExperimentId")
@@ -13,10 +12,7 @@ class BiosaxsClient(CObjectBase):
 
     def init(self):
         self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
-        self.user = "mx1438"
-        self.password = "Rfo4-73"
-        self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = self.user, password = self.password)
-        self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService)
+        self.selectedExperimentId = None
 
     def __initWebservice(self, user, password):
         self.user = user #"mx1438"
@@ -32,7 +28,7 @@ class BiosaxsClient(CObjectBase):
 
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
     def getExperimentNames(self):
-        print "------------ Getting experiment Names"
+#        print "------------ Getting experiment Names"
         experimentNames = []
         for experiment in self.experiments:
             experimentNames.append([experiment.experiment.name, experiment.experiment.experimentId])
@@ -53,26 +49,28 @@ class BiosaxsClient(CObjectBase):
             self.experiments.append(Experiment(experiment))
         return self.getExperimentNames()
 
-#        sampleCode = "BSA__B1__30"
-#        exposureTemperature = "exposureTemperature"
-#        storageTemperature = "storageTemperature"
-#        timePerFrame = "timePerFrame"
-#        timeStart = ""
-#        timeEnd = ""
-#        energy = "energy"
-#        detectorDistance = "detectorDistance"
-#        fileArray = "['/data/bm29/inhouse/Test/raw/jj_058_00001.dat', '/data/bm29/inhouse/Test/raw/jj_058_00002.dat', '/data/bm29/inhouse/Test/raw/jj_058_00003.dat']"
-#        snapshotCapillary = "snapshotCapillar"
-#        currentMachine = "currentMachine"
-#
-#        self.client = BiosaxsClient('mx1438', 'Rfo4-73')
-#        self.client.saveFrameSet(self.experiment.experiment.experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame,timeStart, timeEnd, energy, detectorDistance,  fileArray, snapshotCapillary, currentMachine)
-
     def test(self):
         print "----------------> TEST"
 
-    def saveFrameSet(self, experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        self.client.service.saveFrameSet(experimentId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+    def getSpecimenIdBySampleCode(self, sampleCode):
+        for experiment in self.experiments:
+            if experiment.experiment.experimentId is self.selectedExperimentId:
+                for sample in experiment.experiment.samples:
+                    for specimen in sample.specimen3VOs:
+                        if specimen.code == sampleCode:
+                            return specimen.specimenId
+        return None
+
+
+    def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        print "Sample code: " + sampleCode
+        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+        print "ExperimentId: " + str(self.selectedExperimentId)
+        print fileArray
+        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+        if specimenId is None:
+            specimenId = -1
+        self.client.service.saveFrameSet(self.selectedExperimentId, str(self.getSpecimenIdBySampleCode(sampleCode)), sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
         #print str(response)
         #return str(response)
@@ -92,27 +90,16 @@ class BiosaxsClient(CObjectBase):
         for experiment in self.experiments:
             plates = []
             if experiment.experiment.experimentId is experimentId:
-                print "Experiment found with id " + str(experimentId)
+                self.selectedExperimentId = experimentId
                 for plate in experiment.getPlates():
                     plates.append(plate.samplePlateId)
-                print plates
                 return self.client.service.getRobotXMLByPlateIds(experimentId, plates)
         return None
-
-#        return Noneself.client.service.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
-
-    def getRobotXML(self, currentIndex):
-        plates = []
-        for  plate in self.experiments[currentIndex].getPlates():
-            plates.append(plate.samplePlateId)
-        return self.client.service.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
-
 
 
 class Experiment:
     def __init__(self, experiment):
         self.experiment = experiment
-        print 'creating experiment ' + experiment.name
 
     def getPlates(self):
         return self.experiment.samplePlate3VOs

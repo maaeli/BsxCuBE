@@ -1,8 +1,6 @@
 from PyQt4   import Qt, QtCore, QtGui
 from Samples import Sample, CollectPars, SampleList
 import cStringIO
-#import BiosaxsForBsxCubeWidget
-from ISPyBPlateObject import ISPyBPlateObject
 import logging
 import os.path, time
 import pprint
@@ -206,7 +204,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         self.bufferModeLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
         self.hBoxLayout7.addWidget(self.bufferModeLabel)
         self.bufferModeComboBox = Qt.QComboBox(self)
-        self.bufferModeComboBox.addItems(["First and After", "Before", "After", "None"])
+        self.bufferModeComboBox.addItems(["First and After", "None"])
         self.bufferModeComboBox.setFixedWidth(self.PARAMETERS_WIDTH)
         self.hBoxLayout7.setAlignment(QtCore.Qt.AlignLeft)
         self.hBoxLayout7.addWidget(self.bufferModeComboBox)
@@ -623,26 +621,6 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         #self.fileLineEdit.setText(filename)
         #self.saveFile(filename)
 
-
-    def loadFromISPyBButtonClicked(self):
-        Widget = QtGui.QDialog()
-        bsxIspybWidget = ISPyBPlateObject()
-        bsxIspybWidget.setupUi(Widget)
-        Widget.exec_()
-
-
-#        self.__iSPyBPlate.show()
-#        self.__iSPyBPlate.activateWindow()
-#        self.__iSPyBPlate.raise_()
-
-        if bsxIspybWidget.response:
-            #f = open("/tmp/output.xml", "w"); f.write(bsx_ispyb_widget.response); f.close()
-            # create a file-like object and pass it to the standard functions
-            xmlfile = cStringIO.StringIO(bsxIspybWidget.response)
-            try:
-                self.loadFile(xmlfile, fromIspyB = True)
-            finally:
-                self.filename = ""
 
 
     #def savePushButtonClicked(self, filename = None):
@@ -1091,31 +1069,40 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     #ISPyB Methods
     def onRefreshButtonClickedEvent(self):
+        self.populateExperiments()
+
+    def populateExperiments(self):
         while (self.experimentsComboBox.count() != 0):
             self.experimentsComboBox.removeItem(0)
 
+        self.experimentsComboBox.addItem('None', -1)
+
         self.experimentNames = self.__parent.getExperimentNamesByProposalCodeNumber()
-        print self.experimentNames
+#        print self.experimentNames
         for experiment in self.experimentNames:
             self.experimentsComboBox.addItem(experiment[0], experiment[1])
-
 
     def onExperimentChosenEvent(self):
         plates = []
         xmlfile = None
+
         currentIndex = self.experimentsComboBox.currentIndex()
+        #Experiment selected None
+        if currentIndex is 0:
+            self.clearConfiguration()
+            return
+
         self.sampleIDs = []
         self.sampleIDCount = 0
 #        for  plate in self.experiments[currentIndex].getPlates():
 #            plates.append(plate.samplePlateId)
 #            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
-        response = self.__parent.getRobotXMLByExperimentId(self.experimentNames[currentIndex][1])
+        response = self.__parent.getRobotXMLByExperimentId(self.experimentNames[currentIndex - 1][1])
         print "--------------------->"
         print response
         if response != None:
             xmlfile = cStringIO.StringIO(response)
         try:
-            print "Trying to load file"
             self.loadFile(xmlfile, fromIspyB = True)
         finally:
             self.filename = ""
