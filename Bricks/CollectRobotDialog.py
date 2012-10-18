@@ -572,7 +572,6 @@ class CollectRobotDialog(Qt.QDialog):
 
             self.CBblock = 0
             self.filename = filename
-            pprint.pprint(filename)
             if fromIspyB:
                 Qt.QMessageBox.information(self, "Info", "The data from ISPyB was successfully loaded!")
             else:

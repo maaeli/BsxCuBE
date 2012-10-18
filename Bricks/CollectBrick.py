@@ -137,8 +137,8 @@ class CollectBrick(Core.BaseBrick):
         self.nbPlates = 0
         self.platesIDs = []
         self.plateInfos = []
-        self._machineCurrent = 0.0
-        self._diodeCurrent = 0.00
+        self._machineCurrent = float(0.0)
+        self._diodeCurrent = float(0.00)
         self._frameNumber = 0
         self._feedBackFlag = False
         self._abortFlag = False
@@ -563,7 +563,12 @@ class CollectBrick(Core.BaseBrick):
             self.spec = spec
 
     def collectBeamStopDiodeChanged(self, pValue):
-        self._diodeCurrent = pValue
+        try:
+            self._diodeCurrent = float(pValue)
+        except Exception, e:
+            logger.error("Got non-valid Diode current " + str(pValue))
+            logger.error("Full Exception: " + str(e))
+            self._diodeCurrent = float(0.00)
 
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
@@ -698,7 +703,7 @@ class CollectBrick(Core.BaseBrick):
             self.__lastFrame = pValue
             if self._isCollecting:
                 self.collectObj.triggerEDNA(filename0, oneway = True)
-                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % (filename0, float(self._diodeCurrent), float(self._machineCurrent))
+                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % (filename0, self._diodeCurrent, self._machineCurrent)
                 logger.info(message)
                 if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory(0, message)
@@ -1421,7 +1426,8 @@ class CollectBrick(Core.BaseBrick):
                            (filename.split("_")[-1] != "00000.edf") \
                            and (filename.split("_")[-1] != "00000.xml") \
                            and (filename.split(".")[-1] != "h5") \
-                           and (filename.split(".")[-1] != "json"):
+                           and (filename.split(".")[-1] != "json" \
+                           and (filename.split(".")[-1] != "png")):
                             # Check if we have a run number higher than the requested run number:
                             try:
                                 existingRunNumber = filename.split("_")[-2]
@@ -1432,12 +1438,12 @@ class CollectBrick(Core.BaseBrick):
                             except IndexError:
                                 #TODO: DEBUG
                                 print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory, prefix or something else. Please rewrite run info", Qt.QMessageBox.Ok)
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory Unexpected file %s in directory " % filename , Qt.QMessageBox.Ok)
                                 raise RuntimeError, "Creating of filename from info not possible"
                             except ValueError:
                                 #TODO: DEBUG
                                 print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory, prefix or something else. Please rewrite run info", Qt.QMessageBox.Ok)
+                                Qt.QMessageBox.critical(self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok)
                                 raise RuntimeError, "Creating of filename from info not possible"
 
             if not flag:
@@ -1501,7 +1507,12 @@ class CollectBrick(Core.BaseBrick):
                 self.setButtonState(0)
 
     def machineCurrentChanged(self, pValue):
-        self._machineCurrent = pValue
+        try:
+            self._machineCurrent = float(pValue)
+        except Exception, e:
+            logger.error("Got non-valid  Machine current " + str(pValue))
+            logger.error("Full Exception: " + str(e))
+            self._machineCurrent = float(0.0)
 
     def newSASUrl(self, url):
         #TODO: DEBUG

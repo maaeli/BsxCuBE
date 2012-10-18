@@ -68,46 +68,46 @@ class BiosaxsClient(CObjectBase):
 
 
     def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        print "Sample code: " + sampleCode
-        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-        print "saveFrameBefore " + str(self.selectedExperimentId)
-        print fileArray
+#        print "Sample code: " + sampleCode
+#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+#        print "saveFrameBefore " + str(self.selectedExperimentId)
+#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
 
-        print self.selectedExperimentId
-        print specimenId
-        print sampleCode
+#        print self.selectedExperimentId
+#        print specimenId
+#        print sampleCode
         self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
     def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        print "Sample code: " + sampleCode
-        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-        print "saveFrameAfter " + str(self.selectedExperimentId)
-        print fileArray
+#        print "Sample code: " + sampleCode
+#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+#        print "saveFrameAfter " + str(self.selectedExperimentId)
+#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
 
-        print self.selectedExperimentId
-        print specimenId
-        print sampleCode
+#        print self.selectedExperimentId
+#        print specimenId
+#        print sampleCode
         self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
 
     def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        print "Sample code: " + sampleCode
-        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-        print "ExperimentId: " + str(self.selectedExperimentId)
-        print fileArray
+#        print "Sample code: " + sampleCode
+#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+#        print "ExperimentId: " + str(self.selectedExperimentId)
+#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
 
-        print self.selectedExperimentId
-        print specimenId
-        print sampleCode
+#        print self.selectedExperimentId
+#        print specimenId
+#        print sampleCode
         self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
         #print str(response)
         #return str(response)

@@ -7,6 +7,7 @@ import gevent
 import math
 import pprint
 import datetime
+import re
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -150,19 +151,19 @@ class Collect(CObjectBase):
 
     def tangoErrMsgExtractDesc(self, errMsg):
         pprint.pprint(errMsg)
-#         tempList = str(ErrMsg).split("\n")
-#        finalMessage = "Unknown"
-#        insideDesc = False
-#        for item in tempList:
-#            if item.startswith("Formatted Exception Description:"):
-#                insideDesc = True
-#                # remove "Formatted Exception Description: "
-#                finalMessage = item[33:]
-#            else:
-#                if item.startswith("Exception:"):
-#                    insideDesc = False
-#                if insideDesc:
-#                    finalMessage = finalMessage + " " + item
+        # try to see if it is a Tango message first
+        tempList = str(errMsg).split("\n")
+        print "Checking %s" % tempList[0]
+        tangoError = False
+        if re.match(".*: an error occurred when calling Tango command .*", tempList[0]):
+            print "GOT the signal"
+            tangoError = True
+            # Now let us check for first desc
+            for item in tempList:
+                print ">> item %s " % item
+        else:
+            return None
+
 
 
 
@@ -746,7 +747,7 @@ class Collect(CObjectBase):
         timeEnd = timeAfter
         energy = self.hcOverE / float(pars["waveLength"])
         detectorDistance = pars["detectorDistance"]
-        snapshotCapillary = "snapshotCapillar"
+        snapshotCapillary = "snapshotCapillary"
         currentMachine = "currentMachine"
 
         if mode is "buffer_before":
@@ -765,33 +766,16 @@ class Collect(CObjectBase):
         self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
 
 
-
-        print "-------------------------> " + str(pars["collectISPYB"])
-        # 
+        # ============================
         #  Setting storage temperature
         # ============================
         self.showMessage(0, "Setting storage temperature to '%s' C..." % pars["storageTemperature"])
         try:
             # ASynchronous - Treated in sample Changer
             self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
-        except Exception, ErrMsg:
-            #TODO: TOTALLY WRING - TO REDO XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-            # since we have a formatted ErrMsg from Tango, let us work on it
-            tempList = str(ErrMsg).split("\n")
-            finalMessage = "Unknown"
-            insideDesc = False
-            for item in tempList:
-                if item.startswith("Formatted Exception Description:"):
-                    insideDesc = True
-                    # remove "Formatted Exception Description: "
-                    finalMessage = item[33:]
-                else:
-                    if item.startswith("Exception:"):
-                        insideDesc = False
-                    if insideDesc:
-                        finalMessage = finalMessage + " " + item
-
-            message = "Error when trying set Storage Temperature.\nSampleChanger Error:\n%s\nAborting collection!" % finalMessage
+        except Exception, errMsg:
+            #TODO: Get this to work
+            message = "Error when trying set Storage Temperature.\nSampleChanger Error:\nAborting collection!"
             self.showMessage(2, message, notify = 1)
             self.collectAbort()
             # allow time to abort
@@ -833,8 +817,6 @@ class Collect(CObjectBase):
         self.sampleNumber = 0
         for sample in pars["sampleList"]:
             self.sampleNumber = self.sampleNumber + 1
-            print sample
-            pprint.pprint(sample)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
