@@ -1072,14 +1072,16 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         self.populateExperiments()
 
     def populateExperiments(self):
+        #Asynchronous call to the webService
+        self.__parent.getExperimentNamesByProposalCodeNumber()
+
+
+    def onExperimentNamesRetrieved(self, experimentNames):
         while (self.experimentsComboBox.count() != 0):
             self.experimentsComboBox.removeItem(0)
-
+        self.experimentNames = experimentNames
         self.experimentsComboBox.addItem('None', -1)
-
-        self.experimentNames = self.__parent.getExperimentNamesByProposalCodeNumber()
-#        print self.experimentNames
-        for experiment in self.experimentNames:
+        for experiment in experimentNames:
             self.experimentsComboBox.addItem(experiment[0], experiment[1])
 
     def onExperimentChosenEvent(self):
@@ -1087,8 +1089,19 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         xmlfile = None
 
         currentIndex = self.experimentsComboBox.currentIndex()
+
+#        print "CurrentIndex" + str(currentIndex)
         #Experiment selected None
         if currentIndex is 0:
+            self.clearConfiguration()
+            return
+
+        if currentIndex is -1:
+            self.clearConfiguration()
+            return
+
+        #Double check
+        if self.experimentNames[currentIndex - 1][1] == -1:
             self.clearConfiguration()
             return
 
@@ -1098,8 +1111,6 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 #            plates.append(plate.samplePlateId)
 #            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
         response = self.__parent.getRobotXMLByExperimentId(self.experimentNames[currentIndex - 1][1])
-        print "--------------------->"
-        print response
         if response != None:
             xmlfile = cStringIO.StringIO(response)
         try:

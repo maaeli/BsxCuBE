@@ -101,7 +101,9 @@ class CollectBrick(Core.BaseBrick):
                                             "connectedToLogin"),
 
                     "BiosaxsClient": Connection("BiosaxsClient object",
-                                            [],
+                                            [
+                                             Signal("onSuccess", "onISPYBWebServiceSuccess")
+                                             ],
                                             [Slot("getRobotXML"),
                                              Slot("getExperimentNamesByProposalCodeNumber"),
                                              Slot("setUser"),
@@ -493,10 +495,15 @@ class CollectBrick(Core.BaseBrick):
     def getExperimentNamesByProposalCodeNumber(self):
         if self.getObject("BiosaxsClient") is not None:
             print "Getting experiments from Control object for type: " + str(self.__enteredPropType) + " Number: " + str(self.__enteredPropNumber)
-            return self.getObject("BiosaxsClient").getExperimentNamesByProposalCodeNumber(self.__enteredPropType, self.__enteredPropNumber)
+            self.getObject("BiosaxsClient").getExperimentNamesByProposalCodeNumber(self.__enteredPropType, self.__enteredPropNumber, oneway = True)
         else:
             logger.warning("No connection to BiosaxsClient")
-            return None
+
+    def onISPYBWebServiceSuccess(self, methodName, response):
+        print "------------------->" + methodName
+        if methodName == "getExperimentNamesByProposalCodeNumber":
+            self._collectRobotDialog.onExperimentNamesRetrieved(response)
+
 
 
     # When connected SAS webdisplay
@@ -703,8 +710,8 @@ class CollectBrick(Core.BaseBrick):
                 # Waiting for the file to appear
                 t0 = time.time()
                 fileFound = False
-                while time.time() - t0 < 7:
-                    #TODO: DEBUG - Before we check existence/size, do a small sleep
+                # First try a small sleep
+                while time.time() - t0 < 1:
                     time.sleep(0.1)
                     if os.path.exists(filename0):
                         filesize = os.path.getsize(filename0)
@@ -719,8 +726,27 @@ class CollectBrick(Core.BaseBrick):
                     # before getting back, let us treat Qt events
                     QtGui.qApp.processEvents()
                 if not fileFound:
+                    #TODO: See if this will solve the problem of files not seen
+                    dummy = os.stat(directory)
                     timestr = str(time.time() - t0)
-                    print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
+                    print ">>> No file 3 %s seen after %s seconds. We try again after stat on directrory " % (filename0, timestr)
+                    # sleep 9 more seconds
+                    while time.time() - t0 < 10:
+                        time.sleep(0.1)
+                        if os.path.exists(filename0):
+                            filesize = os.path.getsize(filename0)
+                            if filesize > 4000000:
+                                time.sleep(0.1)
+                                # we got file
+                                fileFound = True
+                                print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                                print "display1D: %r" % filename0
+                                self.emit("displayItemChanged", filename0)
+                                break
+                        # before getting back, let us treat Qt events
+                        QtGui.qApp.processEvents()
+                    if not fileFound:
+                        print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
 
                 if self._currentFrame == self._frameNumber:
                     splitList = os.path.basename(filename0).split("_")

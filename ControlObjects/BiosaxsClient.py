@@ -1,9 +1,13 @@
-from Framework4.Control.Core.CObject import CObjectBase, Slot
+from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
+import time
 
 class BiosaxsClient(CObjectBase):
-    signals = []
+    signals = [
+               Signal("onSuccess"),
+               Signal("onError")
+               ]
     slots = [
              Slot("getExperimentNamesByProposalCodeNumber"),
              Slot("setUser"),
@@ -18,7 +22,7 @@ class BiosaxsClient(CObjectBase):
         self.user = user #"mx1438"
         self.password = password #"Rfo4-73"
         self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = self.user, password = self.password)
-        self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService)
+        self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService, cache = None)
         self.experiments = []
         self.response = None
 
@@ -39,7 +43,8 @@ class BiosaxsClient(CObjectBase):
         self.experiments = []
         for experiment in response:
             self.experiments.append(Experiment(experiment))
-        return self.getExperimentNames()
+        experimentNames = self.getExperimentNames()
+        self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
 
 
     def getExperimentsByProposalId(self, proposalId):
@@ -62,6 +67,35 @@ class BiosaxsClient(CObjectBase):
         return None
 
 
+    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        print "Sample code: " + sampleCode
+        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+        print "saveFrameBefore " + str(self.selectedExperimentId)
+        print fileArray
+        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+        if specimenId is None:
+            specimenId = -1
+
+        print self.selectedExperimentId
+        print specimenId
+        print sampleCode
+        self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+
+    def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        print "Sample code: " + sampleCode
+        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
+        print "saveFrameAfter " + str(self.selectedExperimentId)
+        print fileArray
+        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+        if specimenId is None:
+            specimenId = -1
+
+        print self.selectedExperimentId
+        print specimenId
+        print sampleCode
+        self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+
+
     def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
         print "Sample code: " + sampleCode
         print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
@@ -70,8 +104,11 @@ class BiosaxsClient(CObjectBase):
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
-        self.client.service.saveFrameSet(self.selectedExperimentId, str(self.getSpecimenIdBySampleCode(sampleCode)), sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
+        print self.selectedExperimentId
+        print specimenId
+        print sampleCode
+        self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
         #print str(response)
         #return str(response)
         #return experiments

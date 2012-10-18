@@ -17,7 +17,9 @@
    <command name="getJobOutput_edna2" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
    
    <command name="guillopen" type="spec" call="guillopen"/>
+   <command name="guillclose" type="spec" call="guillclose"/>
    <command name="shopen" type="tango" uri="bm29/bsh/1" call="Open"/>
+   <command name="shclose" type="tango" uri="bm29/bsh/1" call="Close"/>
    
    <channel name="jobSuccess_edna1"    type="tango"   uri="DAU/edna/1"  call="jobSuccess"/> 
    <channel name="jobFailure_edna1"    type="tango"   uri="DAU/edna/1"  call="jobFailure"/> 

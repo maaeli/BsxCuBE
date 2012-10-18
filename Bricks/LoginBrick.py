@@ -26,6 +26,7 @@ class LoginBrick(Core.BaseBrick):
         self.__username = "nobody"
         self.loginProxy = None
         self.__loggedIn = False
+        self.experimentNames = []
 
         #TODO: make it more prominent with coloring
         # Set up layout

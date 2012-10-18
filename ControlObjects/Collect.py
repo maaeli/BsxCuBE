@@ -148,6 +148,25 @@ class Collect(CObjectBase):
         # set up a channel
         self.channels["collectRunNumber"].connect("update", self.runNumberChanged)
 
+    def tangoErrMsgExtractDesc(self, errMsg):
+        pprint.pprint(errMsg)
+#         tempList = str(ErrMsg).split("\n")
+#        finalMessage = "Unknown"
+#        insideDesc = False
+#        for item in tempList:
+#            if item.startswith("Formatted Exception Description:"):
+#                insideDesc = True
+#                # remove "Formatted Exception Description: "
+#                finalMessage = item[33:]
+#            else:
+#                if item.startswith("Exception:"):
+#                    insideDesc = False
+#                if insideDesc:
+#                    finalMessage = finalMessage + " " + item
+
+
+
+
     def showMessageEdnaDead(self, _ednaServerNumber):
         if _ednaServerNumber == 1:
             if self.edna1Dead:
@@ -598,8 +617,11 @@ class Collect(CObjectBase):
         try:
             self.objects["sample_changer"].doFillProcedure(tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"])
         except Exception, errMsg:
-            print errMsg
-            pprint.pprint(errMsg)
+            # Check if we have a standard Tango error (PyTango.DevFailed)
+            msg = self.tangoErrMsgExtractDesc(errMsg)
+            if msg is not None:
+                message = "Error when Filling a sample.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                self.showMessage(2, message, notify = 1)
             message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
             self.showMessage(2, message)
             self.collectAbort()
@@ -698,63 +720,25 @@ class Collect(CObjectBase):
         #TODO: DEBUG
         timeAfter = datetime.datetime.now()
 
-#        if pars["collectISPYB"]:
-        try:
-            self.saveFrameToISPYP(pars, tocollect, timeBefore, timeAfter)
-            self.showMessage(0, "Data stored into ISPyB")
-        except Exception:
-            message = "Error when trying to send data to ISPyB!"
-            self.showMessage(2, message)
-#            print "----------------------------"
-#            print "Preparing to send to ISPyB"
-#            print " Mode is %r" % mode
-#
-#            files = []
-#            for i in range(1, pars["frameNumber"] + 1):
-#               files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
-#
-#            sampleCode = tocollect["code"]
-#            exposureTemperature = pars["SEUTemperature"]
-#            storageTemperature = pars["storageTemperature"]
-#            timePerFrame = pars["timePerFrame"]
-#            timeStart = timeBefore
-#            timeEnd = timeAfter
-#            energy = self.hcOverE / float(pars["waveLength"])
-#            detectorDistance = pars["detectorDistance"]
-#            fileArray = files
-#            #           fileArray = "['/data/bm29/inhouse/Test/raw/jj_058_00001.dat', '/data/bm29/inhouse/Test/raw/jj_058_00002.dat', '/data/bm29/inhouse/Test/raw/jj_058_00003.dat']"
-#            snapshotCapillary = "snapshotCapillar"
-#            currentMachine = "currentMachine"
-#            self.objects["biosaxs_client"].saveFrameSet("44", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
-
-#        files = []
-#        for i in range(1, pars["frameNumber"] + 1):
-#            files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
-#        print "FilePaths :"
-#        pprint.pprint(files)
-#        print "Exposure Temperature: %r " % pars["SEUTemperature"]
-#        print "Storage Temperature: %r " % pars["storageTemperature"]
-#        print "Time per frame %r " % pars["timePerFrame"]
-#        print ">>>Time before and after run : %r   %r " % (timeBefore, timeAfter)
-#        energy = self.hcOverE / float(pars["waveLength"])
-#        print "Energy in keV %r" % energy
-#        print "Detector distance %r" % pars["detectorDistance"]
-#        #print "Wait time %r" % 
-#        print "---------------COLLECT"
-#        pprint.pprint(pars)
-#        print "------  tocollect"
-#        pprint.pprint(tocollect)
+#        try:
+#            self.saveFrameToISPYP(pars, tocollect, timeBefore, timeAfter)
+#            self.showMessage(0, "Data stored into ISPyB")
+#        except Exception:
+#            message = "Error when trying to send data to ISPyB!"
+#            self.showMessage(2, message)
+#            
+        return (pars, tocollect, timeBefore, timeAfter, mode)
+#       
 
 
-    def saveFrameToISPYP(self, pars, tocollect, timeBefore, timeAfter):
-        print "----------------------------"
-        print "Preparing to send to ISPyB"
+
+    def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode):
+        self.showMessage(0, "Preparing to send to ISPyB: " + mode)
 
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
 
-        sampleCode = tocollect["code"]
         exposureTemperature = pars["SEUTemperature"]
         storageTemperature = pars["storageTemperature"]
         timePerFrame = pars["timePerFrame"]
@@ -764,7 +748,15 @@ class Collect(CObjectBase):
         detectorDistance = pars["detectorDistance"]
         snapshotCapillary = "snapshotCapillar"
         currentMachine = "currentMachine"
-        self.objects["biosaxs_client"].saveFrameSet(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+
+        if mode is "buffer_before":
+            self.objects["biosaxs_client"].saveFrameSetBefore(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+        if mode is "buffer_after":
+            self.objects["biosaxs_client"].saveFrameSetAfter(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+        if mode is "sample":
+            self.objects["biosaxs_client"].saveFrameSet(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+
+
 
     def _collectWithRobot(self, pars):
         lastBuffer = ""
@@ -783,6 +775,7 @@ class Collect(CObjectBase):
             # ASynchronous - Treated in sample Changer
             self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
         except Exception, ErrMsg:
+            #TODO: TOTALLY WRING - TO REDO XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
             # since we have a formatted ErrMsg from Tango, let us work on it
             tempList = str(ErrMsg).split("\n")
             finalMessage = "Unknown"
@@ -817,7 +810,7 @@ class Collect(CObjectBase):
                 self.collectAbort()
                 break
 
-        #TODO: Be smarter than just open
+        # Open shutter
         self.commands["shopen"]()
 
         if pars["initialCleaning"]:
@@ -840,6 +833,8 @@ class Collect(CObjectBase):
         self.sampleNumber = 0
         for sample in pars["sampleList"]:
             self.sampleNumber = self.sampleNumber + 1
+            print sample
+            pprint.pprint(sample)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
@@ -866,7 +861,9 @@ class Collect(CObjectBase):
                 else:
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
-                self._collectOne(sample, pars, mode = "buffer_before")
+                (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_before")
+                if pars["collectISPYB"]:
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
 
             #
             # Wait if necessary before collecting sample
@@ -890,7 +887,9 @@ class Collect(CObjectBase):
             else:
                 # need to increase run number
                 pars["runNumber"] = self.nextRunNumber
-            self._collectOne(sample, pars, mode = "sample")
+            (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
+            if pars["collectISPYB"]:
+                self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
 
             if pars["bufferAfter"]:
                 if runNumberSet:
@@ -899,13 +898,18 @@ class Collect(CObjectBase):
                 else:
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
-                self._collectOne(sample, pars, mode = "buffer_after")
+                (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_after")
+                if pars["collectISPYB"]:
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
 
             prevSample = sample
 
         #
         # End of for sample loop
         #---------------------------------- 
+        # Let us close guillotine and shutter
+        self.commands["guillclose"]()
+        self.commands["shclose"]()
         self.showMessage(0, "The data collection is done!")
         self.emit("collectDone")
 
