@@ -1,17 +1,13 @@
 <object class = "MotorAlignment" username = "MotorAlignmentBS">
-	
    <uri>nela:exp</uri>
-	
-   <command name="moveMotor" type="spec" call="moveMotor"/>
-	
-   <command name="getMotorPosition" type="spec" call="getMotorPosition"/>	
-	
-   <channel name="motorPosition" type="spec" call="BSX_GLOBAL/command/motorPosition"/>
-      
-   <data name="Up" motor="bsz" signal="+"/>
-   <data name="Down" motor="bsz" signal="-"/>
-   <data name="Left" motor="bsy" signal="-"/>
-   <data name="Right" motor="bsy" signal="+"/>
-	
+
+   <object href="BsxCuBE/bsz" role="vertical"/>
+   <object href="BsxCuBE/bsy" role="horizontal"/>     
+   
+   <data name="Up" role="vertical" direction="+"/>
+   <data name="Down" role="vertical" direction="-"/>
+   <data name="Left" role="horizontal" direction="-"/>
+   <data name="Right" role="horizontal" direction="+"/>
+   
 </object>	
 

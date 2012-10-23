@@ -158,9 +158,14 @@ class Collect(CObjectBase):
         if re.match(".*: an error occurred when calling Tango command .*", tempList[0]):
             print "GOT the signal"
             tangoError = True
-            # Now let us check for first desc
+            # Now let us check for first desc and do return on that
+            message = "Unknown Error"
             for item in tempList:
-                print ">> item %s " % item
+                print ">>> item:%s" % item
+                if re.match(".* desc = .*", item):
+                    message = item[11:]
+                    return message
+            return message
         else:
             return None
 
@@ -606,7 +611,7 @@ class Collect(CObjectBase):
         try:
             self.objects["sample_changer"].doSetSEUTemperatureProcedure(sample["SEUtemperature"])
         except Exception, errMsg:
-            self.showMessage(2, "Error when setting SEU temperature. Error: %r\nAborting collection!" % errMsg)
+            self.showMessage(2, "Error when setting SEU temperature. Error:\n%r\nAborting collection!" % errMsg)
             self.collectAbort()
             # allow time to abort
             time.sleep(5)
@@ -621,10 +626,11 @@ class Collect(CObjectBase):
             # Check if we have a standard Tango error (PyTango.DevFailed)
             msg = self.tangoErrMsgExtractDesc(errMsg)
             if msg is not None:
-                message = "Error when Filling a sample.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error:\n%s\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], msg)
                 self.showMessage(2, message, notify = 1)
-            message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error: %r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
-            self.showMessage(2, message)
+            else:
+                message = "Error when trying to fill from plate '%s', row '%s' and well '%s' with volume '%s'.\nSampleChanger Error:\n%r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"], errMsg)
+                self.showMessage(2, message)
             self.collectAbort()
             # allow time to abort
             time.sleep(5)
@@ -636,8 +642,15 @@ class Collect(CObjectBase):
             self.showMessage(0, "Flowing with volume '%s' during '%s' second(s)..." % (tocollect["volume"], pars["flowTime"]))
             try:
                 self.objects["sample_changer"].flow(tocollect["volume"], pars["flowTime"])
-            except Exception:
-                self.showMessage(2, "Error when trying to flow with volume '%s' during '%s' second(s)...\nAborting collection!" % (tocollect["volume"], pars["flowTime"]))
+            except Exception, errMsg:
+                # Check if we have a standard Tango error (PyTango.DevFailed)
+                msg = self.tangoErrMsgExtractDesc(errMsg)
+                if msg is not None:
+                    message = "Error when trying to flow with volume '%s' during '%s' second(s)...\n%s\Aborting collection!" % (tocollect["volume"], pars["flowTime"], msg)
+                    self.showMessage(2, message, notify = 1)
+                else:
+                    message = "Error when trying to flow with volume '%s' during '%s' second(s)...\n%r\Aborting collection!" % (tocollect["volume"], pars["flowTime"], errMsg)
+                    self.showMessage(2, message)
                 self.collectAbort()
                 # allow time to abort
                 time.sleep(5)
@@ -684,8 +697,15 @@ class Collect(CObjectBase):
             self.showMessage(0, "Waiting for end of flow...")
             try:
                 self.objects["sample_changer"].wait()
-            except Exception:
-                self.showMessage(2, "Error when waiting for end of flow...\nAborting collection!")
+            except Exception, errMsg:
+                # Check if we have a standard Tango error (PyTango.DevFailed)
+                msg = self.tangoErrMsgExtractDesc(errMsg)
+                if msg is not None:
+                    message = "Error when waiting for end of flow.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                    self.showMessage(2, message, notify = 1)
+                else:
+                    message = "Error when waiting for end of flow.\nSampleChanger Error:\n%r\nAborting collection!" % errMsg
+                    self.showMessage(2, message)
                 self.collectAbort()
                 # allow time to abort
                 time.sleep(5)
@@ -697,8 +717,15 @@ class Collect(CObjectBase):
             self.showMessage(0, "Recuperating to plate '%s', row '%s' and well '%s'..." % (tocollect["plate"], tocollect["row"], tocollect["well"]))
             try:
                 self.objects["sample_changer"].doRecuperateProcedure(tocollect["plate"], tocollect["row"], tocollect["well"])
-            except Exception:
-                self.showMessage(2, "Error when trying to recuperate to plate '%s', row '%s' well '%s'...\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"]))
+            except Exception, errMsg:
+                # Check if we have a standard Tango error (PyTango.DevFailed)
+                msg = self.tangoErrMsgExtractDesc(errMsg)
+                if msg is not None:
+                    message = "Error when trying to recuperate to plate '%s', row '%s' well '%s'...\nSampleChanger Error:\n%s\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], msg)
+                    self.showMessage(2, message, notify = 1)
+                else:
+                    message = "Error when trying to recuperate to plate '%s', row '%s' well '%s'...\nSampleChanger Error:\n%r\nAborting collection!" % (tocollect["plate"], tocollect["row"], tocollect["well"], errMsg)
+                    self.showMessage(2, message)
                 self.collectAbort()
                 # allow time to abort
                 time.sleep(5)
@@ -710,9 +737,15 @@ class Collect(CObjectBase):
 
         try:
             self.objects["sample_changer"].doCleanProcedure()
-        except Exception:
-            message = "Error when trying to clean. Aborting collection!"
-            self.showMessage(2, message)
+        except Exception, errMsg:
+            # Check if we have a standard Tango error (PyTango.DevFailed)
+            msg = self.tangoErrMsgExtractDesc(errMsg)
+            if msg is not None:
+                message = "Error when trying to clean.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                self.showMessage(2, message, notify = 1)
+            else:
+                message = "Error when trying to clean.\nSampleChanger Error:\n%r\nAborting collection!" % errMsg
+                self.showMessage(2, message)
             self.collectAbort()
             # allow time to abort
             time.sleep(5)
@@ -774,9 +807,14 @@ class Collect(CObjectBase):
             # ASynchronous - Treated in sample Changer
             self.objects["sample_changer"].setStorageTemperature(pars["storageTemperature"])
         except Exception, errMsg:
-            #TODO: Get this to work
-            message = "Error when trying set Storage Temperature.\nSampleChanger Error:\nAborting collection!"
-            self.showMessage(2, message, notify = 1)
+            # Check if we have a standard Tango error (PyTango.DevFailed)
+            msg = self.tangoErrMsgExtractDesc(errMsg)
+            if msg is not None:
+                message = "Error when trying to set Storage Temperature.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                self.showMessage(2, message, notify = 1)
+            else:
+                message = "Error when trying to set Storage Temperature.\nSampleChanger Error:\n%r\nAborting collection!" % errMsg
+                self.showMessage(2, message)
             self.collectAbort()
             # allow time to abort
             time.sleep(5)
@@ -801,9 +839,15 @@ class Collect(CObjectBase):
             self.showMessage(0, "Initial cleaning...")
             try:
                 self.objects["sample_changer"].doCleanProcedure()
-            except Exception:
-                message = "Error when trying to clean. Aborting collection!"
-                self.showMessage(2, message)
+            except Exception, errMsg:
+                # Check if we have a standard Tango error (PyTango.DevFailed)
+                msg = self.tangoErrMsgExtractDesc(errMsg)
+                if msg is not None:
+                    message = "Error when trying to clean.\nSampleChanger Error:\n%s\nAborting collection!" % msg
+                    self.showMessage(2, message, notify = 1)
+                else:
+                    message = "Error when trying to clean.\nSampleChanger Error:\n%r\nAborting collection!" % errMsg
+                    self.showMessage(2, message)
                 self.collectAbort()
                 # wait for abort to work
                 time.sleep(5)

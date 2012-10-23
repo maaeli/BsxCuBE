@@ -1,20 +1,17 @@
 <object class = "MotorAlignment" username = "MotorAlignmentSM">
-	
    <uri>nela:exp</uri>
-	
-   <command name="moveMotor" type="spec" call="moveMotor"/>
-	
-   <command name="getMotorPosition" type="spec" call="getMotorPosition"/>	
-	
-   <channel name="motorPosition" type="spec" call="BSX_GLOBAL/command/motorPosition"/>
+   <object href="BsxCuBE/smha" role="size_hoz_aperture"/>
+   <object href="BsxCuBE/smht" role="hoz_translation"/>
+   <object href="BsxCuBE/smva" role="size_ver_aperture" />
+   <object href="BsxCuBE/smvt" role="ver_translation" />
       
-   <data name="Open horizontal aperture" motor="smha" signal="+"/>
-   <data name="Close horizontal aperture" motor="smha" signal="-"/>
-   <data name="Left translation" motor="smht" signal="+"/>
-   <data name="Right translation" motor="smht" signal="-"/>
-   <data name="Open vertical aperture" motor="smva" signal="+"/>
-   <data name="Up translation" motor="smvt" signal="+"/>
-   <data name="Close vertical aperture" motor="smva" signal="-"/>
-   <data name="Down translation" motor="smvt" signal="-"/>
+   <data name="Open horizontal aperture" role="size_hoz_aperture" direction="+"/>
+   <data name="Close horizontal aperture" role="size_hoz_aperture" direction="-"/>
+   <data name="Left translation" role="hoz_translation" direction="+"/>
+   <data name="Right translation" role="hoz_translation" direction="-"/>
+   <data name="Open vertical aperture" role="size_ver_aperture" direction="+"/>
+   <data name="Up translation" role="ver_translation" direction="+"/>
+   <data name="Close vertical aperture" role="size_ver_aperture" direction="-"/>
+   <data name="Down translation" role="ver_translation" direction="-"/>
 </object>	
 

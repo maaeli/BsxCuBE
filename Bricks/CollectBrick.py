@@ -686,7 +686,8 @@ class CollectBrick(Core.BaseBrick):
                 self.messageDialog(level, logmsg)
 
         self.lastCollectProcessingLog = logmsg
-        self._collectRobotDialog.addHistory(level, logmsg)
+        if self._collectRobotDialog is not None:
+            self._collectRobotDialog.addHistory(level, logmsg)
 
 
     def clearCurve(self):
@@ -1646,7 +1647,8 @@ class CollectBrick(Core.BaseBrick):
             logging.warning(pMessage)
         elif pLevel == 2:
             logging.error(pMessage)
-        self._collectRobotDialog.addHistory(pLevel, pMessage)
+        if self._collectRobotDialog is not None:
+            self._collectRobotDialog.addHistory(pLevel, pMessage)
 
         if notify:
             self.messageDialog(pLevel, pMessage)
