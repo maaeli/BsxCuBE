@@ -1,0 +1,4 @@
+<object class="SpecMotor">
+  <data name="spec" uri="nela:exp"/>
+  <data name="spec" motor="smht"/>
+</object>
