@@ -472,9 +472,15 @@ class CollectBrick(Core.BaseBrick):
 
     # When connected to Login, then block the brick
     def connectedToLogin(self, pPeer):
+
         if pPeer is not None:
             self.loginObject = pPeer
-            self.brick_widget.setEnabled(False)
+            # Check if we are reconnecting first
+            if self.loginDone:
+                #TODO: DEBUG
+                print ">> Keep logged in"
+            else:
+                self.brick_widget.setEnabled(False)
 
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient(self, pPeer):
@@ -520,9 +526,6 @@ class CollectBrick(Core.BaseBrick):
                 if (self.__username is not None and self.__password is not None):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo(self.__username, self.__password)
-#                        (sampleCode, exposureTemperature, storageTemperature, timePerFrame, \
-#                           start, end, energy, detectorDistance, edfFileArray, snapshotCapillary, \
-#                           currentMachine) = self.collectObj.getIspyByParams(self)
                 #TODO: DEBUG
                 print "Now we are logged in as %s with pwd %s " % (self.__username, self.__password)
                 if self.getObject("BiosaxsClient") is not None:
@@ -860,6 +863,8 @@ class CollectBrick(Core.BaseBrick):
 
     def collectObjectConnected(self, collect_obj):
         if collect_obj is not None:
+            #TODO: DEBUG
+            print ">>> Reconnected to COSERVER"
             # we reconnected.. Let us put back light if out
             self.setButtonState(0)
             self.brick_widget.setEnabled(self.loginDone)
