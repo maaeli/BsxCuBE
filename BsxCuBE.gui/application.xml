@@ -523,6 +523,8 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
+      <slot name="getMotorPosition"/>
+      <slot name="getMotorsList"/>
       <peer name="BsxCuBE/MotorAlignmentBS"/>
     </connection>
   </connections>
@@ -531,6 +533,8 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
+      <slot name="getMotorPosition"/>
+      <slot name="getMotorsList"/>
       <peer name="BsxCuBE/MotorAlignmentS2"/>
     </connection>
   </connections>
@@ -539,6 +543,8 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
+      <slot name="getMotorPosition"/>
+      <slot name="getMotorsList"/>
       <peer name="BsxCuBE/MotorAlignmentS1"/>
     </connection>
   </connections>
@@ -547,6 +553,8 @@
     <connection role="motoralignment">
       <signal name="motorPositionChanged"/>
       <slot name="moveMotor"/>
+      <slot name="getMotorPosition"/>
+      <slot name="getMotorsList"/>
       <peer name="BsxCuBE/MotorAlignmentSM"/>
     </connection>
   </connections>

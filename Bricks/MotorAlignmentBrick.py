@@ -17,7 +17,10 @@ class MotorAlignmentBrick(Core.BaseBrick):
 
     connections = {"motoralignment": Connection("MotorAlignment object",
                                              [Signal("motorPositionChanged", "motorPositionChanged")],
-                                            [Slot("moveMotor")])}
+                                            [Slot("moveMotor"),
+                                             Slot("getMotorPosition"),
+                                             Slot("getMotorsList")],
+                                             "connectedToMotorAlignment")}
     signals = [Signal("executeTestCollect")]
     slots = []
 
@@ -53,6 +56,9 @@ class MotorAlignmentBrick(Core.BaseBrick):
     def delete(self):
         pass
 
+    def connectedToMotorAlignment(self, pValue):
+        pass
+
     def captionChanged(self, pValue):
         self.motorAlignmentPushButton.setText(pValue)
 
@@ -83,6 +89,7 @@ class MotorAlignmentDialog(Qt.QDialog):
     def __init__(self, pParent, pMotorList):
         self.__parent = pParent
         self.__motorsList = pMotorList
+        self.__qlabelDict = {}
 
         Qt.QDialog.__init__(self, self.__parent.brick_widget)
         caption = self.__parent.motorAlignmentPushButton.text()
@@ -141,7 +148,8 @@ class MotorAlignmentDialog(Qt.QDialog):
         self.layout().addWidget(self.closePushButton)
         Qt.QObject.connect(self.closePushButton, Qt.SIGNAL("clicked()"), self.closePushButtonClicked)
 
-        for name, signal, label in self.__motorsList:
+
+        for name, _, _ in self.__motorsList:
             flag = True
             for i in range(0, self.tableWidget.rowCount()):
                 if self.tableWidget.cellWidget(i, 0).text() == name:
@@ -151,30 +159,32 @@ class MotorAlignmentDialog(Qt.QDialog):
                 i = self.tableWidget.rowCount()
                 self.tableWidget.insertRow(i)
                 self.tableWidget.setCellWidget(i, 0, Qt.QLabel(Qt.QString(name)))
+                position = self.__parent.getObject("motoralignment").getMotorPosition(str(name))
+                self.__qlabelDict[str(i)] = Qt.QLabel(str(position) + " mm")
+                self.tableWidget.setCellWidget(i, 1, self.__qlabelDict[str(i)])
 
-        for i in range(0, self.tableWidget.rowCount()):
-            self.__parent.getObject("motoralignment").getMotorPosition(str(self.tableWidget.cellWidget(i, 0).text()))
 
 
 
     def setMotorPosition(self, pValue):
-        list = pValue.split(",")
-        if len(list) > 1:
-            motor = list[0]
-            position = list[1]
+        myList = pValue.split(",")
+        if len(myList) > 1:
+            motor = myList[0]
+            position = myList[1]
             for i in range(0, self.tableWidget.rowCount()):
                 if self.tableWidget.cellWidget(i, 0).text() == motor:
-                    self.tableWidget.setCellWidget(i, 1, Qt.QLabel(position + " mm"))
+                    # Updating dictionary - otherwise there will be overwriting
+                    (self.__qlabelDict[str(i)]).setText(Qt.QString(position + " mm"))
                     break
 
 
-    def moveMotor(self, pMotor, pSignal):
-        if pSignal == "+":
+    def moveMotor(self, pMotor, pDirection):
+        if pDirection == "+":
             step = self.stepDoubleSpinBox.value()
         else:
             step = -self.stepDoubleSpinBox.value()
         logger.info("Moving motor '%s' by '%s'..." % (pMotor, step))
-        self.__parent.getObject("motoralignment").moveMotor(pMotor, step)
+        self.__parent.getObject("motoralignment").moveMotor(str(pMotor), step)
         if self.collectTestFrameCheckBox.isChecked():
             self.__parent.emit("executeTestCollect")
 
@@ -190,7 +200,7 @@ class TableWidget(QtGui.QTableWidget):
         QtGui.QTableWidget.__init__(self, *args)
 
 
-    def resizeEvent(self, pQResizeEvent):
+    def resizeEvent(self, _):
         size = float(self.width())
         self.setColumnWidth(0, round(size / 2, 0) - 2)
         self.setColumnWidth(1, round(size / 2, 0) - 2)
@@ -203,7 +213,7 @@ class PushButton(Qt.QPushButton):
         Qt.QPushButton.__init__(self, *args)
         self.__parent = None
         self.__motor = None
-        self.__signal = None
+        self.__direction = None
 
 
 
@@ -218,11 +228,11 @@ class PushButton(Qt.QPushButton):
 
 
 
-    def setSignal(self, pSignal):
-        self.__signal = pSignal
+    def setSignal(self, pDirection):
+        self.__direction = pDirection
 
 
 
-    def clicked(self, *args):
-        if self.__motor is not None and self.__signal is not None:
-            self.__parent.moveMotor(self.__motor, self.__signal)
+    def clicked(self):
+        if self.__motor is not None and self.__direction is not None:
+            self.__parent.moveMotor(self.__motor, self.__direction)
