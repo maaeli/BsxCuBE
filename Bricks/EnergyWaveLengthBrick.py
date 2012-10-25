@@ -43,6 +43,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
         self.__energyDialog = None
         self.__waveLengthDialogOpen = False
         self.__waveLengthDialog = None
+        self.loginDone = False
 
 
     def init(self):
@@ -88,7 +89,9 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
     # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
-            self.brick_widget.setEnabled(False)
+            # Check if we were already connected first
+            if not self.loginDone:
+                self.brick_widget.setEnabled(False)
 
     # Connect to display
 
@@ -112,6 +115,7 @@ class EnergyWaveLengthBrick(Core.BaseBrick):
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
+        self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
     def newEnergyPushButtonClicked(self):

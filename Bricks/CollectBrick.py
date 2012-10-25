@@ -716,25 +716,31 @@ class CollectBrick(Core.BaseBrick):
                 t0 = time.time()
                 fileFound = False
                 # First try a small sleep
-                while time.time() - t0 < 1:
-                    time.sleep(0.1)
-                    if os.path.exists(filename0):
-                        filesize = os.path.getsize(filename0)
-                        if filesize > 4000000:
-                            time.sleep(0.1)
-                            # we got file
-                            fileFound = True
-                            print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                            print "display1D: %r" % filename0
-                            self.emit("displayItemChanged", filename0)
-                            break
+                time.sleep(0.1)
+                if os.path.exists(directory):
+                    # make a stat on the directory
+                    dummy = os.stat(directory)
+                if os.path.exists(filename0):
+                    filesize = os.path.getsize(filename0)
+                    if filesize > 4000000:
+                        time.sleep(0.1)
+                        # we got file
+                        fileFound = True
+                        print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                        print "display1D: %r" % filename0
+                        self.emit("displayItemChanged", filename0)
                     # before getting back, let us treat Qt events
                     QtGui.qApp.processEvents()
                 if not fileFound:
                     #TODO: See if this will solve the problem of files not seen
-                    dummy = os.stat(directory)
+                    time.sleep(0.1)
+                    try:
+                        dummy = os.stat(directory)
+                    except Exception:
+                        # in case directory does not exist yet
+                        pass
                     timestr = str(time.time() - t0)
-                    print ">>> No file 3 %s seen after %s seconds. We try again after stat on directrory " % (filename0, timestr)
+                    print ">>> No file 3 %s seen after %s seconds and a look up and an os.stat. We wait 10 seconds for it " % (filename0, timestr)
                     # sleep 9 more seconds
                     while time.time() - t0 < 10:
                         time.sleep(0.1)
@@ -859,8 +865,6 @@ class CollectBrick(Core.BaseBrick):
 
     def collectObjectConnected(self, collect_obj):
         if collect_obj is not None:
-            #TODO: DEBUG
-            print ">>> Reconnected to COSERVER"
             # we reconnected.. Let us put back light if out
             self.setButtonState(0)
             self.brick_widget.setEnabled(self.loginDone)

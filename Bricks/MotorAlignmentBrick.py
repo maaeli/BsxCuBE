@@ -56,6 +56,7 @@ class MotorAlignmentBrick(Core.BaseBrick):
     def delete(self):
         pass
 
+
     def connectedToMotorAlignment(self, pValue):
         pass
 
@@ -125,7 +126,9 @@ class MotorAlignmentDialog(Qt.QDialog):
         self.stepDoubleSpinBox = Qt.QDoubleSpinBox(self)
         self.stepDoubleSpinBox.setSuffix(" mm")
         self.stepDoubleSpinBox.setDecimals(2)
-        self.stepDoubleSpinBox.setRange(0.1, 1)
+        self.stepDoubleSpinBox.setRange(0.01, 1)
+        self.stepDoubleSpinBox.setValue(0.1)
+        self.stepDoubleSpinBox.setSingleStep(0.01)
         self.stepDoubleSpinBox.setToolTip("Current step")
         self.parametersHBoxLayout1.addWidget(self.stepDoubleSpinBox)
         self.parametersVBoxLayout.layout().addLayout(self.parametersHBoxLayout1)
@@ -162,7 +165,6 @@ class MotorAlignmentDialog(Qt.QDialog):
                 position = self.__parent.getObject("motoralignment").getMotorPosition(str(name))
                 self.__qlabelDict[str(i)] = Qt.QLabel(str(position) + " mm")
                 self.tableWidget.setCellWidget(i, 1, self.__qlabelDict[str(i)])
-
 
 
 
@@ -230,7 +232,6 @@ class PushButton(Qt.QPushButton):
 
     def setSignal(self, pDirection):
         self.__direction = pDirection
-
 
 
     def clicked(self):

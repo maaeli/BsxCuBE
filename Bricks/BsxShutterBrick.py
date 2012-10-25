@@ -98,6 +98,7 @@ class BsxShutterBrick(Core.BaseBrick):
     def init(self):
         self.shutterName = None
         self.state = None
+        self.loginDone = False
         self.shutter_state = Qt.QLabel("Unknown", self.brick_widget)
         self.shutter_state.setAutoFillBackground(True)
         self.shutter_state.palette().setColor(QtGui.QPalette.Background, self.shutterState["unknown"])
@@ -111,10 +112,13 @@ class BsxShutterBrick(Core.BaseBrick):
    # When connected to Login, then block the brick
     def connectionToLogin(self, pPeer):
         if pPeer is not None:
-            self.brick_widget.setEnabled(False)
+            # Check if we were already connected first
+            if not self.loginDone:
+                self.brick_widget.setEnabled(False)
 
     # Logged In : True or False 
     def loggedIn(self, pValue):
+        self.loginDone = pValue
         self.brick_widget.setEnabled(pValue)
 
     # Connect to display 
