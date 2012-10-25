@@ -153,15 +153,10 @@ class Collect(CObjectBase):
         pprint.pprint(errMsg)
         # try to see if it is a Tango message first
         tempList = str(errMsg).split("\n")
-        print "Checking %s" % tempList[0]
-        tangoError = False
         if re.match(".*: an error occurred when calling Tango command .*", tempList[0]):
-            print "GOT the signal"
-            tangoError = True
             # Now let us check for first desc and do return on that
             message = "Unknown Error"
             for item in tempList:
-                print ">>> item:%s" % item
                 if re.match(".* desc = .*", item):
                     message = item[11:]
                     return message
@@ -374,7 +369,7 @@ class Collect(CObjectBase):
                 self.showMessageEdnaDead(2)
 
 
-    def specCollectDone(self, returned_value):
+    def specCollectDone(self, returnValue):
         self.collecting = False
         # start EDNA to calculate average at the end
         if not self.isHPLC:
@@ -669,11 +664,9 @@ class Collect(CObjectBase):
         # ==================================================
         self.showMessage(0, "  - Start collecting (%s) '%s'..." % (mode, pars["prefix"]))
         # Clear 1D curve
-        # Commented out 26/6 2012 on order by Petra The One (SO)
+        # Commented out 26/6 2012 on order by Petra Pernot (SO)
         #self.emit("clearCurve")
 
-        print tocollect
-        print pars
         self.collect(pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
