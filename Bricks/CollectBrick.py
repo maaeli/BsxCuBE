@@ -472,14 +472,10 @@ class CollectBrick(Core.BaseBrick):
 
     # When connected to Login, then block the brick
     def connectedToLogin(self, pPeer):
-
         if pPeer is not None:
             self.loginObject = pPeer
-            # Check if we are reconnecting first
-            if self.loginDone:
-                #TODO: DEBUG
-                print ">> Keep logged in"
-            else:
+            # Check if we were already connected first
+            if not self.loginDone:
                 self.brick_widget.setEnabled(False)
 
     # When connected to the BiosaxsClient
