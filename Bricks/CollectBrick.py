@@ -640,13 +640,26 @@ class CollectBrick(Core.BaseBrick):
             logger.info("processing done, file is %s", dat_filename)
             # Only display 1d images like XXXX/1d/<at least on char>.dat
             if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
-                #DEBUG: get file size
+                # Waiting for the file to appear
+                t0 = time.time()
+                fileFound = False
+                directory = os.path.dirname(dat_filename)
+                #small sleep
+                time.sleep(0.4)
+                try:
+                    dummy = os.stat(directory)
+                except Exception:
+                    # in case directory does not exist yet
+                    pass
+                time.sleep(0.1)
                 if os.path.exists(dat_filename):
                     filesize = os.path.getsize(dat_filename)
-                    print ">>> File info 0 %r  %s " % (filesize, type(filesize))
+                    print ">>> File info 0 %r  %s " % (filesize, dat_filename)
+                    fileFound = True
                     self.display1D(dat_filename)
                 else:
-                    logger.warning("processing done but no file, will not display file %s", dat_filename)
+                    timestr = str(time.time() - t0)
+                    logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
             self.last_dat = dat_filename
         else:
             if self.last_dat == dat_filename:
@@ -655,13 +668,26 @@ class CollectBrick(Core.BaseBrick):
                 logger.info("processing done, file is %s", dat_filename)
                 # Only display 1d images like XXXX/1d/<at least on char>.dat
                 if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
-                    #DEBUG: get file size
+                    # Waiting for the file to appear
+                    t0 = time.time()
+                    fileFound = False
+                    directory = os.path.dirname(dat_filename)
+                    #small sleep
+                    time.sleep(0.4)
+                    try:
+                        dummy = os.stat(directory)
+                    except Exception:
+                        # in case directory does not exist yet
+                        pass
+                    time.sleep(0.1)
                     if os.path.exists(dat_filename):
                         filesize = os.path.getsize(dat_filename)
-                        print ">>> File info 1 %r  %s " % (filesize, type(filesize))
+                        print ">>> File info 0 %r  %s " % (filesize, dat_filename)
+                        fileFound = True
                         self.display1D(dat_filename)
                     else:
-                        logger.warning("processing done but no file, will not display file %s", dat_filename)
+                        timestr = str(time.time() - t0)
+                        logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
                 self.last_dat = dat_filename
 
 
@@ -715,11 +741,13 @@ class CollectBrick(Core.BaseBrick):
                 # Waiting for the file to appear
                 t0 = time.time()
                 fileFound = False
-                # First try a small sleep
+                #small sleep
                 time.sleep(0.1)
-                if os.path.exists(directory):
-                    # make a stat on the directory
+                try:
                     dummy = os.stat(directory)
+                except Exception:
+                    # in case directory does not exist yet
+                    pass
                 if os.path.exists(filename0):
                     filesize = os.path.getsize(filename0)
                     if filesize > 4000000:
@@ -729,19 +757,34 @@ class CollectBrick(Core.BaseBrick):
                         print ">>> File info 3 %r  %s " % (filesize, type(filesize))
                         print "display1D: %r" % filename0
                         self.emit("displayItemChanged", filename0)
-                    # before getting back, let us treat Qt events
-                    QtGui.qApp.processEvents()
                 if not fileFound:
-                    #TODO: See if this will solve the problem of files not seen
-                    time.sleep(0.1)
+                    #a bit longer sleep
+                    time.sleep(0.2)
+                    try:
+                        dummy = os.stat(directory)
+                    except Exception:
+                        # in case directory does not exist yet
+                        pass
+                    if os.path.exists(filename0):
+                        filesize = os.path.getsize(filename0)
+                        if filesize > 4000000:
+                            time.sleep(0.1)
+                            # we got file
+                            fileFound = True
+                            print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                            print "display1D: %r" % filename0
+                            self.emit("displayItemChanged", filename0)
+                if not fileFound:
+                    #a bit longer again
+                    time.sleep(0.3)
                     try:
                         dummy = os.stat(directory)
                     except Exception:
                         # in case directory does not exist yet
                         pass
                     timestr = str(time.time() - t0)
-                    print ">>> No file 3 %s seen after %s seconds and a look up and an os.stat. We wait 10 seconds for it " % (filename0, timestr)
-                    # sleep 9 more seconds
+                    print ">>> No file 3 %s seen after %s seconds after two stats and a 0.6s wait . We wait 10 seconds for it " % (filename0, timestr)
+                    # sleep up to 10 seconds
                     while time.time() - t0 < 10:
                         time.sleep(0.1)
                         if os.path.exists(filename0):
@@ -764,16 +807,35 @@ class CollectBrick(Core.BaseBrick):
                     # Take away last _ piece
                     filename1 = "_".join(splitList[:-1])
                     ave_filename = os.path.join(directory, filename1 + "_ave.dat")
-                    #DEBUG: get file size
+                    # Waiting for the file to appear
+                    t0 = time.time()
+                    fileFound = False
+                    #small sleep
+                    time.sleep(0.1)
+                    try:
+                        dummy = os.stat(directory)
+                    except Exception:
+                        # in case directory does not exist yet
+                        pass
                     if os.path.exists(ave_filename):
                         filesize = os.path.getsize(ave_filename)
-                        #TODO: DEBUG
-                        print ">>> File info 4 %r  %s " % (filesize, type(filesize))
-                        print "display1D: %r" % ave_filename
-                        self.display1D(ave_filename)
-                    else:
-                        #TODO: DEBUG
-                        print ">>> No file 4 %s seen. We do not display it " % ave_filename
+                        if filesize > 40000:
+                            time.sleep(0.1)
+                            # we got file
+                            fileFound = True
+                            print ">>> File info 4 %r  %s " % (filesize, ave_filename)
+                            print "display1D: %r" % ave_filename
+                            self.display1D(ave_filename)
+                    if not fileFound:
+                        time.sleep(0.2)
+                        if os.path.exists(ave_filename):
+                            filesize = os.path.getsize(ave_filename)
+                            print ">>> File info 4 %r  %s " % (filesize, ave_filename)
+                            print "display1D: %r" % ave_filename
+                            self.display1D(ave_filename)
+                        else:
+                            timestr = str(time.time() - t0)
+                            print ">>> No file 4 %s seen after %s seconds. We do not display it " % (ave_filename, timestr)
             else:
 
                 if os.path.exists(filename0):
@@ -1428,12 +1490,13 @@ class CollectBrick(Core.BaseBrick):
             if os.path.isdir(directory):
                 for filename in os.listdir(directory):
                     if os.path.isfile(os.path.join(directory, filename)):
-                        if filename.startswith(str(self.prefixLineEdit.text())) and \
-                           (filename.split("_")[-1] != "00000.edf") \
+                        if filename.startswith(str(self.prefixLineEdit.text())) \
+                           and (filename.split("_")[-1] != "00000.edf") \
                            and (filename.split("_")[-1] != "00000.xml") \
                            and (filename.split(".")[-1] != "h5") \
-                           and (filename.split(".")[-1] != "json" \
-                           and (filename.split(".")[-1] != "png")):
+                           and (filename.split(".")[-1] != "json") \
+                           and (filename.split(".")[-1] != "svg") \
+                           and (filename.split(".")[-1] != "png"):
                             # Check if we have a run number higher than the requested run number:
                             try:
                                 existingRunNumber = filename.split("_")[-2]
