@@ -502,7 +502,7 @@ class CollectBrick(Core.BaseBrick):
             logger.warning("No connection to BiosaxsClient")
 
     def onISPYBWebServiceSuccess(self, methodName, response):
-        print "------------------->" + methodName
+        #print "------------------->" + methodName
         if methodName == "getExperimentNamesByProposalCodeNumber":
             self._collectRobotDialog.onExperimentNamesRetrieved(response)
 

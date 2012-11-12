@@ -15,12 +15,12 @@ class BiosaxsClient(CObjectBase):
              ]
 
     def init(self):
+        self.client = None
         self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
 
-    def __initWebservice(self, user, password):
-        self.user = user #"mx1438"
-        self.password = password #"Rfo4-73"
+    def __initWebservice(self):
+
         self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = self.user, password = self.password)
         self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService, cache = None)
         self.experiments = []
@@ -28,7 +28,9 @@ class BiosaxsClient(CObjectBase):
 
 
     def setUser(self, user, password):
-        self.__initWebservice(user, password)
+        self.user = user #"mx1438"
+        self.password = password #"Rfo4-73"
+
 
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
     def getExperimentNames(self):
@@ -39,6 +41,8 @@ class BiosaxsClient(CObjectBase):
         return experimentNames
 
     def getExperimentNamesByProposalCodeNumber(self, code, number):
+        if (self.client is None):
+             self.__initWebservice()
         response = self.client.service.findExperimentByProposalCode(code, number)
         self.experiments = []
         for experiment in response:
@@ -48,6 +52,9 @@ class BiosaxsClient(CObjectBase):
 
 
     def getExperimentsByProposalId(self, proposalId):
+        if (self.client is None):
+             self.__initWebservice()
+
         response = self.client.service.findExperimentByPosposalId(3124)
         self.experiments = []
         for experiment in response:
@@ -68,6 +75,8 @@ class BiosaxsClient(CObjectBase):
 
 
     def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        if (self.client is None):
+             self.__initWebservice()
 #        print "Sample code: " + sampleCode
 #        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
 #        print "saveFrameBefore " + str(self.selectedExperimentId)
@@ -82,6 +91,8 @@ class BiosaxsClient(CObjectBase):
         self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
     def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        if (self.client is None):
+             self.__initWebservice()
 #        print "Sample code: " + sampleCode
 #        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
 #        print "saveFrameAfter " + str(self.selectedExperimentId)
@@ -97,6 +108,8 @@ class BiosaxsClient(CObjectBase):
 
 
     def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+        if (self.client is None):
+             self.__initWebservice()
 #        print "Sample code: " + sampleCode
 #        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
 #        print "ExperimentId: " + str(self.selectedExperimentId)
@@ -124,6 +137,8 @@ class BiosaxsClient(CObjectBase):
 
 
     def getRobotXMLByExperimentId(self, experimentId):
+        if (self.client is None):
+             self.__initWebservice()
         for experiment in self.experiments:
             plates = []
             if experiment.experiment.experimentId is experimentId:
