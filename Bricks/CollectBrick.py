@@ -161,15 +161,20 @@ class CollectBrick(Core.BaseBrick):
         self.__password = None
         self.collectObj = None
 
+        self.lostBeam = False
+
         self.sasWebObject = None
 
         self.scObject = None
 
         self.__validParameters = [False, False, False]
 
-        #TODO: DEBUG
+        #TODO: DEBUG - Horrible
         self.last_dat = None
         self.imageProxy = None
+        #TODO: DEBUG - Horrible
+        self.lastInfoFromBeamLostChanged = None
+
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
 
@@ -880,8 +885,29 @@ class CollectBrick(Core.BaseBrick):
 
 
     def beamLostChanged(self, pValue):
-        if pValue != None and pValue != "":
-            logger.warning("BEAM LOST: %s" % pValue)
+        if pValue != None:
+            # put beamlost value updated
+            if pValue != "":
+                self.lostBeam = True
+                #TODO: DEBUG
+                print ">> lost beam"
+            else:
+                self.lostBeam = False
+                #TODO: DEBUG
+                print ">> found beam"
+
+        #TODO : DEBUG
+        #TODO remove this hack ASAP (SO 12/11 12)
+        ### HORRIBLE CODE
+        if self.lastInfoFromBeamLostChanged is None :
+            if pValue != None and pValue != "":
+                logger.warning("BEAM LOST: %s" % pValue)
+                self.lastInfoFromBeamLostChanged = pValue
+        else:
+            if self.lastInfoFromBeamLostChanged != pValue:
+                if pValue != None and pValue != "":
+                    logger.warning("BEAM LOST: %s" % pValue)
+                    self.lastInfoFromBeamLostChanged = pValue
 
     def checkBeamChanged(self, pValue):
         if pValue == 1:
@@ -1390,6 +1416,7 @@ class CollectBrick(Core.BaseBrick):
         if self.energyControlObject is None:
             print ">>> No BsxCUBE contact with Pilatus"
         else:
+            #TODO: DEBUG
             print ">> info on self.energyControlObject"
             print dir(self.energyControlObject)
             try:
@@ -1400,7 +1427,13 @@ class CollectBrick(Core.BaseBrick):
         if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
             if self.contact:
                 logger.warning("Lost contact with Pilatus")
-            self.contact = False
+                self.contact = False
+                #TODO: DEBUG
+                print ">> LOST CONTACT WITH PILATUS"
+                print ">> info on self.energyControlObject"
+                print dir(self.energyControlObject)
+                print "%r" % self.energyControlObject
+                print ">> END LOST CONTACT WITH PILATUS INFO"
             return False
         else:
             if not self.contact:
@@ -1744,7 +1777,7 @@ class CollectBrick(Core.BaseBrick):
         #
         # Stop all timers 
         #
-        self.SPECBusyTimerTimeOut()
+        self.SPECBusyTimerTimeOut(testBeamLost = False)
 
         for timer in self._curveList:
             timer.stop()
@@ -1825,10 +1858,13 @@ class CollectBrick(Core.BaseBrick):
 
         self.brick_widget.setStyleSheet(self.brick_widget.styleSheet())
 
-    def SPECBusyTimerTimeOut(self):
+    def SPECBusyTimerTimeOut(self, testBeamLost = True):
         #
         # this should be done otherwise.  Checking the status of the spec ready channel
         #
+        # if lostBeam do not care about SPEC timeout
+        if testBeamLost and self.lostBeam :
+            return
         self.SPECBusyTimer.stop()
         self.setCollectionStatus("done")
 

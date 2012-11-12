@@ -120,7 +120,7 @@ class Collect(CObjectBase):
 
         try:
             self.channels["jobSuccess_edna1"].connect("update", self.processingDone)
-            self.channels["jobFailure_edna1"].connect("update", self.processingDone)
+            self.channels["jobFailure_edna1"].connect("update", self.processingFailed)
             self.commands["initPlugin_edna1"](self.pluginSAS)
             self.commands["initPlugin_edna1"](self.pluginHPLC)
             self.edna1Dead = False
@@ -129,7 +129,7 @@ class Collect(CObjectBase):
 
         try:
             self.channels["jobSuccess_edna2"].connect("update", self.processingDone)
-            self.channels["jobFailure_edna2"].connect("update", self.processingDone)
+            self.channels["jobFailure_edna2"].connect("update", self.processingFailed)
             self.commands["initPlugin_edna2"](self.pluginIntegrate)
             self.commands["initPlugin_edna2"](self.pluginMerge)
 
@@ -384,7 +384,11 @@ class Collect(CObjectBase):
             # If HPLC we can now dump data
             self.flushHPLC()
 
-    def processingDone(self, jobId):
+    # if failed, set failed flag
+    def processingFailed(self, jobId):
+        self.processingDone(jobId, jobSuccess = False)
+
+    def processingDone(self, jobId, jobSuccess = True):
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
             if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
@@ -393,6 +397,10 @@ class Collect(CObjectBase):
                     logger.warning("processing Done from EDNA: %s but no Job submitted found in the submit list", jobId)
         else:
             filename = self.dat_filenames.pop(jobId)
+            # stop here if not success
+            if not jobSuccess:
+                logger.info("processing Failed from EDNA: %s -> %s", jobId, filename)
+                return
             logger.info("processing Done from EDNA: %s -> %s", jobId, filename)
             self.emit("collectProcessingDone", filename)
             if jobId.startswith(self.pluginMerge):
