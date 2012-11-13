@@ -153,10 +153,10 @@ class CollectBrick(Core.BaseBrick):
         self.__expertModeOnly = False
         self.__expertMode = False
         self.loginDone = False
-        self.contact = False
+        self.linkUpPilatus = False
         self.energyControlObject = None
         self.loginObject = None
-#        self.biosaxsClientObject = None
+        self.biosaxsClientObject = None
         self.__username = None
         self.__password = None
         self.collectObj = None
@@ -485,11 +485,10 @@ class CollectBrick(Core.BaseBrick):
 
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient(self, pPeer):
-        pass
-#        print "Biosaxs connected"
-
-#        if pPeer is not None:
-#            self.biosaxsClientObject = pPeer
+        #TODO: DEBUG
+        print "Biosaxs connected"
+        if pPeer is not None:
+            self.biosaxsClientObject = pPeer
 
 
     def getRobotXMLByExperimentId(self, experimentId):
@@ -956,12 +955,10 @@ class CollectBrick(Core.BaseBrick):
             self.collectObj.updateChannels(oneway = True)
 
     def connectedToEnergy(self, pPeer):
-        if pPeer is None:
-            self.energyControlObject = None
-        else:
+        if pPeer is not None:
             if self.energyControlObject is None:
                 self.energyControlObject = pPeer
-                self.contact = True
+                self.linkUpPilatus = True
                 # read energy when getting contact with CO Object
                 self.__energy = float(self.energyControlObject.getEnergy())
                 wavelength = self.hcOverE / self.__energy
@@ -1413,32 +1410,24 @@ class CollectBrick(Core.BaseBrick):
             print ">>> No BsxCUBE contact with Pilatus"
         else:
             #TODO: DEBUG
-            print ">> info on self.energyControlObject"
-            print dir(self.energyControlObject)
-            try:
-                testPilatus = self.energyControlObject.pilatusReady()
-            except:
-                raise
             print ">>> Testing %s " % self.energyControlObject.pilatusReady()
-        if (self.energyControlObject is None) or ("pilatusReady" not in dir(self.energyControlObject)):
-            if self.contact:
+        if self.energyControlObject is None:
+            if self.linkUpPilatus:
                 logger.warning("Lost contact with Pilatus")
-                self.contact = False
+                self.linkUpPilatus = False
                 #TODO: DEBUG
                 print ">> LOST CONTACT WITH PILATUS"
-                print ">> info on self.energyControlObject"
-                print dir(self.energyControlObject)
                 print "%r" % self.energyControlObject
                 print ">> END LOST CONTACT WITH PILATUS INFO"
             return False
         else:
-            if not self.contact:
+            if not self.linkUpPilatus:
                 logger.warning("Found Pilatus again")
-                self.contact = True
-        if not self.energyControlObject.pilatusReady():
-            Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later or try restarting the Pilatus", Qt.QMessageBox.Ok)
-            return False
-        return True
+                self.linkUpPilatus = True
+            if not self.energyControlObject.pilatusReady():
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later or try restarting the Pilatus", Qt.QMessageBox.Ok)
+                return False
+            return True
 
     def testPushButtonClicked(self):
         if not self.checkPilatusReady():

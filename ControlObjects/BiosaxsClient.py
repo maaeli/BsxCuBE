@@ -32,6 +32,7 @@ class BiosaxsClient(CObjectBase):
         self.password = password #"Rfo4-73"
 
 
+
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
     def getExperimentNames(self):
 #        print "------------ Getting experiment Names"
@@ -49,6 +50,8 @@ class BiosaxsClient(CObjectBase):
             self.experiments.append(Experiment(experiment))
         experimentNames = self.getExperimentNames()
         self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
+        #self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
+
 
 
     def getExperimentsByProposalId(self, proposalId):
@@ -77,64 +80,26 @@ class BiosaxsClient(CObjectBase):
     def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
         if (self.client is None):
              self.__initWebservice()
-#        print "Sample code: " + sampleCode
-#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-#        print "saveFrameBefore " + str(self.selectedExperimentId)
-#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
-
-#        print self.selectedExperimentId
-#        print specimenId
-#        print sampleCode
         self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
     def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
         if (self.client is None):
              self.__initWebservice()
-#        print "Sample code: " + sampleCode
-#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-#        print "saveFrameAfter " + str(self.selectedExperimentId)
-#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
-
-#        print self.selectedExperimentId
-#        print specimenId
-#        print sampleCode
         self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
-
 
     def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
         if (self.client is None):
              self.__initWebservice()
-#        print "Sample code: " + sampleCode
-#        print "SpecimenId: " + str(self.getSpecimenIdBySampleCode(sampleCode))
-#        print "ExperimentId: " + str(self.selectedExperimentId)
-#        print fileArray
         specimenId = self.getSpecimenIdBySampleCode(sampleCode)
         if specimenId is None:
             specimenId = -1
-
-#        print self.selectedExperimentId
-#        print specimenId
-#        print sampleCode
         self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
-        #print str(response)
-        #return str(response)
-        #return experiments
-
-#    def getExperiments(self, user, password, code, number):
-#        self.response = self.client.service.findExperimentByProposalCode(code, number)
-#        self.experimentIds = []
-#        for experiment in self.response:
-#            self.experimentIds.append([experiment.name, experiment.experimentId])
-#            self.experiments.append(Experiment(experiment))
-#        return self.experimentIds
-
-
 
     def getRobotXMLByExperimentId(self, experimentId):
         if (self.client is None):
@@ -155,3 +120,14 @@ class Experiment:
 
     def getPlates(self):
         return self.experiment.samplePlate3VOs
+
+    def getPlateGroups(self, experiment):
+        plates = self.getPlates()
+        dict = {}
+        plateGroups = []
+        for plate in plates:
+            if hasattr(plate, 'plategroup3VO'):
+                if not dict.has_key(plate.plategroup3VO.name):
+                    plateGroups.append(plate.plategroup3VO)
+                    dict[plate.plategroup3VO.name] = True
+        return plateGroups
