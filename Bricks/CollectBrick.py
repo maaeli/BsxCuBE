@@ -889,12 +889,8 @@ class CollectBrick(Core.BaseBrick):
             # put beamlost value updated
             if pValue != "":
                 self.lostBeam = True
-                #TODO: DEBUG
-                print ">> lost beam"
             else:
                 self.lostBeam = False
-                #TODO: DEBUG
-                print ">> found beam"
 
         #TODO : DEBUG
         #TODO remove this hack ASAP (SO 12/11 12)
