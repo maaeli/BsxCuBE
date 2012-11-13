@@ -955,6 +955,7 @@ class CollectBrick(Core.BaseBrick):
             self.collectObj.updateChannels(oneway = True)
 
     def connectedToEnergy(self, pPeer):
+        #TODO: For Matias : How on earth is this getting None as input.. What is connecting with pPeer = None???
         if pPeer is not None:
             if self.energyControlObject is None:
                 self.energyControlObject = pPeer
