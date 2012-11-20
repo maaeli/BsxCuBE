@@ -77,19 +77,23 @@ class CollectBrick(Core.BaseBrick):
                                              Slot("triggerEDNA"),
                                              Slot("blockEnergyAdjust")],
                                             "collectObjectConnected"),
+
                     "motoralignment": Connection("MotorAlignment object",
                                             [Signal("executeTestCollect", "executeTestCollect")],
                                             []),
+
                     "energy": Connection("Energy object",
                                             [Signal("energyChanged", "energyChanged")],
                                             [Slot("setEnergy"), Slot("getEnergy"), Slot("pilatusReady"), Slot("setPilatusFill"), Slot("energyAdjustPilatus")],
                                             "connectedToEnergy"),
+
                     "samplechanger": Connection("Sample Changer object",
                                             [Signal('seuTemperatureChanged', 'seuTemperatureChanged'),
                                              Signal('storageTemperatureChanged', 'storageTemperatureChanged'),
                                              Signal('stateChanged', 'state_changed')],
                                             [],
                                             "connectedToSC"),
+
                     "image_proxy": Connection("image proxy",
                                             [Signal('new_curves_data', 'y_curves_data'), Signal('erase_curve', 'erase_curve')],
                                             [],
@@ -1201,7 +1205,6 @@ class CollectBrick(Core.BaseBrick):
             self.normalisationLabel.show()
 
     def readOnlyCheckBoxToggled(self, pValue):
-
         self.directoryLineEdit.setEnabled(not pValue)
         self.directoryPushButton.setEnabled(not pValue)
         self.prefixLineEdit.setEnabled(not pValue)
@@ -1774,8 +1777,12 @@ class CollectBrick(Core.BaseBrick):
         answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Please wait for current action to finish", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
 
     def setWidgetState(self):
-
+        #TODO: DEBUG
+        print "<><>  setWidgetState called"
+        print "<><>  self.__expertModeOnly %s and self.__expertMode %s self.readOnlyCheckBox.isChecked() %s" % (self.__expertModeOnly, self.__expertMode, self.readOnlyCheckBox.isChecked())
         enabled = (not self.__expertModeOnly or self.__expertMode) and (not self.readOnlyCheckBox.isChecked())
+
+        print "<><> enabled %s " % (enabled)
 
 
         self.maskLineEdit.setEnabled(enabled)
@@ -1800,15 +1807,6 @@ class CollectBrick(Core.BaseBrick):
                    self.commentsLineEdit, \
                    self.codeLineEdit, \
                    self.blParamsButton, \
-                   self.maskLineEdit, \
-                   self.maskDirectoryPushButton, \
-                   self.maskDisplayPushButton, \
-                   self.detectorDistanceDoubleSpinBox, \
-                   self.pixelSizeXDoubleSpinBox, \
-                   self.pixelSizeYDoubleSpinBox, \
-                   self.beamCenterXSpinBox, \
-                   self.beamCenterYSpinBox, \
-                   self.normalisationDoubleSpinBox, \
                    self.radiationCheckBox, \
                    self.radiationRelativeDoubleSpinBox, \
                    self.radiationAbsoluteDoubleSpinBox, \
