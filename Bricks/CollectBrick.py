@@ -242,7 +242,7 @@ class CollectBrick(Core.BaseBrick):
         self.concentrationDoubleSpinBox = Qt.QDoubleSpinBox(self.brick_widget)
         self.concentrationDoubleSpinBox.setSuffix(" mg/ml")
         self.concentrationDoubleSpinBox.setDecimals(2)
-        self.concentrationDoubleSpinBox.setRange(0, 100)
+        self.concentrationDoubleSpinBox.setRange(0, 400)
         self.hBoxLayout5.addWidget(self.concentrationDoubleSpinBox)
         self.brick_widget.layout().addLayout(self.hBoxLayout5)
 
