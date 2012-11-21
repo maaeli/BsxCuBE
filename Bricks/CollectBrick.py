@@ -1598,6 +1598,10 @@ class CollectBrick(Core.BaseBrick):
                 self.setButtonState(0)
 
     def machineCurrentChanged(self, pValue):
+        # if Machine dead, do not give error messages
+        if pValue is None:
+            return
+
         try:
             self._machineCurrent = float(pValue)
         except Exception, e:
@@ -1777,12 +1781,7 @@ class CollectBrick(Core.BaseBrick):
         answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Please wait for current action to finish", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
 
     def setWidgetState(self):
-        #TODO: DEBUG
-        print "<><>  setWidgetState called"
-        print "<><>  self.__expertModeOnly %s and self.__expertMode %s self.readOnlyCheckBox.isChecked() %s" % (self.__expertModeOnly, self.__expertMode, self.readOnlyCheckBox.isChecked())
         enabled = (not self.__expertModeOnly or self.__expertMode) and (not self.readOnlyCheckBox.isChecked())
-
-        print "<><> enabled %s " % (enabled)
 
 
         self.maskLineEdit.setEnabled(enabled)
