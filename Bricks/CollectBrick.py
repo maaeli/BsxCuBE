@@ -639,7 +639,7 @@ class CollectBrick(Core.BaseBrick):
 
     def collectProcessingDone(self, dat_filename):
         #TODO : DEBUG
-        ##print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
+        print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
         #TODO remove this hack ASAP (SO 27/9 11)
         ### HORRIBLE CODE
         if self.last_dat is None :
