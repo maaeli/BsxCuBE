@@ -490,8 +490,7 @@ class CollectBrick(Core.BaseBrick):
 
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient(self, pPeer):
-        #TODO: DEBUG
-        print "Biosaxs connected"
+        # if None, then we lost contact
         if pPeer is not None:
             self.biosaxsClientObject = pPeer
 
@@ -549,7 +548,7 @@ class CollectBrick(Core.BaseBrick):
             self.scObject = pPeer
             self.nbPlates = 3
             self.plateInfos = [self.scObject.getPlateInfo(i) for i in range(1, self.nbPlates + 1)]
-            print "sample changer connected in CollectBrick>>>> %r" % self.plateInfos
+            print "sample changer connected >>>> %r" % self.plateInfos
             self.seuTemperature = self.scObject.getSEUTemperature()
             self.storageTemperature = self.scObject.getSampleStorageTemperature()
 

@@ -266,7 +266,17 @@ class CollectRobotDialog(Qt.QDialog):
         robotFileName = self.__parent.getRobotFileName()
         self.fileLineEdit.setText(robotFileName)
 
-        self.loadFile(robotFileName)
+
+        if not os.path.exists(robotFileName):
+            if robotFileName != "":
+                Qt.QMessageBox.critical(self, "Error", "Robot file %r does not exist anymore. I will start with an empty one" % robotFileName, Qt.QMessageBox.Ok)
+            self.fileLineEdit.setText("")
+            self.__parent.setRobotFileName("")
+
+        if os.path.exists(robotFileName):
+            filename = str(robotFileName)
+            self.loadFile(filename)
+
 
     #------------------
     #  createSampleRow.  Creates GUI for each row in sample table
@@ -536,8 +546,8 @@ class CollectRobotDialog(Qt.QDialog):
             return
 
         self.fileLineEdit.setText(filename)
-        filename = str(filename)
 
+        filename = str(filename)
         self.loadFile(filename)
 
     def loadFile(self, filename):
@@ -602,6 +612,9 @@ class CollectRobotDialog(Qt.QDialog):
         self.fileLineEdit.setText(filename)
         self.saveFile(filename)
 
+        # Update robot file
+        self.__parent.setRobotFileName(filename)
+
 
 
 
@@ -613,7 +626,7 @@ class CollectRobotDialog(Qt.QDialog):
 
     def saveFile(self, filename, askrewrite = True):
 
-        if askrewrite and os.path.exists(filename):
+        if os.path.exists(filename):
             quitsave = Qt.QMessageBox.question(self, "Warning", "The file '%s' already exists. Overwrite it?" % filename, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton) != Qt.QMessageBox.Yes
             if quitsave:
                 return
