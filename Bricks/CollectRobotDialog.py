@@ -99,7 +99,7 @@ class CollectRobotDialog(Qt.QDialog):
         #Qt.QObject.connect(self.filePushButton, Qt.SIGNAL("clicked()"), self.filePushButtonClicked)
         #self.hBoxLayout0.addWidget(self.filePushButton)
 
-        self.loadPushButton = Qt.QPushButton("Load", self)
+        self.loadPushButton = Qt.QPushButton("Load new", self)
         self.loadPushButton.setFixedWidth(70)
         Qt.QObject.connect(self.loadPushButton, Qt.SIGNAL("clicked()"), self.loadPushButtonClicked)
         self.hBoxLayout0.addWidget(self.loadPushButton)
@@ -261,6 +261,12 @@ class CollectRobotDialog(Qt.QDialog):
                             *[valid=\"false\"] {background-color: #f99}\
                             *[sampletype=\"Buffer\"] {background-color: #eec}\
                             *[sampletype=\"Sample\"] {background-color: #cce}")
+
+        # add automatically the robot from CollectBrick
+        robotFileName = self.__parent.getRobotFileName()
+        self.fileLineEdit.setText(robotFileName)
+
+        self.loadFile(robotFileName)
 
     #------------------
     #  createSampleRow.  Creates GUI for each row in sample table
@@ -524,7 +530,7 @@ class CollectRobotDialog(Qt.QDialog):
             except Exception, e:
                 print "Ignored Exception 5: " + str(e)
 
-        filename = Qt.QFileDialog.getOpenFileName(self, "Choose a file to load", dirname, "XML File (*.xml)")
+        filename = Qt.QFileDialog.getOpenFileName(self, "Choose a new file to load", dirname, "XML File (*.xml)")
 
         if not filename:
             return
@@ -534,7 +540,7 @@ class CollectRobotDialog(Qt.QDialog):
 
         self.loadFile(filename)
 
-    def loadFile(self, filename, fromIspyB = False):
+    def loadFile(self, filename):
         try:
             myPars = CollectPars(filename)
 
@@ -572,16 +578,14 @@ class CollectRobotDialog(Qt.QDialog):
 
             self.CBblock = 0
             self.filename = filename
-            if fromIspyB:
-                Qt.QMessageBox.information(self, "Info", "The data from ISPyB was successfully loaded!")
-            else:
-                Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
+
+            Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
+            # Update robot file
+            self.__parent.setRobotFileName(filename)
+
         except Exception, e:
             logger.exception('Cannot load collection parameters file. \n')
-            if fromIspyB:
-                Qt.QMessageBox.critical(self, "Error", "Error when loading data from ISPyB!")
-            else:
-                Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
+            Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
 
     def saveAsPushButtonClicked(self):
         filename = Qt.QFileDialog.getSaveFileName(self, "Choose a file to save", self.filename, "XML File (*.xml)")

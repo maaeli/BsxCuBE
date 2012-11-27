@@ -558,7 +558,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
         #self.loadFile(filename)
 
-    def loadFile(self, filename, fromIspyB = False):
+    def loadFile(self, filename):
         try:
             myPars = CollectPars(filename)
             self.clearConfiguration()
@@ -594,16 +594,12 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
             self.CBblock = 0
             self.filename = filename
-            if fromIspyB:
-                Qt.QMessageBox.information(self, "Info", "The data from ISPyB was successfully loaded!")
-            else:
-                Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully loaded!" % filename)
+
+            Qt.QMessageBox.information(self, "Info", "The data from ISPyB was successfully loaded!")
+
         except Exception, e:
             logger.exception('Cannot load collection parameters file. \n')
-            if fromIspyB:
-                Qt.QMessageBox.critical(self, "Error", "Error when loading data from ISPyB!")
-            else:
-                Qt.QMessageBox.critical(self, "Error", "Error when trying to read file '%s'!" % filename)
+            Qt.QMessageBox.critical(self, "Error", "Error when loading data from ISPyB!")
 
     #def saveAsPushButtonClicked(self):
         #filename = Qt.QFileDialog.getSaveFileName(self, "Choose a file to save", self.filename, "XML File (*.xml)")
@@ -1113,7 +1109,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         if response != None:
             xmlfile = cStringIO.StringIO(response)
         try:
-            self.loadFile(xmlfile, fromIspyB = True)
+            self.loadFile(xmlfile)
         finally:
             self.filename = ""
 

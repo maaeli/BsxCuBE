@@ -681,6 +681,7 @@
     <connection role="collect">
       <signal name="collectBeamStopDiodeChanged"/>
       <signal name="collectDirectoryChanged"/>
+      <signal name="collectRobotFileChanged"/>
       <signal name="collectPrefixChanged"/>
       <signal name="collectRunNumberChanged"/>
       <signal name="collectNumberFramesChanged"/>

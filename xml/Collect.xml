@@ -37,6 +37,7 @@
    <channel name="guillstate" type="spec" call="BSX_GLOBAL/shutter/guillstate"/>
    <channel name="collectBeamStopDiode"  type="spec" call="BSX_GLOBAL/collect/beamStopDiode" signal="collectBeamStopDiodeChanged"/>
    <channel name="collectDirectory"      type="spec" call="BSX_GLOBAL/collect/directory" signal="collectDirectoryChanged"/>
+   <channel name="collectRobotFile"      type="spec" call="BSX_GLOBAL/collect/robotFile" signal="collectRobotFileChanged"/>
    <channel name="collectPrefix"         type="spec" call="BSX_GLOBAL/collect/prefix" signal="collectPrefixChanged"/>
    <channel name="collectRunNumber"      type="spec" call="BSX_GLOBAL/collect/runNumber" signal="collectRunNumberChanged"/>
    <channel name="collectNumberFrames"   type="spec" call="BSX_GLOBAL/collect/numberFrames" signal="collectNumberFramesChanged"/>

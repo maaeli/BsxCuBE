@@ -42,6 +42,7 @@ class CollectBrick(Core.BaseBrick):
     connections = {"collect": Connection("Collect object",
                                             [Signal("collectBeamStopDiodeChanged", "collectBeamStopDiodeChanged"),
                                              Signal("collectDirectoryChanged", "collectDirectoryChanged"),
+                                             Signal("collectRobotFileChanged", "collectRobotFileChanged"),
                                              Signal("collectPrefixChanged", "collectPrefixChanged"),
                                              Signal("collectRunNumberChanged", "collectRunNumberChanged"),
                                              Signal("collectNumberFramesChanged", "collectNumberFramesChanged"),
@@ -148,6 +149,7 @@ class CollectBrick(Core.BaseBrick):
         self._abortFlag = False
         self._currentFrame = 0
         self._currentCurve = 0
+        self._robotFileStr = "/tmp/robot.xml"
         self._waveLengthStr = "0.0"
         self._collectRobotDialog = None
         self._ispybCollect = False
@@ -174,7 +176,6 @@ class CollectBrick(Core.BaseBrick):
         self.__validParameters = [False, False, False]
 
         #TODO: DEBUG - Horrible
-        self.last_dat = None
         self.imageProxy = None
         #TODO: DEBUG - Horrible
         self.lastInfoFromBeamLostChanged = None
@@ -580,6 +581,9 @@ class CollectBrick(Core.BaseBrick):
     def collectDirectoryChanged(self, pValue):
         self.directoryLineEdit.setText(pValue)
 
+    def collectRobotFileChanged(self, pValue):
+        self._robotFileStr = pValue
+
     def collectPrefixChanged(self, pValue):
         self.prefixLineEdit.setText(pValue)
 
@@ -638,70 +642,31 @@ class CollectBrick(Core.BaseBrick):
             self.radiationRelativeDoubleSpinBox.setValue(float(pValue))
 
     def collectProcessingDone(self, dat_filename):
-        #TODO : DEBUG
-        print ">>>>>> Collect Processing Done filename is %r and will be displayed in 1D " % dat_filename
-        #TODO remove this hack ASAP (SO 27/9 11)
-        ### HORRIBLE CODE
-        if self.last_dat is None :
-            #TODO remove this hack ASAP (SO 27/9 11)
-            ### TO BE REMOVED WHEN FWK4 IS FIXED (MG)
-            logger.info("processing done, file is %s", dat_filename)
-            # Only display 1d images like XXXX/1d/<at least on char>.dat
-            if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
-                # Waiting for the file to appear
-                t0 = time.time()
-                fileFound = False
-                directory = os.path.dirname(dat_filename)
-                #small sleep
-                time.sleep(0.4)
-                try:
-                    dummy = os.stat(directory)
-                except Exception:
-                    # in case directory does not exist yet
-                    pass
-                time.sleep(0.1)
-                if os.path.exists(dat_filename):
-                    filesize = os.path.getsize(dat_filename)
-                    print ">>> File info 0 %r  %s " % (filesize, dat_filename)
-                    fileFound = True
-                    self.display1D(dat_filename)
-                else:
-                    timestr = str(time.time() - t0)
-                    logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
-            self.last_dat = dat_filename
-        else:
-            if self.last_dat == dat_filename:
-                return
+        logger.info("processing done, file is %s", dat_filename)
+        # Only display 1d images like XXXX/1d/<at least on char>.dat
+        if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
+            # Waiting for the file to appear
+            t0 = time.time()
+            fileFound = False
+            directory = os.path.dirname(dat_filename)
+            #small sleep
+            time.sleep(0.4)
+            try:
+                dummy = os.stat(directory)
+            except Exception:
+                # in case directory does not exist yet
+                pass
+            time.sleep(0.1)
+            if os.path.exists(dat_filename):
+                filesize = os.path.getsize(dat_filename)
+                print ">>> File info 0 %r  %s " % (filesize, dat_filename)
+                fileFound = True
+                self.display1D(dat_filename)
             else:
-                logger.info("processing done, file is %s", dat_filename)
-                # Only display 1d images like XXXX/1d/<at least on char>.dat
-                if re.match(r".*/1d/[^/]+\.dat$", dat_filename):
-                    # Waiting for the file to appear
-                    t0 = time.time()
-                    fileFound = False
-                    directory = os.path.dirname(dat_filename)
-                    #small sleep
-                    time.sleep(0.4)
-                    try:
-                        dummy = os.stat(directory)
-                    except Exception:
-                        # in case directory does not exist yet
-                        pass
-                    time.sleep(0.1)
-                    if os.path.exists(dat_filename):
-                        filesize = os.path.getsize(dat_filename)
-                        print ">>> File info 0 %r  %s " % (filesize, dat_filename)
-                        fileFound = True
-                        self.display1D(dat_filename)
-                    else:
-                        timestr = str(time.time() - t0)
-                        logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
-                self.last_dat = dat_filename
-
+                timestr = str(time.time() - t0)
+                logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
 
     def collectProcessingLog(self, level, logmsg, notify):
-        #TODO : DEBUG
-        print ">>>>>>> CollectProcessingLog logmsg %r and level %d " % (logmsg, level)
         # Level 0 = info, Level 1 = Warning, Level 2 = Error 
         if level == 0:
             logmethod = logger.info
@@ -948,8 +913,6 @@ class CollectBrick(Core.BaseBrick):
     def erase_curve(self, pPeer):
         pass
 
-
-
     def collectObjectConnected(self, collect_obj):
         if collect_obj is not None:
             # we reconnected.. Let us put back light if out
@@ -959,7 +922,7 @@ class CollectBrick(Core.BaseBrick):
             self.collectObj.updateChannels(oneway = True)
 
     def connectedToEnergy(self, pPeer):
-        #TODO: For Matias : How on earth is this getting None as input.. What is connecting with pPeer = None???
+        #TODO: Matias says: If None => lost connection to peer
         if pPeer is not None:
             if self.energyControlObject is None:
                 self.energyControlObject = pPeer
@@ -1027,7 +990,12 @@ class CollectBrick(Core.BaseBrick):
         else:
             return 10 ** (-val)
 
+    def getRobotFileName(self):
+        return self._robotFileStr
 
+    def setRobotFileName(self, pValue):
+        if self.collectObj is not None:
+            self.collectObj.setRobotFileName(pValue)
 
     def getFileInfo(self):
         generalParsWidget = self
@@ -1429,7 +1397,7 @@ class CollectBrick(Core.BaseBrick):
                 logger.warning("Found Pilatus again")
                 self.linkUpPilatus = True
             if not self.energyControlObject.pilatusReady():
-                Qt.QMessageBox.critical(self.brick_widget, "Error", "Pilatus detector is busy.. Try later or try restarting the Pilatus", Qt.QMessageBox.Ok)
+                Qt.QMessageBox.critical(self.brick_widget, "Error", "No contact with Pilatus.. Try later or Restart the Pilatus", Qt.QMessageBox.Ok)
                 return False
             return True
 

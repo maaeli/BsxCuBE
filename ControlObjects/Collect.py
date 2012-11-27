@@ -25,6 +25,7 @@ logger = logging.getLogger("Collect")
 class Collect(CObjectBase):
     signals = [Signal("collectBeamStopDiodeChanged"),
                Signal("collectDirectoryChanged"),
+               Signal("collectRobotFileChanged"),
                Signal("collectPrefixChanged"),
                Signal("collectRunNumberChanged"),
                Signal("collectNumberFramesChanged"),
@@ -568,6 +569,10 @@ class Collect(CObjectBase):
         else:
             self.channels["checkBeam"].set_value(0)
 
+    def setRobotFileName(self, pValue):
+        # Update latest Robot File
+        self.collectRobotFile.set_value(pValue)
+
     # overwrite connectNotify ; first values will be read by brick
     def connectNotify(self, signal_name):
         pass
@@ -795,6 +800,7 @@ class Collect(CObjectBase):
 
 
     def _collectWithRobot(self, pars):
+
         lastBuffer = ""
         # Setting sample type
         # Synchronous - no exception handling

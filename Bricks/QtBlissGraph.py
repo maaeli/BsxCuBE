@@ -36,12 +36,8 @@ import time
 import numpy
 
 from PyMca import PyMcaQt as qt
-if not hasattr(qt, 'QString'):
-    QString = str
-else:
-    QString = qt.QString
 
-QTVERSION = qt.qVersion()
+QString = qt.QString
 
 
 from PyQt4 import Qwt5
@@ -103,9 +99,9 @@ if not USE_SPS_LUT:
         # fuzzy variables, so we will represent them like trapezoids
         # that are centered in the crisp value
         fuzziness = 0.75
-        slope_factor = 4  # We always supposse that 2*(1.0/slope)<fuzziness
+        slope_factor = 4  # We always suppose that 2*(1.0/slope)<fuzziness
 
-        # Settiings for palette
+        # Settings for the pallette
         R_center = 0.75
         G_center = 0.5
         B_center = 0.25
@@ -408,12 +404,6 @@ class QtBlissGraph(Qwt5.QwtPlot):
             self.selectionPicker.setTrackerMode(Qwt5.QwtPicker.AlwaysOn)
             self.selectionPicker.setSelectionFlags(
                 Qwt5.QwtPicker.DragSelection | Qwt5.QwtPicker.PolygonSelection)
-        elif mode.upper() == "ELLIPSE":
-            raise NotImplemented("Ellipse selection is not implemented yet")
-            self.selectionPicker.setRubberBand(Qwt5.QwtPicker.EllipseRubberBand)
-            self.selectionPicker.setTrackerMode(Qwt5.QwtPicker.AlwaysOn)
-            self.selectionPicker.setSelectionFlags(
-                Qwt5.QwtPicker.DragSelection | Qwt5.QwtPicker.RectSelection)
         else:
             raise ValueError("Unknown selection mode %s" % mode)
         self._selectionMode = mode
@@ -434,6 +424,8 @@ class QtBlissGraph(Qwt5.QwtPlot):
         npoints = polygon.size()
         xList = []
         yList = []
+        oldy = None
+        oldx = None
         for i in range(npoints):
             point = polygon.point(i)
             xpixel = point.x()
@@ -497,6 +489,8 @@ class QtBlissGraph(Qwt5.QwtPlot):
         if self._selectionMode.upper() == "LINE":
             if npoints > 1:
                 #check that I already have two distinct points
+                oldx = None
+                oldy = None
                 for i in range(polygon.size()):
                     point = polygon.point(i)
                     x = point.x()
@@ -734,13 +728,6 @@ class QtBlissGraph(Qwt5.QwtPlot):
             print("plotimage obsolete, use imagePlot instead")
         return self.imagePlot(*var, **kw)
 
-    def drawCanvasItems(self, painter, rectangle, maps, filter):
-        if DEBUG:
-            print("drawCanvasItems")
-        if self.plotImage is not None:
-            self.plotImage.drawImage(painter, maps[Qwt5.QwtPlot.xBottom],
-                                     maps[Qwt5.QwtPlot.yLeft])
-        Qwt5.QwtPlot.drawCanvasItems(self, painter, rectangle, maps, filter)
 
     def removeImage(self, legend = None):
         self.plotImage.detach()
@@ -1378,7 +1365,8 @@ class QtBlissGraph(Qwt5.QwtPlot):
                 for i in range(n):
                 #if i != index:
                     item = self.legend().findItem(i + 1)
-                    item.setFocusPolicy(qt.QWidget.ClickFocus)
+#TODO: DEBUG - next line is not right - No ClickFocus
+#                    item.setFocusPolicy(qt.QWidget.ClickFocus)
             else:
                 for curve in self.curves.keys():
                     item = self.legend().findItem(self.curves[curve] ["curve"])
@@ -1796,7 +1784,8 @@ class QtBlissGraph(Qwt5.QwtPlot):
             if 0:
                 for i in range(n):
                         item = self.legend().findItem(i + 1)
-                        item.setFocusPolicy(qt.QWidget.ClickFocus)
+                        #TODO: DEBUG - next line is not right - No ClickFocus
+#                       item.setFocusPolicy(qt.QWidget.ClickFocus)
             else:
                 for curve in self.curves.keys():
                     if DEBUG:
