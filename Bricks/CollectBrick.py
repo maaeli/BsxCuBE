@@ -496,12 +496,29 @@ class CollectBrick(Core.BaseBrick):
             self.biosaxsClientObject = pPeer
 
 
+    #Deprecated
     def getRobotXMLByExperimentId(self, experimentId):
         if self.getObject("BiosaxsClient") is not None:
             return self.getObject("BiosaxsClient").getRobotXMLByExperimentId(experimentId)
         else:
             logger.warning("No connection to BiosaxsClient")
             return None
+
+
+    def getRobotXMLByPlateGroupId(self, plateGroupId, experimentId):
+        if self.getObject("BiosaxsClient") is not None:
+            self.getObject("BiosaxsClient").getRobotXMLByPlateGroupId(plateGroupId, experimentId)
+        else:
+            logger.warning("No connection to BiosaxsClient")
+            return None
+
+    def getPlateGroupByExperimentId(self, experimentId):
+        if self.getObject("BiosaxsClient") is not None:
+            return self.getObject("BiosaxsClient").getPlateGroupByExperimentId(experimentId)
+        else:
+            logger.warning("No connection to BiosaxsClient")
+            return None
+
 
     def getExperimentNamesByProposalCodeNumber(self):
         if self.getObject("BiosaxsClient") is not None:
@@ -514,6 +531,9 @@ class CollectBrick(Core.BaseBrick):
         #print "------------------->" + methodName
         if methodName == "getExperimentNamesByProposalCodeNumber":
             self._collectRobotDialog.onExperimentNamesRetrieved(response)
+
+        if methodName == "getRobotXMLByPlateGroupId":
+            self._collectRobotDialog.loadXML(response)
 
 
 

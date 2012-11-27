@@ -101,7 +101,19 @@ class BiosaxsClient(CObjectBase):
             specimenId = -1
         self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
 
+    def getPlatesByPlateGroupId(self, plateGroupId, experimentId):
+        plates = []
+        for experiment in self.experiments:
+            if experiment.experiment.experimentId == experimentId:
+                experimentPlates = experiment.getPlates()
+                for plate in experimentPlates:
+                    if plate.plategroup3VO is not None:
+                        if plate.plategroup3VO.plateGroupId == plateGroupId:
+                            plates.append(plate)
+        return plates
+
     def getRobotXMLByExperimentId(self, experimentId):
+        self.selectedExperimentId = experimentId
         if (self.client is None):
              self.__initWebservice()
         for experiment in self.experiments:
@@ -113,6 +125,27 @@ class BiosaxsClient(CObjectBase):
                 return self.client.service.getRobotXMLByPlateIds(experimentId, plates)
         return None
 
+    def getPlateGroupByExperimentId(self, experimentId):
+        self.selectedExperimentId = experimentId
+        for experiment in self.experiments:
+            if experiment.experiment.experimentId is experimentId:
+                #It works but I don't know how to deserialize in bricks side
+                #return str(experiment.getPlateGroups())
+                groups = experiment.getPlateGroups()
+                names = []
+                for group in groups:
+                    names.append([group.name, group.plateGroupId])
+                return names
+        return []
+
+    def getRobotXMLByPlateGroupId(self, plateGroupId, experimentId):
+        print "plate Group ID" + str(plateGroupId)
+        plates = self.getPlatesByPlateGroupId(plateGroupId, experimentId)
+        ids = []
+        for plate in plates:
+            ids.append(plate.samplePlateId)
+        xml = self.client.service.getRobotXMLByPlateIds(experimentId, str(ids))
+        self.emit("onSuccess", "getRobotXMLByPlateGroupId", xml)
 
 class Experiment:
     def __init__(self, experiment):
@@ -121,13 +154,16 @@ class Experiment:
     def getPlates(self):
         return self.experiment.samplePlate3VOs
 
-    def getPlateGroups(self, experiment):
+    def getPlateGroups(self):
         plates = self.getPlates()
         dict = {}
         plateGroups = []
         for plate in plates:
             if hasattr(plate, 'plategroup3VO'):
                 if not dict.has_key(plate.plategroup3VO.name):
-                    plateGroups.append(plate.plategroup3VO)
+                    if plate.plategroup3VO is not None:
+                        plateGroups.append(plate.plategroup3VO)
                     dict[plate.plategroup3VO.name] = True
         return plateGroups
+
+
