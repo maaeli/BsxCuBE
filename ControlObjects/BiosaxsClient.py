@@ -18,6 +18,8 @@ class BiosaxsClient(CObjectBase):
         self.client = None
         self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
+        self.user = None
+        self.password = None
 
     def __initWebservice(self):
 
@@ -30,7 +32,6 @@ class BiosaxsClient(CObjectBase):
     def setUser(self, user, password):
         self.user = user #"mx1438"
         self.password = password #"Rfo4-73"
-
 
 
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]

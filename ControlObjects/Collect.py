@@ -83,7 +83,7 @@ class Collect(CObjectBase):
         self.dat_filenames = {}
         self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
-        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
+        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
         self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_0"
@@ -292,10 +292,19 @@ class Collect(CObjectBase):
         sPrefix = str(pPrefix)
         ave_filename = os.path.join(pDirectory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
         sub_filename = os.path.join(pDirectory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
+
+        user = self.objects["biosaxs_client"].user
+        password = self.objects["biosaxs_client"].password
+        measurementId = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+        print "Sending to EDNA login %s,%s,%s" % (user, password, measurementId)
+        sample = XSDataBioSaxsSample(login = XSDataString(user),
+                                     passwd = XSDataString(password),
+                                     measurementID = XSDataInteger(measurementId))
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
                                 inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%05d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
                                 mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
-                                subtractedCurve = XSDataFile(path = XSDataString(sub_filename)))
+                                subtractedCurve = XSDataFile(path = XSDataString(sub_filename)),
+                                sample = sample)
         if pRadiationChecked:
             self.xsdAverage.absoluteFidelity = XSDataDouble(float(pRadiationAbsolute))
             self.xsdAverage.relativeFidelity = XSDataDouble(float(pRadiationRelative))
@@ -773,9 +782,18 @@ class Collect(CObjectBase):
 
 
 
-    def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode):
+    def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample):
         self.showMessage(0, "Preparing to send to ISPyB: " + mode)
-
+        self.showMessage(0, "MeasurementId: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
+        print "sample"
+        print sample
+        print "sample.buffer"
+        print sample["buffer"]
+        print "toCollect"
+        print tocollect
+        print "pars"
+        print pars
+        print "-----------------"
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -789,6 +807,7 @@ class Collect(CObjectBase):
         detectorDistance = pars["detectorDistance"]
         snapshotCapillary = "snapshotCapillary"
         currentMachine = "currentMachine"
+        print "SEU: " + str(exposureTemperature)
 
         if mode is "buffer_before":
             self.objects["biosaxs_client"].saveFrameSetBefore(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
@@ -897,7 +916,7 @@ class Collect(CObjectBase):
                     pars["runNumber"] = self.nextRunNumber
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_before")
                 if pars["collectISPYB"]:
-                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
 
             #
             # Wait if necessary before collecting sample
@@ -923,7 +942,7 @@ class Collect(CObjectBase):
                 pars["runNumber"] = self.nextRunNumber
             (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
             if pars["collectISPYB"]:
-                self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
+                self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
 
             if pars["bufferAfter"]:
                 if runNumberSet:
@@ -934,7 +953,7 @@ class Collect(CObjectBase):
                     pars["runNumber"] = self.nextRunNumber
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_after")
                 if pars["collectISPYB"]:
-                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"])
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
 
             prevSample = sample
 
