@@ -159,7 +159,9 @@ class BiosaxsClient(CObjectBase):
             return
 
         try:
-            self.client.service.createExperiment("mx", 1438, str(samples), storageTemperature, mode, extraflowTime)
+            print "+++"
+            print samples
+            self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
         except Exception:
             print Exception
             print "error", sys.exc_info()[0]

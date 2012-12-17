@@ -9,6 +9,7 @@ import pprint
 import datetime
 import re
 import sys
+import traceback
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -822,21 +823,33 @@ class Collect(CObjectBase):
         # ===========================================
         try:
 
-             if not pars["collectISPYB"]:
-                 print "We are using robot and we will create a new ISPyB experiment"
-                 ispyBuffers = []
-                 for sample in pars["sampleList"]:
-                     print sample["buffer"]
-                     ispyBuffers.append(sample["buffer"])
-                     print "------------------------------------------------------------"
-                     self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers[0], "23", "BeforeAndAfter", "10")
-                     #createExperiment(proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime)
-                     return
+            if not pars["collectISPYB"]:
+                print "We are using robot and we will create a new ISPyB experiment"
+                ispyBuffers = []
+                bufferNames = []
+                ##Collecting the buffers
+                for sample in pars["sampleList"]:
+                    print sample["buffer"]
+                    print sample["buffer"][0]["code"]
+                    if sample["buffer"][0]["code"] not in bufferNames:
+                        bufferNames.append(sample["buffer"][0]["code"])
+                        ispyBuffers.append(sample["buffer"][0])
+
+                ##Collecting the samples
+                for sample in pars["sampleList"]:
+                    print sample
+                    print sample["code"]
+                    sampleWithNoBufferAttribute = sample.copy()
+                    sampleWithNoBufferAttribute["buffer"] = ""
+                    ispyBuffers.append(sampleWithNoBufferAttribute)
+
+                self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
         except Exception:
             print Exception
             print "error", sys.exc_info()[0]
 
             print "There was some error trying to log into ISPyB"
+            traceback.print_exc()
             return
         return
 
