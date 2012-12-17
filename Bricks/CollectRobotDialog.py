@@ -553,7 +553,6 @@ class CollectRobotDialog(Qt.QDialog):
     def loadFile(self, filename):
         try:
             myPars = CollectPars(filename)
-
             self.clearConfiguration()
 
             #  Clear first if load was succesful
@@ -636,7 +635,10 @@ class CollectRobotDialog(Qt.QDialog):
 
         try:
             myPars.save(filename , history)
-            Qt.QMessageBox.information(self, "Info", "The file '%s' was successfully saved!" % filename)
+            if os.path.exists(filename):
+                Qt.QMessageBox.information(self, "Info", "The new version of the file '%s' was successfully saved!" % filename)
+            else:
+                Qt.QMessageBox.information(self, "Info", "A new version of the file '%s' was successfully saved!" % filename)
         except Exception, e:
             import traceback
             traceback.print_exc()
