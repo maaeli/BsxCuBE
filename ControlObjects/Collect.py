@@ -8,6 +8,7 @@ import math
 import pprint
 import datetime
 import re
+import sys
 from XSDataCommon import XSDataString, XSDataImage, XSDataBoolean, \
         XSDataInteger, XSDataDouble, XSDataFile, XSDataStatus, \
         XSDataLength, XSDataWavelength, XSDataDouble, XSDataTime
@@ -819,11 +820,24 @@ class Collect(CObjectBase):
         # ===========================================
         #  Silent creation of the experiment in ISPyB
         # ===========================================
-        if not pars["collectISPYB"]:
-             print "We are using robot and we will create a new ISPyB experiment"
-             for sample in pars["sampleList"]:
-                 print sample.buffer
-             print "------------------------------------------------------------"
+        try:
+
+             if not pars["collectISPYB"]:
+                 print "We are using robot and we will create a new ISPyB experiment"
+                 ispyBuffers = []
+                 for sample in pars["sampleList"]:
+                     print sample["buffer"]
+                     ispyBuffers.append(sample["buffer"])
+                     print "------------------------------------------------------------"
+                     self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers[0], "23", "BeforeAndAfter", "10")
+                     #createExperiment(proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime)
+                     return
+        except Exception:
+            print Exception
+            print "error", sys.exc_info()[0]
+
+            print "There was some error trying to log into ISPyB"
+            return
         return
 
 

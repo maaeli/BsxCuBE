@@ -2,6 +2,9 @@ from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 import time
+import sys
+import traceback
+
 
 class BiosaxsClient(CObjectBase):
     signals = [
@@ -140,13 +143,27 @@ class BiosaxsClient(CObjectBase):
         return []
 
     def getRobotXMLByPlateGroupId(self, plateGroupId, experimentId):
-        print "plate Group ID" + str(plateGroupId)
         plates = self.getPlatesByPlateGroupId(plateGroupId, experimentId)
         ids = []
         for plate in plates:
             ids.append(plate.samplePlateId)
         xml = self.client.service.getRobotXMLByPlateIds(experimentId, str(ids))
         self.emit("onSuccess", "getRobotXMLByPlateGroupId", xml)
+
+    def createExperiment(self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime):
+        try:
+            if (self.client is None):
+                self.__initWebservice()
+        except:
+            print "It has been not possible to connect with ISPyB"
+            return
+
+        try:
+            self.client.service.createExperiment("mx", 1438, str(samples), storageTemperature, mode, extraflowTime)
+        except Exception:
+            print Exception
+            print "error", sys.exc_info()[0]
+            traceback.print_exc()
 
 class Experiment:
     def __init__(self, experiment):
