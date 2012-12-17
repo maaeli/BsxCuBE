@@ -1453,6 +1453,10 @@ class CollectBrick(Core.BaseBrick):
 
 
     def collectPushButtonClicked(self):
+        #Just for testing
+        self.startCollectWithRobot()
+
+
         if not self.checkPilatusReady():
             print "It seems not to be ready"
             return

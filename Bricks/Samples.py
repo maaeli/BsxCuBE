@@ -27,6 +27,30 @@ sample_pars = {
      'waittime':        [0.0, float],
 }
 
+ispyb_sample_pars = {
+     #internal Id for the database
+     'measurementId':   ['-1', int],
+     #If None this measurement has not been taken yet
+     'runId':       ['', str],
+     'type':            ['Sample', str],
+     'plate':           [-1, int],
+     'row':             [-1, int],
+     'well':            [-1, int],
+     'title':           ["", str],
+     'buffername' :     ["", str],
+     'enable':          [True, ast.literal_eval],
+     'concentration':   [0.0, float],
+     'comments' :       ["", str],
+     'code' :           ["", str],
+     'viscosity'  :     ['Low', str],
+     'transmission' :   [100.0, float],
+     'volume':          [10, int],
+     'SEUtemperature':  [4, float],
+     'flow':            [False, ast.literal_eval],
+     'recuperate':      [False, ast.literal_eval],
+     'waittime':        [0.0, float],
+}
+
 general_pars = {
      'sampleType'           :  ['Green', str],
      'storageTemperature'   :  [25, float],
@@ -43,7 +67,12 @@ def valdict(indict, idx):
     return a
 
 
-def node_to_members(node, obj):
+def node_to_members(node, obj, sampleParametersValues = None):
+
+
+    if sampleParametersValues is None:
+        sampleParametersValues = sample_pars
+    print sampleParametersValues
     for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
         if value in ("false", "true"):
             # to avoid Alejandro changing stuff on his side,
@@ -52,7 +81,9 @@ def node_to_members(node, obj):
         else:
             # be smart and use conversion helper
             try:
-                value = sample_pars[tag][-1](value)
+                print tag
+                print value
+                value = sampleParametersValues[tag][-1](value)
             except KeyError:
                 value = general_pars[tag][-1](value)
         setattr(obj, tag, value)
@@ -240,6 +271,44 @@ class SampleList(list):
             return cmp(a.SEUtemperature, b.SEUtemperature)
         else:
             return cmp(a.code, b.code)
+
+#For ISPyB
+class ISPyBSample(Sample):
+    def __init__(self, copysample = None):
+        if copysample:
+            self.__dict__ = copy (copysample.__dict__)
+        else:
+            self.__dict__.update(valdict(ispyb_sample_pars, 0))
+
+
+class ISPyBCollectPars(CollectPars):
+
+
+     def searchXML(self, xmlstr, destobj):
+        xml_tree = etree.fromstring(xmlstr)
+        for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general")]:
+            setattr(self, tag, value)
+        buffers = xml_tree.xpath("//Buffer")
+
+        for buffer in buffers:
+            sample = ISPyBSample()
+            sample.type = "Buffer"
+            self.bufferList.append(sample)
+            # let's consider there is only one sampledesc and collectpars per buffer
+            node_to_members(buffer.xpath("./sampledesc")[0], sample, ispyb_sample_pars)
+            node_to_members(buffer.xpath("./collectpars")[0], sample, ispyb_sample_pars)
+        samples = xml_tree.xpath("//Sample")
+
+        for sample_node in samples:
+            sample = ISPyBSample()
+            sample.type = "Sample"
+            self.sampleList.append(sample)
+            # let's consider there is only one sampledesc and collectpars per sample
+            node_to_members(buffer.xpath("./sampledesc")[0], sample, ispyb_sample_pars)
+            node_to_members(sample_node.xpath("./sampledesc")[0], sample, ispyb_sample_pars)
+            node_to_members(sample_node.xpath("./collectpars")[0], sample, ispyb_sample_pars)
+
+
 
 if __name__ == '__main__':
     pars = CollectPars('/data/id14eh3/inhouse/saxs_pilatus/Sandra/Dps1_DNAcomplexes/Dps1complexes.xml')

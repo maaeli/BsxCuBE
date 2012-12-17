@@ -1,5 +1,5 @@
 from PyQt4   import Qt, QtCore, QtGui
-from Samples import Sample, CollectPars, SampleList
+from Samples import SampleList, ISPyBSample, ISPyBCollectPars
 import cStringIO
 import logging
 import os.path, time
@@ -545,7 +545,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def loadFile(self, filename):
         try:
-            myPars = CollectPars(filename)
+            myPars = ISPyBCollectPars(filename) #CollectPars(filename)
             self.clearConfiguration()
             #  Clear first if load was succesful
             # 
@@ -726,7 +726,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def getSampleRow(self, i):
         table = self.tableWidget
-        sampleRow = Sample()
+        sampleRow = ISPyBSample() #Sample()
 
         sampleRow.enable = table.cellWidget(i, self.ENABLE_COLUMN).isChecked()
         sampleRow.type = str(table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentText())
@@ -757,7 +757,8 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def addSampleRow(self, sample = None, index = -1):
         if sample is None:
-            samp = Sample()
+            #samp = Sample()
+            samp = ISPyBSample()
             if self.tableWidget.rowCount() == 0:
                 samp.type = "Buffer"
             else:

@@ -769,17 +769,7 @@ class Collect(CObjectBase):
         # We took a frame, now send info to ISPyB
         #TODO: DEBUG
         timeAfter = datetime.datetime.now()
-
-#        try:
-#            self.saveFrameToISPYP(pars, tocollect, timeBefore, timeAfter)
-#            self.showMessage(0, "Data stored into ISPyB")
-#        except Exception:
-#            message = "Error when trying to send data to ISPyB!"
-#            self.showMessage(2, message)
-#            
         return (pars, tocollect, timeBefore, timeAfter, mode)
-#       
-
 
 
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample):
@@ -824,6 +814,17 @@ class Collect(CObjectBase):
         # Setting sample type
         # Synchronous - no exception handling
         self.objects["sample_changer"].setSampleType(pars["sampleType"].lower())
+
+
+        # ===========================================
+        #  Silent creation of the experiment in ISPyB
+        # ===========================================
+        if not pars["collectISPYB"]:
+             print "We are using robot and we will create a new ISPyB experiment"
+             for sample in pars["sampleList"]:
+                 print sample.buffer
+             print "------------------------------------------------------------"
+        return
 
 
         # ============================
