@@ -829,16 +829,16 @@ class Collect(CObjectBase):
                 bufferNames = []
                 ##Collecting the buffers
                 for sample in pars["sampleList"]:
-                    print sample["buffer"]
-                    print sample["buffer"][0]["code"]
+                    #print sample["buffer"]
+                    #print sample["buffer"][0]["code"]
                     if sample["buffer"][0]["code"] not in bufferNames:
                         bufferNames.append(sample["buffer"][0]["code"])
                         ispyBuffers.append(sample["buffer"][0])
 
                 ##Collecting the samples
                 for sample in pars["sampleList"]:
-                    print sample
-                    print sample["code"]
+                    #print sample
+                    #print sample["code"]
                     sampleWithNoBufferAttribute = sample.copy()
                     sampleWithNoBufferAttribute["buffer"] = ""
                     ispyBuffers.append(sampleWithNoBufferAttribute)
@@ -850,8 +850,6 @@ class Collect(CObjectBase):
 
             print "There was some error trying to log into ISPyB"
             traceback.print_exc()
-            return
-        return
 
 
         # ============================

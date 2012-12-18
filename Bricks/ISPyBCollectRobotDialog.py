@@ -1083,6 +1083,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def populatePlateGroup(self, experimentId):
         self.plateGroups = self.__parent.getPlateGroupByExperimentId(experimentId)
+        print self.plateGroups
         while (self.plateGroupComboBox.count() != 0):
             self.plateGroupComboBox.removeItem(0)
 

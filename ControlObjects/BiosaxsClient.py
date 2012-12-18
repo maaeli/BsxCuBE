@@ -132,7 +132,8 @@ class BiosaxsClient(CObjectBase):
     def getPlateGroupByExperimentId(self, experimentId):
         self.selectedExperimentId = experimentId
         for experiment in self.experiments:
-            if experiment.experiment.experimentId is experimentId:
+            if experiment.experiment.experimentId == experimentId:
+                print experiment.experiment.experimentId
                 #It works but I don't know how to deserialize in bricks side
                 #return str(experiment.getPlateGroups())
                 groups = experiment.getPlateGroups()
@@ -157,9 +158,7 @@ class BiosaxsClient(CObjectBase):
         except:
             print "It has been not possible to connect with ISPyB"
             return
-
         try:
-            print "+++"
             print samples
             self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
         except Exception:
@@ -176,11 +175,15 @@ class Experiment:
 
     def getPlateGroups(self):
         plates = self.getPlates()
+        print plates
         dict = {}
         plateGroups = []
         for plate in plates:
+            print str(plate)
             if hasattr(plate, 'plategroup3VO'):
+                print "contiene plategroup3VO"
                 if not dict.has_key(plate.plategroup3VO.name):
+                    print "plate.plategroup3VO.name"
                     if plate.plategroup3VO is not None:
                         plateGroups.append(plate.plategroup3VO)
                     dict[plate.plategroup3VO.name] = True
