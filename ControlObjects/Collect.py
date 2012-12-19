@@ -777,15 +777,15 @@ class Collect(CObjectBase):
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample):
         self.showMessage(0, "Preparing to send to ISPyB: " + mode)
         self.showMessage(0, "MeasurementId: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
-        print "sample"
-        print sample
-        print "sample.buffer"
-        print sample["buffer"]
-        print "toCollect"
-        print tocollect
-        print "pars"
-        print pars
-        print "-----------------"
+        #print "sample"
+        #print sample
+        #print "sample.buffer"
+        #print sample["buffer"]
+        #print "toCollect"
+        #print tocollect
+        #print "pars"
+        #print pars
+        #print "-----------------"
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -824,7 +824,7 @@ class Collect(CObjectBase):
         try:
 
             if not pars["collectISPYB"]:
-                print "We are using robot and we will create a new ISPyB experiment"
+                print "[ISPyB] Create a new experiment in ISPyB"
                 ispyBuffers = []
                 bufferNames = []
                 ##Collecting the buffers
@@ -844,11 +844,12 @@ class Collect(CObjectBase):
                     ispyBuffers.append(sampleWithNoBufferAttribute)
 
                 self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
+                pars["collectISPYB"] = True
+                print "[ISPyB] collectISPYB set to True"
         except Exception:
             print Exception
-            print "error", sys.exc_info()[0]
-
-            print "There was some error trying to log into ISPyB"
+            print "[ISPyB] error", sys.exc_info()[0]
+            print "[ISPyB]There was some error trying to log into ISPyB"
             traceback.print_exc()
 
 

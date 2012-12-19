@@ -72,6 +72,12 @@ class BiosaxsClient(CObjectBase):
         print "----------------> TEST"
 
     def getSpecimenIdBySampleCode(self, sampleCode):
+        if self.experiment is None:
+            print "[ISPyB] Experiment is None"
+            return None
+        if self.selectedExperimentId is None:
+            print "[ISPyB] Experiment is None"
+            return None
         for experiment in self.experiments:
             if experiment.experiment.experimentId is self.selectedExperimentId:
                 for sample in experiment.experiment.samples:
@@ -82,28 +88,46 @@ class BiosaxsClient(CObjectBase):
 
 
     def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        if (self.client is None):
-             self.__initWebservice()
-        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-        if specimenId is None:
-            specimenId = -1
-        self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        try:
+            print "[ISPyB] Request for saveFrameSetBefore " + str(sampleCode)
+            if (self.client is None):
+                self.__initWebservice()
+            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+            if specimenId is None:
+                specimenId = -1
+            self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        except Exception:
+            print Exception
+            print "[ISPyB] error", sys.exc_info()[0]
+            traceback.print_exc()
 
     def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        if (self.client is None):
-             self.__initWebservice()
-        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-        if specimenId is None:
-            specimenId = -1
-        self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        try:
+            print "[ISPyB] Request for saveFrameSetAfter " + str(sampleCode)
+            if (self.client is None):
+                self.__initWebservice()
+            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+            if specimenId is None:
+                specimenId = -1
+            self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        except Exception:
+            print Exception
+            print "[ISPyB] error", sys.exc_info()[0]
+            traceback.print_exc()
 
     def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
-        if (self.client is None):
-             self.__initWebservice()
-        specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-        if specimenId is None:
-            specimenId = -1
-        self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        try:
+            print "[ISPyB] Request for saveFrameSet " + str(sampleCode)
+            if (self.client is None):
+                self.__initWebservice()
+            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+            if specimenId is None:
+                specimenId = -1
+            self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+        except Exception:
+            print Exception
+            print "[ISPyB] error", sys.exc_info()[0]
+            traceback.print_exc()
 
     def getPlatesByPlateGroupId(self, plateGroupId, experimentId):
         plates = []
@@ -119,7 +143,7 @@ class BiosaxsClient(CObjectBase):
     def getRobotXMLByExperimentId(self, experimentId):
         self.selectedExperimentId = experimentId
         if (self.client is None):
-             self.__initWebservice()
+            self.__initWebservice()
         for experiment in self.experiments:
             plates = []
             if experiment.experiment.experimentId is experimentId:
@@ -156,15 +180,21 @@ class BiosaxsClient(CObjectBase):
             if (self.client is None):
                 self.__initWebservice()
         except:
-            print "It has been not possible to connect with ISPyB"
+            print "[ISPyB] It has been not possible to connect with ISPyB"
             return
         try:
-            print samples
-            self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
+            self.experiment = None
+            self.selectedExperimentId = None
+            print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str(proposalCode) + str(proposalNumber)
+            experiment = self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
+            print "[ISPyB] Experiment Created: " + str(experiment.experimentId)
+            self.selectedExperimentId = experiment.experimentId
+            self.experiment = experiment
+            #print experiment
         except Exception:
             print Exception
-            print "error", sys.exc_info()[0]
-            traceback.print_exc()
+            print "[ISPyB] error", sys.exc_info()[0]
+            #traceback.print_exc()
 
 class Experiment:
     def __init__(self, experiment):
