@@ -1,47 +1,9 @@
 import logging
 import types
-import ast
-from copy import copy
+import copy
 from lxml import etree
 
 logger = logging.getLogger("Samples")
-
-#  Default values
-sample_pars = {
-     'type':            ['Sample', str],
-     'plate':           [-1, int],
-     'row':             [-1, int],
-     'well':            [-1, int],
-     'title':           ["", str],
-     'buffername' :     ["", str],
-     'enable':          [True, ast.literal_eval],
-     'concentration':   [0.0, float],
-     'comments' :       ["", str],
-     'code' :           ["", str],
-     'viscosity'  :     ['Low', str],
-     'transmission' :   [100.0, float],
-     'volume':          [10, int],
-     'SEUtemperature':  [4, float],
-     'flow':            [False, ast.literal_eval],
-     'recuperate':      [False, ast.literal_eval],
-     'waittime':        [0.0, float],
-}
-
-general_pars = {
-     'sampleType'           :  ['Green', str],
-     'storageTemperature'   :  [25, float],
-     'extraFlowTime'        :  [0, int],
-     'optimization'         :  [0, int],
-     'initialCleaning'      :  [False, ast.literal_eval],
-     'bufferMode'           :  [0, int],
-}
-
-def valdict(indict, idx):
-    a = {}
-    for key in indict:
-        a[key] = indict[key][idx]
-    return a
-
 
 def node_to_members(node, obj):
     for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
@@ -50,15 +12,24 @@ def node_to_members(node, obj):
             # convert those to booleans
             value = bool(value.title())
         else:
-            # be smart and use conversion helper
             try:
-                value = sample_pars[tag][-1](value)
-            except KeyError:
-                value = general_pars[tag][-1](value)
+               value = int(value)
+            except ValueError:
+               try:
+                 value = float(value)
+               except ValueError:
+                 pass
         setattr(obj, tag, value)
 
 
-class Sample:
+def Sample(copysample = None):
+  if copysample:
+    return copy.deepcopy(copysample)
+  else:
+    return _Sample()
+
+
+class _Sample:
     __xmlformat = """
 <%(type)s>
   <sampledesc>
@@ -84,10 +55,24 @@ class Sample:
 </%(type)s>
     """
     def __init__(self, copysample = None):
-        if copysample:
-            self.__dict__ = copy (copysample.__dict__)
-        else:
-            self.__dict__.update(valdict(sample_pars, 0))
+        # Default Values
+        self.type = 'Sample'
+        self.plate = -1
+        self.row = -1
+        self.well = -1
+        self.title = ""
+        self.buffername = ""
+        self.enable = True
+        self.concentration = 0.0
+        self.comments = ""
+        self.code = ""
+        self.viscosity = 'Low'
+        self.transmission = 100.0
+        self.volume = 10
+        self.SEUtemperature = 4
+        self.flow = False
+        self.recuperate = False
+        self.waittime = 0.0
 
     def isBuffer(self):
         return self.type == "Buffer"
@@ -102,7 +87,7 @@ class Sample:
             return self.__xmlformat % self.__dict__
 
 
-class CollectPars(list):
+class CollectPars:
     __xmlformat = """
 <general>
      <sampleType>%(sampleType)s</sampleType>
@@ -115,7 +100,12 @@ class CollectPars(list):
     """
     def __init__(self, filename = None):
         # initialize
-        self.__dict__.update(valdict(general_pars, 0))
+        self.sampleType = 'Green'
+        self.storageTemperature = 25
+        self.extraFlowTime = 0
+        self.optimization = 0
+        self.initialCleaning = False
+        self.bufferMode = 0
 
         self.sampleList = SampleList()
         self.bufferList = SampleList()
@@ -141,45 +131,8 @@ class CollectPars(list):
         self.searchXML(bufstr , self)
 
     def searchXML(self, xmlstr, destobj):
-        """retag = re.compile('\<(?P<key>.*?)\>(?P<value>.*?)\<\/(?P=key)\>', re.DOTALL | re.MULTILINE)
-
-        cursor = 0
-        mat = retag.search(xmlstr, cursor)
-
-        while mat :
-            foundkey = mat.group('key')
-            if foundkey in ['bsxcube', 'general', 'collectpars', 'sampledesc' ]:   # Do nothing. Go deeper only
-                self.searchXML(mat.group('value'), destobj)
-            elif foundkey in ['Sample', 'Buffer']:  # create sample and add to list. pass object to continue deeper
-                sample = Sample()
-                self.searchXML(mat.group('value'), sample)
-                sample.type = foundkey
-                print sample.type
-                if foundkey == 'Buffer':
-                    self.bufferList.append(sample)
-                else:
-                    self.sampleList.append(sample)
-            elif foundkey == 'history':
-                self.history = mat.group('value')
-            elif foundkey in sample_pars:
-                try:
-                    destobj.__dict__[foundkey] = sample_pars[foundkey][1](mat.group('value'))
-                except Exception, e:
-                    print "problem interpreting ", foundkey
-                    print " value is ", mat.group('value')
-                    logger.error("Got Exception: " + str(e) + "When interpreting value")
-            elif foundkey in general_pars:
-                try:
-                    destobj.__dict__[foundkey] = general_pars[foundkey][1](mat.group('value'))
-                except Exception, e:
-                    print "problem interpreting ", foundkey
-                    print " value is ", mat.group('value')
-                    logger.error("Got Exception: " + str(e) + "When interpreting value")
-            cursor = mat.end()
-            mat = retag.search(xmlstr, cursor)
-        """
         xml_tree = etree.fromstring(xmlstr)
-        for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general")]:
+        for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general/*")]:
             setattr(self, tag, value)
         buffers = xml_tree.xpath("//Buffer")
         for buffer in buffers:
@@ -223,7 +176,6 @@ class CollectPars(list):
         open(filename, "w").write(bufstr)
 
 class SampleList(list):
-
     def sortSEUtemp(self):
         self.sort(self.cmpSEUtemp)
     def sortCode(self):
@@ -242,7 +194,7 @@ class SampleList(list):
             return cmp(a.code, b.code)
 
 if __name__ == '__main__':
-    pars = CollectPars('/data/id14eh3/inhouse/saxs_pilatus/Sandra/Dps1_DNAcomplexes/Dps1complexes.xml')
+    pars = CollectPars('/data/bm29/inhouse/Test/robot.xml')
     for sample in pars.sampleList:
         print sample.SEUtemperature
     print pars
