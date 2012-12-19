@@ -2,31 +2,36 @@ import logging
 import types
 import copy
 from lxml import etree
+import ast
 
 logger = logging.getLogger("Samples")
 
 def node_to_members(node, obj):
     for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
-        if value in ("false", "true"):
-            # to avoid Alejandro changing stuff on his side,
-            # convert those to booleans
-            value = bool(value.title())
+        if value is None:
+            value = ""
+        # catch false and False
+        elif value.lower() in ("false", "true"):
+            # title means false -> False and of course False -> False
+            value = ast.literal_eval(value.title())
         else:
+            # Now we know it is not Boolean
+            # we try int and float and if ValueError on both it is str
             try:
-               value = int(value)
+                value = int(value)
             except ValueError:
-               try:
-                 value = float(value)
-               except ValueError:
-                 pass
+                try:
+                    value = float(value)
+                except ValueError:
+                    pass
         setattr(obj, tag, value)
 
 
 def Sample(copysample = None):
-  if copysample:
-    return copy.deepcopy(copysample)
-  else:
-    return _Sample()
+    if copysample:
+        return copy.deepcopy(copysample)
+    else:
+        return _Sample()
 
 
 class _Sample:
@@ -53,8 +58,8 @@ class _Sample:
     <waittime>%(waittime)s</waittime>
   </collectpars>
 </%(type)s>
-    """
-    def __init__(self, copysample = None):
+"""
+    def __init__(self):
         # Default Values
         self.type = 'Sample'
         self.plate = -1
@@ -78,13 +83,12 @@ class _Sample:
         return self.type == "Buffer"
 
     def getTitle(self):
-        return "P%(plate)s-%(row)s:%(well)s" % self.__dict__
+        # return a title
+        return "P%ds-%ds:%ds" % (self.plate, self.row, self.well)
 
-    def xmlFormat(self, format = "xmlline"):
-        if format == "xmlline":
-            return self.__xmlformat % self.__dict__
-        else:
-            return self.__xmlformat % self.__dict__
+    def xmlFormat(self):
+        # return from above
+        return self.__xmlformat % self.__dict__
 
 
 class CollectPars:
@@ -97,9 +101,9 @@ class CollectPars:
      <initialCleaning>%(initialCleaning)s</initialCleaning>
      <bufferMode>%(bufferMode)s</bufferMode>
 </general>
-    """
+"""
     def __init__(self, filename = None):
-        # initialize
+        # Default Values
         self.sampleType = 'Green'
         self.storageTemperature = 25
         self.extraFlowTime = 0
@@ -114,11 +118,9 @@ class CollectPars:
         if filename:
             self.loadFromXML(filename)
 
-    def xmlFormat(self, format = "xmlline"):
-        if format == "xmlline":
-            return self.__xmlformat % self.__dict__
-        else:
-            return self.__xmlformat % self.__dict__
+    def xmlFormat(self):
+        # use pattern from above (self.__xmlformat)
+        return self.__xmlformat % self.__dict__
 
     def loadFromXML(self, filename):
         # filename can be a string, in this case the file is opened then read,
@@ -128,31 +130,47 @@ class CollectPars:
         else:
             bufstr = filename.read()
             bufstr = bufstr.replace("\000", "")
-        self.searchXML(bufstr , self)
+        self.searchXML(bufstr)
 
-    def searchXML(self, xmlstr, destobj):
+
+    def searchXML(self, xmlstr):
         xml_tree = etree.fromstring(xmlstr)
         for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general/*")]:
+            if value is None:
+                value = ""
+            # catch false and False
+            elif value.lower() in ("false", "true"):
+                # title means false -> False and of course False -> False
+                value = ast.literal_eval(value.title())
+            else:
+                # Now we know it is not Boolean
+                # we try int and float and if ValueError on both it is str
+                try:
+                    value = int(value)
+                except ValueError:
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        pass
             setattr(self, tag, value)
         buffers = xml_tree.xpath("//Buffer")
-        for buffer in buffers:
-            sample = Sample()
-            sample.type = "Buffer"
-            self.bufferList.append(sample)
+        for myBuffer in buffers:
+            mySample = Sample()
+            mySample.type = "Buffer"
+            self.bufferList.append(mySample)
             # let's consider there is only one sampledesc and collectpars per buffer
-            node_to_members(buffer.xpath("./sampledesc")[0], sample)
-            node_to_members(buffer.xpath("./collectpars")[0], sample)
+            node_to_members(myBuffer.xpath("./sampledesc")[0], mySample)
+            node_to_members(myBuffer.xpath("./collectpars")[0], mySample)
         samples = xml_tree.xpath("//Sample")
-        for sample_node in samples:
-            sample = Sample()
-            sample.type = "Sample"
-            self.sampleList.append(sample)
+        for sampleNode in samples:
+            mySample = Sample()
+            mySample.type = "Sample"
+            self.sampleList.append(mySample)
             # let's consider there is only one sampledesc and collectpars per sample
-            node_to_members(buffer.xpath("./sampledesc")[0], sample)
-            node_to_members(sample_node.xpath("./sampledesc")[0], sample)
-            node_to_members(sample_node.xpath("./collectpars")[0], sample)
+            node_to_members(sampleNode.xpath("./sampledesc")[0], mySample)
+            node_to_members(sampleNode.xpath("./collectpars")[0], mySample)
 
-    def save(self, filename, history, format = "xml"):
+    def save(self, filename, history):
         # start
         bufstr = "<bsxcube>"
 
@@ -194,7 +212,21 @@ class SampleList(list):
             return cmp(a.code, b.code)
 
 if __name__ == '__main__':
-    pars = CollectPars('/data/bm29/inhouse/Test/robot.xml')
+    pars = CollectPars('/data/bm29/inhouse/louiza/old/mx1303/id14eh3/samples/Manu3.xml')
     for sample in pars.sampleList:
         print sample.SEUtemperature
-    print pars
+    # start
+    myBufferString = "<bsxcube>"
+
+    # general pars
+    myBufferString += pars.xmlFormat()
+
+    # samples and buffers
+    for myLocalBuffer in pars.bufferList:
+        myBufferString += myLocalBuffer.xmlFormat()
+    for myLocalSample in pars.sampleList:
+        myBufferString += myLocalSample.xmlFormat()
+
+    # end
+    myBufferString += "</bsxcube>"
+    print myBufferString
