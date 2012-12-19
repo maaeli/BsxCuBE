@@ -17,6 +17,7 @@ def node_to_members(node, obj):
         else:
             # Now we know it is not Boolean
             # we try int and float and if ValueError on both it is str
+            #TODO: figure out a faster way to do this: exception is slow
             try:
                 value = int(value)
             except ValueError:
@@ -83,8 +84,8 @@ class _Sample:
         return self.type == "Buffer"
 
     def getTitle(self):
-        # return a title
-        return "P%ds-%ds:%ds" % (self.plate, self.row, self.well)
+        # return a title like P2-1:9
+        return "P%(plate)s-%(row)s:%(well)s" % self.__dict__
 
     def xmlFormat(self):
         # return from above
