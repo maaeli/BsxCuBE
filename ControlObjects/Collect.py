@@ -781,11 +781,18 @@ class Collect(CObjectBase):
         #print sample
         #print "sample.buffer"
         #print sample["buffer"]
-        #print "toCollect"
-        #print tocollect
-        #print "pars"
-        #print pars
-        #print "-----------------"
+        print "-----------------"
+        print "toCollect"
+        print tocollect
+        print "-----------------"
+        print "pars"
+        print pars
+        print "-----------------"
+        print str(self.xsdin.experimentSetup)
+        print "-----------------"
+        print "-----------------"
+        print (self.xsdin.experimentSetup.__dict__)
+        print "-----------------"
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -799,14 +806,13 @@ class Collect(CObjectBase):
         detectorDistance = pars["detectorDistance"]
         snapshotCapillary = "snapshotCapillary"
         currentMachine = "currentMachine"
-        print "SEU: " + str(exposureTemperature)
 
         if mode is "buffer_before":
-            self.objects["biosaxs_client"].saveFrameSetBefore(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+            self.objects["biosaxs_client"].saveFrameSetBefore(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
         if mode is "buffer_after":
-            self.objects["biosaxs_client"].saveFrameSetAfter(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+            self.objects["biosaxs_client"].saveFrameSetAfter(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
         if mode is "sample":
-            self.objects["biosaxs_client"].saveFrameSet(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine)
+            self.objects["biosaxs_client"].saveFrameSet(sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
 
 
 

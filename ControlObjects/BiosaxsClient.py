@@ -72,6 +72,7 @@ class BiosaxsClient(CObjectBase):
         print "----------------> TEST"
 
     def getSpecimenIdBySampleCode(self, sampleCode):
+        print "[ISPyB] getSpecimenIdBySampleCode"
         if self.experiment is None:
             print "[ISPyB] Experiment is None"
             return None
@@ -79,7 +80,8 @@ class BiosaxsClient(CObjectBase):
             print "[ISPyB] Experiment is None"
             return None
         for experiment in self.experiments:
-            if experiment.experiment.experimentId is self.selectedExperimentId:
+            print experiment.experiment.experimentId
+            if experiment.experiment.experimentId == self.selectedExperimentId:
                 for sample in experiment.experiment.samples:
                     for specimen in sample.specimen3VOs:
                         if specimen.code == sampleCode:
@@ -87,7 +89,8 @@ class BiosaxsClient(CObjectBase):
         return None
 
 
-    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+
+    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
         try:
             print "[ISPyB] Request for saveFrameSetBefore " + str(sampleCode)
             if (self.client is None):
@@ -95,13 +98,16 @@ class BiosaxsClient(CObjectBase):
             specimenId = self.getSpecimenIdBySampleCode(sampleCode)
             if specimenId is None:
                 specimenId = -1
-            self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+            print "[ISPyB] Specimen found with specimenId: " + str(specimenId)
+            print tocollect
+            print pars
+            self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars)
         except Exception:
             print Exception
             print "[ISPyB] error", sys.exc_info()[0]
             traceback.print_exc()
 
-    def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+    def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
         try:
             print "[ISPyB] Request for saveFrameSetAfter " + str(sampleCode)
             if (self.client is None):
@@ -109,13 +115,13 @@ class BiosaxsClient(CObjectBase):
             specimenId = self.getSpecimenIdBySampleCode(sampleCode)
             if specimenId is None:
                 specimenId = -1
-            self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+            self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars)
         except Exception:
             print Exception
             print "[ISPyB] error", sys.exc_info()[0]
             traceback.print_exc()
 
-    def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine):
+    def saveFrameSet(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
         try:
             print "[ISPyB] Request for saveFrameSet " + str(sampleCode)
             if (self.client is None):
@@ -123,7 +129,7 @@ class BiosaxsClient(CObjectBase):
             specimenId = self.getSpecimenIdBySampleCode(sampleCode)
             if specimenId is None:
                 specimenId = -1
-            self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine)
+            self.client.service.saveFrame(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars)
         except Exception:
             print Exception
             print "[ISPyB] error", sys.exc_info()[0]
@@ -189,7 +195,9 @@ class BiosaxsClient(CObjectBase):
             experiment = self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
             print "[ISPyB] Experiment Created: " + str(experiment.experimentId)
             self.selectedExperimentId = experiment.experimentId
-            self.experiment = experiment
+            self.experiment = Experiment(experiment)
+            self.experiments.append(Experiment(experiment))
+            print "[ISPyB] selectedExperimentId: " + str(self.selectedExperimentId)
             #print experiment
         except Exception:
             print Exception
@@ -219,4 +227,11 @@ class Experiment:
                     dict[plate.plategroup3VO.name] = True
         return plateGroups
 
+if __name__ == "__main__":
+    import sys
+    biosaxs = BiosaxsClient("mx1438", "Rfo4-73")
+    biosaxs.getExperimentNamesByProposalCodeNumber("mx", "1438")
+    #experiment = biosaxs.getExperimentById(345)
+    biosaxs.selectedExperimentId = 345
+    print biosaxs.getSpecimenIdBySampleCode("bsa_25C")
 
