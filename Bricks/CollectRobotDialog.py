@@ -634,10 +634,11 @@ class CollectRobotDialog(Qt.QDialog):
         history = self.historyText.toPlainText()
 
         try:
-            myPars.save(filename , history)
             if os.path.exists(filename):
+                myPars.save(filename , history)
                 Qt.QMessageBox.information(self, "Info", "The new version of the file '%s' was successfully saved!" % filename)
             else:
+                myPars.save(filename , history)
                 Qt.QMessageBox.information(self, "Info", "A new version of the file '%s' was successfully saved!" % filename)
         except Exception, e:
             import traceback
@@ -903,7 +904,7 @@ class CollectRobotDialog(Qt.QDialog):
             temperatureSEUDoubleSpinBox.setValue(sample.SEUtemperature)
 
 
-        # final arrangementes
+        # final arrangements
         self.formatLine(index, sample)
 
 
