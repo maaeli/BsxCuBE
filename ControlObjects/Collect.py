@@ -295,10 +295,12 @@ class Collect(CObjectBase):
         ave_filename = os.path.join(pDirectory, "1d", "%s_%03d_ave.dat" % (sPrefix, pRunNumber))
         sub_filename = os.path.join(pDirectory, "ednaSub", "%s_%03d_sub.dat" % (sPrefix, pRunNumber))
 
+        # TODO: only when it is last buffer of the data collection and not always
+        # Indeed, it is not possile to get the measurementId of a buffer because the code is not unique
         user = self.objects["biosaxs_client"].user
         password = self.objects["biosaxs_client"].password
         measurementId = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-        print "Sending to EDNA login %s,%s,%s" % (user, password, measurementId)
+        print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
         sample = XSDataBioSaxsSample(login = XSDataString(user),
                                      passwd = XSDataString(password),
                                      measurementID = XSDataInteger(measurementId))
@@ -776,7 +778,7 @@ class Collect(CObjectBase):
 
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample):
         self.showMessage(0, "Preparing to send to ISPyB: " + mode)
-        self.showMessage(0, "MeasurementId: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
+        self.showMessage(0, "Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
         #print "sample"
         #print sample
         #print "sample.buffer"
