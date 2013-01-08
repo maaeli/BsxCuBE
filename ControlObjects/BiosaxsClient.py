@@ -23,11 +23,13 @@ class BiosaxsClient(CObjectBase):
         self.selectedExperimentId = None
         self.user = None
         self.password = None
+        self.timeout = 5
+        self.experiments = None
 
     def __initWebservice(self):
 
         self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated(username = self.user, password = self.password)
-        self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService, cache = None)
+        self.client = Client(self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService, cache = None, timeout = self.timeout)
         self.experiments = []
         self.response = None
 
@@ -47,7 +49,7 @@ class BiosaxsClient(CObjectBase):
 
     def getExperimentNamesByProposalCodeNumber(self, code, number):
         if (self.client is None):
-             self.__initWebservice()
+            self.__initWebservice()
         response = self.client.service.findExperimentByProposalCode(code, number)
         self.experiments = []
         for experiment in response:
@@ -58,15 +60,15 @@ class BiosaxsClient(CObjectBase):
 
 
 
-    def getExperimentsByProposalId(self, proposalId):
-        if (self.client is None):
-             self.__initWebservice()
-
-        response = self.client.service.findExperimentByPosposalId(3124)
-        self.experiments = []
-        for experiment in response:
-            self.experiments.append(Experiment(experiment))
-        return self.getExperimentNames()
+#    def getExperimentsByProposalId(self, proposalId):
+#        if (self.client is None):
+#            self.__initWebservice()
+#
+#        response = self.client.service.findExperimentByPosposalId(3124)
+#        self.experiments = []
+#        for experiment in response:
+#            self.experiments.append(Experiment(experiment))
+#        return self.getExperimentNames()
 
     def test(self):
         print "----------------> TEST"
@@ -159,7 +161,7 @@ class BiosaxsClient(CObjectBase):
         except Exception:
             print Exception
             print "[ISPyB] error", sys.exc_info()[0]
-            traceback.print_exc()
+            #traceback.print_exc()
 
     def getPlatesByPlateGroupId(self, plateGroupId, experimentId):
         plates = []
@@ -211,8 +213,9 @@ class BiosaxsClient(CObjectBase):
         try:
             if (self.client is None):
                 self.__initWebservice()
-        except:
-            print "[ISPyB] It has been not possible to connect with ISPyB"
+        except Exception:
+            print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
+            raise Exception
             return
         try:
             self.experiment = None
@@ -228,6 +231,7 @@ class BiosaxsClient(CObjectBase):
         except Exception:
             print Exception
             print "[ISPyB] error", sys.exc_info()[0]
+            raise Exception
             #traceback.print_exc()
 
 class Experiment:

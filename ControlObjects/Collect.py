@@ -73,6 +73,9 @@ class Collect(CObjectBase):
         # HPCL or not
         self.isHPLC = False
 
+        #
+        # ISPyB or not
+        self.isISPyB = False
 
         CObjectBase.__init__(self, *args, **kwargs)
         self.__collectWithRobotProcedure = None
@@ -297,13 +300,21 @@ class Collect(CObjectBase):
 
         # TODO: only when it is last buffer of the data collection and not always
         # Indeed, it is not possile to get the measurementId of a buffer because the code is not unique
-        user = self.objects["biosaxs_client"].user
-        password = self.objects["biosaxs_client"].password
-        measurementId = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-        print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
-        sample = XSDataBioSaxsSample(login = XSDataString(user),
+        sample = XSDataBioSaxsSample()
+        user = None
+        password = None
+        measurementId = None
+        if self.isISPyB:
+            user = self.objects["biosaxs_client"].user
+            password = self.objects["biosaxs_client"].password
+            measurementId = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+            print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
+            sample = XSDataBioSaxsSample(login = XSDataString(user),
                                      passwd = XSDataString(password),
                                      measurementID = XSDataInteger(measurementId))
+
+
+
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
                                 inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%05d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
                                 mergedCurve = XSDataFile(path = XSDataString(ave_filename)),
@@ -861,14 +872,18 @@ class Collect(CObjectBase):
 
                 self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
                 pars["collectISPYB"] = True
+
                 print "[ISPyB] collectISPYB set to True"
         except Exception:
-            print Exception
-            print "[ISPyB] error", sys.exc_info()[0]
-            print "[ISPyB]There was some error trying to log into ISPyB"
-            traceback.print_exc()
+            #print Exception
+            #print "[ISPyB] error", sys.exc_info()[0]
+            print "[ISPyB] There was some error trying to log into ISPyB"
+            pars["collectISPYB"] = False
+            print "[ISPyB] collectISPYB set to False"
+            #traceback.print_exc()
 
-
+        #I need this field for EDNA, maybe it should be great to remove pars["collectISPYB"]
+        self.isISPyB = pars["collectISPYB"]
         # ============================
         #  Setting storage temperature
         # ============================
