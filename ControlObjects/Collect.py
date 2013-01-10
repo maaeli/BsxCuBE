@@ -76,6 +76,8 @@ class Collect(CObjectBase):
         #
         # ISPyB or not
         self.isISPyB = False
+        self.isLastBuffer = False #ISPyB only send EDNA to communicate with ISPyB when it is last buffer
+        self.ispybLastMeasurementCode = None
 
         CObjectBase.__init__(self, *args, **kwargs)
         self.__collectWithRobotProcedure = None
@@ -304,16 +306,22 @@ class Collect(CObjectBase):
         user = None
         password = None
         measurementId = None
+
+        print "[ISPyB] It is last buffer " + str(self.isLastBuffer)
+
+
         if self.isISPyB:
-            user = self.objects["biosaxs_client"].user
-            password = self.objects["biosaxs_client"].password
-            measurementId = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-            print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
-            sample = XSDataBioSaxsSample(login = XSDataString(user),
-                                     passwd = XSDataString(password),
-                                     measurementID = XSDataInteger(measurementId))
+            if self.isLastBuffer:
+                user = self.objects["biosaxs_client"].user
+                password = self.objects["biosaxs_client"].password
+                measurementId = self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+                print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
+                sample = XSDataBioSaxsSample(login = XSDataString(user),
+                                         passwd = XSDataString(password),
+                                         measurementID = XSDataInteger(measurementId))
 
-
+        self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+        print "[ISPyB] Last measurement code " + str(measurementId)
 
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
                                 inputCurves = [XSDataFile(path = XSDataString(os.path.join(pDirectory, "1d", "%s_%03d_%05d.dat" % (sPrefix, pRunNumber, i)))) for i in range(1, pNumberFrames + 1)],
@@ -945,6 +953,7 @@ class Collect(CObjectBase):
         # ==================================================
         self.sampleNumber = 0
         for sample in pars["sampleList"]:
+            self.isLastBuffer = False
             self.sampleNumber = self.sampleNumber + 1
             #
             #  Collect buffer before
@@ -1003,6 +1012,7 @@ class Collect(CObjectBase):
                 self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
 
             if pars["bufferAfter"]:
+                self.isLastBuffer = True
                 if runNumberSet:
                     # Using pars["runNumber"] from collect brick
                     runNumberSet = False
