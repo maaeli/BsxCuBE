@@ -82,7 +82,7 @@ class Collect(CObjectBase):
         self.ednaJob = None
         self.dat_filenames = {}
         self.jobSubmitted = False
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_3"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
