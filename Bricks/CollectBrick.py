@@ -175,10 +175,7 @@ class CollectBrick(Core.BaseBrick):
 
         self.__validParameters = [False, False, False]
 
-        #TODO: DEBUG - Horrible
         self.imageProxy = None
-        #TODO: DEBUG - Horrible
-        self.lastInfoFromBeamLostChanged = None
 
 
         self.brick_widget.setLayout(Qt.QVBoxLayout())
@@ -853,24 +850,14 @@ class CollectBrick(Core.BaseBrick):
 
     def beamLostChanged(self, pValue):
         if pValue != None:
-            # put beamlost value updated
+            # updated Beamlost value
             if pValue != "":
                 self.lostBeam = True
             else:
                 self.lostBeam = False
 
-        #TODO : DEBUG
-        #TODO remove this hack ASAP (SO 12/11 12)
-        ### HORRIBLE CODE
-        if self.lastInfoFromBeamLostChanged is None :
-            if pValue != None and pValue != "":
+        if pValue != None and pValue != "":
                 logger.warning("BEAM LOST: %s" % pValue)
-                self.lastInfoFromBeamLostChanged = pValue
-        else:
-            if self.lastInfoFromBeamLostChanged != pValue:
-                if pValue != None and pValue != "":
-                    logger.warning("BEAM LOST: %s" % pValue)
-                    self.lastInfoFromBeamLostChanged = pValue
 
     def checkBeamChanged(self, pValue):
         if pValue == 1:
@@ -1723,7 +1710,6 @@ class CollectBrick(Core.BaseBrick):
 
         logger.info("Aborting!")
         logger.warning("Wait for current action to finish...")
-        answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Please wait for current action to finish", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
 
         self._abortFlag = True
 
@@ -1745,6 +1731,7 @@ class CollectBrick(Core.BaseBrick):
 
         self.setCollectionStatus("aborting")
         self._curveList = []
+        Qt.QMessageBox.information(self.brick_widget, "Info", "Please wait for current action to finish")
 
 
     def setWidgetState(self):
