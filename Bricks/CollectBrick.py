@@ -1723,6 +1723,7 @@ class CollectBrick(Core.BaseBrick):
 
         logger.info("Aborting!")
         logger.warning("Wait for current action to finish...")
+        answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Please wait for current action to finish", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
 
         self._abortFlag = True
 
@@ -1745,7 +1746,6 @@ class CollectBrick(Core.BaseBrick):
         self.setCollectionStatus("aborting")
         self._curveList = []
 
-        answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Please wait for current action to finish", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
 
     def setWidgetState(self):
         enabled = (not self.__expertModeOnly or self.__expertMode) and (not self.readOnlyCheckBox.isChecked())
