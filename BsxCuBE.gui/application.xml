@@ -5,13 +5,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Collect"/>
   </properties>
-  <properties id="CalibrationDiamondBrick1">
-     <property name="flex" value="0"/>
-     <property name="caption" value="Calibration diamond"/>
-     <property name="parameter" value="1"/>
-     <property name="toolTip" value="Execute calibration of diamond"/>
-     <property name="expertModeOnly" value="True"/>
-  </properties>
   <properties id="BrowseBrick1">
      <property name="flex" value="0"/>
      <property name="enableType" value="True"/>
@@ -121,14 +114,6 @@
      <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
      <property name="toolTip" value="Execute sample alignment"/>
-     <property name="parameter" value=""/>
-  </properties>
-  <properties id="CommandBrick1">
-     <property name="flex" value="0"/>
-     <property name="caption" value="Quick realignment"/>
-     <property name="warningPopup" value="False"/>
-     <property name="expertModeOnly" value="True"/>
-     <property name="toolTip" value="Execute quick realignment"/>
      <property name="parameter" value=""/>
   </properties>
   <properties id="LogBrick1">
@@ -406,12 +391,6 @@
     <connections id="CollectTab">
   </connections>
 
-  <connections id="CalibrationDiamondBrick1">
-    <connection role="calibration">
-      <peer name="BsxCuBE/CalibrationDiamond"/>
-    </connection>
-  </connections>
-
   <connections id="BrowseBrick1">
     <connection role="browse">
       <peer name="BsxCuBE/Browse"/>
@@ -504,19 +483,6 @@
   </connections>
 
   <connections id="BsxFrameBrick1">
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
-    <connection role="display">
-      <signal name="displayResetChanged"/>
-      <signal name="displayItemChanged"/>
-      <signal name="transmissionChanged"/>
-      <signal name="grayOut"/>
-      <peer name="BrowseBrick1"/>
-      <peer name="ReprocessBrick1"/>
-      <peer name="CollectBrick1"/>
-    </connection>
   </connections>
 
   <connections id="MotorAlignmentBrick4">
@@ -572,14 +538,6 @@
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
       <peer name="BsxCuBE/CommandSampleAlignment"/>
-    </connection>
-  </connections>
-
-  <connections id="CommandBrick1">
-    <connection role="command">
-      <signal name="commandStatusChanged"/>
-      <slot name="executeCommand"/>
-      <peer name="BsxCuBE/CommandQuickRealignment"/>
     </connection>
   </connections>
 
@@ -669,6 +627,8 @@
       <peer name="BsxCuBE/EnergyWaveLength"/>
     </connection>
     <connection role="BiosaxsClient">
+      <signal name="onSuccess"/>
+      <slot name="getRobotXML"/>
       <slot name="getExperimentNamesByProposalCodeNumber"/>
       <slot name="setUser"/>
       <slot name="getRobotXMLByExperimentId"/>

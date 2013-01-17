@@ -29,9 +29,7 @@
 </vbox>
   </tabpanel>
 <tabpanel id='tab_BeamlineTab'><vbox id="BeamlineTab" orient="vertical">
-  <hbox qwidget="true" id="CalibrationDiamondBrick1" brick="true"><script src="CalibrationDiamondBrick" tau="false"/></hbox>
-<hbox qwidget="true" id="CommandBrick1" brick="true"><script src="CommandBrick" tau="false"/></hbox>
-<hbox qwidget="true" id="BsxShutterBrick2" brick="true"><script src="BsxShutterBrick" tau="false"/></hbox>
+  <hbox qwidget="true" id="BsxShutterBrick2" brick="true"><script src="BsxShutterBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="MotorAlignmentBrick1" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="MotorAlignmentBrick2" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
 <hbox qwidget="true" id="MotorAlignmentBrick3" brick="true"><script src="MotorAlignmentBrick" tau="false"/></hbox>
