@@ -856,7 +856,6 @@ class Collect(CObjectBase):
         #  Silent creation of the experiment in ISPyB
         # ===========================================
         try:
-            print pars["sampleList"]
             if not pars["collectISPYB"]:
                 print "[ISPyB] Create a new experiment in ISPyB"
                 ispyBuffers = []
