@@ -1,0 +1,15 @@
+<object class="VacPump" username="VacPump" >
+   <uri>nela:exp</uri> 
+
+   <command name="exftclose" type="spec" call="exftclose"/>
+   <command name="exscclose" type="spec" call="exscclose"/>
+   <command name="vacftclose" type="spec" call="vacftclose"/>
+   <command name="vacscclose" type="spec" call="vacscclose"/>
+   
+   <command name="rv5open" type="spec" call="rv5open"/>
+   <command name="rv6open" type="spec" call="rv6open"/>
+   
+   <channel name="valveThreshold" type="spec" call="BSX_GLOBAL/vacuum/valvethreshold"/>
+   <channel name="pumpThreshold" type="spec" call="BSX_GLOBAL/vacuum/pumpthreshold"/>
+   
+</object>

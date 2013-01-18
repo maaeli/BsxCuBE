@@ -1,7 +1,0 @@
-<object class = "Command" username = "CommandQuickRealignment">
-	
-   <uri>nela:exp</uri> 
-	
-   <command name="command" type="spec" call="quickRealignment"/>
-
-</object>	
