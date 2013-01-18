@@ -1,6 +1,7 @@
 from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
+from math import fabs
 import time
 import sys
 import traceback
@@ -70,8 +71,6 @@ class BiosaxsClient(CObjectBase):
 #            self.experiments.append(Experiment(experiment))
 #        return self.getExperimentNames()
 
-    def test(self):
-        print "----------------> TEST"
 
     def getSpecimenIdBySampleCode(self, sampleCode):
         print "[ISPyB] getSpecimenIdBySampleCode " + str(sampleCode)
@@ -90,7 +89,32 @@ class BiosaxsClient(CObjectBase):
                             return specimen.specimenId
         return None
 
+    def getSpecimenIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration):
+        print "[ISPyB] getSpecimenIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " #+ str(seu)
+        if self.experiment is None:
+            print "[ISPyB] Experiment is None"
+            return None
+        if self.selectedExperimentId is None:
+            print "[ISPyB] Experiment is None"
+            return None
+        for experiment in self.experiments:
+            #print experiment.experiment.experimentId
+            if experiment.experiment.experimentId == self.selectedExperimentId:
+                for sample in experiment.experiment.samples:
+                    for specimen in sample.specimen3VOs:
+                        #and (specimen.exposureTemperature == seu)
+                        #print "----------------------------------------------------"
+                        #print str(specimen.code) + " " + str(sampleCode)
+                        #print str(specimen.concentration) + " " + str(concentration)
+                        #print str(float(specimen.concentration))
+                        #print str(float(concentration))
+                        #print "--"
+                        #print str(round(float(specimen.concentration), 2))
+                        #print str(round(float(concentration), 2))
 
+                        if ((str(specimen.code) == str(sampleCode))  and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
+                            return specimen.specimenId
+        return None
 
 #    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
 #        try:
@@ -123,12 +147,16 @@ class BiosaxsClient(CObjectBase):
 #            print "[ISPyB] error", sys.exc_info()[0]
 #            traceback.print_exc()
 
-    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
+    ### Mode: before, after, sample    
+    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration):
         try:
-            print "[ISPyB] Request for saveFrameSet " + str(mode) + str(sampleCode)
+            print "[ISPyB] Request for saveFrameSet " + str(mode) + " " + str(sampleCode)
             if (self.client is None):
                 self.__initWebservice()
-            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+            #specimenId = self.getSpecimenIdBySampleCode(sampleCode)
+            print "[ISPyB] tocollect[concentration]: " + str(concentration)
+            #print "[ISPyB] exposureTemperature: " + str(tocollect["SEUtemperature"])
+            specimenId = self.getSpecimenIdBySampleCodeConcentrationAndSEU(sampleCode, concentration)
             print "[ISPyB] Specimen found: " + str(specimenId)
             if specimenId is None:
                 specimenId = -1
@@ -159,7 +187,6 @@ class BiosaxsClient(CObjectBase):
                                           tocollect["transmission"]
                                           )
         except Exception:
-            print Exception
             print "[ISPyB] error", sys.exc_info()[0]
             #traceback.print_exc()
 

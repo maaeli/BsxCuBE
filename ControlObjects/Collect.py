@@ -308,19 +308,17 @@ class Collect(CObjectBase):
         measurementId = None
 
         print "[ISPyB] It is last buffer " + str(self.isLastBuffer)
-
-
         if self.isISPyB:
             if self.isLastBuffer:
                 user = self.objects["biosaxs_client"].user
                 password = self.objects["biosaxs_client"].password
                 measurementId = self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-                print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)))
+                print "Sending to EDNA login %s,%s,%s, %s, %s" % (user, password, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration)))
                 sample = XSDataBioSaxsSample(login = XSDataString(user),
                                          passwd = XSDataString(password),
                                          measurementID = XSDataInteger(measurementId))
 
-        self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+        self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration)
         print "[ISPyB] Last measurement code " + str(measurementId)
 
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
@@ -795,9 +793,9 @@ class Collect(CObjectBase):
         return (pars, tocollect, timeBefore, timeAfter, mode)
 
 
-    def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample):
-        self.showMessage(0, "Preparing to send to ISPyB: " + mode)
-        self.showMessage(0, "Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
+    def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample, concentration):
+        self.showMessage(1, "[ISPyB] Preparing to send to ISPyB: " + mode)
+        self.showMessage(1, "[ISPyB] Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
         #print "sample"
         #print sample
         #print "sample.buffer"
@@ -842,7 +840,8 @@ class Collect(CObjectBase):
         self.objects["biosaxs_client"].saveFrameSet(ispybMode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary,
                                                     currentMachine,
                                                     tocollect,
-                                                    pars)
+                                                    pars,
+                                                    concentration)
 
 
     def _collectWithRobot(self, pars):
@@ -857,7 +856,7 @@ class Collect(CObjectBase):
         #  Silent creation of the experiment in ISPyB
         # ===========================================
         try:
-
+            print pars["sampleList"]
             if not pars["collectISPYB"]:
                 print "[ISPyB] Create a new experiment in ISPyB"
                 ispyBuffers = []
@@ -877,6 +876,8 @@ class Collect(CObjectBase):
                     sampleWithNoBufferAttribute = sample.copy()
                     sampleWithNoBufferAttribute["buffer"] = ""
                     ispyBuffers.append(sampleWithNoBufferAttribute)
+
+                print ispyBuffers
 
                 self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
                 pars["collectISPYB"] = True
@@ -983,7 +984,7 @@ class Collect(CObjectBase):
                     pars["runNumber"] = self.nextRunNumber
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_before")
                 if pars["collectISPYB"]:
-                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
             #
             # Wait if necessary before collecting sample
@@ -1009,7 +1010,7 @@ class Collect(CObjectBase):
                 pars["runNumber"] = self.nextRunNumber
             (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
             if pars["collectISPYB"]:
-                self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
+                self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
             if pars["bufferAfter"]:
                 self.isLastBuffer = True
@@ -1021,7 +1022,7 @@ class Collect(CObjectBase):
                     pars["runNumber"] = self.nextRunNumber
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_after")
                 if pars["collectISPYB"]:
-                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample)
+                    self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
             prevSample = sample
 
