@@ -764,6 +764,18 @@
   <connections id="VacPumpBrick1">
     <connection role="pumping">
       <slot name="exftclose"/>
+      <slot name="exscclose"/>
+      <slot name="vacftclose"/>
+      <slot name="vacscclose"/>
+      <slot name="rv5open"/>
+      <slot name="rv6open"/>
+      <slot name="getValveThreshold"/>
+      <slot name="getPumpThreshold"/>
+      <slot name="getFTTimeout"/>
+      <slot name="getSCTimeout"/>
+      <slot name="getFTVaccum"/>
+      <slot name="getSCVacuum"/>
+      <slot name="getUSVacuum"/>
       <peer name="BsxCuBE/vacPump"/>
     </connection>
   </connections>
