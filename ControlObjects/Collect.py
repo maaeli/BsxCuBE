@@ -77,7 +77,9 @@ class Collect(CObjectBase):
         # ISPyB or not
         self.isISPyB = False
         self.isLastBuffer = False #ISPyB only send EDNA to communicate with ISPyB when it is last buffer
-        self.ispybLastMeasurementCode = None
+        self.ispybLastMeasurementCode = None #I need the id of the sample when I am collection the last buffer so Buffer - sample - Buffer at this moment ispybLastMeasurementCode 
+                                             # contains the measurementId of the sample
+        self.ispybSEUtemperature = None #Seu temperature of the specimen I am collecting...
 
         CObjectBase.__init__(self, *args, **kwargs)
         self.__collectWithRobotProcedure = None
@@ -308,6 +310,7 @@ class Collect(CObjectBase):
         measurementId = None
 
         print "[ISPyB] It is last buffer " + str(self.isLastBuffer)
+        print "[ISPyB] pSEUTemperature" + str(self.ispybSEUtemperature)
         if self.isISPyB:
             if self.isLastBuffer:
                 user = self.objects["biosaxs_client"].user
@@ -876,11 +879,10 @@ class Collect(CObjectBase):
                     sampleWithNoBufferAttribute["buffer"] = ""
                     ispyBuffers.append(sampleWithNoBufferAttribute)
 
-                print ispyBuffers
+
 
                 self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
                 pars["collectISPYB"] = True
-
                 print "[ISPyB] collectISPYB set to True"
         except Exception:
             #print Exception
@@ -955,6 +957,9 @@ class Collect(CObjectBase):
         for sample in pars["sampleList"]:
             self.isLastBuffer = False
             self.sampleNumber = self.sampleNumber + 1
+
+            #Keep the SEU temperature so later I can retrieve it from EDNA analysis, we need to improve it.
+            self.ispybSEUtemperature = sample["SEUtemperature"]
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
@@ -1007,6 +1012,7 @@ class Collect(CObjectBase):
             else:
                 # need to increase run number
                 pars["runNumber"] = self.nextRunNumber
+
             (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
             if pars["collectISPYB"]:
                 self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
