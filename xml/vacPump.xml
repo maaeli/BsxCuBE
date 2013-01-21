@@ -11,6 +11,7 @@
    
    <channel name="valveThreshold" type="spec" call="BSX_GLOBAL/vacuum/valveThreshold"/>
    <channel name="pumpThreshold" type="spec" call="BSX_GLOBAL/vacuum/pumpThreshold"/>
+   <channel name="usThreshold" type="spec" call="BSX_GLOBAL/vacuum/upstreamThreshold"/>
    
    <channel name="ftTimeout" type="spec" call="BSX_GLOBAL/vacuum/ftTimeout"/>
    <channel name="scTimeout" type="spec" call="BSX_GLOBAL/vacuum/scTimeout"/>

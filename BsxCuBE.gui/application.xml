@@ -767,10 +767,13 @@
       <slot name="exscclose"/>
       <slot name="vacftclose"/>
       <slot name="vacscclose"/>
+      <slot name="vacftopen"/>
+      <slot name="vacscopen"/>
       <slot name="rv5open"/>
       <slot name="rv6open"/>
       <slot name="getValveThreshold"/>
       <slot name="getPumpThreshold"/>
+      <slot name="getUSThreshold"/>
       <slot name="getFTTimeout"/>
       <slot name="getSCTimeout"/>
       <slot name="getFTVaccum"/>

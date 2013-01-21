@@ -5,8 +5,8 @@ class VacPump(CObjectBase):
 
     signals = []
 
-    slots = [Slot("exftclose"), Slot("exscclose"), Slot("vacftclose"), Slot("vacscclose"), Slot("rv5open"), Slot("rv6open"),
-             Slot("getValveThreshold"), Slot("getPumpThreshold"), Slot("getFTTimeout"), Slot("getSCTimeout"),
+    slots = [Slot("exftclose"), Slot("exscclose"), Slot("vacftclose"), Slot("vacscclose"), Slot("vacftopen"), Slot("vacscopen"), Slot("rv5open"), Slot("rv6open"),
+             Slot("getValveThreshold"), Slot("getPumpThreshold"), Slot("getUSThreshold"), Slot("getFTTimeout"), Slot("getSCTimeout"),
              Slot("getFTVacuum"), Slot("getSCVacuum"), Slot("getUSVacuum")]
 
 
@@ -19,22 +19,28 @@ class VacPump(CObjectBase):
         pass
 
     def exftclose(self):
-        self.commands["exftclose"]
+        self.commands["exftclose"]()
 
     def exscclose(self):
-        self.commands["exscclose"]
+        self.commands["exscclose"]()
 
     def vacftclose(self):
-        self.commands["vacftclose"]
+        self.commands["vacftclose"]()
 
     def vacscclose(self):
-        self.commands["vacscclose"]
+        self.commands["vacscclose"]()
+
+    def vacftopen(self):
+        self.commands["vacftopen"]()
+
+    def vacscopen(self):
+        self.commands["vacscopen"]()
 
     def rv5open(self):
-        self.commands["rv5open"]
+        self.commands["rv5open"]()
 
     def rv6open(self):
-        self.commands["rv6open"]
+        self.commands["rv6open"]()
 
     def getValveThreshold(self):
         channel = self.channels.get("valveThreshold")
@@ -51,10 +57,12 @@ class VacPump(CObjectBase):
             return 0
         else:
             return self.channels.get("pumpThreshold").value()
-        return self.channels.get("pumpThreshold")
 
         #DEBUG
         # TODO 
+    def getUSThreshold(self):
+        return self.channels.get("usThreshold").value()
+
     def getFTTimeout(self):
         return self.channels.get("ftTimeout").value()
 
