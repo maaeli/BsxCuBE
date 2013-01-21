@@ -289,10 +289,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Operation"/>
   </properties>
-  <properties id="WebBrowseBrick1">
-     <property name="url" value="http://pcantolinos:8080/ispyb"/>
-     <property name="flex" value="0"/>
-  </properties>
   <properties id="ReadingBrick1">
      <property name="flex" value="0"/>
      <property name="valueThreshold" value="0.80000000000000004"/>
@@ -320,12 +316,6 @@
   </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
-  </properties>
-  <properties id="ISPyBB">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="ISPyBB"/>
   </properties>
   <properties id="Misc">
      <property name="flex" value="0"/>
@@ -776,7 +766,7 @@
       <slot name="getUSThreshold"/>
       <slot name="getFTTimeout"/>
       <slot name="getSCTimeout"/>
-      <slot name="getFTVaccum"/>
+      <slot name="getFTVacuum"/>
       <slot name="getSCVacuum"/>
       <slot name="getUSVacuum"/>
       <peer name="BsxCuBE/vacPump"/>
@@ -839,13 +829,6 @@
   <connections id="Operation">
   </connections>
 
-  <connections id="WebBrowseBrick1">
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
-    </connection>
-  </connections>
-
   <connections id="ReadingBrick1">
     <connection role="reading">
       <signal name="readingChanged"/>
@@ -870,9 +853,6 @@
     <connection role="samplechanger">
       <peer name="BsxCuBE/SampleChanger (local)"/>
     </connection>
-  </connections>
-
-  <connections id="ISPyBB">
   </connections>
 
   <connections id="Misc">

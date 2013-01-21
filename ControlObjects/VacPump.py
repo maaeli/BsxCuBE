@@ -1,4 +1,4 @@
-from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
+from Framework4.Control.Core.CObject import CObjectBase, Slot
 import logging
 
 class VacPump(CObjectBase):
@@ -46,7 +46,7 @@ class VacPump(CObjectBase):
         channel = self.channels.get("valveThreshold")
         if channel is None:
             logging.error("Tried and failed to connect to EXP spec session")
-            return 0
+            return "0.0"
         else:
             return self.channels.get("valveThreshold").value()
 
@@ -54,26 +54,54 @@ class VacPump(CObjectBase):
         channel = self.channels.get("pumpThreshold")
         if channel is None:
             logging.error("Tried and failed to connect to EXP spec session")
-            return 0
+            return "0.0"
         else:
             return self.channels.get("pumpThreshold").value()
 
-        #DEBUG
-        # TODO 
     def getUSThreshold(self):
-        return self.channels.get("usThreshold").value()
+        channel = self.channels.get("usThreshold")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0.0"
+        else:
+            return self.channels.get("usThreshold").value()
 
     def getFTTimeout(self):
-        return self.channels.get("ftTimeout").value()
+        channel = self.channels.get("ftTimeout")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0"
+        else:
+            return self.channels.get("ftTimeout").value()
 
     def getSCTimeout(self):
-        return self.channels.get("scTimeout").value()
+        channel = self.channels.get("scTimeout")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0"
+        else:
+            return self.channels.get("scTimeout").value()
 
     def getFTVacuum(self):
-        return self.channels.get("FTVacuum").value()
+        channel = self.channels.get("FTVacuum")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0.0"
+        else:
+            return self.channels.get("FTVacuum").value()
 
     def getSCVacuum(self):
-        return self.channels.get("SCVacuum").value()
+        channel = self.channels.get("SCVacuum")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0.0"
+        else:
+            return self.channels.get("SCVacuum").value()
 
     def getUSVacuum(self):
-        return self.channels.get("USVacuum").value()
+        channel = self.channels.get("USVacuum")
+        if channel is None:
+            logging.error("Tried and failed to connect to EXP spec session")
+            return "0.0"
+        else:
+            return self.channels.get("USVacuum").value()

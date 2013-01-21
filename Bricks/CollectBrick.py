@@ -390,12 +390,11 @@ class CollectBrick(Core.BaseBrick):
         self.robotCheckBox = Qt.QCheckBox("Collect using robot", self.brick_widget)
         Qt.QObject.connect(self.robotCheckBox, Qt.SIGNAL("toggled(bool)"), self.robotCheckBoxToggled)
         self.hBoxLayout16.addWidget(self.robotCheckBox)
-        self.ispybRobotCheckBox = Qt.QCheckBox("Collect with ISPyB", self.brick_widget)
-        Qt.QObject.connect(self.ispybRobotCheckBox, Qt.SIGNAL("toggled(bool)"), self.ispybRobotCheckBoxToggled)
-        self.hBoxLayout16.addWidget(self.ispybRobotCheckBox)
         self.hplcCheckBox = Qt.QCheckBox("Collect using HPLC", self.brick_widget)
         Qt.QObject.connect(self.hplcCheckBox, Qt.SIGNAL("toggled(bool)"), self.CheckBoxToggledHPLC)
         self.hBoxLayout16.addWidget(self.hplcCheckBox)
+        self.fillspace = Qt.QLabel("")
+        self.hBoxLayout16.addWidget(self.fillspace)
         self.brick_widget.layout().addLayout(self.hBoxLayout16)
 
         self.hBoxLayout17 = Qt.QHBoxLayout()
@@ -720,7 +719,7 @@ class CollectBrick(Core.BaseBrick):
                 self.collectObj.triggerEDNA(filename0, oneway = True)
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % (filename0, self._diodeCurrent, self._machineCurrent)
                 logger.info(message)
-                if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
+                if self.robotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory(0, message)
 
                 self._currentFrame += 1
@@ -852,7 +851,7 @@ class CollectBrick(Core.BaseBrick):
                         self.emit("grayOut", False)
                     else:
                         feedBackFlag = self._feedBackFlag
-                        if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
+                        if self.robotCheckBox.isChecked():
                             self.setCollectionStatus("done")
                             self._feedBackFlag = False
                             self.__isTesting = False
@@ -1312,11 +1311,6 @@ class CollectBrick(Core.BaseBrick):
     def robotCheckBoxToggled(self, pValue):
 
         if pValue:
-            # Inform that manual and ISPyB are not compatible
-            if self.ispybRobotCheckBox.isChecked():
-                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not collect data manually and with ISpYB", Qt.QMessageBox.Ok)
-                self.robotCheckBox.setChecked(False)
-                return
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok)
@@ -1329,32 +1323,6 @@ class CollectBrick(Core.BaseBrick):
                 self._collectRobotDialog.raise_()
             else:
                 self._collectRobotDialog.show()
-        else:
-            if not self._collectRobotDialog is None:
-                self._collectRobotDialog.hide()
-            self._collectRobotDialog = None
-
-    def ispybRobotCheckBoxToggled(self, pValue):
-        if pValue:
-            # Inform that manual and ISPyB are not compatible
-            if self.robotCheckBox.isChecked():
-                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not collect data manually and with ISpYB", Qt.QMessageBox.Ok)
-                self.ispybRobotCheckBox.setChecked(False)
-                return
-            # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
-            if self.isHPLC:
-                Qt.QMessageBox.critical(self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok)
-                self.ispybRobotCheckBox.setChecked(False)
-                return
-            self._ispybCollect = True
-            self._collectRobotDialog = ISPyBCollectRobotDialog(self)
-            if self._collectRobotDialog.isVisible():
-                self._collectRobotDialog.activateWindow()
-                self._collectRobotDialog.raise_()
-            else:
-                self._collectRobotDialog.show()
-                #Populate list of experiments
-                self._collectRobotDialog.populateExperiments()
         else:
             if not self._collectRobotDialog is None:
                 self._collectRobotDialog.hide()
@@ -1444,7 +1412,7 @@ class CollectBrick(Core.BaseBrick):
         if not self.checkPilatusReady():
             print "It seems not to be ready"
             return
-        self.robotCollect = (self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked())
+        self.robotCollect = self.robotCheckBox.isChecked()
         if not self.robotCollect or self.validParameters():
             # Check Temperature changes are not too big when doing robot collection
             if self.robotCollect:
@@ -1663,7 +1631,7 @@ class CollectBrick(Core.BaseBrick):
                 pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, \
                 pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, \
                 pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature):
-        if not self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
+        if not self.robotCheckBox.isChecked():
             self.SPECBusyTimer.start(pFrameNumber * (pTimePerFrame + 5) * 1000 + 12000)
 
         self.__isTesting = False
@@ -1725,7 +1693,7 @@ class CollectBrick(Core.BaseBrick):
 
 
     def abortPushButtonClicked(self):
-        if self.robotCheckBox.isChecked() or self.ispybRobotCheckBox.isChecked():
+        if self.robotCheckBox.isChecked():
             answer = Qt.QMessageBox.question(self.brick_widget, "Info", "Do you want to abort the ongoing data collection?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton)
             if answer == Qt.QMessageBox.No:
                 return
@@ -1791,7 +1759,6 @@ class CollectBrick(Core.BaseBrick):
                    self.testPushButton, \
                    self.collectPushButton, \
                    self.robotCheckBox, \
-                   self.ispybRobotCheckBox, \
                    self.hplcCheckBox, \
                    self.testPushButton, \
                    self.abortPushButton)
