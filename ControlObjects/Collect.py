@@ -91,13 +91,8 @@ class Collect(CObjectBase):
         self.ednaJob = None
         self.dat_filenames = {}
         self.jobSubmitted = False
-#<<<<<<< HEAD
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_3"
-#        self.pluginMerge = "EDPluginBioSaxsSmartMergev1_4"
-#=======
-#        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_2"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
-#>>>>>>> refs/heads/biosaxs
         self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
         self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_0"
