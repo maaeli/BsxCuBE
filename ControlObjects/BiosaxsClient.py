@@ -155,6 +155,9 @@ class BiosaxsClient(CObjectBase):
                 self.__initWebservice()
             #specimenId = self.getSpecimenIdBySampleCode(sampleCode)
             print "[ISPyB] tocollect[concentration]: " + str(concentration)
+            print "[ISPyB] toCollect.SEUtemperature " + str(tocollect)
+            print "[ISPyB] toCollect.SEUtemperature " + str(tocollect["SEUtemperature"])
+
             #print "[ISPyB] exposureTemperature: " + str(tocollect["SEUtemperature"])
             specimenId = self.getSpecimenIdBySampleCodeConcentrationAndSEU(sampleCode, concentration)
             print "[ISPyB] Specimen found: " + str(specimenId)

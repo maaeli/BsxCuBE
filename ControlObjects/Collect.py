@@ -794,8 +794,8 @@ class Collect(CObjectBase):
 
 
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample, concentration):
-        self.showMessage(1, "[ISPyB] Preparing to send to ISPyB: " + mode)
-        self.showMessage(1, "[ISPyB] Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
+        self.showMessage(0, "[ISPyB] Preparing to send to ISPyB: " + mode)
+        self.showMessage(0, "[ISPyB] Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
         #print "sample"
         #print sample
         #print "sample.buffer"
