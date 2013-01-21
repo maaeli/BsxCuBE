@@ -48,6 +48,7 @@ class VacPumpBrick(Core.BaseBrick):
             return
         if  self.pumpingObject is not None:
             self.pumpingObject.exftclose()
+        ## test
         Qt.QMessageBox.information(self.brick_widget, "Info", "This command does noting yet")
 
 
