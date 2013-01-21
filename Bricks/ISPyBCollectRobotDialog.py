@@ -1,5 +1,5 @@
 from PyQt4   import Qt, QtCore, QtGui
-from Samples import Sample, CollectPars, SampleList
+from Samples import SampleList, Sample, CollectPars#, ISPyBSample, ISPyBCollectPars
 import cStringIO
 import logging
 import os.path, time
@@ -83,61 +83,46 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         self.vBoxLayout = Qt.QVBoxLayout(self.groupBox)
         self.layout().addWidget(self.groupBox)
 
+
+
+        # Experiment name comboBox
         self.hBoxLayout0 = Qt.QHBoxLayout()
+        self.hBoxLayout0.setAlignment(QtCore.Qt.AlignLeft)
+        self.experimentsLabel = Qt.QLabel("Select Experiment", self)
+        self.experimentsLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
+        self.hBoxLayout0.addWidget(self.experimentsLabel)
 
-        #self.fileLabel = Qt.QLabel("File", self)
-        #self.fileLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
-        #self.hBoxLayout0.addWidget(self.fileLabel)
-        #self.fileLineEdit = Qt.QLineEdit(self)
-        #self.fileLineEdit.setMaxLength(100)
-        #self.fileLineEdit.setFixedWidth(400)
-        #self.fileLineEdit.setEnabled(False)
+        #self.experimentsComboBox.setGeometry(QtCore.QRect(10, 30, 300, 22))
+        self.experimentsComboBox = QtGui.QComboBox(self)
+        self.experimentsComboBox.setObjectName("comboBox")
+        self.experimentsComboBox.setFixedWidth(300)
+        QtCore.QObject.connect(self.experimentsComboBox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onExperimentChosenEvent)
+        self.hBoxLayout0.addWidget(self.experimentsComboBox)
 
-        #self.hBoxLayout0.setAlignment(QtCore.Qt.AlignLeft)
-        #self.hBoxLayout0.addWidget(self.fileLineEdit)
-
-        #Adding ISPyB Experiment Selector
         # Load experiment button
         self.refresh_data_button = Qt.QPushButton("Refresh", self)
         self.refresh_data_button.setFixedWidth(100)
         self.refresh_data_button.setGeometry(QtCore.QRect(280, 30, 50, 23))
         self.refresh_data_button.setObjectName("refresh_data_button")
         self.refresh_data_button.clicked.connect(self.onRefreshButtonClickedEvent)
-
-        # Experiment name comboBox
-        self.experimentsComboBox = QtGui.QComboBox(self)
-        self.experimentsComboBox.setGeometry(QtCore.QRect(10, 30, 300, 22))
-        self.experimentsComboBox.setObjectName("comboBox")
-        self.experimentsComboBox.setFixedWidth(500)
-        QtCore.QObject.connect(self.experimentsComboBox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onExperimentChosenEvent)
-
-        self.hBoxLayout0.addWidget(self.experimentsComboBox)
         self.hBoxLayout0.addWidget(self.refresh_data_button)
-
-        #self.filePushButton = Qt.QPushButton("...", self)        
-        #self.filePushButton.setFixedWidth(25)
-        #Qt.QObject.connect(self.filePushButton, Qt.SIGNAL("clicked()"), self.filePushButtonClicked)
-        #self.hBoxLayout0.addWidget(self.filePushButton)
-
-        #self.loadPushButton = Qt.QPushButton("Load", self)
-        #self.loadPushButton.setFixedWidth(70)
-        #Qt.QObject.connect(self.loadPushButton, Qt.SIGNAL("clicked()"), self.loadPushButtonClicked)
-        #self.hBoxLayout0.addWidget(self.loadPushButton)
-
-        #self.savePushButton = Qt.QPushButton("Save", self)
-        #self.savePushButton.setFixedWidth(70)
-        #Qt.QObject.connect(self.savePushButton, Qt.SIGNAL("clicked()"), self.savePushButtonClicked)
-        #self.hBoxLayout0.addWidget(self.savePushButton)
+        self.vBoxLayout.addLayout(self.hBoxLayout0)
 
 
-        #self.saveAsPushButton = Qt.QPushButton("Save as", self)
-        #self.saveAsPushButton.setFixedWidth(70)
-        #Qt.QObject.connect(self.saveAsPushButton, Qt.SIGNAL("clicked()"), self.saveAsPushButtonClicked)
-        #self.hBoxLayout0.addWidget(self.saveAsPushButton)
+        # Plate Groups
+        self.hBoxLayoutPlateGroup = Qt.QHBoxLayout()
+        self.hBoxLayoutPlateGroup.setAlignment(QtCore.Qt.AlignLeft)
+        self.experimentsLabel = Qt.QLabel("Select Plate Group", self)
+        self.experimentsLabel.setFixedWidth(self.PARAMLABEL_WIDTH)
+        self.hBoxLayoutPlateGroup.addWidget(self.experimentsLabel)
 
-        #self.loadFromISPyBButton = Qt.QPushButton("Load from ISPyB", self)
-        #Qt.QObject.connect(self.loadFromISPyBButton, Qt.SIGNAL("clicked()"), self.loadFromISPyBButtonClicked)
-        #self.hBoxLayout0.addWidget(self.loadFromISPyBButton)
+        self.plateGroupComboBox = QtGui.QComboBox(self)
+        self.plateGroupComboBox.setObjectName("comboBox")
+        self.plateGroupComboBox.setFixedWidth(300)
+        QtCore.QObject.connect(self.plateGroupComboBox, QtCore.SIGNAL("currentIndexChanged(QString)"), self.onPlateGroupSelected)
+        self.hBoxLayoutPlateGroup.addWidget(self.plateGroupComboBox)
+        self.vBoxLayout.addLayout(self.hBoxLayoutPlateGroup)
+
 
         self.vBoxLayout.addLayout(self.hBoxLayout0)
 
@@ -560,7 +545,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def loadFile(self, filename):
         try:
-            myPars = CollectPars(filename)
+            myPars = CollectPars(filename) #ISPyBCollectPars(filename) 
             self.clearConfiguration()
             #  Clear first if load was succesful
             # 
@@ -741,7 +726,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
 
     def getSampleRow(self, i):
         table = self.tableWidget
-        sampleRow = Sample()
+        sampleRow = Sample() #ISPyBSample() 
 
         sampleRow.enable = table.cellWidget(i, self.ENABLE_COLUMN).isChecked()
         sampleRow.type = str(table.cellWidget(i, self.SAMPLETYPE_COLUMN).currentText())
@@ -773,6 +758,7 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
     def addSampleRow(self, sample = None, index = -1):
         if sample is None:
             samp = Sample()
+#            samp = ISPyBSample()
             if self.tableWidget.rowCount() == 0:
                 samp.type = "Buffer"
             else:
@@ -1079,39 +1065,53 @@ class ISPyBCollectRobotDialog(Qt.QDialog):
         for experiment in experimentNames:
             self.experimentsComboBox.addItem(experiment[0], experiment[1])
 
-    def onExperimentChosenEvent(self):
-        plates = []
-        xmlfile = None
+    def onPlateGroupSelected(self):
+        if self.plateGroupComboBox.currentIndex() > 0:
+            #xml = self.__parent.getRobotXMLByPlateGroupId(self.plateGroups[self.plateGroupComboBox.currentIndex() - 1].plateGroupId, self.experimentId)
+            self.__parent.getRobotXMLByPlateGroupId(self.plateGroups[self.plateGroupComboBox.currentIndex() - 1][1], self.experimentId)
+            #self.loadXML(xml)
+        else:
+            print "None"
 
-        currentIndex = self.experimentsComboBox.currentIndex()
-
-#        print "CurrentIndex" + str(currentIndex)
-        #Experiment selected None
-        if currentIndex is 0:
-            self.clearConfiguration()
-            return
-
-        if currentIndex is -1:
-            self.clearConfiguration()
-            return
-
-        #Double check
-        if self.experimentNames[currentIndex - 1][1] == -1:
-            self.clearConfiguration()
-            return
-
-        self.sampleIDs = []
-        self.sampleIDCount = 0
-#        for  plate in self.experiments[currentIndex].getPlates():
-#            plates.append(plate.samplePlateId)
-#            response = self.client.getRobotXMLByPlateIds(self.experiments[currentIndex].experiment.experimentId, plates)
-        response = self.__parent.getRobotXMLByExperimentId(self.experimentNames[currentIndex - 1][1])
+    def loadXML(self, response):
         if response != None:
             xmlfile = cStringIO.StringIO(response)
         try:
             self.loadFile(xmlfile)
         finally:
             self.filename = ""
+
+    def populatePlateGroup(self, experimentId):
+        self.plateGroups = self.__parent.getPlateGroupByExperimentId(experimentId)
+        print self.plateGroups
+        while (self.plateGroupComboBox.count() != 0):
+            self.plateGroupComboBox.removeItem(0)
+
+        self.plateGroupComboBox.addItem('None', -1)
+        for plateGroup in self.plateGroups:
+            #self.plateGroupComboBox.addItem(plateGroup.name, plateGroup.plateGroupId)
+            self.plateGroupComboBox.addItem(plateGroup[0], plateGroup[1])
+
+
+    def onExperimentChosenEvent(self):
+        plates = []
+        xmlfile = None
+        currentIndex = self.experimentsComboBox.currentIndex()
+
+        #Experiment selected None
+        if (currentIndex == 0) or (currentIndex == -1):
+            self.clearConfiguration()
+            return
+
+        #Double check
+        self.experimentId = self.experimentNames[currentIndex - 1][1]
+        if  self.experimentId == -1:
+            self.clearConfiguration()
+            return
+
+        self.sampleIDs = []
+        self.sampleIDCount = 0
+        self.populatePlateGroup(self.experimentId)
 
 if __name__ == '__main__':
   app = QtGui.QApplication([])
