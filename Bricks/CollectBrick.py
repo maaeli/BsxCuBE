@@ -709,8 +709,10 @@ class CollectBrick(Core.BaseBrick):
     def collectNewFrameChanged(self, pValue):
         filename0 = pValue.split(",")[0]
         if os.path.dirname(filename0).endswith("/raw"):
+            directoryRaw = True
             directory = os.path.join(os.path.dirname(filename0)[:-4], "1d")
         else:
+            directoryRaw = False
             directory = os.path.join(os.path.dirname(filename0), "1d")
 
         if self.__lastFrame is None or self.__lastFrame != pValue:
@@ -726,28 +728,12 @@ class CollectBrick(Core.BaseBrick):
 
                 self.setCollectionStatus("running")
 
-                # Waiting for the file to appear
-                t0 = time.time()
-                fileFound = False
-                #small sleep
-                time.sleep(0.1)
-                try:
-                    dummy = os.stat(directory)
-                except Exception:
-                    # in case directory does not exist yet
-                    pass
-                if os.path.exists(filename0):
-                    filesize = os.path.getsize(filename0)
-                    if filesize > 4000000:
-                        time.sleep(0.1)
-                        # we got file
-                        fileFound = True
-                        print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                        print "display1D: %r" % filename0
-                        self.emit("displayItemChanged", filename0)
-                if not fileFound:
-                    #a bit longer sleep
-                    time.sleep(0.2)
+                # Waiting for the file to appear if not raw
+                if directoryRaw == False:
+                    t0 = time.time()
+                    fileFound = False
+                    #small sleep
+                    time.sleep(0.1)
                     try:
                         dummy = os.stat(directory)
                     except Exception:
@@ -760,21 +746,16 @@ class CollectBrick(Core.BaseBrick):
                             # we got file
                             fileFound = True
                             print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                            print "display1D: %r" % filename0
+                            print "display: %r" % filename0
                             self.emit("displayItemChanged", filename0)
-                if not fileFound:
-                    #a bit longer again
-                    time.sleep(0.3)
-                    try:
-                        dummy = os.stat(directory)
-                    except Exception:
-                        # in case directory does not exist yet
-                        pass
-                    timestr = str(time.time() - t0)
-                    print ">>> No file 3 %s seen after %s seconds after two stats and a 0.6s wait . We wait 10 seconds for it " % (filename0, timestr)
-                    # sleep up to 10 seconds
-                    while time.time() - t0 < 10:
-                        time.sleep(0.1)
+                    if not fileFound:
+                        #a bit longer sleep
+                        time.sleep(0.2)
+                        try:
+                            dummy = os.stat(directory)
+                        except Exception:
+                            # in case directory does not exist yet
+                            pass
                         if os.path.exists(filename0):
                             filesize = os.path.getsize(filename0)
                             if filesize > 4000000:
@@ -782,13 +763,38 @@ class CollectBrick(Core.BaseBrick):
                                 # we got file
                                 fileFound = True
                                 print ">>> File info 3 %r  %s " % (filesize, type(filesize))
-                                print "display1D: %r" % filename0
+                                print "display: %r" % filename0
                                 self.emit("displayItemChanged", filename0)
-                                break
-                        # before getting back, let us treat Qt events
-                        QtGui.qApp.processEvents()
                     if not fileFound:
-                        print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
+                        #a bit longer again
+                        time.sleep(0.3)
+                        try:
+                            dummy = os.stat(directory)
+                        except Exception:
+                            # in case directory does not exist yet
+                            pass
+                        timestr = str(time.time() - t0)
+                        print ">>> No file 3 %s seen after %s seconds after two stats and a 0.6s wait . We wait 10 seconds for it " % (filename0, timestr)
+                        # sleep up to 10 seconds
+                        while time.time() - t0 < 10:
+                            time.sleep(0.1)
+                            if os.path.exists(filename0):
+                                filesize = os.path.getsize(filename0)
+                                if filesize > 4000000:
+                                    time.sleep(0.1)
+                                    # we got file
+                                    fileFound = True
+                                    print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                                    print "display: %r" % filename0
+                                    self.emit("displayItemChanged", filename0)
+                                    break
+                            # before getting back, let us treat Qt events
+                            QtGui.qApp.processEvents()
+                        if not fileFound:
+                            print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
+                else:
+                    print "display2D raw: %r" % filename0
+                    self.emit("displayItemChanged", filename0)
 
                 if self._currentFrame == self._frameNumber:
                     splitList = os.path.basename(filename0).split("_")

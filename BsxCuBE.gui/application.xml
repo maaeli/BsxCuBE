@@ -140,6 +140,11 @@
      <property name="toolTip" value="Execute flight tube air"/>
      <property name="parameter" value=""/>
   </properties>
+  <properties id="tabbox2">
+     <property name="flex" value="1"/>
+     <property name="notification" value="switch to tab"/>
+     <property name="caption" value=""/>
+  </properties>
   <properties id="hbox1">
      <property name="flex" value="0"/>
      <property name="align" value="stretch"/>
@@ -209,11 +214,6 @@
   <properties id="splitter1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="tabbox2">
-     <property name="flex" value="1"/>
-     <property name="notification" value="switch to tab"/>
-     <property name="caption" value=""/>
-  </properties>
   <properties id="EH">
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
@@ -245,7 +245,7 @@
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="2D"/>
+     <property name="caption" value="2D raw"/>
   </properties>
   <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
@@ -487,6 +487,7 @@
       <signal name="displayItemChanged"/>
       <signal name="transmissionChanged"/>
       <signal name="grayOut"/>
+      <peer name="CollectBrick1"/>
     </connection>
   </connections>
 
@@ -555,6 +556,9 @@
       <slot name="executeCommand"/>
       <peer name="BsxCuBE/CommandFTAir"/>
     </connection>
+  </connections>
+
+  <connections id="tabbox2">
   </connections>
 
   <connections id="hbox1">
@@ -691,9 +695,6 @@
   </connections>
 
   <connections id="splitter1">
-  </connections>
-
-  <connections id="tabbox2">
   </connections>
 
   <connections id="EH">

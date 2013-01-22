@@ -53,7 +53,7 @@
       <tab label='EH Scan'/>
 <tab label='OH Scan'/>
 <tab label='1D'/>
-<tab label='2D'/>
+<tab label='2D raw'/>
 <tab label='Robot'/>
 <tab label='SAS'/>
     </tabs>
