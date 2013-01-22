@@ -86,7 +86,7 @@ class VacPump(CObjectBase):
         channel = self.channels.get("FTVacuum")
         if channel is None:
             logging.error("Tried and failed to connect to EXP spec session")
-            return "0.0"
+            return "-1.0"
         else:
             return self.channels.get("FTVacuum").value()
 
@@ -94,7 +94,7 @@ class VacPump(CObjectBase):
         channel = self.channels.get("SCVacuum")
         if channel is None:
             logging.error("Tried and failed to connect to EXP spec session")
-            return "0.0"
+            return "-1.0"
         else:
             return self.channels.get("SCVacuum").value()
 
@@ -102,6 +102,6 @@ class VacPump(CObjectBase):
         channel = self.channels.get("USVacuum")
         if channel is None:
             logging.error("Tried and failed to connect to EXP spec session")
-            return "0.0"
+            return "-1.0"
         else:
             return self.channels.get("USVacuum").value()
