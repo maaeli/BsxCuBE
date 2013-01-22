@@ -1503,6 +1503,8 @@ class CollectBrick(Core.BaseBrick):
                                                   Qt.QMessageBox.No, Qt.QMessageBox.NoButton) == Qt.QMessageBox.Yes)
 
                 if flag:
+                    #When collect without robot there is no log on ISPyB
+                    self.getObject("collect").isISPyB = False
                     self.startCollectWithoutRobot()
 
     def setCollectionStatus(self, status):
