@@ -5,6 +5,8 @@
    <command name="exscclose" type="spec" call="exscclose"/>
    <command name="vacftclose" type="spec" call="vacftclose"/>
    <command name="vacscclose" type="spec" call="vacscclose"/>
+   <command name="vacftopen" type="spec" call="vacftopen"/>
+   <command name="vacscopen" type="spec" call="vacscopen"/>
    
    <command name="rv5open" type="spec" call="rv5open"/>
    <command name="rv6open" type="spec" call="rv6open"/>
