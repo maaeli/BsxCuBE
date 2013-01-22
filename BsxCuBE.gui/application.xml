@@ -84,14 +84,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Display"/>
   </properties>
-  <properties id="ReadingBrick3">
-     <property name="flex" value="0"/>
-     <property name="valueThreshold" value="0.80000000000000004"/>
-     <property name="maskFormat" value="%1.1e"/>
-     <property name="suffix" value=" mbar"/>
-     <property name="toolTip" value="Vacuum in flight tube"/>
-     <property name="fontSize" value="24"/>
-  </properties>
   <properties id="BsxFrameBrick1">
      <property name="flex" value="1"/>
   </properties>
@@ -140,28 +132,12 @@
      <property name="emailAddresses" value="ohlsson@esrf.fr, guijarro@esrf.fr"/>
      <property name="minimum_level" value="INFO"/>
   </properties>
-  <properties id="CommandBrick6">
-     <property name="flex" value="0"/>
-     <property name="caption" value="Flight tube vacuum"/>
-     <property name="warningPopup" value="True"/>
-     <property name="expertModeOnly" value="True"/>
-     <property name="toolTip" value="Execute flight tube vacuum"/>
-     <property name="parameter" value=""/>
-  </properties>
   <properties id="CommandBrick5">
      <property name="flex" value="0"/>
      <property name="caption" value="Flight tube air"/>
      <property name="warningPopup" value="True"/>
      <property name="expertModeOnly" value="True"/>
      <property name="toolTip" value="Execute flight tube air"/>
-     <property name="parameter" value=""/>
-  </properties>
-  <properties id="CommandBrick4">
-     <property name="flex" value="0"/>
-     <property name="caption" value="Sample changer vacuum"/>
-     <property name="warningPopup" value="True"/>
-     <property name="expertModeOnly" value="True"/>
-     <property name="toolTip" value="Execute sample changer vacuum"/>
      <property name="parameter" value=""/>
   </properties>
   <properties id="hbox1">
@@ -316,6 +292,14 @@
   </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
+  </properties>
+  <properties id="ReadingBrick3">
+     <property name="flex" value="0"/>
+     <property name="valueThreshold" value="0.80000000000000004"/>
+     <property name="maskFormat" value="%1.1e"/>
+     <property name="suffix" value=" mbar"/>
+     <property name="toolTip" value="Vacuum in flight tube"/>
+     <property name="fontSize" value="24"/>
   </properties>
   <properties id="Misc">
      <property name="flex" value="0"/>
@@ -494,13 +478,6 @@
   <connections id="Display">
   </connections>
 
-  <connections id="ReadingBrick3">
-    <connection role="reading">
-      <signal name="readingChanged"/>
-      <peer name="BsxCuBE/ReadingVacFlightTube"/>
-    </connection>
-  </connections>
-
   <connections id="BsxFrameBrick1">
     <connection role="login">
       <signal name="loggedIn"/>
@@ -572,27 +549,11 @@
   <connections id="LogBrick1">
   </connections>
 
-  <connections id="CommandBrick6">
-    <connection role="command">
-      <signal name="commandStatusChanged"/>
-      <slot name="executeCommand"/>
-      <peer name="BsxCuBE/CommandFTVacuum"/>
-    </connection>
-  </connections>
-
   <connections id="CommandBrick5">
     <connection role="command">
       <signal name="commandStatusChanged"/>
       <slot name="executeCommand"/>
       <peer name="BsxCuBE/CommandFTAir"/>
-    </connection>
-  </connections>
-
-  <connections id="CommandBrick4">
-    <connection role="command">
-      <signal name="commandStatusChanged"/>
-      <slot name="executeCommand"/>
-      <peer name="BsxCuBE/CommandSCVacuum"/>
     </connection>
   </connections>
 
@@ -852,6 +813,13 @@
   <connections id="BsxVideoBrick1">
     <connection role="samplechanger">
       <peer name="BsxCuBE/SampleChanger (local)"/>
+    </connection>
+  </connections>
+
+  <connections id="ReadingBrick3">
+    <connection role="reading">
+      <signal name="readingChanged"/>
+      <peer name="BsxCuBE/ReadingVacFlightTube"/>
     </connection>
   </connections>
 

@@ -44,7 +44,8 @@ class VacPumpBrick(Core.BaseBrick):
         self.brick_widget.layout().addWidget(self.commandPushButton)
         # Only in expert mode
         self.commandPushButton.setEnabled(False)
-        self.commandPushButton.setText("Pump Vacuum")
+        self.commandPushButton.setToolTip("Make Vacuum in Flight Tube and/or Sample Changer safely")
+        self.commandPushButton.setText("Smart Vacuum")
 
     def commandPushButtonClicked(self):
 
