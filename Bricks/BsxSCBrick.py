@@ -1,5 +1,6 @@
 import logging
-
+import traceback
+import sys
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Connection, Signal
 
@@ -89,11 +90,13 @@ class BsxSCBrick(Core.BaseBrick):
     def state_changed(self, state, status):
         if self._sampleChanger is None:
             return
-        #TODO: Need to understand why this exception is triggered five times
         try:
-            cmdException = self._sampleChanger.getCommandException(timeout = 0.5)
+            cmdException = self._sampleChanger.getCommandException()
         except:
             print "Could not read sample changer CommandException state: %s, status: %s" % (state, status)
+            print "[State changed] error", sys.exc_info()[0]
+            print "Exception in user code:"
+            traceback.print_exc(file = sys.stdout)
             cmdException = ""
         self.SCWidget.setState(state, status, cmdException)
 

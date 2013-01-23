@@ -131,7 +131,6 @@ class CollectBrick(Core.BaseBrick):
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
         self._curveList = []
-        self.lastCollectProcessingLog = None
         self.__energy = None
         self.isHPLC = False
 
@@ -682,7 +681,8 @@ class CollectBrick(Core.BaseBrick):
                 logger.warning("processing done but no file after %s seconds, will not display file %s" % (timestr, dat_filename))
 
     def collectProcessingLog(self, level, logmsg, notify):
-        # Level 0 = info, Level 1 = Warning, Level 2 = Error 
+        # Level 0 = info, Level 1 = Warning, Level 2 = Error
+        print"collectProcessing Log " + str(level) + " " + logmsg
         if level == 0:
             logmethod = logger.info
         elif level == 1:
@@ -690,15 +690,11 @@ class CollectBrick(Core.BaseBrick):
         elif level == 2:
             logmethod = logger.error
 
-        #TODO remove this hack ASAP (SO 9/7 12)
-        ### HORRIBLE CODE
-        if logmsg != self.lastCollectProcessingLog:
-            for line in logmsg.split(os.linesep):
-                logmethod(line.rstrip())
-            if notify:
-                self.messageDialog(level, logmsg)
+        for line in logmsg.split(os.linesep):
+            logmethod(line.rstrip())
+        if notify:
+            self.messageDialog(level, logmsg)
 
-        self.lastCollectProcessingLog = logmsg
         if self._collectRobotDialog is not None:
             self._collectRobotDialog.addHistory(level, logmsg)
 
@@ -708,9 +704,9 @@ class CollectBrick(Core.BaseBrick):
 
     def collectNewFrameChanged(self, pValue):
         filename0 = pValue.split(",")[0]
-        if os.path.dirname(filename0).endswith("/raw"):
+        if os.path.dirname(filename0).endswith("/raw") and filename0.endswith('.edf'):
             directoryRaw = True
-            directory = os.path.join(os.path.dirname(filename0)[:-4], "1d")
+            directory = os.path.dirname(filename0)
         else:
             directoryRaw = False
             directory = os.path.join(os.path.dirname(filename0), "1d")
@@ -793,8 +789,25 @@ class CollectBrick(Core.BaseBrick):
                         if not fileFound:
                             print ">>> No file 3 %s seen after %s seconds. We do not display it " % (filename0, timestr)
                 else:
-                    print "display2D raw: %r" % filename0
-                    self.emit("displayItemChanged", filename0)
+                    # raw .edf file 2D
+                    t0 = time.time()
+                    fileFound = False
+                    #small sleep
+                    time.sleep(0.1)
+                    try:
+                        dummy = os.stat(directory)
+                    except Exception:
+                        # in case directory does not exist yet
+                        pass
+                    if os.path.exists(filename0):
+                        filesize = os.path.getsize(filename0)
+                        if filesize > 4000000:
+                            time.sleep(0.1)
+                            # we got file
+                            fileFound = True
+                            print ">>> File info 3 %r  %s " % (filesize, type(filesize))
+                            print "display2D raw: %r" % filename0
+                            self.emit("displayItemChanged", filename0)
 
                 if self._currentFrame == self._frameNumber:
                     splitList = os.path.basename(filename0).split("_")

@@ -77,8 +77,8 @@ class Collect(CObjectBase):
         # ISPyB or not
         self.isISPyB = False
         self.isLastBuffer = False #ISPyB only send EDNA to communicate with ISPyB when it is last buffer
-        self.ispybLastMeasurementCode = None #I need the id of the sample when I am collection the last buffer so Buffer - sample - Buffer at this moment ispybLastMeasurementCode 
-                                             # contains the measurementId of the sample
+        ### I need the id of the sample when I am collection the last buffer so Buffer - sample - Buffer at this moment ispybLastMeasurementCode contains the measurementId of the sample
+        self.ispybLastMeasurementCode = None
         self.ispybSEUtemperature = None #Seu temperature of the specimen I am collecting...
 
         CObjectBase.__init__(self, *args, **kwargs)
@@ -317,12 +317,12 @@ class Collect(CObjectBase):
                 user = self.objects["biosaxs_client"].user
                 password = self.objects["biosaxs_client"].password
                 measurementId = self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-                print "[ISPyB] Sending to EDNA login %s,%s, %s, %s" % (user, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration)))
+                print "[ISPyB] Sending to EDNA login %s,%s, %s, %s" % (user, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)))
                 sample = XSDataBioSaxsSample(login = XSDataString(user),
                                          passwd = XSDataString(password),
                                          measurementID = XSDataInteger(measurementId))
 
-            self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration)
+            self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)
             print "[ISPyB] Last measurement code " + str(measurementId)
 
 
@@ -460,9 +460,9 @@ class Collect(CObjectBase):
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
-                        self.showMessage(1, log)
+                        self.showMessage(1, "Executive summary from EDNA: " + log)
                     else:
-                        self.showMessage(0, log)
+                        self.showMessage(0, "Executive summary from EDNA: " + log)
                 else:
                     self.showMessage(2, "EDNA 2 has a problem - No Executive Summary - Please check")
 
@@ -723,9 +723,6 @@ class Collect(CObjectBase):
                      pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
                      pars["radiationRelative"],
                      pars["processData"], pars["SEUTemperature"], pars["storageTemperature"])
-        # wait for flowing if we started it
-        if tocollect["flow"]:
-            self.objects["sample_changer"].wait()
 
         while self.collecting:
             time.sleep(1)
@@ -801,22 +798,6 @@ class Collect(CObjectBase):
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample, concentration):
         self.showMessage(0, "[ISPyB] Preparing to send to ISPyB: " + mode)
         self.showMessage(0, "[ISPyB] Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
-        #print "sample"
-        #print sample
-        #print "sample.buffer"
-        #print sample["buffer"]
-#        print "-----------------"
-#        print "toCollect"
-#        print tocollect
-#        print "-----------------"
-#        print "pars"
-#        print pars
-#        print "-----------------"
-#        print str(self.xsdin.experimentSetup)
-#        print "-----------------"
-#        print "-----------------"
-#        print (self.xsdin.experimentSetup.__dict__)
-#        print "-----------------"
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -846,7 +827,9 @@ class Collect(CObjectBase):
                                                     currentMachine,
                                                     tocollect,
                                                     pars,
-                                                    concentration)
+                                                    concentration,
+                                                    self.ispybSEUtemperature #This is the temperature defined in the sample that could be not the same 
+                                                    )
 
 
     def _collectWithRobot(self, pars):
@@ -953,6 +936,8 @@ class Collect(CObjectBase):
         #   MAIN LOOP on Samples
         # ==================================================
         self.sampleNumber = 0
+
+        print pars["sampleList"]
         for sample in pars["sampleList"]:
             self.isLastBuffer = False
             self.sampleNumber = self.sampleNumber + 1

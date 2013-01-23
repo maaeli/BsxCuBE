@@ -89,8 +89,8 @@ class BiosaxsClient(CObjectBase):
                             return specimen.specimenId
         return None
 
-    def getSpecimenIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration):
-        print "[ISPyB] getSpecimenIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " #+ str(seu)
+    def getSpecimenIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration, seu):
+        print "[ISPyB] getSpecimenIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " + str(seu)
         if self.experiment is None:
             print "[ISPyB] Experiment is None"
             return None
@@ -103,17 +103,26 @@ class BiosaxsClient(CObjectBase):
                 for sample in experiment.experiment.samples:
                     for specimen in sample.specimen3VOs:
                         #and (specimen.exposureTemperature == seu)
-                        #print "----------------------------------------------------"
-                        #print str(specimen.code) + " " + str(sampleCode)
-                        #print str(specimen.concentration) + " " + str(concentration)
-                        #print str(float(specimen.concentration))
-                        #print str(float(concentration))
+                        print "----------------------------------------------------"
+                        print "[TEST] " + str(specimen.code) + " " + str(sampleCode)
+                        print "[TEST] " + str(str(specimen.code) == str(sampleCode))
+                        print "[TEST] " + str(specimen.exposureTemperature) + " " + str(seu)
+                        print "[TEST] " + str(round(float(specimen.exposureTemperature), 2) == round(float(seu), 2))
+                        print "[TEST] " + str(float(specimen.concentration)) + " " + str(float(concentration))
+                        print "[TEST] " + str(round(float(specimen.concentration), 2) == round(float(concentration), 2))
+
                         #print "--"
                         #print str(round(float(specimen.concentration), 2))
                         #print str(round(float(concentration), 2))
 
-                        if ((str(specimen.code) == str(sampleCode))  and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
+                        if (float(specimen.exposureTemperature) == float(seu)
+                            and (str(specimen.code) == str(sampleCode))
+                            and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
+                            print "[TEST] found" + str(specimen.specimenId)
+                            print "[TEST] et" + str(float(specimen.exposureTemperature))
+                            print "[TEST] set" + str(float(seu))
                             return specimen.specimenId
+        print "[TEST] It is a buffer"
         return None
 
 #    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
@@ -148,18 +157,18 @@ class BiosaxsClient(CObjectBase):
 #            traceback.print_exc()
 
     ### Mode: before, after, sample    
-    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration):
+    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration, ispybSEUtemperature):
         try:
             print "[ISPyB] Request for saveFrameSet " + str(mode) + " " + str(sampleCode)
             if (self.client is None):
                 self.__initWebservice()
             #specimenId = self.getSpecimenIdBySampleCode(sampleCode)
             print "[ISPyB] tocollect[concentration]: " + str(concentration)
-            print "[ISPyB] toCollect.SEUtemperature " + str(tocollect)
-            print "[ISPyB] toCollect.SEUtemperature " + str(tocollect["SEUtemperature"])
+            print "[ISPyB] toCollect.SEUtemperature " + str(exposureTemperature)
+            print "[ISPyB] toCollect.SEUtemperature " + str(ispybSEUtemperature)
 
             #print "[ISPyB] exposureTemperature: " + str(tocollect["SEUtemperature"])
-            specimenId = self.getSpecimenIdBySampleCodeConcentrationAndSEU(sampleCode, concentration)
+            specimenId = self.getSpecimenIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature)
             print "[ISPyB] Specimen found: " + str(specimenId)
             if specimenId is None:
                 specimenId = -1
