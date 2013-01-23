@@ -125,14 +125,14 @@ class VacPumpBrick(Core.BaseBrick):
             logger.info("Vacuum already OK in Sample Changer")
             self.pumpingObject.rv5open()
             self.pumpingObject.exftclose()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             self.pumpingObject.vacftopen()
             # wait for vacuum
             if self.waitForFtVacuum() :
-                Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 logger.info("Vacuum achieved in Flight Tube")
                 self.pumpingObject.rv6open()
                 self.pumpingObject.vacftclose()
+                Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Flight Tube")
         elif ((self.scvacuum < self.valveThreshold)):
@@ -141,20 +141,20 @@ class VacPumpBrick(Core.BaseBrick):
             self.pumpingObject.rv5open()
             self.pumpingObject.exftclose()
             self.pumpingObject.vacftopen()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             # Now wait for vacuum
             if self.waitForFtVacuum() :
-                Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 logger.info("Vacuum achieved in Flight Tube")
                 self.pumpingObject.rv6open()
                 self.pumpingObject.vacftclose()
+                Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Flight Tube")
         elif ((self.ftvacuum < self.valveThreshold) and (self.scvacuum < self.pumpThreshold)):
             # FT OK and SC good but not air
             logger.info("Vacuum already OK in Flight Tube")
             self.pumpingObject.exscclose()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             self.pumpingObject.vacscopen()
             # Now wait for vacuum
             if self.waitForScVacuum() :
@@ -167,16 +167,16 @@ class VacPumpBrick(Core.BaseBrick):
                     self.pumpingObject.vacftopen()
                     # Now wait for vacuum
                     if self.waitForFtVacuum():
-                        Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                         logger.info("Vacuum achieved in Flight Tube")
                         self.pumpingObject.vacftclose()
                         self.pumpingObject.rv6open()
+                        Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     else:
                         logger.warning("Timeout, could not achieve vacuum in Flight Tube")
                 else:
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum still OK in Flight Tube")
                     self.pumpingObject.rv6open()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
         elif ((self.ftvacuum < self.valveThreshold)):
@@ -184,7 +184,7 @@ class VacPumpBrick(Core.BaseBrick):
             logger.info("Vacuum already OK in Flight Tube")
             self.pumpingObject.exscclose()
             self.pumpingObject.vacscopen()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             # Now wait for vacuum
             if self.waitForScVacuum():
                 logger.info("Vacuum achieved in Sample Changer")
@@ -196,16 +196,16 @@ class VacPumpBrick(Core.BaseBrick):
                     self.pumpingObject.vacftopen()
                     # Now wait for vacuum
                     if self.waitForFtVacuum()  :
-                        Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                         logger.info("Vacuum achieved in Flight Tube")
                         self.pumpingObject.vacftclose()
                         self.pumpingObject.rv6open()
+                        Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     else:
                         logger.warning("Timeout, could not achieve vacuum in Flight Tube")
                 else:
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum still OK in Flight Tube")
                     self.pumpingObject.rv6open()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
         elif ((self.ftvacuum < self.pumpThreshold) and (self.scvacuum < self.pumpThreshold)):
@@ -216,7 +216,7 @@ class VacPumpBrick(Core.BaseBrick):
             # FT and SC both good and not air
             self.pumpingObject.exftclose()
             self.pumpingObject.exscclose()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             self.pumpingObject.vacscopen()
             self.pumpingObject.vacftopen()
             # Now wait for vacuum in SC first
@@ -225,12 +225,12 @@ class VacPumpBrick(Core.BaseBrick):
                 # Now deal with FT
                 # wait for vacuum
                 if self.waitForFtVacuum() :
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum achieved in Flight Tube")
                     self.pumpingObject.rv6open()
                     self.pumpingObject.rv5open()
                     self.pumpingObject.vacscclose()
                     self.pumpingObject.vacftclose()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
             else:
@@ -241,7 +241,7 @@ class VacPumpBrick(Core.BaseBrick):
             self.pumpingObject.exftclose()
             self.pumpingObject.exscclose()
             self.pumpingObject.vacscopen()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             self.pumpingObject.vacftopen()
             # Now wait for vacuum in SC first
             if self.waitForScVacuum() :
@@ -249,12 +249,12 @@ class VacPumpBrick(Core.BaseBrick):
                 # Now deal with FT
                 # Now wait for vacuum
                 if self.waitForFtVacuum():
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum achieved in Flight Tube")
                     self.pumpingObject.rv6open()
                     self.pumpingObject.rv5open()
                     self.pumpingObject.vacscclose()
                     self.pumpingObject.vacftclose()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
             else:
@@ -265,7 +265,7 @@ class VacPumpBrick(Core.BaseBrick):
             self.pumpingObject.exftclose()
             self.pumpingObject.exscclose()
             self.pumpingObject.vacftopen()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             self.pumpingObject.vacscopen()
             # Now wait for vacuum in SC first
             if self.waitForScVacuum() :
@@ -273,12 +273,12 @@ class VacPumpBrick(Core.BaseBrick):
                 # Now deal with FT
                 # Now wait for vacuum
                 if self.waitForFtVacuum():
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum achieved in Flight Tube")
                     self.pumpingObject.rv6open()
                     self.pumpingObject.rv5open()
                     self.pumpingObject.vacscclose()
                     self.pumpingObject.vacftclose()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
             else:
@@ -290,19 +290,19 @@ class VacPumpBrick(Core.BaseBrick):
             self.pumpingObject.exscclose()
             self.pumpingObject.vacftopen()
             self.pumpingObject.vacscopen()
-            Qt.QMessageBox.information(self.brick_widget, "Info", "OK Please go into the Hutch and start pump and ONLY when done click OK")
+            Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and start pump and ONLY when done click OK")
             # Now wait for vacuum in SC first
             if self.waitForScVacuum() :
                 logger.info("Vacuum achieved in Sample Changer")
                 # Now deal with FT
                 # Now wait for vacuum
                 if self.waitForFtVacuum() :
-                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     logger.info("Vacuum achieved in Flight Tube")
                     self.pumpingObject.rv6open()
                     self.pumpingObject.rv5open()
                     self.pumpingObject.vacscclose()
                     self.pumpingObject.vacftclose()
+                    Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
             else:
