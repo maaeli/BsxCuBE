@@ -26,7 +26,9 @@ class BrowseBrick(Core.BaseBrick):
 
 
     signals = [Signal("displayResetChanged"),
-               Signal("displayItemChanged")]
+               Signal("displayItemChanged"),
+               Signal("transmissionChanged"),
+               Signal("grayOut", "grayOut")]
     slots = []
 
 
@@ -273,7 +275,7 @@ class BrowseBrick(Core.BaseBrick):
                 directoryList = str(self.locationLineEdit.text()).split("/")
                 for i in range(len(directoryList) - 1, -1, -1):
                     if directoryList[i] != "":
-                        if directoryList[i] in ("raw", "2d"):
+                        if directoryList[i] in ("raw"):
                             directoryList[i] = "1d"
                         else:
                             directoryList.insert(i + 1, "1d")

@@ -488,6 +488,7 @@
       <signal name="transmissionChanged"/>
       <signal name="grayOut"/>
       <peer name="CollectBrick1"/>
+      <peer name="BrowseBrick1"/>
     </connection>
   </connections>
 
