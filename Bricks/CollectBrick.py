@@ -898,6 +898,8 @@ class CollectBrick(Core.BaseBrick):
                 logger.warning("BEAM LOST: %s" % pValue)
 
     def checkBeamChanged(self, pValue):
+        #TODO: DEBUG
+        print "Got info on checkBeam %r " % pValue
         if pValue == 1:
             self.checkBeamBox.setChecked(True)
         else:
@@ -944,6 +946,7 @@ class CollectBrick(Core.BaseBrick):
             self.brick_widget.setEnabled(self.loginDone)
             self.collectObj = collect_obj
             self.collectObj.updateChannels(oneway = True)
+            # and force the Check Beam
 
     def connectedToEnergy(self, pPeer):
         #TODO: Matias says: If None => lost connection to peer
