@@ -73,13 +73,21 @@ class Collect(CObjectBase):
         # HPCL or not
         self.isHPLC = False
 
-        #
-        # ISPyB or not
+        # ----------------------------
+        # ISPyB Parameters
         self.isISPyB = False
-        self.isLastBuffer = False #ISPyB only send EDNA to communicate with ISPyB when it is last buffer
-        ### I need the id of the sample when I am collection the last buffer so Buffer - sample - Buffer at this moment ispybLastMeasurementCode contains the measurementId of the sample
+        # Incremental number of the data collection ([0, 1, 2],[0,1,2] ... ) = [Buffer, Sample, Buffer][Buffer, Sample, Buffer] 
+        self.dataCollectionOrder = 0
+        #Previous measurementId
         self.ispybLastMeasurementCode = None
-        self.ispybSEUtemperature = None #Seu temperature of the specimen I am collecting...
+        #Exposure temperature of the current specimen
+        self.ispybSEUtemperature = None
+        # Sample code of the current Data Collection
+        self.ispybSampleCode = None
+        # Sample id of the current Data Collection
+        self.ispybSampleId = None
+        # ----------------------------
+
 
         CObjectBase.__init__(self, *args, **kwargs)
         self.__collectWithRobotProcedure = None
@@ -156,8 +164,9 @@ class Collect(CObjectBase):
         readMachCurrentValue = self.channels.get('read_current_value')
         if readMachCurrentValue is not None:
             readMachCurrentValue.connect('update', self.currentChanged)
-        # set up a channel
+        # set up channels
         self.channels["collectRunNumber"].connect("update", self.runNumberChanged)
+        self.channels["checkBeam"].connect("update", self.checkBeamChanged)
 
     def tangoErrMsgExtractDesc(self, errMsg):
         pprint.pprint(errMsg)
@@ -218,6 +227,10 @@ class Collect(CObjectBase):
     def runNumberChanged(self, runNumber):
         # set new run number from Spec - Convert it to int
         self.nextRunNumber = int(runNumber)
+
+    def checkBeamChanged(self, pValue):
+        # new value for Checkbeam - send to Brick
+        self.emit("checkBeamChanged", pValue)
 
     def prepareEdnaInput(self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame):
         # fill up self.xsdinXSDataInputBioSaxsProcessOneFilev1_0
@@ -311,16 +324,27 @@ class Collect(CObjectBase):
 
 
         if self.isISPyB:
-            print "[ISPyB] It is last buffer " + str(self.isLastBuffer)
+            print "[ISPyB] Collection Order " + str(self.dataCollectionOrder)
+            print "[ISPyB] sample code" + str(self.ispybSampleId)
             print "[ISPyB] pSEUTemperature" + str(self.ispybSEUtemperature)
-            if self.isLastBuffer:
-                user = self.objects["biosaxs_client"].user
-                password = self.objects["biosaxs_client"].password
-                measurementId = self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-                print "[ISPyB] Sending to EDNA login %s,%s, %s, %s" % (user, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)))
-                sample = XSDataBioSaxsSample(login = XSDataString(user),
-                                         passwd = XSDataString(password),
-                                         measurementID = XSDataInteger(measurementId))
+            #if self.dataCollectionOrder == 2:
+            user = self.objects["biosaxs_client"].user
+            password = self.objects["biosaxs_client"].password
+
+            print "[ISPyB] sample code" + str(self.ispybLastMeasurementCode)
+            print "[ISPyB] sample code" + str(self.ispybSampleId)
+
+            measurementId = self.ispybSampleId #self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
+            print "[ISPyB] Sending to EDNA login %s,%s, %s, %s" % (user, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)))
+            pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
+            print "[ISPyB] Copying into " + pyarchDestination
+            sample = XSDataBioSaxsSample(
+                                     login = XSDataString(user),
+                                     passwd = XSDataString(password),
+                                     measurementID = XSDataInteger(measurementId),
+                                     ispybDestination = XSDataFile(XSDataString(pyarchDestination)),
+                                     collectionOrder = XSDataInteger(self.dataCollectionOrder)
+                                     )
 
             self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)
             print "[ISPyB] Last measurement code " + str(measurementId)
@@ -937,13 +961,16 @@ class Collect(CObjectBase):
         # ==================================================
         self.sampleNumber = 0
 
-        print pars["sampleList"]
         for sample in pars["sampleList"]:
-            self.isLastBuffer = False
+            self.dataCollectionOrder = 0
             self.sampleNumber = self.sampleNumber + 1
 
             #Keep the SEU temperature so later I can retrieve it from EDNA analysis, we need to improve it.
-            self.ispybSEUtemperature = sample["SEUtemperature"]
+            if (self.isISPyB):
+                self.ispybSEUtemperature = sample["SEUtemperature"]
+                self.ispybSampleCode = sample["code"]
+                self.ispybSampleId = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(self.ispybSampleCode, sample["concentration"], self.ispybSEUtemperature)
+                print "[ISPyB] Sample ID for the data collection is: " + str(self.ispybSampleId)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always
@@ -970,7 +997,9 @@ class Collect(CObjectBase):
                 else:
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
+
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_before")
+                self.dataCollectionOrder = self.dataCollectionOrder + 1
                 if pars["collectISPYB"]:
                     self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
@@ -990,6 +1019,7 @@ class Collect(CObjectBase):
             #
             # Collect sample
             #
+
             if runNumberSet:
                 # Using pars["runNumber"] from collect brick
                 runNumberSet = False
@@ -998,11 +1028,12 @@ class Collect(CObjectBase):
                 pars["runNumber"] = self.nextRunNumber
 
             (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
+            self.dataCollectionOrder = self.dataCollectionOrder + 1
             if pars["collectISPYB"]:
                 self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
             if pars["bufferAfter"]:
-                self.isLastBuffer = True
+
                 if runNumberSet:
                     # Using pars["runNumber"] from collect brick
                     runNumberSet = False
@@ -1010,6 +1041,7 @@ class Collect(CObjectBase):
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_after")
+                self.dataCollectionOrder = self.dataCollectionOrder + 1
                 if pars["collectISPYB"]:
                     self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 

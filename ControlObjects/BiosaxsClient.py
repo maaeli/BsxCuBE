@@ -103,13 +103,13 @@ class BiosaxsClient(CObjectBase):
                 for sample in experiment.experiment.samples:
                     for specimen in sample.specimen3VOs:
                         #and (specimen.exposureTemperature == seu)
-                        print "----------------------------------------------------"
-                        print "[TEST] " + str(specimen.code) + " " + str(sampleCode)
-                        print "[TEST] " + str(str(specimen.code) == str(sampleCode))
-                        print "[TEST] " + str(specimen.exposureTemperature) + " " + str(seu)
-                        print "[TEST] " + str(round(float(specimen.exposureTemperature), 2) == round(float(seu), 2))
-                        print "[TEST] " + str(float(specimen.concentration)) + " " + str(float(concentration))
-                        print "[TEST] " + str(round(float(specimen.concentration), 2) == round(float(concentration), 2))
+                        #print "----------------------------------------------------"
+                        #print "[TEST] " + str(specimen.code) + " " + str(sampleCode)
+                        #print "[TEST] " + str(str(specimen.code) == str(sampleCode))
+                        #print "[TEST] " + str(specimen.exposureTemperature) + " " + str(seu)
+                        #print "[TEST] " + str(round(float(specimen.exposureTemperature), 2) == round(float(seu), 2))
+                        #print "[TEST] " + str(float(specimen.concentration)) + " " + str(float(concentration))
+                        #print "[TEST] " + str(round(float(specimen.concentration), 2) == round(float(concentration), 2))
 
                         #print "--"
                         #print str(round(float(specimen.concentration), 2))
@@ -118,11 +118,11 @@ class BiosaxsClient(CObjectBase):
                         if (float(specimen.exposureTemperature) == float(seu)
                             and (str(specimen.code) == str(sampleCode))
                             and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
-                            print "[TEST] found" + str(specimen.specimenId)
-                            print "[TEST] et" + str(float(specimen.exposureTemperature))
-                            print "[TEST] set" + str(float(seu))
+                            #print "[TEST] found" + str(specimen.specimenId)
+                            #print "[TEST] et" + str(float(specimen.exposureTemperature))
+                            #print "[TEST] set" + str(float(seu))
                             return specimen.specimenId
-        print "[TEST] It is a buffer"
+        #print "[TEST] It is a buffer"
         return None
 
 #    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
