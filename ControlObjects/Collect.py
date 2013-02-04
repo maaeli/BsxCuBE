@@ -998,8 +998,8 @@ class Collect(CObjectBase):
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
 
+                self.dataCollectionOrder = 0
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_before")
-                self.dataCollectionOrder = self.dataCollectionOrder + 1
                 if pars["collectISPYB"]:
                     self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
@@ -1027,8 +1027,8 @@ class Collect(CObjectBase):
                 # need to increase run number
                 pars["runNumber"] = self.nextRunNumber
 
+            self.dataCollectionOrder = 1
             (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "sample")
-            self.dataCollectionOrder = self.dataCollectionOrder + 1
             if pars["collectISPYB"]:
                 self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
@@ -1040,8 +1040,8 @@ class Collect(CObjectBase):
                 else:
                     # need to increase run number
                     pars["runNumber"] = self.nextRunNumber
+                self.dataCollectionOrder = 2
                 (pars, tocollect, timeBefore, timeAfter, mode) = self._collectOne(sample, pars, mode = "buffer_after")
-                self.dataCollectionOrder = self.dataCollectionOrder + 1
                 if pars["collectISPYB"]:
                     self.saveFrame(pars, tocollect, timeBefore, timeAfter, mode, sample["code"], sample, sample["concentration"])
 
