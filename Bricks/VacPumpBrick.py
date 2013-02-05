@@ -135,6 +135,7 @@ class VacPumpBrick(Core.BaseBrick):
                 Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                self.pumpingObject.vacftclose()
         elif ((self.scvacuum < self.valveThreshold)):
             # SC OK and in FT is air - FT vacuum value from Logic - If we came here, FT is air
             logger.info("Vacuum already OK in Sample Changer")
@@ -150,6 +151,7 @@ class VacPumpBrick(Core.BaseBrick):
                 Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                self.pumpingObject.vacftclose()
         elif ((self.ftvacuum < self.valveThreshold) and (self.scvacuum < self.pumpThreshold)):
             # FT OK and SC good but not air
             logger.info("Vacuum already OK in Flight Tube")
@@ -173,12 +175,14 @@ class VacPumpBrick(Core.BaseBrick):
                         Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     else:
                         logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                        self.pumpingObject.vacftclose()
                 else:
                     logger.info("Vacuum still OK in Flight Tube")
                     self.pumpingObject.rv6open()
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
+                self.pumpingObject.vacscclose()
         elif ((self.ftvacuum < self.valveThreshold)):
             # FT OK and in SC is air - SC vacuum value from Logic - If we came here, SC in air
             logger.info("Vacuum already OK in Flight Tube")
@@ -202,12 +206,14 @@ class VacPumpBrick(Core.BaseBrick):
                         Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                     else:
                         logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                        self.pumpingObject.vacftclose()
                 else:
                     logger.info("Vacuum still OK in Flight Tube")
                     self.pumpingObject.rv6open()
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
+                self.pumpingObject.vacscclose()
         elif ((self.ftvacuum < self.pumpThreshold) and (self.scvacuum < self.pumpThreshold)):
             #TODO: DEBUG
             print "sc vacuum %r " % self.scvacuum
@@ -233,8 +239,12 @@ class VacPumpBrick(Core.BaseBrick):
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                    self.pumpingObject.vacscclose()
+                    self.pumpingObject.vacftclose()
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
+                self.pumpingObject.vacsclose()
+                self.pumpingObject.vacftclose()
                 # we do not try to do anything else
         elif ((self.ftvacuum < self.pumpThreshold)):
             # FT good and in SC is air - SC vacuum value from Logic - If we came here, SC in air
@@ -257,9 +267,12 @@ class VacPumpBrick(Core.BaseBrick):
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                    self.pumpingObject.vacscclose()
+                    self.pumpingObject.vacftclose()
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
-                # we do not try to do anything else
+                self.pumpingObject.vacscclose()
+                self.pumpingObject.vacftclose()
         elif ((self.scvacuum < self.pumpThreshold)):
             # SC good and in FT is air - FT vacuum value from Logic - If we came here, FT in air
             self.pumpingObject.exftclose()
@@ -281,9 +294,12 @@ class VacPumpBrick(Core.BaseBrick):
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                    self.pumpingObject.vacscclose()
+                    self.pumpingObject.vacftclose()
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
-                # we do not try to do anything else
+                self.pumpingObject.exftclose()
+                self.pumpingObject.vacftclose()
         else:
             # SC and FT is air - FT and SC vacuum value from Logic - If we came here, FT and SC in air
             self.pumpingObject.exftclose()
@@ -305,9 +321,12 @@ class VacPumpBrick(Core.BaseBrick):
                     Qt.QMessageBox.information(self.brick_widget, "Info", "Please go into the Hutch and stop the pump")
                 else:
                     logger.warning("Timeout, could not achieve vacuum in Flight Tube")
+                    self.pumpingObject.vacscclose()
+                    self.pumpingObject.vacftclose()
             else:
                 logger.warning("Timeout, could not achieve vacuum in Sample Changer")
-                # we do not try to do anything else
+                self.pumpingObject.exftclose()
+                self.pumpingObject.vacftclose()
 
     def expert_mode(self, expert):
         self.__expertMode = expert
