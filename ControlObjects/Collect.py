@@ -821,7 +821,7 @@ class Collect(CObjectBase):
 
     def saveFrame(self, pars, tocollect, timeBefore, timeAfter, mode, sampleCode, sample, concentration):
         self.showMessage(0, "[ISPyB] Preparing to send to ISPyB: " + mode)
-        self.showMessage(0, "[ISPyB] Measurement: " + sampleCode + " id: " + str(self.objects["biosaxs_client"].getSpecimenIdBySampleCode(sampleCode)))
+        self.showMessage(0, "[ISPyB] Measurement: " + str(sampleCode))
         files = []
         for i in range(1, pars["frameNumber"] + 1):
             files.append(os.path.join(pars["directory"], "raw", "%s_%03d_%05d.dat" % (pars["prefix"], pars["runNumber"], i)))
@@ -867,39 +867,39 @@ class Collect(CObjectBase):
         # ===========================================
         #  Silent creation of the experiment in ISPyB
         # ===========================================
-        try:
-            if not pars["collectISPYB"]:
-                print "[ISPyB] Create a new experiment in ISPyB"
-                ispyBuffers = []
-                bufferNames = []
-                ##Collecting the buffers
-                for sample in pars["sampleList"]:
-                    #print sample["buffer"]
-                    #print sample["buffer"][0]["code"]
-                    if sample["buffer"][0]["code"] not in bufferNames:
-                        bufferNames.append(sample["buffer"][0]["code"])
-                        ispyBuffers.append(sample["buffer"][0])
-
-                ##Collecting the samples
-                for sample in pars["sampleList"]:
-                    #print sample
-                    #print sample["code"]
-                    sampleWithNoBufferAttribute = sample.copy()
-                    sampleWithNoBufferAttribute["buffer"] = ""
-                    ispyBuffers.append(sampleWithNoBufferAttribute)
-                self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
-                pars["collectISPYB"] = True #Tobe replaced by self.isISPyB
-                print "[ISPyB] collectISPYB set to True"
-        except Exception:
-            #print Exception
-            #print "[ISPyB] error", sys.exc_info()[0]
-            print "[ISPyB] There was some error trying to log into ISPyB"
-            pars["collectISPYB"] = False
-            print "[ISPyB] collectISPYB set to False"
-            #traceback.print_exc()
+#        try:
+#            if not pars["collectISPYB"]:
+#                print "[ISPyB] Create a new experiment in ISPyB"
+#                ispyBuffers = []
+#                bufferNames = []
+#                ##Collecting the buffers
+#                for sample in pars["sampleList"]:
+#                    #print sample["buffer"]
+#                    #print sample["buffer"][0]["code"]
+#                    if sample["buffer"][0]["code"] not in bufferNames:
+#                        bufferNames.append(sample["buffer"][0]["code"])
+#                        ispyBuffers.append(sample["buffer"][0])
+#
+#                ##Collecting the samples
+#                for sample in pars["sampleList"]:
+#                    #print sample
+#                    #print sample["code"]
+#                    sampleWithNoBufferAttribute = sample.copy()
+#                    sampleWithNoBufferAttribute["buffer"] = ""
+#                    ispyBuffers.append(sampleWithNoBufferAttribute)
+#                self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
+#                pars["collectISPYB"] = True #Tobe replaced by self.isISPyB
+#                print "[ISPyB] collectISPYB set to True"
+#        except Exception:
+#            #print Exception
+#            #print "[ISPyB] error", sys.exc_info()[0]
+#            print "[ISPyB] There was some error trying to log into ISPyB"
+#            pars["collectISPYB"] = False
+#            print "[ISPyB] collectISPYB set to False"
+#            #traceback.print_exc()
 
         #I need this field for EDNA, maybe it should be great to remove pars["collectISPYB"]
-        self.isISPyB = pars["collectISPYB"]
+        self.isISPyB = False #pars["collectISPYB"]
         # ============================
         #  Setting storage temperature
         # ============================
