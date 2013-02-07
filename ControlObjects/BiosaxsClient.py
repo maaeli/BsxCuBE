@@ -102,8 +102,8 @@ class BiosaxsClient(CObjectBase):
         for experiment in self.experiments:
             if experiment.experiment.experimentId == self.selectedExperimentId:
                 for sample in experiment.experiment.samples:
-                    print "[TEST] " + str(round(float(sample.concentration))) + " " + str(round(float(concentration)))
-                    if round(float(sample.concentration)) == round(float(concentration)):
+                    print "[TEST] " + str((float(sample.concentration))) + " " + str((float(concentration)))
+                    if (float(sample.concentration)) == (float(concentration)):
                         samples.append(sample)
         return samples
 
