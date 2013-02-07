@@ -89,6 +89,24 @@ class BiosaxsClient(CObjectBase):
                             return specimen.specimenId
         return None
 
+    def getSpecimensByConcentration(self, concentration):
+        print "[ISPyB] getSpecimenByConcentration: " + str(concentration)
+        if self.experiment is None:
+            print "[ISPyB] Experiment is None"
+            return None
+        if self.selectedExperimentId is None:
+            print "[ISPyB] Experiment is None"
+            return None
+
+        samples = []
+        for experiment in self.experiments:
+            if experiment.experiment.experimentId == self.selectedExperimentId:
+                for sample in experiment.experiment.samples:
+                    print "[TEST] " + str(round(float(sample.concentration))) + " " + str(round(float(concentration)))
+                    if round(float(sample.concentration)) == round(float(concentration)):
+                        samples.append(sample)
+        return samples
+
     def getSpecimenIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration, seu):
         print "[ISPyB] getSpecimenIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " + str(seu)
         if self.experiment is None:
@@ -100,7 +118,8 @@ class BiosaxsClient(CObjectBase):
         for experiment in self.experiments:
             #print experiment.experiment.experimentId
             if experiment.experiment.experimentId == self.selectedExperimentId:
-                for sample in experiment.experiment.samples:
+                samples = self.getSpecimensByConcentration(concentration)
+                for sample in samples:
                     for specimen in sample.specimen3VOs:
                         #and (specimen.exposureTemperature == seu)
                         #print "----------------------------------------------------"
@@ -115,9 +134,8 @@ class BiosaxsClient(CObjectBase):
                         #print str(round(float(specimen.concentration), 2))
                         #print str(round(float(concentration), 2))
 
-                        if (float(specimen.exposureTemperature) == float(seu)
-                            and (str(specimen.code) == str(sampleCode))
-                            and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
+                        if (float(specimen.exposureTemperature) == float(seu) and (str(specimen.code) == str(sampleCode))):
+                            #and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
                             #print "[TEST] found" + str(specimen.specimenId)
                             #print "[TEST] et" + str(float(specimen.exposureTemperature))
                             #print "[TEST] set" + str(float(seu))
