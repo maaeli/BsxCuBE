@@ -61,8 +61,12 @@ class EnergyWaveLength(CObjectBase):
                             logging.error("Tried and failed to connect to Pilatus")
                         else:
                             self.pilatusThreshold.set_value(self.__energy)
+                            while not self.pilatusReady() :
+                                time.sleep(0.5)
                     else :
                         self.pilatusThreshold.set_value(self.__energy)
+                        while not self.pilatusReady() :
+                            time.sleep(0.5)
 
     def getPilatusThreshold(self):
         return float(self.channels["pilatus_threshold"].value())
@@ -84,8 +88,13 @@ class EnergyWaveLength(CObjectBase):
                         logging.error("Tried and failed to connect to Pilatus")
                     else:
                         self.pilatusThreshold.set_value(self.__energy)
+                        while not self.pilatusReady() :
+                            time.sleep(0.5)
+
                 else:
                     self.pilatusThreshold.set_value(self.__energy)
+                    while not self.pilatusReady() :
+                        time.sleep(0.5)
 
     def fillModeChanged(self, pValue):
         # read value first
