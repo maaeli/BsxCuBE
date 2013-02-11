@@ -78,14 +78,14 @@ class Collect(CObjectBase):
         self.isISPyB = False
         # Incremental number of the data collection ([0, 1, 2],[0,1,2] ... ) = [Buffer, Sample, Buffer][Buffer, Sample, Buffer] 
         self.dataCollectionOrder = 0
-        #Previous measurementId
-        self.ispybLastMeasurementCode = None
         #Exposure temperature of the current specimen
         self.ispybSEUtemperature = None
         # Sample code of the current Data Collection
         self.ispybSampleCode = None
         # Sample id of the current Data Collection
         self.ispybSampleId = None
+        # Buffername of the data collection
+        self.ispybBufferName = None
         # ----------------------------
 
 
@@ -324,19 +324,15 @@ class Collect(CObjectBase):
 
 
         if self.isISPyB:
-            print "[ISPyB] Collection Order " + str(self.dataCollectionOrder)
-            print "[ISPyB] sample code" + str(self.ispybSampleId)
-            print "[ISPyB] pSEUTemperature" + str(self.ispybSEUtemperature)
-            #if self.dataCollectionOrder == 2:
             user = self.objects["biosaxs_client"].user
             password = self.objects["biosaxs_client"].password
 
-            print "[ISPyB] sample code" + str(self.ispybLastMeasurementCode)
-            print "[ISPyB] sample code" + str(self.ispybSampleId)
-
-            measurementId = self.ispybSampleId #self.ispybLastMeasurementCode #self.objects["biosaxs_client"].getSpecimenIdBySampleCode(pCode)
-            print "[ISPyB] Sending to EDNA login %s,%s, %s, %s" % (user, measurementId, pCode, str(self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)))
-            pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
+            measurementId = self.ispybSampleId
+            print "[ISPyB] Sending to EDNA login %s,%s, %s" % (user,
+                                                                   measurementId,
+                                                                   pCode)
+            #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
+            pyarchDestination = "/data/pyarch/bm29/mx1438/%s" % (self.objects["biosaxs_client"].selectedExperimentId)
             print "[ISPyB] Copying into " + pyarchDestination
             sample = XSDataBioSaxsSample(
                                      login = XSDataString(user),
@@ -345,9 +341,6 @@ class Collect(CObjectBase):
                                      ispybDestination = XSDataFile(XSDataString(pyarchDestination)),
                                      collectionOrder = XSDataInteger(self.dataCollectionOrder)
                                      )
-
-            self.ispybLastMeasurementCode = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(pCode, pConcentration, self.ispybSEUtemperature)
-            print "[ISPyB] Last measurement code " + str(measurementId)
 
 
         self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0(\
@@ -852,7 +845,8 @@ class Collect(CObjectBase):
                                                     tocollect,
                                                     pars,
                                                     concentration,
-                                                    self.ispybSEUtemperature #This is the temperature defined in the sample that could be not the same 
+                                                    self.ispybSEUtemperature, #This is the temperature defined in the sample that could be not the same
+                                                    self.ispybBufferName #this parameters is needed to identify the current measurment 
                                                     )
 
 
@@ -867,39 +861,36 @@ class Collect(CObjectBase):
         # ===========================================
         #  Silent creation of the experiment in ISPyB
         # ===========================================
-#        try:
-#            if not pars["collectISPYB"]:
-#                print "[ISPyB] Create a new experiment in ISPyB"
-#                ispyBuffers = []
-#                bufferNames = []
-#                ##Collecting the buffers
-#                for sample in pars["sampleList"]:
-#                    #print sample["buffer"]
-#                    #print sample["buffer"][0]["code"]
-#                    if sample["buffer"][0]["code"] not in bufferNames:
-#                        bufferNames.append(sample["buffer"][0]["code"])
-#                        ispyBuffers.append(sample["buffer"][0])
-#
-#                ##Collecting the samples
-#                for sample in pars["sampleList"]:
-#                    #print sample
-#                    #print sample["code"]
-#                    sampleWithNoBufferAttribute = sample.copy()
-#                    sampleWithNoBufferAttribute["buffer"] = ""
-#                    ispyBuffers.append(sampleWithNoBufferAttribute)
-#                self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
-#                pars["collectISPYB"] = True #Tobe replaced by self.isISPyB
-#                print "[ISPyB] collectISPYB set to True"
-#        except Exception:
-#            #print Exception
-#            #print "[ISPyB] error", sys.exc_info()[0]
-#            print "[ISPyB] There was some error trying to log into ISPyB"
-#            pars["collectISPYB"] = False
-#            print "[ISPyB] collectISPYB set to False"
-#            #traceback.print_exc()
+        try:
+            if not pars["collectISPYB"]:
+                print "[ISPyB] Create a new experiment in ISPyB"
+
+                ispyBuffers = []
+                bufferNames = []
+                ##Collecting the buffers
+                for sample in pars["sampleList"]:
+                    print sample
+                    if sample["enable"]:
+                        if sample["buffer"][0]["buffername"] not in bufferNames:
+                            bufferNames.append(sample["buffer"][0]["buffername"])
+                            ispyBuffers.append(sample["buffer"][0])
+
+                ##Collecting the samples
+                for sample in pars["sampleList"]:
+                    if sample["enable"]:
+                        sampleWithNoBufferAttribute = sample.copy()
+                        sampleWithNoBufferAttribute["buffer"] = ""
+                        ispyBuffers.append(sampleWithNoBufferAttribute)
+
+                self.objects["biosaxs_client"].createExperiment("mx", 1438, ispyBuffers, "23", "BeforeAndAfter", "10")
+                pars["collectISPYB"] = True #Tobe replaced by self.isISPyB
+                print "[ISPyB] collectISPYB set to True"
+        except Exception:
+            pars["collectISPYB"] = False
+            print "[ISPyB] collectISPYB set to False"
 
         #I need this field for EDNA, maybe it should be great to remove pars["collectISPYB"]
-        self.isISPyB = False #pars["collectISPYB"]
+        self.isISPyB = pars["collectISPYB"]
         # ============================
         #  Setting storage temperature
         # ============================
@@ -969,8 +960,12 @@ class Collect(CObjectBase):
             if (self.isISPyB):
                 self.ispybSEUtemperature = sample["SEUtemperature"]
                 self.ispybSampleCode = sample["code"]
-                self.ispybSampleId = self.objects["biosaxs_client"].getSpecimenIdBySampleCodeConcentrationAndSEU(self.ispybSampleCode, sample["concentration"], self.ispybSEUtemperature)
-                print "[ISPyB] Sample ID for the data collection is: " + str(self.ispybSampleId)
+                self.ispybBufferName = sample["buffer"][0]["buffername"]
+                self.ispybSampleId = self.objects["biosaxs_client"].getMeasurementIdBySampleCodeConcentrationAndSEU(self.ispybSampleCode,
+                                                                                                                    sample["concentration"],
+                                                                                                                    self.ispybSEUtemperature,
+                                                                                                                    self.ispybBufferName)
+                #print "[ISPyB] Sample ID for the data collection is: " + str(self.ispybSampleId)
             #
             #  Collect buffer before
             #     - in mode BufferBefore  , always

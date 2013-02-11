@@ -1,10 +1,9 @@
 from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
-from math import fabs
-import time
-import sys
 import traceback
+import sys
+
 
 
 class BiosaxsClient(CObjectBase):
@@ -72,6 +71,7 @@ class BiosaxsClient(CObjectBase):
 #        return self.getExperimentNames()
 
 
+
     def getSpecimenIdBySampleCode(self, sampleCode):
         print "[ISPyB] getSpecimenIdBySampleCode " + str(sampleCode)
         if self.experiment is None:
@@ -89,6 +89,7 @@ class BiosaxsClient(CObjectBase):
                             return specimen.specimenId
         return None
 
+    # Return an array of samples which a given concentration
     def getSpecimensByConcentration(self, concentration):
         print "[ISPyB] getSpecimenByConcentration: " + str(concentration)
         if self.experiment is None:
@@ -102,91 +103,53 @@ class BiosaxsClient(CObjectBase):
         for experiment in self.experiments:
             if experiment.experiment.experimentId == self.selectedExperimentId:
                 for sample in experiment.experiment.samples:
-                    print "[TEST] " + str((float(sample.concentration))) + " " + str((float(concentration)))
                     if (float(sample.concentration)) == (float(concentration)):
                         samples.append(sample)
         return samples
 
-    def getSpecimenIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration, seu):
-        print "[ISPyB] getSpecimenIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " + str(seu)
-        if self.experiment is None:
-            print "[ISPyB] Experiment is None"
-            return None
-        if self.selectedExperimentId is None:
-            print "[ISPyB] Experiment is None"
-            return None
-        for experiment in self.experiments:
-            #print experiment.experiment.experimentId
-            if experiment.experiment.experimentId == self.selectedExperimentId:
-                samples = self.getSpecimensByConcentration(concentration)
-                for sample in samples:
-                    for specimen in sample.specimen3VOs:
-                        #and (specimen.exposureTemperature == seu)
-                        #print "----------------------------------------------------"
-                        #print "[TEST] " + str(specimen.code) + " " + str(sampleCode)
-                        #print "[TEST] " + str(str(specimen.code) == str(sampleCode))
-                        #print "[TEST] " + str(specimen.exposureTemperature) + " " + str(seu)
-                        #print "[TEST] " + str(round(float(specimen.exposureTemperature), 2) == round(float(seu), 2))
-                        #print "[TEST] " + str(float(specimen.concentration)) + " " + str(float(concentration))
-                        #print "[TEST] " + str(round(float(specimen.concentration), 2) == round(float(concentration), 2))
 
-                        #print "--"
-                        #print str(round(float(specimen.concentration), 2))
-                        #print str(round(float(concentration), 2))
-
-                        if (float(specimen.exposureTemperature) == float(seu) and (str(specimen.code) == str(sampleCode))):
-                            #and (round(float(specimen.concentration), 2) == round(float(concentration), 2))):
-                            #print "[TEST] found" + str(specimen.specimenId)
-                            #print "[TEST] et" + str(float(specimen.exposureTemperature))
-                            #print "[TEST] set" + str(float(seu))
-                            return specimen.specimenId
-        #print "[TEST] It is a buffer"
+    def getBufferIdByAcronym(self, bufferName):
+        for myBuffer in self.experiment.getBuffers():
+            if bufferName == myBuffer.acronym:
+                return myBuffer.bufferId
         return None
 
-#    def saveFrameSetBefore(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
-#        try:
-#            print "[ISPyB] Request for saveFrameSetBefore " + str(sampleCode)
-#            if (self.client is None):
-#                self.__initWebservice()
-#            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-#            if specimenId is None:
-#                specimenId = -1
-#            print "[ISPyB] Specimen found with specimenId: " + str(specimenId)
-#            print tocollect
-#            print pars
-#            self.client.service.saveFrameBefore(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars)
-#        except Exception:
-#            print Exception
-#            print "[ISPyB] error", sys.exc_info()[0]
-#            traceback.print_exc()
 
-#    def saveFrameSetAfter(self, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars):
-#        try:
-#            print "[ISPyB] Request for saveFrameSetAfter " + str(sampleCode)
-#            if (self.client is None):
-#                self.__initWebservice()
-#            specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-#            if specimenId is None:
-#                specimenId = -1
-#            self.client.service.saveFrameAfter(self.selectedExperimentId, specimenId, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars)
-#        except Exception:
-#            print Exception
-#            print "[ISPyB] error", sys.exc_info()[0]
-#            traceback.print_exc()
+    def getMeasurementIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration, seu, bufferName):
+        try:
+            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str(sampleCode) + " " + str(concentration) + " " + str(seu) + " " + str(bufferName)
+            if self.experiment is None:
+                print "[ISPyB] Experiment is None"
+                return None
+            if self.selectedExperimentId is None:
+                print "[ISPyB] Experiment is None"
+                return None
+            bufferId = self.getBufferIdByAcronym(bufferName)
+            print "[ISPyB] bufferId " + str(bufferId)
+            for experiment in self.experiments:
+                #print experiment.experiment.experimentId
+                if experiment.experiment.experimentId == self.selectedExperimentId:
+                    samples = self.getSpecimensByConcentration(concentration)
+                    for sample in samples:
+                        if sample.bufferId == bufferId:
+                            for specimen in sample.specimen3VOs:
+                                if (float(specimen.exposureTemperature) == float(seu) and (str(specimen.code) == str(sampleCode))):
+                                    return specimen.specimenId
+        except:
+             print "[ISPyB] error"
+             traceback.print_exc()
+        print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % (str(concentration), str(seu), str(sampleCode))
+        return -1
+
 
     ### Mode: before, after, sample    
-    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration, ispybSEUtemperature):
+    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration, ispybSEUtemperature, bufferName):
         try:
             print "[ISPyB] Request for saveFrameSet " + str(mode) + " " + str(sampleCode)
             if (self.client is None):
                 self.__initWebservice()
-            #specimenId = self.getSpecimenIdBySampleCode(sampleCode)
-            print "[ISPyB] tocollect[concentration]: " + str(concentration)
-            print "[ISPyB] toCollect.SEUtemperature " + str(exposureTemperature)
-            print "[ISPyB] toCollect.SEUtemperature " + str(ispybSEUtemperature)
 
-            #print "[ISPyB] exposureTemperature: " + str(tocollect["SEUtemperature"])
-            specimenId = self.getSpecimenIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature)
+            specimenId = self.getMeasurementIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature, bufferName)
             print "[ISPyB] Specimen found: " + str(specimenId)
             if specimenId is None:
                 specimenId = -1
@@ -273,12 +236,15 @@ class BiosaxsClient(CObjectBase):
         except Exception:
             print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
             raise Exception
-            return
         try:
             self.experiment = None
             self.selectedExperimentId = None
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str(proposalCode) + str(proposalNumber)
             experiment = self.client.service.createExperiment(proposalCode, proposalNumber, str(samples), storageTemperature, mode, extraflowTime)
+            if (experiment is None):
+                print "[ISPyB] ISPyB could not create the experiment from robot file"
+                raise Exception
+
             print "[ISPyB] Experiment Created: " + str(experiment.experimentId)
             self.selectedExperimentId = experiment.experimentId
             self.experiment = Experiment(experiment)
@@ -286,14 +252,17 @@ class BiosaxsClient(CObjectBase):
             print "[ISPyB] selectedExperimentId: " + str(self.selectedExperimentId)
             #print experiment
         except Exception:
-            print Exception
-            print "[ISPyB] error", sys.exc_info()[0]
+            print "[ISPyB] handled error"
+            traceback.print_exc()
             raise Exception
             #traceback.print_exc()
 
 class Experiment:
     def __init__(self, experiment):
         self.experiment = experiment
+
+    def getBuffers(self):
+        return self.experiment.buffer3VOs
 
     def getPlates(self):
         return self.experiment.samplePlate3VOs
@@ -315,7 +284,6 @@ class Experiment:
         return plateGroups
 
 if __name__ == "__main__":
-    import sys
     biosaxs = BiosaxsClient("mx1438", "Rfo4-73")
     biosaxs.getExperimentNamesByProposalCodeNumber("mx", "1438")
     #experiment = biosaxs.getExperimentById(345)
