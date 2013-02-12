@@ -114,6 +114,22 @@ class BiosaxsClient(CObjectBase):
                 return myBuffer.bufferId
         return None
 
+    #It looks for a code in the comments that identifies the measurments
+    # [1] This is a comment
+    # ---
+    #  |_ Id
+    def getMeasurementIdByCommentId(self, commentId):
+        try:
+            for experiment in self.experiments:
+                if experiment.experiment.experimentId == self.selectedExperimentId:
+                    for sample in experiment.experiment.samples:
+                        for specimen in sample.specimen3VOs:
+                            if str(specimen.comment).find("[" + str(commentId) + "]") != -1:
+                                return specimen.specimenId
+        except:
+             traceback.print_exc()
+             raise Exception
+        return -1
 
     def getMeasurementIdBySampleCodeConcentrationAndSEU(self, sampleCode, concentration, seu, bufferName):
         try:
@@ -135,22 +151,23 @@ class BiosaxsClient(CObjectBase):
                             for specimen in sample.specimen3VOs:
                                 if (float(specimen.exposureTemperature) == float(seu) and (str(specimen.code) == str(sampleCode))):
                                     return specimen.specimenId
-        except:
+        except Exception:
              print "[ISPyB] error"
              traceback.print_exc()
+             raise Exception
         print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % (str(concentration), str(seu), str(sampleCode))
         return -1
 
 
     ### Mode: before, after, sample    
-    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, concentration, ispybSEUtemperature, bufferName):
+    def saveFrameSet(self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId):
         try:
             print "[ISPyB] Request for saveFrameSet " + str(mode) + " " + str(sampleCode)
             if (self.client is None):
                 self.__initWebservice()
 
-            specimenId = self.getMeasurementIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature, bufferName)
-            print "[ISPyB] Specimen found: " + str(specimenId)
+            #specimenId = self.getMeasurementIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature, bufferName)
+            print "[ISPyB] Specimen: " + str(specimenId)
             if specimenId is None:
                 specimenId = -1
 
