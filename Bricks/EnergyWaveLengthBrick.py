@@ -157,7 +157,8 @@ class EnergyWaveLengthBrick( Core.BaseBrick ):
 
     def setEnergy( self, energyStr ):
         if self.energyControlObject is not None:
-            self.energyControlObject.setEnergy( energyStr )
+            # Put 30 second timeout, since Pilatus can be long
+            self.energyControlObject.setEnergy( energyStr , timeout = 30 )
             # make sure you set gapfill as well
             self.energyControlObject.setPilatusFill()
         else:
