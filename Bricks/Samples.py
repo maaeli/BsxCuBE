@@ -4,33 +4,33 @@ import copy
 from lxml import etree
 import ast
 
-logger = logging.getLogger("Samples")
+logger = logging.getLogger( "Samples" )
 
-def node_to_members(node, obj):
-    for tag, value in [(x.tag, x.text) for x in node.getchildren()]:
+def node_to_members( node, obj ):
+    for tag, value in [( x.tag, x.text ) for x in node.getchildren()]:
         if value is None:
             value = ""
         # catch false and False
-        elif value.lower() in ("false", "true"):
+        elif value.lower() in ( "false", "true" ):
             # title means false -> False and of course False -> False
-            value = ast.literal_eval(value.title())
+            value = ast.literal_eval( value.title() )
         else:
             # Now we know it is not Boolean
             # we try int and float and if ValueError on both it is str
             #TODO: figure out a faster way to do this: exception is slow
             try:
-                value = int(value)
+                value = int( value )
             except ValueError:
                 try:
-                    value = float(value)
+                    value = float( value )
                 except ValueError:
                     pass
-        setattr(obj, tag, value)
+        setattr( obj, tag, value )
 
 
-def Sample(copysample = None):
+def Sample( copysample = None ):
     if copysample:
-        return copy.deepcopy(copysample)
+        return copy.deepcopy( copysample )
     else:
         return _Sample()
 
@@ -60,7 +60,7 @@ class _Sample:
   </collectpars>
 </%(type)s>
 """
-    def __init__(self):
+    def __init__( self ):
         # Default Values
         self.type = 'Sample'
         self.plate = -1
@@ -80,14 +80,14 @@ class _Sample:
         self.recuperate = False
         self.waittime = 0.0
 
-    def isBuffer(self):
+    def isBuffer( self ):
         return self.type == "Buffer"
 
-    def getTitle(self):
+    def getTitle( self ):
         # return a title like P2-1:9
         return "P%(plate)s-%(row)s:%(well)s" % self.__dict__
 
-    def xmlFormat(self):
+    def xmlFormat( self ):
         # return from above
         return self.__xmlformat % self.__dict__
 
@@ -103,7 +103,7 @@ class CollectPars:
      <bufferMode>%(bufferMode)s</bufferMode>
 </general>
 """
-    def __init__(self, filename = None):
+    def __init__( self, filename = None ):
         # Default Values
         self.sampleType = 'Green'
         self.storageTemperature = 25
@@ -117,61 +117,61 @@ class CollectPars:
         self.history = ""
 
         if filename:
-            self.loadFromXML(filename)
+            self.loadFromXML( filename )
 
-    def xmlFormat(self):
+    def xmlFormat( self ):
         # use pattern from above (self.__xmlformat)
         return self.__xmlformat % self.__dict__
 
-    def loadFromXML(self, filename):
+    def loadFromXML( self, filename ):
         # filename can be a string, in this case the file is opened then read,
         # or 'filename' can be a file object
-        if type(filename) == types.StringType:
-            bufstr = open(filename).read()
+        if type( filename ) == types.StringType:
+            bufstr = open( filename ).read()
         else:
             bufstr = filename.read()
-            bufstr = bufstr.replace("\000", "")
-        self.searchXML(bufstr)
+            bufstr = bufstr.replace( "\000", "" )
+        self.searchXML( bufstr )
 
 
-    def searchXML(self, xmlstr):
-        xml_tree = etree.fromstring(xmlstr)
-        for tag, value in [(x.tag, x.text) for x in xml_tree.xpath("//general/*")]:
+    def searchXML( self, xmlstr ):
+        xml_tree = etree.fromstring( xmlstr )
+        for tag, value in [( x.tag, x.text ) for x in xml_tree.xpath( "//general/*" )]:
             if value is None:
                 value = ""
             # catch false and False
-            elif value.lower() in ("false", "true"):
+            elif value.lower() in ( "false", "true" ):
                 # title means false -> False and of course False -> False
-                value = ast.literal_eval(value.title())
+                value = ast.literal_eval( value.title() )
             else:
                 # Now we know it is not Boolean
                 # we try int and float and if ValueError on both it is str
                 try:
-                    value = int(value)
+                    value = int( value )
                 except ValueError:
                     try:
-                        value = float(value)
+                        value = float( value )
                     except ValueError:
                         pass
-            setattr(self, tag, value)
-        buffers = xml_tree.xpath("//Buffer")
+            setattr( self, tag, value )
+        buffers = xml_tree.xpath( "//Buffer" )
         for myBuffer in buffers:
             mySample = Sample()
             mySample.type = "Buffer"
-            self.bufferList.append(mySample)
+            self.bufferList.append( mySample )
             # let's consider there is only one sampledesc and collectpars per buffer
-            node_to_members(myBuffer.xpath("./sampledesc")[0], mySample)
-            node_to_members(myBuffer.xpath("./collectpars")[0], mySample)
-        samples = xml_tree.xpath("//Sample")
+            node_to_members( myBuffer.xpath( "./sampledesc" )[0], mySample )
+            node_to_members( myBuffer.xpath( "./collectpars" )[0], mySample )
+        samples = xml_tree.xpath( "//Sample" )
         for sampleNode in samples:
             mySample = Sample()
             mySample.type = "Sample"
-            self.sampleList.append(mySample)
+            self.sampleList.append( mySample )
             # let's consider there is only one sampledesc and collectpars per sample
-            node_to_members(sampleNode.xpath("./sampledesc")[0], mySample)
-            node_to_members(sampleNode.xpath("./collectpars")[0], mySample)
+            node_to_members( sampleNode.xpath( "./sampledesc" )[0], mySample )
+            node_to_members( sampleNode.xpath( "./collectpars" )[0], mySample )
 
-    def save(self, filename, history):
+    def save( self, filename, history ):
         # start
         bufstr = "<bsxcube>"
 
@@ -192,28 +192,28 @@ class CollectPars:
         # end
         bufstr += "</bsxcube>"
 
-        open(filename, "w").write(bufstr)
+        open( filename, "w" ).write( bufstr )
 
-class SampleList(list):
-    def sortSEUtemp(self):
-        self.sort(self.cmpSEUtemp)
-    def sortCode(self):
-        self.sort(self.cmpCode)
-    def sortCodeAndSEU(self):
-        self.sort(self.cmpCodeAndSEU)
+class SampleList( list ):
+    def sortSEUtemp( self ):
+        self.sort( self.cmpSEUtemp )
+    def sortCode( self ):
+        self.sort( self.cmpCode )
+    def sortCodeAndSEU( self ):
+        self.sort( self.cmpCodeAndSEU )
 
-    def cmpSEUtemp(self, a, b):
-        return cmp(a.SEUtemperature, b.SEUtemperature)
-    def cmpCode(self, a, b):
-        return cmp(a.code, b.code)
-    def cmpCodeAndSEU(self, a, b):
+    def cmpSEUtemp( self, a, b ):
+        return cmp( a.SEUtemperature, b.SEUtemperature )
+    def cmpCode( self, a, b ):
+        return cmp( a.code, b.code )
+    def cmpCodeAndSEU( self, a, b ):
         if a.code == b.code:
-            return cmp(a.SEUtemperature, b.SEUtemperature)
+            return cmp( a.SEUtemperature, b.SEUtemperature )
         else:
-            return cmp(a.code, b.code)
+            return cmp( a.code, b.code )
 
 if __name__ == '__main__':
-    pars = CollectPars('/data/bm29/inhouse/louiza/old/mx1303/id14eh3/samples/Manu3.xml')
+    pars = CollectPars( '/data/bm29/inhouse/louiza/old/mx1303/id14eh3/samples/Manu3.xml' )
     for sample in pars.sampleList:
         print sample.SEUtemperature
     # start

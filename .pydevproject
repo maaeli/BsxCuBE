@@ -9,4 +9,10 @@
 <path>/BsxCuBE/ControlObjects</path>
 <path>/BsxCuBE/Tests</path>
 </pydev_pathproperty>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>/users/blissadm/python/bliss_modules</path>
+<path>/users/blissadm/python/bliss_modules/redhate4</path>
+<path>/users/blissadm/python/bliss_python/redhate4/lib/python2.6</path>
+<path>/users/blissadm/python/bliss_python/redhate4/lib/python2.6/site-packages/PyQt4</path>
+</pydev_pathproperty>
 </pydev_project>
