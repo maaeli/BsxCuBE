@@ -19,7 +19,8 @@ class BiosaxsClient( CObjectBase ):
 
     def init( self ):
         self.client = None
-        self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        self.URL = 'http://pydevcz.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
         self.user = None
         self.password = None
@@ -157,7 +158,7 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
         print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
         return -1
-
+#Testing git hub
 
     ### Mode: before, after, sample    
     def saveFrameSet( self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId ):
