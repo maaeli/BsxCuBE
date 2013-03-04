@@ -230,9 +230,10 @@ class CollectBrick( Core.BaseBrick ):
         self.timePerFrameLabel = Qt.QLabel( "Time per frame", self.brick_widget )
         self.timePerFrameLabel.setFixedWidth( 130 )
         self.hBoxLayout4.addWidget( self.timePerFrameLabel )
-        self.timePerFrameSpinBox = Qt.QSpinBox( self.brick_widget )
+        self.timePerFrameSpinBox = Qt.QDoubleSpinBox( self.brick_widget )
         self.timePerFrameSpinBox.setSuffix( " s" )
-        self.timePerFrameSpinBox.setRange( 1, 99 )
+        self.timePerFrameSpinBox.setRange( 0, 99 )
+        self.timePerFrameSpinBox.setDecimals( 1 )
         self.hBoxLayout4.addWidget( self.timePerFrameSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout4 )
 
@@ -608,7 +609,7 @@ class CollectBrick( Core.BaseBrick ):
         self.frameNumberSpinBox.setValue( int( pValue ) )
 
     def collectTimePerFrameChanged( self, pValue ):
-        self.timePerFrameSpinBox.setValue( int( pValue ) )
+        self.timePerFrameSpinBox.setValue( float( pValue ) )
 
     def collectConcentrationChanged( self, pValue ):
         self.concentrationDoubleSpinBox.setValue( float( pValue ) )
@@ -702,8 +703,7 @@ class CollectBrick( Core.BaseBrick ):
     def clearCurve( self ):
         self.displayReset()
 
-    def collectNewFrameChanged( self, pValue ):
-        filename0 = pValue.split( "," )[0]
+    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
         if os.path.dirname( filename0 ).endswith( "/raw" ) and filename0.endswith( '.edf' ):
             directoryRaw = True
             directory = os.path.dirname( filename0 )
@@ -711,11 +711,10 @@ class CollectBrick( Core.BaseBrick ):
             directoryRaw = False
             directory = os.path.join( os.path.dirname( filename0 ), "1d" )
 
-        if self.__lastFrame is None or self.__lastFrame != pValue:
-            self.__lastFrame = pValue
+        if self.__lastFrame != filename0:
+            self.__lastFrame = filename0
             if self._isCollecting:
-                self.collectObj.triggerEDNA( filename0, oneway = True )
-                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % ( filename0, self._diodeCurrent, self._machineCurrent )
+                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
                 if self.robotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory( 0, message )
@@ -1039,7 +1038,7 @@ class CollectBrick( Core.BaseBrick ):
                             "prefix": str( self.prefixLineEdit.text() ),
                             "runNumber": int( self.runNumberSpinBox.value() ),
                             "frameNumber": int( self.frameNumberSpinBox.value() ),
-                            "timePerFrame": int( self.timePerFrameSpinBox.value() ),
+                            "timePerFrame": float( self.timePerFrameSpinBox.value() ),
                             "currentConcentration": float( self.concentrationDoubleSpinBox.value() ),
                             "currentComments":str( self.commentsLineEdit.text() ),
                             "currentCode": str( self.codeLineEdit.text() ),

@@ -56,7 +56,7 @@
    <channel name="collectRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/radiationDamage" signal="collectRadiationDamageChanged"/>
    <channel name="collectAbsoluteRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/absoluteRadiationDamage" signal="collectAbsoluteRadiationDamageChanged"/>
    <channel name="collectRelativeRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/relativeRadiationDamage" signal="collectRelativeRadiationDamageChanged"/>
-   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>
+   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame"/>
    <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>
    <channel name="abortCollect"          type="spec" call="BSX_ABORT" signal="abortCollectChanged"/>
    <channel name="checkBeam"             type="spec" uri="nela:oh"  call="BSX_CHECKBEAM"/>
