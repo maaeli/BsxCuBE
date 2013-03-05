@@ -9,6 +9,8 @@ from QtBlissGraph import QtBlissGraph
 
 import logging
 
+logger = logging.getLogger( "BsxGraphBrick" )
+
 __category__ = "BsxCuBE"
 
 class BsxGraphBrick( BaseBrick ):
