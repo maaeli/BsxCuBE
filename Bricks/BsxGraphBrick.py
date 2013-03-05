@@ -22,7 +22,6 @@ class BsxGraphBrick( BaseBrick ):
                   "enableGrid": Property( "boolean", "Enable grid", "", "enableGridChanged", False ),
                   "enableZoom": Property( "boolean", "Enable zoom", "", "enableZoomChanged", False ),
 
-                  #"showSaveButton": Property("boolean", "Show save button", "", "showSaveButtonChanged", True),
                   "showPrintButton": Property( "boolean", "Show print button", "", "showPrintButtonChanged", True ),
                   "showScaleButton": Property( "boolean", "Show scale button", "", "showScaleButtonChanged", True ),
                   "showGridButton": Property( "boolean", "Show grid button", "", "showGridButtonChanged", True ),
@@ -37,34 +36,16 @@ class BsxGraphBrick( BaseBrick ):
                   "timeElapsedTime": Property( "boolean", "Elapsed time", "", "timeElapsedTimeChanged", True ),
                   "windowSize": Property( "integer", "Window size", "", "windowSizeChanged", "3600" )}
 
-    connections = { "Y": Connection( "Y axis values provider"
-                                       , [ Signal( "update", "new_y_axis_value" ) ]
-                                       , [ ]
-                                       , "y_axis_values_provider_connected" ),
-                    "Y2": Connection( "Y2 axis values provider"
-                                       , [ Signal( "update", "new_y2_axis_value" ) ]
-                                       , [ ]
-                                       , "y2_axis_values_provider_connected" ),
-                    "y_curves": Connection( "Y-mapped curves provider"
-                                            , [Signal( 'new_curves_data', 'y_curves_data' ),
+    connections = { "y_curves": Connection( "Y-mapped curves provider"
+                                            , [Signal( 'new_curves_data', 'new_curves_data' ),
                                                Signal( 'erase_curve', 'erase_curve' )]
                                             , []
                                             , 'y_curves_provider_connected' ),
-                    "y2_curves": Connection( "Y2-mapped curves provider"
-                                            , [Signal( 'new_curves_data', 'y2_curves_data' ),
-                                               Signal( 'erase_curve', 'erase_curve' )]
-                                            , []
-                                            , 'y2_curves_provider_connected' ),
                     'y_scan': Connection( 'Y scan provider'
                                          , [Signal( 'new_scan', 'new_scan' ),
                                             Signal( 'new_point', 'new_value' )]
                                          , []
-                                         , 'y_scan_provider_connected' ),
-                    'y2_scan': Connection( 'Y2 scan provider'
-                                         , [Signal( 'new_scan', 'new_scan' ),
-                                            Signal( 'new_point', 'new_value' )]
-                                         , []
-                                         , 'y2_scan_provider_connected' ),
+                                         , 'y_scan_provider_connected' )
                     }
 
 
@@ -81,10 +62,6 @@ class BsxGraphBrick( BaseBrick ):
 
         self.qtBlissGraph = QtBlissGraph()
         self.graphLayout.addWidget( self.qtBlissGraph )
-
-        #self.savePushButton = Qt.QPushButton("Save")
-        #self.graphSubLayout.addWidget(self.savePushButton)
-        #Qt.QObject.connect(self.savePushButton, Qt.SIGNAL("clicked()"), self.savePushButtonClicked)
 
         self.printPushButton = Qt.QPushButton( "Print" )
         self.graphSubLayout.addWidget( self.printPushButton )
@@ -210,7 +187,6 @@ class BsxGraphBrick( BaseBrick ):
             pass
         else:
             self.qtBlissGraph.newCurve( pCurveName, [], [] )
-            pass
 
 
     def new_y_axis_value( self, *args, **kwargs ):
@@ -221,7 +197,7 @@ class BsxGraphBrick( BaseBrick ):
         self.new_value( *args, **kwargs )
 
 
-    def y_curves_data( self, *args, **kwargs ):
+    def new_curves_data( self, *args, **kwargs ):
         self.new_value( *args, **kwargs )
 
     def y2_curves_data( self, *args, **kwargs ):
@@ -249,10 +225,10 @@ class BsxGraphBrick( BaseBrick ):
             curveName = sender.username()
 
         if sender not in self.__curves_by_provider.keys():
-          self.__curves_by_provider[sender] = [curveName]
+            self.__curves_by_provider[sender] = [curveName]
         else:
-          if curveName not in self.__curves_by_provider[sender]:
-            self.__curves_by_provider[sender].append( curveName )
+            if curveName not in self.__curves_by_provider[sender]:
+                self.__curves_by_provider[sender].append( curveName )
 
         if value is None:
             self.removeCurve( curveName )
@@ -289,23 +265,11 @@ class BsxGraphBrick( BaseBrick ):
         else:
             self.qtBlissGraph.setAxisTitle( qwt.QwtPlot.yRight, ylabel )
 
-    def y_axis_values_provider_connected( self, provider ):
-        pass
-
-    def y2_axis_values_provider_connected( self, provider ):
-        pass
-
     def y_curves_provider_connected( self, provider ):
-        pass
-
-    def y2_curves_provider_connected( self, provider ):
         pass
 
     def y_scan_provider_connected( self, provider ):
         self.__axis_provider[provider] = 'y'
-
-    def y2_scan_provider_connected( self, provider ):
-        self.__axis_provider[provider] = 'y2'
 
     def titleChanged( self, pValue ):
         self.qtBlissGraph.setTitle( pValue )
@@ -331,12 +295,6 @@ class BsxGraphBrick( BaseBrick ):
     def enableZoomChanged( self, pValue ):
         self.qtBlissGraph.enableZoom( pValue )
 
-
-
-    def showSaveButtonChanged( self, pValue ):
-        pass
-        #if self.savePushButton is not None:
-        #    self.savePushButton.setVisible(pValue)
 
 
     def showPrintButtonChanged( self, pValue ):
@@ -430,28 +388,14 @@ class BsxGraphBrick( BaseBrick ):
         self.windowSize = pValue
         self.setXAxisScale()
 
-    def savePushButtonClicked( self ):
-        fileName = QtGui.QFileDialog.getSaveFileName( self.brick_widget, "Save File", "." )
-
-        print
-        print dir( self.qtBlissGraph )
-        print
-
-        #pixmap = QtGui.QPixmap(self.qtBlissGraph.plotImage.getPixmap())
-
-        pixmap = QtGui.QPixmap( 500, 500 )
-
-        pixmap.fill( self.qtBlissGraph, 0, 0 )
-        pixmap.save( fileName, "PNG" )
-
     def printPushButtonClicked( self ):
         self.qtBlissGraph.printps()
 
     def scaleActionGroupTriggered( self, scale_action ):
         if scale_action == self.scaleMenuLinear:
             if self.current_scale != "linear":
-              self.current_scale = "linear"
-              self.qtBlissGraph.toggleLogY()
+                self.current_scale = "linear"
+                self.qtBlissGraph.toggleLogY()
         else:
             if self.current_scale == "linear":
                 self.current_scale = "logarithmic"
@@ -474,8 +418,6 @@ class BsxGraphBrick( BaseBrick ):
         for name in curve_names:
             self.erase_curve( name )
         self.qtBlissGraph.replot()
-
-
 
 
 class CurveData( Qt.QObject ):

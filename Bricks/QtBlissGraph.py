@@ -524,11 +524,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
 
     def toggleLogY( self ):
         if self.__logy1:
-            #get the current limits
-            xmin = self.canvasMap( Qwt5.QwtPlot.xBottom ).s1()
-            xmax = self.canvasMap( Qwt5.QwtPlot.xBottom ).s2()
-            ymin = self.canvasMap( Qwt5.QwtPlot.yLeft ).s1()
-            ymax = self.canvasMap( Qwt5.QwtPlot.yLeft ).s2()
             self.__logy1 = 0
             self.__logy2 = 0
             if self.yAutoScale:
@@ -539,12 +534,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
             self.setAxisScaleEngine( Qwt5.QwtPlot.yRight,
                                     Qwt5.QwtLinearScaleEngine() )
         else:
-            #get current margins
-            #get the current limits
-            xmin = self.canvasMap( Qwt5.QwtPlot.xBottom ).s1()
-            xmax = self.canvasMap( Qwt5.QwtPlot.xBottom ).s2()
-            ymin = self.canvasMap( Qwt5.QwtPlot.yLeft ).s1()
-            ymax = self.canvasMap( Qwt5.QwtPlot.yLeft ).s2()
             self.__logy1 = 1
             self.__logy2 = 1
             self.enableAxis( Qwt5.QwtPlot.yLeft )
@@ -562,23 +551,12 @@ class QtBlissGraph( Qwt5.QwtPlot ):
 
     def toggleLogX( self ):
         if self.__logx1:
-            #get the current limits
-            xmin = self.canvasMap( Qwt5.QwtPlot.xBottom ).s1()
-            xmax = self.canvasMap( Qwt5.QwtPlot.xBottom ).s2()
-            ymin = self.canvasMap( Qwt5.QwtPlot.yLeft ).s1()
-            ymax = self.canvasMap( Qwt5.QwtPlot.yLeft ).s2()
             self.__logx1 = 0
             if self.xAutoScale:
                 self.setAxisAutoScale( Qwt5.QwtPlot.xBottom )
             self.setAxisScaleEngine( Qwt5.QwtPlot.xBottom,
                                     Qwt5.QwtLinearScaleEngine() )
         else:
-            #get current margins
-            #get the current limits
-            xmin = self.canvasMap( Qwt5.QwtPlot.xBottom ).s1()
-            xmax = self.canvasMap( Qwt5.QwtPlot.xBottom ).s2()
-            ymin = self.canvasMap( Qwt5.QwtPlot.yLeft ).s1()
-            ymax = self.canvasMap( Qwt5.QwtPlot.yLeft ).s2()
             self.__logx1 = 1
             self.enableAxis( Qwt5.QwtPlot.xBottom )
             if self.xAutoScale:
@@ -918,31 +896,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
                 self.picker.setRubberBand( Qwt5.QwtPicker.RectRubberBand )
         elif qt.Qt.RightButton == e.button():
             self._zooming = 0
-            """
-            if self.__markermode:
-                if len(self.markersdict.keys()):
-                    xpixel = e.pos().x()
-                    ypixel = e.pos().y()
-                    x = self.invTransform(Qwt5.QwtPlot.xBottom, xpixel)
-                    y = self.invTransform(Qwt5.QwtPlot.yLeft, ypixel)
-                    (marker,distance)=self.closestMarker(xpixel,ypixel)
-                    if marker not in self.markersdict.keys():
-                        print "Wrong Marker selection"
-                    else:
-                        if self.markersdict[marker]['followmouse']:
-                            self.__markermoving = marker
-                            self.setMarkerXPos(marker, x)
-                            self.replot()
-                            dict = {}
-                            dict['event']    = "markerMoved"
-                            dict['distance'] = distance
-                            dict['marker']   = marker
-                            dict['x']        = x
-                            dict['xpixel']   = xpixel
-                            dict['y']        = y
-                            dict['ypixel']   = ypixel
-                            self.emit(qt.PYSIGNAL("QtBlissGraphSignal"),(dict,))
-            """
         # fake a mouse move to show the cursor position
         self.onMouseMoved( e )
 
@@ -1146,7 +1099,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
 
     def __legendsetactive( self ):
         self.setactivecurve( self.__activelegendname )
-        pass
 
     def __legendmaptoy1( self ):
         self.mapToY1( self.__activelegendname )
@@ -1187,16 +1139,12 @@ class QtBlissGraph( Qwt5.QwtPlot ):
             self.__defaultPlotLines = True
             for key in self.curves.keys():
                 curve = self.curves[key]['curve']
-                linetype = curve.style()
-                pen = curve.pen()
                 if curve.style() == Qwt5.QwtPlotCurve.NoCurve:
                     self.toggleLine( key )
         else:
             self.__defaultPlotLines = False
             for key in self.curves.keys():
                 curve = self.curves[key]['curve']
-                linetype = curve.style()
-                pen = curve.pen()
                 if curve.style() != Qwt5.QwtPlotCurve.NoCurve:
                     self.toggleLine( key )
             if self.__defaultPlotPoints == False:
@@ -1363,7 +1311,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
         if n > 1:
             if 0:
                 for i in range( n ):
-                #if i != index:
                     item = self.legend().findItem( i + 1 )
 #TODO: DEBUG - next line is not right - No ClickFocus
 #                    item.setFocusPolicy(qt.QWidget.ClickFocus)
@@ -1434,11 +1381,14 @@ class QtBlissGraph( Qwt5.QwtPlot ):
         if value:
             self.legend().show()
             return
-            self.legend().setDisplayPolicy( self.legend().AutoIdentifier, 3 )
+            #TODO: Not reached
+            #self.legend().setDisplayPolicy( self.legend().AutoIdentifier, 3 )
         else:
             self.legend().hide()
             return
-            self.legend().setDisplayPolicy( self.legend().NoIdentifier, 3 )
+            #TODO:  Not reached 
+            # self.legend().setDisplayPolicy( self.legend().NoIdentifier, 3 )
+
 
     def legendItemSlot( self, ddict ):
         if ddict['event'] == "leftMousePressed": return self.setactivecurve( ddict['legend'] )
@@ -1462,7 +1412,7 @@ class QtBlissGraph( Qwt5.QwtPlot ):
             self.legendmenu.addSeparator()
             self.legendmenu.addAction( QString( "Remove curve" ) , self.__legendremovesignal )
             if self.__legendrename:
-                 self.legendmenu.addAction( QString( "Rename curve" ) ,
+                self.legendmenu.addAction( QString( "Rename curve" ) ,
                                            self.__legendrenamesignal )
 
         self.legendmenu.exec_( self.cursor().pos() )
@@ -1504,7 +1454,7 @@ class QtBlissGraph( Qwt5.QwtPlot ):
             if len( y ):
                 if isinstance( y, numpy.ndarray ):
                     if y.shape == ( len( y ), 1 ):
-                       y.shape = [len( y ), ]
+                        y.shape = [len( y ), ]
                 if x is None:
                     x = numpy.arange( len( y ) )
                 if logfilter:
@@ -1603,7 +1553,7 @@ class QtBlissGraph( Qwt5.QwtPlot ):
         self.symbol = 0
         #line type
         self.linetype = 0
-        # TODO fred this code is useless
+        #TODO: this code is useless
         if 0:
             self.removeMarkers() #necessary because clear() will get rid of them
             self.clear()         #this deletes also plot items in Qwt5!
@@ -1778,7 +1728,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
             self.setCurvePen( self.curves[key]['curve'], pen )
         self.__activecurves.append( key )
 
-        actualindex = self.curves[key] ["curve"]
         n = self.legend().itemCount()
         if n > 1:
             if 0:
@@ -1791,7 +1740,6 @@ class QtBlissGraph( Qwt5.QwtPlot ):
                     if DEBUG:
                         print( "findItem also missing" )
 
-        #self.legend().findItem(index).setFocus()
         self.replot()
         dict = {}
         dict['event' ] = "SetActiveCurveEvent"
