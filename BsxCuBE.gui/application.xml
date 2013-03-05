@@ -540,10 +540,6 @@
   </connections>
 
   <connections id="1D Graph">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
     <connection role="y_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
@@ -552,16 +548,6 @@
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
       <peer name="BsxCuBE/image_proxy"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
     </connection>
   </connections>
 
@@ -674,10 +660,6 @@
   </connections>
 
   <connections id="EH Scan">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
     <connection role="y_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
@@ -686,16 +668,6 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
     </connection>
   </connections>
 
@@ -809,10 +781,6 @@
   </connections>
 
   <connections id="OH Scan">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
     <connection role="y_scan">
       <signal name="new_scan"/>
       <signal name="new_point"/>
@@ -821,16 +789,6 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
     </connection>
   </connections>
 
