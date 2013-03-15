@@ -549,7 +549,7 @@ class CollectBrick( Core.BaseBrick ):
                 #TODO: DEBUG
                 print "Now we are logged in as %s with pwd %s " % ( self.__username, self.__password )
                 if self.getObject( "BiosaxsClient" ) is not None:
-                    self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password )
+                    self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password, self.__enteredPropType, self.__enteredPropNumber )
                 else:
                     logger.warning( "No connection to BiosaxsClient" )
             else:

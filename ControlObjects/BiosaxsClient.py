@@ -22,8 +22,14 @@ class BiosaxsClient( CObjectBase ):
         #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.URL = 'http://pydevcz.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
+
+        #Login information
         self.user = None
         self.password = None
+        self.proposalType = None
+        self.proposalNumber = None
+
+
         self.timeout = 5
         self.experiments = None
 
@@ -35,10 +41,11 @@ class BiosaxsClient( CObjectBase ):
         self.response = None
 
 
-    def setUser( self, user, password ):
+    def setUser( self, user, password, proposalType, proposalNumber ):
         self.user = user #"mx1438"
         self.password = password #"Rfo4-73"
-
+        self.proposalType = proposalType
+        self.proposalNumber = proposalNumber
 
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
     def getExperimentNames( self ):
