@@ -85,7 +85,7 @@ class CollectBrick( Core.BaseBrick ):
 
                     "energy": Connection( "Energy object",
                                             [Signal( "energyChanged", "energyChanged" )],
-                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
+                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot ( "pilatusReset" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
                                             "connectedToEnergy" ),
 
                     "samplechanger": Connection( "Sample Changer object",
@@ -1392,8 +1392,22 @@ class CollectBrick( Core.BaseBrick ):
                 logger.warning( "Found Pilatus again" )
                 self.linkUpPilatus = True
             if not self.energyControlObject.pilatusReady():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "No contact with Pilatus.. Try later or Restart the Pilatus", Qt.QMessageBox.Ok )
-                return False
+                # We had contact with Pilatus and it replied once with error.
+                # Try first a reset and try again
+                self.energyControlObject.pilatusReset()
+                logger.warning( "Pliatus not ready - doing reset - Please be patient" )
+                # wait 0.2*10 = 2s to recover after reset
+                # Note __ = No interest
+                for __ in range( 0, 10 ):
+                    time.sleep( 0.2 )
+                    # take Qt actions
+                    QtGui.qApp.processEvents()
+                if not self.energyControlObject.pilatusReady():
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "No contact with Pilatus.. Try later or Restart the Pilatus", Qt.QMessageBox.Ok )
+                    self.linkUpPilatus = False
+                    return False
+                else:
+                    return True
             return True
 
     def testPushButtonClicked( self ):
@@ -1723,7 +1737,8 @@ class CollectBrick( Core.BaseBrick ):
 
         logger.info( "Aborting!" )
         logger.warning( "Wait for current action to finish..." )
-
+        # put in a small wait for everything to stabilize
+        time.sleep( 2 )
         self._abortFlag = True
 
         if self.__isTesting:

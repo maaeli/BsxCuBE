@@ -2,6 +2,7 @@
    <object href="BsxCuBE/energy" role="getEnergy"/>
    <uri>nela:oh</uri>
    <command name="setEnergy" type="spec" call="setEnergy"/>
+   <command name="pilatus_reset" type="tango" uri="bm29/limaccds/p0" call="reset"/>
    <channel name="collectWaveLength"  type="spec" uri="nela:exp" call="BSX_GLOBAL/collect/waveLength"/>  
    <channel name="pilatus_threshold"  type="tango" uri="bm29/pilatus/p0" call="energy_threshold"/>
    <channel name="pilatus_status" type="tango" uri="bm29/limaccds/p0" call="acq_status"/>

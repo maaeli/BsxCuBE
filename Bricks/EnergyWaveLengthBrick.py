@@ -15,7 +15,7 @@ class EnergyWaveLengthBrick( Core.BaseBrick ):
 
     connections = { "energy": Connection( "Energy object",
                                             [Signal( "energyChanged", "energyChanged" )],
-                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
+                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "pilatusReset" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
                                             "connectedToEnergy" ),
 
                     "login": Connection( "Login object",

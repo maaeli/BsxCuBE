@@ -8,7 +8,7 @@ class EnergyWaveLength( CObjectBase ):
 
     signals = [Signal( "energyChanged" )]
 
-    slots = [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )]
+    slots = [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "pilatusReset" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )]
 
     def __init__( self, *args, **kwargs ):
         CObjectBase.__init__( self, *args, **kwargs )
@@ -119,3 +119,7 @@ class EnergyWaveLength( CObjectBase ):
             return True
         else:
             return False
+
+    def pilatusReset( self ):
+        # reset the pilatus
+        self.commands["pilatus_reset"]()

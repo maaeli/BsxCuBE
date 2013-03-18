@@ -579,6 +579,7 @@
       <slot name="setEnergy"/>
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
+      <slot name="pilatusReset"/>
       <slot name="setPilatusFill"/>
       <slot name="energyAdjustPilatus"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
@@ -763,6 +764,7 @@
       <slot name="setEnergy"/>
       <slot name="getEnergy"/>
       <slot name="pilatusReady"/>
+      <slot name="pilatusReset"/>
       <slot name="setPilatusFill"/>
       <slot name="energyAdjustPilatus"/>
       <peer name="BsxCuBE/EnergyWaveLength"/>
