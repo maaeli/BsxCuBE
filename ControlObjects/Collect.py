@@ -112,6 +112,8 @@ class Collect( CObjectBase ):
         # <data name="uri"  value="orion:10000/FE/D/29" />
         self.machDevName = str( self.config["/object/data[@name='uri']/@value"][0] )
 
+
+
     def __getattr__( self, attr ):
         if not attr.startswith( "__" ):
             try:
@@ -200,6 +202,10 @@ class Collect( CObjectBase ):
         self.machineCurrent = current
         # Give this to the CollectBrick
         self.emit( "machineCurrentChanged", current )
+
+    def getTemplateDirectory( self ):
+        # get Template directory
+        return str ( self.config["/object/data[@name='templateDirectory']/@value"][0] )
 
     def sasWebDisplay( self, url ):
         #TODO:DEBUG

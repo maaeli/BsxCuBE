@@ -15,6 +15,7 @@ class CollectRobotDialog( Qt.QDialog ):
         self.__copyLine = []
         self.__history = []
 
+
         # To map samples with rows each time we create a sample we give a unique number
         #   the position of a sample in the map should correspond with the row of the sample in the table
         #   throught the operations
@@ -116,6 +117,19 @@ class CollectRobotDialog( Qt.QDialog ):
         self.hBoxLayout0.addWidget( self.saveAsPushButton )
 
         self.vBoxLayout.addLayout( self.hBoxLayout0 )
+
+        self.hBoxLayout01 = Qt.QHBoxLayout()
+        self.optimizationLabel = Qt.QLabel( "Calibration Template", self )
+        self.optimizationLabel.setFixedWidth( self.PARAMLABEL_WIDTH )
+        self.hBoxLayout01.addWidget( self.optimizationLabel )
+        self.optimizationComboBox = Qt.QComboBox( self )
+        self.optimizationComboBox.addItems( ["None", "BSA", "Water", "Behenate" ] )
+        self.optimizationComboBox.setFixedWidth( self.PARAMETERS_WIDTH )
+        self.hBoxLayout01.setAlignment( QtCore.Qt.AlignLeft )
+        self.hBoxLayout01.addWidget( self.optimizationComboBox )
+        Qt.QObject.connect( self.optimizationComboBox, Qt.SIGNAL( "currentIndexChanged(QString)" ), self.loadCalibrationTemplate )
+        self.vBoxLayout.addLayout( self.hBoxLayout01 )
+
 
         self.hBoxLayout1 = Qt.QHBoxLayout()
         self.sampleTypeLabel = Qt.QLabel( "Sample type", self )
@@ -532,6 +546,7 @@ class CollectRobotDialog( Qt.QDialog ):
     #------------------------------------------------------------------------
     def loadPushButtonClicked( self ):
         dirname = ""
+        self.filename = str( self.fileLineEdit.text() )
         if self.filename != "":
             dirname = os.path.split( self.filename )[0]
         else:
@@ -587,9 +602,6 @@ class CollectRobotDialog( Qt.QDialog ):
 
             self.CBblock = 0
             self.filename = filename
-
-            Qt.QMessageBox.information( self, "Info", "The file '%s' was successfully loaded!" % filename )
-            # Update robot file
             self.__parent.setRobotFileName( filename )
 
         except Exception, e:
@@ -1072,6 +1084,21 @@ class CollectRobotDialog( Qt.QDialog ):
 
     def closePushButtonClicked( self ):
         self.accept()
+
+    def loadCalibrationTemplate( self, pValue ):
+        if str( pValue ) == "None" :
+            # activate load new button
+            self.loadPushButton.setEnabled( 1 )
+            # We hit none, let us reload orig filename
+            self.loadFile( self.filename )
+        else:
+            # gray out "Load new" 
+            self.loadPushButton.setEnabled ( 0 )
+            templateDirectory = self.__parent.getTemplateDirectory()
+            filename = str( templateDirectory + "/" + str( pValue ) + ".xml" )
+            self.loadFile( filename )
+
+
 
 if __name__ == '__main__':
   app = QtGui.QApplication( [] )

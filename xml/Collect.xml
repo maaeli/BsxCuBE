@@ -1,8 +1,10 @@
 <object class = "Collect" username = "Collect" local="false">
-	
+
    <uri>nela:exp</uri>	
 
    <data name="uri"  value="orion:10000/FE/D/29" />
+
+   <data name="templateDirectory" value="/data/bm29/archive/CALIBRATION/Templates"/>
    
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    <object href="BsxCuBE/EnergyWaveLength" role="energyWaveLength"/>

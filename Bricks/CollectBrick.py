@@ -1002,6 +1002,11 @@ class CollectBrick( Core.BaseBrick ):
 
         return valid
 
+    def getTemplateDirectory( self ):
+        if self.collectObj is not None:
+            return self.collectObj.getTemplateDirectory()
+        return None
+
     def getRadiationRelativeLinear( self ):
         val = float( self.radiationRelativeDoubleSpinBox.value() )
         if val == 0.:
