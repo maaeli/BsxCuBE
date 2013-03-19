@@ -120,11 +120,11 @@ class CollectRobotDialog( Qt.QDialog ):
         self.vBoxLayout.addLayout( self.hBoxLayout0 )
 
         self.hBoxLayout01 = Qt.QHBoxLayout()
-        self.optimizationLabel = Qt.QLabel( "Calibration Template", self )
+        self.optimizationLabel = Qt.QLabel( "Type", self )
         self.optimizationLabel.setFixedWidth( self.PARAMLABEL_WIDTH )
         self.hBoxLayout01.addWidget( self.optimizationLabel )
         self.optimizationComboBox = Qt.QComboBox( self )
-        self.optimizationComboBox.addItems( ["None", "BSA", "Water", "Behenate" ] )
+        self.optimizationComboBox.addItems( ["User defined", "BSA Calibration", "Water Calibration" ] )
         self.optimizationComboBox.setFixedWidth( self.PARAMETERS_WIDTH )
         self.hBoxLayout01.setAlignment( QtCore.Qt.AlignLeft )
         self.hBoxLayout01.addWidget( self.optimizationComboBox )
@@ -618,6 +618,7 @@ class CollectRobotDialog( Qt.QDialog ):
             Qt.QMessageBox.critical( self, "Error", "Error when trying to read file '%s'!" % filename )
 
     def saveAsPushButtonClicked( self ):
+        self.filename = str( self.fileLineEdit.text() )
         filename = Qt.QFileDialog.getSaveFileName( self, "Choose a file to save", self.filename, "XML File (*.xml)" )
         if not filename:
             return
@@ -1100,16 +1101,18 @@ class CollectRobotDialog( Qt.QDialog ):
         self.accept()
 
     def loadCalibrationTemplate( self, pValue ):
-        if str( pValue ) == "None" :
+        if str( pValue ) == "User defined" :
             # activate load new button
             self.loadPushButton.setEnabled( 1 )
+            self.savePushButton.setEnabled ( 1 )
             # We hit none, let us reload orig filename
             self.loadFile( self.filename )
         else:
             # gray out "Load new" 
+            self.savePushButton.setEnabled ( 0 )
             self.loadPushButton.setEnabled ( 0 )
             templateDirectory = self.__parent.getTemplateDirectory()
-            filename = str( templateDirectory + "/" + str( pValue ) + ".xml" )
+            filename = str( templateDirectory + "/" + str( pValue ).split( " " )[0] + ".xml" )
             self.loadFile( filename )
 
 
