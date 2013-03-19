@@ -33,7 +33,7 @@ class CollectRobotDialog( Qt.QDialog ):
 
         # COLS
         self.column_headers = [ "", "", "Use", "Type", "Plate", "Row", "Well", \
-                                "Concentration", "Comments", "Code", "Viscosity", "Buffername", \
+                                "Concentration", "Comments", "Macromolecule", "Code", "Viscosity", "Buffername", \
                                 "Transmission", "Volume", "SEU Temp", "Flow", "Recup.", \
                                 "Wait Time", "Del"]
 
@@ -46,16 +46,17 @@ class CollectRobotDialog( Qt.QDialog ):
         self.WELL_COLUMN = 6
         self.CONCENTRATION_COLUMN = 7
         self.COMMENTS_COLUMN = 8
-        self.CODE_COLUMN = 9
-        self.VISCOSITY_COLUMN = 10
-        self.BUFFERNAME_COLUMN = 11
-        self.TRANSMISSION_COLUMN = 12
-        self.VOLUME_COLUMN = 13
-        self.TEMPERATURE_COLUMN = 14
-        self.FLOW_COLUMN = 15
-        self.RECUPERATE_COLUMN = 16
-        self.WAITTIME_COLUMN = 17
-        self.DELETE_COLUMN = 18
+        self.MACROMOLECULE_COLUMN = 9
+        self.CODE_COLUMN = 10
+        self.VISCOSITY_COLUMN = 11
+        self.BUFFERNAME_COLUMN = 12
+        self.TRANSMISSION_COLUMN = 13
+        self.VOLUME_COLUMN = 14
+        self.TEMPERATURE_COLUMN = 15
+        self.FLOW_COLUMN = 16
+        self.RECUPERATE_COLUMN = 17
+        self.WAITTIME_COLUMN = 18
+        self.DELETE_COLUMN = 19
 
         self.PARAMLABEL_WIDTH = 130
         self.PARAMETERS_WIDTH = 220
@@ -214,6 +215,7 @@ class CollectRobotDialog( Qt.QDialog ):
         self.tableWidget.setColumnWidth( self.ROW_COLUMN, 45 )
         self.tableWidget.setColumnWidth( self.WELL_COLUMN, 45 )
         self.tableWidget.setColumnWidth( self.COMMENTS_COLUMN, 80 )
+        self.tableWidget.setColumnWidth( self.MACROMOLECULE_COLUMN, 110 )
         self.tableWidget.setColumnWidth( self.CODE_COLUMN, 80 )
         self.tableWidget.setColumnWidth( self.VOLUME_COLUMN, 60 )
         self.tableWidget.setSelectionBehavior( Qt.QAbstractItemView.SelectRows )
@@ -253,7 +255,7 @@ class CollectRobotDialog( Qt.QDialog ):
         self.hBoxLayout9.addWidget( self.closePushButton )
         self.layout().addLayout( self.hBoxLayout9 )
 
-        self.setGeometry( 400, 200, 1100, 700 )
+        self.setGeometry( 400, 200, 1250, 700 )
         #
         # Style Sheet
         #
@@ -371,6 +373,13 @@ class CollectRobotDialog( Qt.QDialog ):
         commentsLineEdit = Qt.QLineEdit( tableWidget )
         commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), commentsLineEdit ) )
         tableWidget.setCellWidget( row, self.COMMENTS_COLUMN, commentsLineEdit )
+
+
+        # macromolecule
+        macromoleculeLineEdit = Qt.QLineEdit( tableWidget )
+        macromoleculeLineEdit.setMaxLength( 30 )
+        macromoleculeLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "^[a-zA-Z][a-zA-Z0-9_]*" ), macromoleculeLineEdit ) )
+        tableWidget.setCellWidget( row, self.MACROMOLECULE_COLUMN, macromoleculeLineEdit )
 
         # code
         codeLineEdit = Qt.QLineEdit( tableWidget )
@@ -756,6 +765,7 @@ class CollectRobotDialog( Qt.QDialog ):
         sampleRow.well = str( table.cellWidget( i, self.WELL_COLUMN ).currentText() )
         sampleRow.concentration = table.cellWidget( i, self.CONCENTRATION_COLUMN ).value()
         sampleRow.comments = str( table.cellWidget( i, self.COMMENTS_COLUMN ).text() )
+        sampleRow.macromolecule = str( table.cellWidget( i, self.MACROMOLECULE_COLUMN ).text() )
         sampleRow.code = str( table.cellWidget( i, self.CODE_COLUMN ).text() )
         sampleRow.viscosity = str( table.cellWidget( i, self.VISCOSITY_COLUMN ).currentText() )
         sampleRow.buffername = str( table.cellWidget( i, self.BUFFERNAME_COLUMN ).currentText() )
@@ -865,6 +875,10 @@ class CollectRobotDialog( Qt.QDialog ):
         # code 
         codeLineEdit = tableWidget.cellWidget( index, self.CODE_COLUMN )
         codeLineEdit.setText( sample.code )
+
+        # macromolecule 
+        macromoleculeLineEdit = tableWidget.cellWidget( index, self.MACROMOLECULE_COLUMN )
+        macromoleculeLineEdit.setText( sample.macromolecule )
 
         # viscosity
         viscosityComboBox = tableWidget.cellWidget( index, self.VISCOSITY_COLUMN )
