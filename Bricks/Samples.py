@@ -49,6 +49,7 @@ class _Sample:
     <enable>%(enable)s</enable>
     <concentration>%(concentration)s</concentration>
     <comments>%(comments)s</comments>
+    <macromolecule>%(macromolecule)s</macromolecule>
     <code>%(code)s</code>
     <viscosity>%(viscosity)s</viscosity>
     <transmission>%(transmission)s</transmission>
@@ -71,6 +72,7 @@ class _Sample:
         self.enable = True
         self.concentration = 0.0
         self.comments = ""
+        self.macromolecule = ""
         self.code = ""
         self.viscosity = 'Low'
         self.transmission = 100.0
