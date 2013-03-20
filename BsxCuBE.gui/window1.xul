@@ -56,6 +56,7 @@
 <tab label='2D raw'/>
 <tab label='Robot'/>
 <tab label='SAS'/>
+<tab label='Collect/Robot'/>
     </tabs>
     <tabpanels>
       <tabpanel id='tab_EH'><vbox id="EH" orient="vertical">
@@ -81,6 +82,10 @@
   </tabpanel>
 <tabpanel id='tab_SAS'><vbox id="SAS" orient="vertical">
   <hbox qwidget="true" id="WebBrowseBrick2" brick="true"><script src="WebBrowseBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_Collect'><vbox id="Collect" orient="vertical">
+  <hbox qwidget="true" id="CURBrick1" brick="true"><script src="CURBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
     </tabpanels>

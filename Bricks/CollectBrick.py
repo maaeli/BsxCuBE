@@ -1362,7 +1362,6 @@ class CollectBrick( Core.BaseBrick ):
                 self.energyControlObject.setEnergy( self.__energy )
 
     def robotCheckBoxToggled( self, pValue ):
-
         if pValue:
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:

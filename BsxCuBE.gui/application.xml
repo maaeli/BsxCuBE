@@ -131,6 +131,9 @@
      <property name="notification" value="switch to tab"/>
      <property name="caption" value=""/>
   </properties>
+  <properties id="CURBrick1">
+     <property name="flex" value="0"/>
+  </properties>
   <properties id="1D Graph">
      <property name="flex" value="1"/>
      <property name="enableGrid" value="False"/>
@@ -271,6 +274,12 @@
      <property name="pack" value="start"/>
      <property name="caption" value="2D raw"/>
   </properties>
+  <properties id="Collect">
+     <property name="flex" value="1"/>
+     <property name="align" value="stretch"/>
+     <property name="pack" value="start"/>
+     <property name="caption" value="Collect/Robot"/>
+  </properties>
   <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
   </properties>
@@ -328,9 +337,6 @@
   <properties id="LoginBrick1">
      <property name="flex" value="0"/>
   </properties>
-  <properties id="BsxVideoBrick1">
-     <property name="flex" value="1"/>
-  </properties>
   <properties id="ReadingBrick3">
      <property name="flex" value="0"/>
      <property name="valueThreshold" value="0.80000000000000004"/>
@@ -344,6 +350,9 @@
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Misc"/>
+  </properties>
+  <properties id="BsxVideoBrick1">
+     <property name="flex" value="1"/>
   </properties>
   <properties id="ReprocessBrick1">
      <property name="flex" value="0"/>
@@ -537,6 +546,13 @@
   </connections>
 
   <connections id="tabbox2">
+  </connections>
+
+  <connections id="CURBrick1">
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
   </connections>
 
   <connections id="1D Graph">
@@ -758,6 +774,9 @@
   <connections id="2D">
   </connections>
 
+  <connections id="Collect">
+  </connections>
+
   <connections id="EnergyWaveLengthBrick1">
     <connection role="energy">
       <signal name="energyChanged"/>
@@ -824,12 +843,6 @@
   <connections id="LoginBrick1">
   </connections>
 
-  <connections id="BsxVideoBrick1">
-    <connection role="samplechanger">
-      <peer name="BsxCuBE/SampleChanger (local)"/>
-    </connection>
-  </connections>
-
   <connections id="ReadingBrick3">
     <connection role="reading">
       <signal name="readingChanged"/>
@@ -838,6 +851,12 @@
   </connections>
 
   <connections id="Misc">
+  </connections>
+
+  <connections id="BsxVideoBrick1">
+    <connection role="samplechanger">
+      <peer name="BsxCuBE/SampleChanger (local)"/>
+    </connection>
   </connections>
 
   <connections id="ReprocessBrick1">
