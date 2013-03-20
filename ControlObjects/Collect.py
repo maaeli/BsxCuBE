@@ -121,14 +121,14 @@ class Collect( CObjectBase ):
         raise AttributeError, attr
 
     def init( self ):
-
-
         self.edna1Dead = None
         self.edna2Dead = None
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
         self.deltaPilatus = 0.1
+
+        self.channels["collectNewFrame"].connect( "update", self.collectNewFrameChanged )
 
         try:
             self.channels["jobSuccess_edna1"].connect( "update", self.processingDone )
@@ -177,10 +177,6 @@ class Collect( CObjectBase ):
         else:
             return None
 
-
-
-
-
     def showMessageEdnaDead( self, _ednaServerNumber ):
         if _ednaServerNumber == 1:
             if self.edna1Dead:
@@ -204,6 +200,10 @@ class Collect( CObjectBase ):
         self.machineCurrent = current
         # Give this to the CollectBrick
         self.emit( "machineCurrentChanged", current )
+
+    def getTemplateDirectory( self ):
+        # get Template directory
+        return str ( self.config["/object/data[@name='templateDirectory']/@value"][0] )
 
     def sasWebDisplay( self, url ):
         #TODO:DEBUG
@@ -356,12 +356,12 @@ class Collect( CObjectBase ):
         #
         # set the energy if needed 
         #
-        self.__energy = self.objects["energy"].getEnergy()
-        self.__currentPilatusThreshold = self.objects["energy"].getPilatusThreshold()
+        self.__energy = self.objects["energyWaveLength"].getEnergy()
+        self.__currentPilatusThreshold = self.objects["energyWaveLength"].getPilatusThreshold()
         if math.fabs( self.__energy - self.__currentPilatusThreshold ) > self.deltaPilatus:
             if self.__energyAdjust:
-                self.objects["energy"].setEnergy( self.__energy )
-                while not self.objects["energy"].pilatusReady() :
+                self.objects["energyWaveLength"].setEnergy( self.__energy )
+                while not self.objects["energyWaveLength"].pilatusReady() :
                     time.sleep( 0.5 )
 
         #
@@ -370,22 +370,39 @@ class Collect( CObjectBase ):
         self.channels["fill_mode"].set_value( "ON" )
         self.commands["collect"]( callback = self.specCollectDone, error_callback = self.collectFailed )
 
+    def collectNewFrameChanged( self, value, last = {"frame":None} ):
+        raw_filename = value.split( "," )[0]
+        diode_current = self.channels["collectBeamStopDiode"].value()
+        self.emit( "collectNewFrameChanged", raw_filename, float( diode_current ), float( self.machineCurrent ), time.asctime() )
+        if last["frame"] != raw_filename:
+            last["frame"] = raw_filename
+            if self.collecting:
+                self.triggerEDNA( raw_filename, diode_current )
 
-    def triggerEDNA( self, raw_filename ):
+    def triggerEDNA( self, raw_filename, diode_current ):
+        """raw_filename is a path like '/data/visitor/mx1493/bm29/raw/ARR_147_00005.edf' ;
+        base is supposed to be 'ARR_147_00005' 
+        directory is supposed to be '/data/visitor/mx1493/bm29'
+        frame is supposed to be '00005'
+        """
         raw_filename = str( raw_filename )
-        tmp, _ = os.path.splitext( raw_filename )
-        tmp, base = os.path.split( tmp )
-        directory, _ = os.path.split( tmp )
-        frame = ""
-        for c in base[-1::-1]:
-            if c.isdigit():
-                frame = c + frame
-            else:
-                break
+        base = os.path.splitext( os.path.basename( raw_filename ) )[0]
+        directory = os.path.dirname( os.path.dirname( raw_filename ) )
+        frame = base.split( "_" )[-1]
+        #tmp, _ = os.path.splitext( raw_filename )
+        #tmp, base = os.path.split( tmp )
+        #directory, _ = os.path.split( tmp )
+        #frame = ""
+        #for c in base[-1::-1]:
+        #    if c.isdigit():
+        #        frame = c + frame
+        #    else:
+        #        break
+
         self.xsdin.experimentSetup.storageTemperature = XSDataDouble( self.storageTemperature )
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble( self.exposureTemperature )
         self.xsdin.experimentSetup.frameNumber = XSDataInteger( int( frame ) )
-        self.xsdin.experimentSetup.beamStopDiode = XSDataDouble( float( self.channels["collectBeamStopDiode"].value() ) )
+        self.xsdin.experimentSetup.beamStopDiode = XSDataDouble( float( diode_current ) )
         # self.machineCurrent is already float
         self.xsdin.experimentSetup.machineCurrent = XSDataDouble( self.machineCurrent )
         self.xsdin.rawImage = XSDataImage( path = XSDataString( raw_filename ) )
@@ -438,6 +455,7 @@ class Collect( CObjectBase ):
         self.processingDone( jobId, jobSuccess = False )
 
     def processingDone( self, jobId, jobSuccess = True ):
+        time.sleep( 0.1 ) #this is to give more priority to other tasks
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
             if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
@@ -453,6 +471,7 @@ class Collect( CObjectBase ):
             logger.info( "processing Done from EDNA: %s -> %s", jobId, filename )
             self.emit( "collectProcessingDone", filename )
             if jobId.startswith( self.pluginMerge ):
+                time.sleep( 0.1 )
                 try:
                     strXsdout = self.commands["getJobOutput_edna2"]( jobId )
                 except Exception:
@@ -500,6 +519,7 @@ class Collect( CObjectBase ):
                                                         destinationDirectory = XSDataFile( XSDataString( dest ) ) )
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
+                        time.sleep( 0.1 )
                         jobId = self.commands["startJob_edna1"]( [self.pluginSAS, xsdin.marshal()] )
                         self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna1Dead = False
@@ -509,6 +529,7 @@ class Collect( CObjectBase ):
                         self.showMessage( 2, message )
                         self.showMessageEdnaDead( 1 )
             elif jobId.startswith( self.pluginSAS ):
+                time.sleep( 0.1 )
                 try:
                     strXsdout = self.commands["getJobOutput_edna1"]( jobId )
                 except Exception:
@@ -542,6 +563,7 @@ class Collect( CObjectBase ):
                 self.showMessage( 0, "or look in the SAS tab" )
                 self.sasWebDisplay( "file://%s" % webPage )
             elif jobId.startswith( self.pluginHPLC ):#HPLC is on Slavia
+                time.sleep( 0.1 )
                 try:
                     strXsdout = self.commands["getJobOutput_edna1"]( jobId )
                 except Exception:
@@ -602,11 +624,13 @@ class Collect( CObjectBase ):
         self._abortCollectWithRobot()
 
         logger.info( "Sending abort to ISPyB" )
-        self.objects["biosaxs_client"].setExperimentAborted()
+        try:
+            self.objects["biosaxs_client"].setExperimentAborted()
+        except Exception, errMsg:
+            self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
 
     def testCollectAbort( self ):
         logger.info( "sending abort to stop spec test collection" )
-        #self.commands["testCollect"].abort()
 
     def setHPLC( self, pValue ):
         self.isHPLC = bool( pValue )
@@ -953,10 +977,7 @@ class Collect( CObjectBase ):
             if ( self.isISPyB ):
                 try:
                     self.measurementId = self.objects["biosaxs_client"].getMeasurementIdByCommentId( measurementISPyBIteratorId )
-
                     measurementISPyBIteratorId = measurementISPyBIteratorId + 1
-                    print "----------------"
-                    print "MeasurementId: " + str( self.measurementId ) + " " + str( measurementISPyBIteratorId )
                 except Exception:
                     print "[ISPyB] Error: Setting ISPyB to False"
                     self.isISPyB = False

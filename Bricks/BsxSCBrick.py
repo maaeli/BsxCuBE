@@ -7,57 +7,57 @@ from Framework4.GUI.Core import Connection, Signal
 from BsxSCWidget import BsxSCWidget
 from PyQt4 import Qt
 
-logger = logging.getLogger("BsxSCBrick")
+logger = logging.getLogger( "BsxSCBrick" )
 
 __category__ = "BsxCuBE"
 
-class BsxSCBrick(Core.BaseBrick):
+class BsxSCBrick( Core.BaseBrick ):
 
     properties = {}
-    connections = {"samplechanger": Connection("Sample Changer object",
-                            [Signal('seuTemperatureChanged', 'seu_temperature_changed'),
-                             Signal('storageTemperatureChanged', 'storage_temperature_changed'),
-                             Signal('stateChanged', 'state_changed'), ],
+    connections = {"samplechanger": Connection( "Sample Changer object",
+                            [Signal( 'seuTemperatureChanged', 'seu_temperature_changed' ),
+                             Signal( 'storageTemperatureChanged', 'storage_temperature_changed' ),
+                             Signal( 'stateChanged', 'state_changed' ), ],
                             [],
-                            "sample_changer_connected"),
-                    "login": Connection("Login object",
-                            [Signal("loggedIn", "loggedIn")],
+                            "sample_changer_connected" ),
+                    "login": Connection( "Login object",
+                            [Signal( "loggedIn", "loggedIn" )],
                             [],
-                            "connectionToLogin")}
+                            "connectionToLogin" )}
 
-    def __init__(self, *args, **kargs):
-        Core.BaseBrick.__init__(self, *args, **kargs)
+    def __init__( self, *args, **kargs ):
+        Core.BaseBrick.__init__( self, *args, **kargs )
 
-    def init(self):
+    def init( self ):
         self._sampleChanger = None
 
-        mainLayout = Qt.QHBoxLayout(self.brick_widget)
-        self.SCWidget = BsxSCWidget(self.brick_widget)
-        mainLayout.addWidget(self.SCWidget)
-        self.brick_widget.setLayout(mainLayout)
+        mainLayout = Qt.QHBoxLayout( self.brick_widget )
+        self.SCWidget = BsxSCWidget( self.brick_widget )
+        mainLayout.addWidget( self.SCWidget )
+        self.brick_widget.setLayout( mainLayout )
         # self.SCWidget.setState( "Disconnected" )
 
     # When connected to Login, then block the brick
-    def connectionToLogin(self, pPeer):
+    def connectionToLogin( self, pPeer ):
         if pPeer is not None:
-            self.brick_widget.setEnabled(False)
+            self.brick_widget.setEnabled( False )
 
 
     # Logged In : True or False 
-    def loggedIn(self, pValue):
-        self.brick_widget.setEnabled(pValue)
+    def loggedIn( self, pValue ):
+        self.brick_widget.setEnabled( pValue )
 
 
-    def sample_changer_connected(self, sc):
+    def sample_changer_connected( self, sc ):
         if sc is not None:
-            logger.info("Sample Changer connected")
+            logger.info( "Sample Changer connected" )
 
             self._sampleChanger = sc
 
-            geometry = [ self._sampleChanger.getPlateInfo(i) for i in range(1, 3) ]
+            geometry = [ self._sampleChanger.getPlateInfo( i ) for i in range( 1, 3 ) ]
             #TODO: DEBUG
             print ">>>> geometry in sample_changer %r" % geometry
-            self.SCWidget.setPlateGeometry(geometry)
+            self.SCWidget.setPlateGeometry( geometry )
 
             # redefine calls in SCWidget
             self.SCWidget.startSyringeForward = self.startSyringeForward
@@ -75,32 +75,32 @@ class BsxSCBrick(Core.BaseBrick):
             self.SCWidget.restart = self._sampleChanger.restart
             self.SCWidget.setStorageTemperature = self._sampleChanger.setStorageTemperature
             self.SCWidget.setSEUTemperature = self._sampleChanger.setSEUTemperature
-            self.SCWidget.setState("READY", "Connected")
+            self.SCWidget.setState( "READY", "Connected" )
         else:
-            logger.info("Sample Changer NOT connected ")
-            self.SCWidget.setState("DISCONNECTED", "SC GUI not running?")
+            logger.info( "Sample Changer NOT connected " )
+            self.SCWidget.setState( "DISCONNECTED", "SC GUI not running?" )
             return
 
-    def storage_temperature_changed(self, temperature):
-        self.SCWidget.setCurrentStorageTemperature(temperature)
+    def storage_temperature_changed( self, temperature ):
+        self.SCWidget.setCurrentStorageTemperature( temperature )
 
-    def seu_temperature_changed(self, temperature):
-        self.SCWidget.setCurrentSEUTemperature(temperature)
+    def seu_temperature_changed( self, temperature ):
+        self.SCWidget.setCurrentSEUTemperature( temperature )
 
-    def state_changed(self, state, status):
+    def state_changed( self, state, status ):
         if self._sampleChanger is None:
             return
         try:
             cmdException = self._sampleChanger.getCommandException()
         except:
-            print "Could not read sample changer CommandException state: %s, status: %s" % (state, status)
+            print "Could not read sample changer CommandException state: %s, status: %s" % ( state, status )
             print "[State changed] error", sys.exc_info()[0]
             print "Exception in user code:"
-            traceback.print_exc(file = sys.stdout)
+            traceback.print_exc( file = sys.stdout )
             cmdException = ""
-        self.SCWidget.setState(state, status, cmdException)
+        self.SCWidget.setState( state, status, cmdException )
 
-    def startSyringeForward(self):
-        self._sampleChanger.moveSyringeForward(5)
-    def startSyringeBackward(self):
-        self._sampleChanger.moveSyringeBackward(5)
+    def startSyringeForward( self ):
+        self._sampleChanger.moveSyringeForward( 5 )
+    def startSyringeBackward( self ):
+        self._sampleChanger.moveSyringeBackward( 5 )

@@ -1,11 +1,13 @@
 <object class = "Collect" username = "Collect" local="false">
-	
+
    <uri>nela:exp</uri>	
 
    <data name="uri"  value="orion:10000/FE/D/29" />
+
+   <data name="templateDirectory" value="/data/bm29/archive/CALIBRATION/Templates"/>
    
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
-   <object href="BsxCuBE/EnergyWaveLength" role="energy"/>
+   <object href="BsxCuBE/EnergyWaveLength" role="energyWaveLength"/>
    <object href="BsxCuBE/BiosaxsClient" role="biosaxs_client"/>
    
    <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />
@@ -56,7 +58,7 @@
    <channel name="collectRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/radiationDamage" signal="collectRadiationDamageChanged"/>
    <channel name="collectAbsoluteRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/absoluteRadiationDamage" signal="collectAbsoluteRadiationDamageChanged"/>
    <channel name="collectRelativeRadiationDamage"  type="spec" call="BSX_GLOBAL/collect/relativeRadiationDamage" signal="collectRelativeRadiationDamageChanged"/>
-   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame" signal="collectNewFrameChanged"/>
+   <channel name="collectNewFrame"       type="spec" call="BSX_GLOBAL/collect/newFrame"/>
    <channel name="beamLost"              type="spec" call="BSX_GLOBAL/collect/beamLost" signal="beamLostChanged"/>
    <channel name="abortCollect"          type="spec" call="BSX_ABORT" signal="abortCollectChanged"/>
    <channel name="checkBeam"             type="spec" uri="nela:oh"  call="BSX_CHECKBEAM"/>

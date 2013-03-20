@@ -85,7 +85,7 @@ class CollectBrick( Core.BaseBrick ):
 
                     "energy": Connection( "Energy object",
                                             [Signal( "energyChanged", "energyChanged" )],
-                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
+                                            [Slot( "setEnergy" ), Slot( "getEnergy" ), Slot( "pilatusReady" ), Slot ( "pilatusReset" ), Slot( "setPilatusFill" ), Slot( "energyAdjustPilatus" )],
                                             "connectedToEnergy" ),
 
                     "samplechanger": Connection( "Sample Changer object",
@@ -230,9 +230,10 @@ class CollectBrick( Core.BaseBrick ):
         self.timePerFrameLabel = Qt.QLabel( "Time per frame", self.brick_widget )
         self.timePerFrameLabel.setFixedWidth( 130 )
         self.hBoxLayout4.addWidget( self.timePerFrameLabel )
-        self.timePerFrameSpinBox = Qt.QSpinBox( self.brick_widget )
+        self.timePerFrameSpinBox = Qt.QDoubleSpinBox( self.brick_widget )
         self.timePerFrameSpinBox.setSuffix( " s" )
-        self.timePerFrameSpinBox.setRange( 1, 99 )
+        self.timePerFrameSpinBox.setRange( 0, 99 )
+        self.timePerFrameSpinBox.setDecimals( 1 )
         self.hBoxLayout4.addWidget( self.timePerFrameSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout4 )
 
@@ -529,6 +530,31 @@ class CollectBrick( Core.BaseBrick ):
         if methodName == "getRobotXMLByPlateGroupId":
             self._collectRobotDialog.loadXML( response )
 
+    def isInhouseUser( self, username ):
+        if ( username == "opd29" ):
+            return True
+        return False
+
+    def getDefaultDirectoryByUsername ( self, username ):
+        user_category = 'visitor'
+        if ( self.isInhouseUser( username ) ):
+            user_category = 'inhouse'
+            directory = os.path.join( '/data/bm29/',
+                                 user_category,
+                                 username,
+                                 time.strftime( "%Y%m%d" ) )
+        else:
+            directory = os.path.join( '/data',
+                                 user_category,
+                                 username,
+                                 'bm29',
+                                 time.strftime( "%Y%m%d" ) )
+        try:
+            if not os.path.isdir( directory ):
+                os.makedirs( directory )
+            self.setDirectory( str( directory ) )
+        except IOError as error:
+            print "Error while directory creation in : %s Probably your folder has not been created yet" % error
 
 
     # When connected SAS webdisplay
@@ -545,10 +571,11 @@ class CollectBrick( Core.BaseBrick ):
                 if ( self.__username is not None and self.__password is not None ):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo( self.__username, self.__password )
+                        self.getDefaultDirectoryByUsername( self.__username )
                 #TODO: DEBUG
                 print "Now we are logged in as %s with pwd %s " % ( self.__username, self.__password )
                 if self.getObject( "BiosaxsClient" ) is not None:
-                    self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password )
+                    self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password, self.__enteredPropType, self.__enteredPropNumber )
                 else:
                     logger.warning( "No connection to BiosaxsClient" )
             else:
@@ -608,7 +635,7 @@ class CollectBrick( Core.BaseBrick ):
         self.frameNumberSpinBox.setValue( int( pValue ) )
 
     def collectTimePerFrameChanged( self, pValue ):
-        self.timePerFrameSpinBox.setValue( int( pValue ) )
+        self.timePerFrameSpinBox.setValue( float( pValue ) )
 
     def collectConcentrationChanged( self, pValue ):
         self.concentrationDoubleSpinBox.setValue( float( pValue ) )
@@ -702,8 +729,7 @@ class CollectBrick( Core.BaseBrick ):
     def clearCurve( self ):
         self.displayReset()
 
-    def collectNewFrameChanged( self, pValue ):
-        filename0 = pValue.split( "," )[0]
+    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
         if os.path.dirname( filename0 ).endswith( "/raw" ) and filename0.endswith( '.edf' ):
             directoryRaw = True
             directory = os.path.dirname( filename0 )
@@ -711,11 +737,10 @@ class CollectBrick( Core.BaseBrick ):
             directoryRaw = False
             directory = os.path.join( os.path.dirname( filename0 ), "1d" )
 
-        if self.__lastFrame is None or self.__lastFrame != pValue:
-            self.__lastFrame = pValue
+        if self.__lastFrame != filename0:
+            self.__lastFrame = filename0
             if self._isCollecting:
-                self.collectObj.triggerEDNA( filename0, oneway = True )
-                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA)" % ( filename0, self._diodeCurrent, self._machineCurrent )
+                message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
                 if self.robotCheckBox.isChecked():
                     self._collectRobotDialog.addHistory( 0, message )
@@ -1003,6 +1028,11 @@ class CollectBrick( Core.BaseBrick ):
 
         return valid
 
+    def getTemplateDirectory( self ):
+        if self.collectObj is not None:
+            return self.collectObj.getTemplateDirectory()
+        return None
+
     def getRadiationRelativeLinear( self ):
         val = float( self.radiationRelativeDoubleSpinBox.value() )
         if val == 0.:
@@ -1039,7 +1069,7 @@ class CollectBrick( Core.BaseBrick ):
                             "prefix": str( self.prefixLineEdit.text() ),
                             "runNumber": int( self.runNumberSpinBox.value() ),
                             "frameNumber": int( self.frameNumberSpinBox.value() ),
-                            "timePerFrame": int( self.timePerFrameSpinBox.value() ),
+                            "timePerFrame": float( self.timePerFrameSpinBox.value() ),
                             "currentConcentration": float( self.concentrationDoubleSpinBox.value() ),
                             "currentComments":str( self.commentsLineEdit.text() ),
                             "currentCode": str( self.codeLineEdit.text() ),
@@ -1237,6 +1267,9 @@ class CollectBrick( Core.BaseBrick ):
 
     def directoryPushButtonClicked( self ):
         directory = QtGui.QFileDialog.getExistingDirectory( self.brick_widget, "Choose a directory", self.directoryLineEdit.text() )
+        self.setDirectory( directory )
+
+    def setDirectory( self, directory ):
         if directory != "":
             self.directoryLineEdit.setText( directory )
 
@@ -1393,8 +1426,22 @@ class CollectBrick( Core.BaseBrick ):
                 logger.warning( "Found Pilatus again" )
                 self.linkUpPilatus = True
             if not self.energyControlObject.pilatusReady():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "No contact with Pilatus.. Try later or Restart the Pilatus", Qt.QMessageBox.Ok )
-                return False
+                # We had contact with Pilatus and it replied once with error.
+                # Try first a reset and try again
+                self.energyControlObject.pilatusReset()
+                logger.warning( "Pilatus not ready - doing reset - Please be patient" )
+                # wait 0.2*10 = 2s to recover after reset
+                # Note __ = No interest
+                for __ in range( 0, 10 ):
+                    time.sleep( 0.2 )
+                    # take Qt actions
+                    QtGui.qApp.processEvents()
+                if not self.energyControlObject.pilatusReady():
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "No contact with Pilatus.. Try later or Restart the Pilatus", Qt.QMessageBox.Ok )
+                    self.linkUpPilatus = False
+                    return False
+                else:
+                    return True
             return True
 
     def testPushButtonClicked( self ):
@@ -1724,7 +1771,8 @@ class CollectBrick( Core.BaseBrick ):
 
         logger.info( "Aborting!" )
         logger.warning( "Wait for current action to finish..." )
-
+        # put in a small wait for everything to stabilize
+        time.sleep( 2 )
         self._abortFlag = True
 
         if self.__isTesting:
@@ -1734,7 +1782,6 @@ class CollectBrick( Core.BaseBrick ):
 
         #if self.robotCheckBox.isChecked():
         #   self._collectRobot.abort()
-
 
         #
         # Stop all timers 
