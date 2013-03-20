@@ -61,18 +61,6 @@ class BiosaxsClient( CObjectBase ):
 
 
 
-#    def getExperimentsByProposalId(self, proposalId):
-#        if (self.client is None):
-#            self.__initWebservice()
-#
-#        response = self.client.service.findExperimentByPosposalId(3124)
-#        self.experiments = []
-#        for experiment in response:
-#            self.experiments.append(Experiment(experiment))
-#        return self.getExperimentNames()
-
-
-
     def getSpecimenIdBySampleCode( self, sampleCode ):
         print "[ISPyB] getSpecimenIdBySampleCode " + str( sampleCode )
         if self.experiment is None:
@@ -128,8 +116,8 @@ class BiosaxsClient( CObjectBase ):
                             if str( specimen.comment ).find( "[" + str( commentId ) + "]" ) != -1:
                                 return specimen.specimenId
         except:
-             traceback.print_exc()
-             raise Exception
+            traceback.print_exc()
+            raise Exception
         return -1
 
     def getMeasurementIdBySampleCodeConcentrationAndSEU( self, sampleCode, concentration, seu, bufferName ):
@@ -153,9 +141,9 @@ class BiosaxsClient( CObjectBase ):
                                 if ( float( specimen.exposureTemperature ) == float( seu ) and ( str( specimen.code ) == str( sampleCode ) ) ):
                                     return specimen.specimenId
         except Exception:
-             print "[ISPyB] error"
-             traceback.print_exc()
-             raise Exception
+            print "[ISPyB] error"
+            traceback.print_exc()
+            raise Exception
         print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
         return -1
 #Testing git hub
@@ -247,6 +235,20 @@ class BiosaxsClient( CObjectBase ):
         xml = self.client.service.getRobotXMLByPlateIds( experimentId, str( ids ) )
         self.emit( "onSuccess", "getRobotXMLByPlateGroupId", xml )
 
+    def setExperimentAborted( self ):
+        try:
+            if ( self.client is None ):
+                self.__initWebservice()
+        except Exception:
+            print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
+            raise Exception
+        try:
+            if ( self.selectedExperimentId is not None ):
+                self.client.service.setExperimentAborted( self.selectedExperimentId )
+        except Exception:
+            traceback.print_exc()
+            raise Exception
+
     def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime ):
         try:
             if ( self.client is None ):
@@ -273,7 +275,6 @@ class BiosaxsClient( CObjectBase ):
             print "[ISPyB] handled error"
             traceback.print_exc()
             raise Exception
-            #traceback.print_exc()
 
 class Experiment:
     def __init__( self, experiment ):
