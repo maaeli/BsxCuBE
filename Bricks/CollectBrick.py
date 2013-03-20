@@ -530,6 +530,31 @@ class CollectBrick( Core.BaseBrick ):
         if methodName == "getRobotXMLByPlateGroupId":
             self._collectRobotDialog.loadXML( response )
 
+    def isInhouseUser( self, username ):
+        if ( username == "opd29" ):
+            return True
+        return False
+
+    def getDefaultDirectoryByUsername ( self, username ):
+        user_category = 'visitor'
+        if ( self.isInhouseUser( username ) ):
+            user_category = 'inhouse'
+            directory = os.path.join( '/data/bm29/',
+                                 user_category,
+                                 username,
+                                 time.strftime( "%Y%m%d" ) )
+        else:
+            directory = os.path.join( '/data',
+                                 user_category,
+                                 username,
+                                 'bm29',
+                                 time.strftime( "%Y%m%d" ) )
+        try:
+            if not os.path.isdir( directory ):
+                os.makedirs( directory )
+            self.setDirectory( str( directory ) )
+        except IOError as error:
+            print "Error while directory creation in : %s Probably your folder has not been created yet" % error
 
 
     # When connected SAS webdisplay
@@ -546,6 +571,7 @@ class CollectBrick( Core.BaseBrick ):
                 if ( self.__username is not None and self.__password is not None ):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo( self.__username, self.__password )
+                        self.getDefaultDirectoryByUsername( self.__username )
                 #TODO: DEBUG
                 print "Now we are logged in as %s with pwd %s " % ( self.__username, self.__password )
                 if self.getObject( "BiosaxsClient" ) is not None:
@@ -1241,6 +1267,9 @@ class CollectBrick( Core.BaseBrick ):
 
     def directoryPushButtonClicked( self ):
         directory = QtGui.QFileDialog.getExistingDirectory( self.brick_widget, "Choose a directory", self.directoryLineEdit.text() )
+        self.setDirectory( directory )
+
+    def setDirectory( self, directory ):
         if directory != "":
             self.directoryLineEdit.setText( directory )
 

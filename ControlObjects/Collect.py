@@ -977,10 +977,7 @@ class Collect( CObjectBase ):
             if ( self.isISPyB ):
                 try:
                     self.measurementId = self.objects["biosaxs_client"].getMeasurementIdByCommentId( measurementISPyBIteratorId )
-
                     measurementISPyBIteratorId = measurementISPyBIteratorId + 1
-                    print "----------------"
-                    print "MeasurementId: " + str( self.measurementId ) + " " + str( measurementISPyBIteratorId )
                 except Exception:
                     print "[ISPyB] Error: Setting ISPyB to False"
                     self.isISPyB = False
