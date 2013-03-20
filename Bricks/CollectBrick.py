@@ -834,7 +834,7 @@ class CollectBrick( Core.BaseBrick ):
                             print "display2D raw: %r" % filename0
                             self.emit( "displayItemChanged", filename0 )
 
-                if self._currentFrame == self._frameNumber:
+                if self._currentFrame == self._frameNumber and ( self.__isTesting is not True ):
                     splitList = os.path.basename( filename0 ).split( "_" )
                     # Take away last _ piece
                     filename1 = "_".join( splitList[:-1] )
@@ -869,7 +869,6 @@ class CollectBrick( Core.BaseBrick ):
                             timestr = str( time.time() - t0 )
                             print ">>> No file 4 %s seen after %s seconds. We do not display it " % ( ave_filename, timestr )
             else:
-
                 if os.path.exists( filename0 ):
                     if not filename0.endswith( ".dat" ):
                         self.emit( "displayItemChanged", filename0 )
@@ -890,11 +889,10 @@ class CollectBrick( Core.BaseBrick ):
                     if self.__isTesting:
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
-                        logger.info( "The data collection is done!" )
+                        logger.info( "Test frame is done!" )
                         self.grayOut( False )
                         self.emit( "grayOut", False )
                     else:
-                        feedBackFlag = self._feedBackFlag
                         if self.robotCheckBox.isChecked():
                             self.setCollectionStatus( "done" )
                             self._feedBackFlag = False
@@ -905,7 +903,7 @@ class CollectBrick( Core.BaseBrick ):
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
-                        if feedBackFlag:
+                        if self._feedBackFlag:
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
 
@@ -1454,6 +1452,7 @@ class CollectBrick( Core.BaseBrick ):
 
         self.startCollection( mode = 'test' )
 
+        print "We have already started data collection"
         self._feedBackFlag = False
         self._abortFlag = False
         self._frameNumber = 1
@@ -1475,106 +1474,105 @@ class CollectBrick( Core.BaseBrick ):
                                                self.normalisationDoubleSpinBox.value() )
 
 
+
     def collectPushButtonClicked( self ):
-
-
         if not self.checkPilatusReady():
-            print "It seems not to be ready"
+            print "Pilatus seems not to be ready"
             return
         self.robotCollect = self.robotCheckBox.isChecked()
-        if not self.robotCollect or self.validParameters():
-            # Check Temperature changes are not too big when doing robot collection
-            if self.robotCollect:
-                # check temperature moving upwards - Storage temperature first - 1 degree move ...
-                oldTemp = 100.0
-                if self.scObject.getSampleStorageTemperature() != "":
-                    oldTemp = float( self.scObject.getSampleStorageTemperature() )
-                else:
-                    logger.warning( "Can not get current Storage temperature from Sample Changer" )
-                newTemp = float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() )
-                if newTemp > ( oldTemp + 1.0 ) :
-                    answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
-                                 "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
-                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
-                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
-                    if answer == Qt.QMessageBox.No:
-                        return
-                # Check SEU Temperatures (max) - 4 degree move max...
-                oldTemp = 100.0
-                if self.scObject.getSEUTemperature() != "":
-                    oldTemp = float( self.scObject.getSEUTemperature() )
-                else:
-                    logger.warning( "Can not get current SEU temperature from Sample Changer" )
-                newTemp = 0.0
-                for checkSample in self.robotParams["sampleList"]:
-                    if newTemp < checkSample["SEUtemperature"]:
-                        newTemp = checkSample["SEUtemperature"]
-                if newTemp > ( oldTemp + 4.0 ):
-                    answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
-                                 "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
-                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
-                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
-                    if answer == Qt.QMessageBox.No:
-                        return
-            self.displayReset()
-            directory = str( self.directoryLineEdit.text() ) + "/raw"
-            runNumber = "%03d" % self.runNumberSpinBox.value()
 
-            flag = True
-
-            if os.path.isdir( directory ):
-                for filename in os.listdir( directory ):
-                    if os.path.isfile( os.path.join( directory, filename ) ):
-                        if filename.startswith( str( self.prefixLineEdit.text() ) ) \
-                           and ( filename.split( "_" )[-1] != "00000.edf" ) \
-                           and ( filename.split( "_" )[-1] != "00000.xml" ) \
-                           and ( filename.split( "." )[-1] != "h5" ) \
-                           and ( filename.split( "." )[-1] != "json" ) \
-                           and ( filename.split( "." )[-1] != "svg" ) \
-                           and ( filename.split( "." )[-1] != "png" ):
-                            # Check if we have a run number higher than the requested run number:
-                            try:
-                                existingRunNumber = filename.split( "_" )[-2]
-                                if int( existingRunNumber ) >= int( runNumber ):
-                                    logger.info( "Existing run number %r is higher than requested run number %r" % ( existingRunNumber, runNumber ) )
-                                    flag = False
-                                    break
-                            except IndexError:
-                                #TODO: DEBUG
-                                print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory Unexpected file %s in directory " % filename , Qt.QMessageBox.Ok )
-                                raise RuntimeError, "Creating of filename from info not possible"
-                            except ValueError:
-                                #TODO: DEBUG
-                                print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok )
-                                raise RuntimeError, "Creating of filename from info not possible"
-
-            if not flag:
-                flag = ( Qt.QMessageBox.question( self.brick_widget, "Warning", \
-                                "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % \
-                                ( runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text() ), \
-                                Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
-
-            if not flag:
-                return
-
-            if self.robotCollect:
-                self.startCollectWithRobot()
+        # Check Temperature changes are not too big when doing robot collection
+        if ( self.robotCollect and self.validParameters() ):
+            # check temperature moving upwards - Storage temperature first - 1 degree move ...
+            oldTemp = 100.0
+            if self.scObject.getSampleStorageTemperature() != "":
+                oldTemp = float( self.scObject.getSampleStorageTemperature() )
             else:
-                if not ( not self.__expertModeOnly or self.__expertMode ):
+                logger.warning( "Can not get current Storage temperature from Sample Changer" )
+            newTemp = float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() )
+            if newTemp > ( oldTemp + 1.0 ) :
+                answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
+                             "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
+                             " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                             Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
+                if answer == Qt.QMessageBox.No:
+                    return
+            # Check SEU Temperatures (max) - 4 degree move max...
+            oldTemp = 100.0
+            if self.scObject.getSEUTemperature() != "":
+                oldTemp = float( self.scObject.getSEUTemperature() )
+            else:
+                logger.warning( "Can not get current SEU temperature from Sample Changer" )
+            newTemp = 0.0
+            for checkSample in self.robotParams["sampleList"]:
+                if newTemp < checkSample["SEUtemperature"]:
+                    newTemp = checkSample["SEUtemperature"]
+            if newTemp > ( oldTemp + 4.0 ):
+                answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
+                             "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
+                             " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                             Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
+                if answer == Qt.QMessageBox.No:
+                    return
+        self.displayReset()
+        directory = str( self.directoryLineEdit.text() ) + "/raw"
+        runNumber = "%03d" % self.runNumberSpinBox.value()
 
-                    if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
-                        flag = ( Qt.QMessageBox.question( self.brick_widget, \
-                                    "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
-                                                  self.concentrationDoubleSpinBox.value(), \
-                                                  Qt.QMessageBox.Yes, \
-                                                  Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+        flag = True
 
-                if flag:
-                    #When collect without robot there is no log on ISPyB
-                    self.getObject( "collect" ).isISPyB = False
-                    self.startCollectWithoutRobot()
+        if os.path.isdir( directory ):
+            for filename in os.listdir( directory ):
+                if os.path.isfile( os.path.join( directory, filename ) ):
+                    if filename.startswith( str( self.prefixLineEdit.text() ) ) \
+                       and ( filename.split( "_" )[-1] != "00000.edf" ) \
+                       and ( filename.split( "_" )[-1] != "00000.xml" ) \
+                       and ( filename.split( "." )[-1] != "h5" ) \
+                       and ( filename.split( "." )[-1] != "json" ) \
+                       and ( filename.split( "." )[-1] != "svg" ) \
+                       and ( filename.split( "." )[-1] != "png" ):
+                        # Check if we have a run number higher than the requested run number:
+                        try:
+                            existingRunNumber = filename.split( "_" )[-2]
+                            if int( existingRunNumber ) >= int( runNumber ):
+                                logger.info( "Existing run number %r is higher than requested run number %r" % ( existingRunNumber, runNumber ) )
+                                flag = False
+                                break
+                        except IndexError:
+                            #TODO: DEBUG
+                            print ">>> got totally unexpected filename %s " % filename
+                            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory Unexpected file %s in directory " % filename , Qt.QMessageBox.Ok )
+                            raise RuntimeError, "Creating of filename from info not possible"
+                        except ValueError:
+                            #TODO: DEBUG
+                            print ">>> got totally unexpected filename %s " % filename
+                            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok )
+                            raise RuntimeError, "Creating of filename from info not possible"
+
+        if not flag:
+            flag = ( Qt.QMessageBox.question( self.brick_widget, "Warning", \
+                            "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % \
+                            ( runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text() ), \
+                            Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+
+        if not flag:
+            return
+
+        if self.robotCollect:
+            self.startCollectWithRobot()
+        else:
+            if not ( not self.__expertModeOnly or self.__expertMode ):
+
+                if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
+                    flag = ( Qt.QMessageBox.question( self.brick_widget, \
+                                "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
+                                              self.concentrationDoubleSpinBox.value(), \
+                                              Qt.QMessageBox.Yes, \
+                                              Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+
+            if flag:
+                #When collect without robot there is no log on ISPyB
+                self.getObject( "collect" ).isISPyB = False
+                self.startCollectWithoutRobot()
 
     def setCollectionStatus( self, status ):
         self.collectionStatus = status
@@ -1680,8 +1678,11 @@ class CollectBrick( Core.BaseBrick ):
 
         self.setCollectionStatus( "running" )
 
+        self.__isTesting = False
         if mode == "test":
             self.__isTesting = True
+            #Since we collect the same frame over and over again we reset last frame
+            self.__lastFrame = None
 
         logger.info( "   - collection started (mode: %s)" % mode )
 
@@ -1870,6 +1871,8 @@ class CollectBrick( Core.BaseBrick ):
         self.__isTesting = False
         self.grayOut( False )
         self.emit( "grayOut", False )
+
+        print "%s -- %s  -- %s -- %s" % ( str( self._abortFlag ), str( self._currentFrame ), str( self._frameNumber ), str( self.__isTesting ) )
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
             logger.warning( "The frame was not collected or didn't appear on time! (%d,%d)" % \

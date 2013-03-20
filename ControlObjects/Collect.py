@@ -266,10 +266,11 @@ class Collect( CObjectBase ):
         self.collectBeamCenterY.set_value( pBeamCenterY )
         self.collectNormalisation.set_value( pNormalisation )
         # note that pTimePerFrame is 1.0 s and number of frames is 1
-        pNumberFrames = 1
-        pTimePerFrame = 1.0
-        self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
+        #pNumberFrames = 1
+        #pTimePerFrame = 1.0
+        #self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
         self.commands["testCollect"]()
+
 
 
     def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
