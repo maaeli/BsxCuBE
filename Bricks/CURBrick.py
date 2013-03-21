@@ -16,27 +16,27 @@ logger = logging.getLogger( "CURBrick" )
 rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 class CURBrick( Core.BaseBrick ):
 
-#  ,
-#                   "login": Connection( "Login object",
-#                                        [Signal( "loggedIn", "loggedIn" )],
-#                                        [],
-#                                        "connectionToLogin" )
+
     connections = {"display": Connection( "Display object",
                                     [Signal( "displayResetChanged", "displayResetChanged" ),
                                     Signal( "displayItemChanged", "displayItemChanged" ),
                                     Signal( "transmissionChanged", "transmissionChanged" ),
                                     Signal( "grayOut", "grayOut" )],
-                                    [] )
-
+                                    [] ),
+                   "login": Connection( "Login object",
+                                        [Signal( "loggedIn", "loggedIn" )],
+                                        [],
+                                        "connectionToLogin" )
                    }
 
-    signals = []
-    slots = [Slot( "setParentObject" )]
+    signals = [ ]
+    slots = []
 
 
     def __init__( self, *args, **kargs ):
         Core.BaseBrick.__init__( self, *args, **kargs )
-        self.__parent = None
+        self.collectBrickObject = None
+        self.collectBrickObject = None
 
     def init( self ):
         # Setting configuration for columns in the samples table Widget
@@ -49,7 +49,9 @@ class CURBrick( Core.BaseBrick ):
         mainLayout = self.brick_widget.layout()
 
         self.robotCheckBox = Qt.QCheckBox( "Collect using robot", self.brick_widget )
-        Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.robotCheckBoxToggled )
+
+        # Note: We use stateChange instead of toggle to avoid infinite loop between CollectBrick and CURBrick
+        Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "stateChanged(int)" ), self.__robotCheckBoxToggled )
         mainLayout.addWidget( self.robotCheckBox )
 
         self.groupBox = Qt.QGroupBox( "Parameters", self.brick_widget )
@@ -219,12 +221,6 @@ class CURBrick( Core.BaseBrick ):
                                 "Transmission", "Volume", "SEU Temp", "Flow", "Recup.", \
                                 "Wait Time", "Del"]
 
-    # getting a handle to the parent = CollectBrick
-    def setParentObject( self, pParent ):
-        #TODO: DEBUG
-        print "Got parent handle in CURBrick"
-        if pParent is not None:
-            self.__parent = pParent
 
    # When connected to Login, then block the brick
     def connectionToLogin( self, pPeer ):
@@ -235,9 +231,7 @@ class CURBrick( Core.BaseBrick ):
     def loggedIn( self, pValue ):
         self.brick_widget.setEnabled( pValue )
 
-
     # Connect to display 
-
     def grayOut( self, grayout ):
         if grayout is not None:
             if grayout:
@@ -268,7 +262,7 @@ class CURBrick( Core.BaseBrick ):
             dirname = os.path.split( self.filename )[0]
         else:
             try:
-                dirname = os.path.split( self.__parent.collectpars.directory )
+                dirname = os.path.split( self.collectBrickObject.collectpars.directory )
             except Exception, e:
                 print "Ignored Exception 5: " + str( e )
 
@@ -319,7 +313,7 @@ class CURBrick( Core.BaseBrick ):
 
             self.CBblock = 0
             self.filename = filename
-            self.__parent.setRobotFileName( filename )
+            self.collectBrickObject.setRobotFileName( filename )
 
         except Exception, e:
             logger.exception( 'Cannot load collection parameters file. \n' )
@@ -342,7 +336,7 @@ class CURBrick( Core.BaseBrick ):
         self.saveFile( filename )
 
         # Update robot file
-        self.__parent.setRobotFileName( filename )
+        self.collectBrickObject.setRobotFileName( filename )
 
 
 
@@ -434,7 +428,7 @@ class CURBrick( Core.BaseBrick ):
         if self.CBblock:
               return
 
-        plateInfos = self.__parent.plateInfos
+        plateInfos = self.collectBrickObject.plateInfos
 
         try:
             index = self.sampleIDs.index( sampleID )
@@ -539,7 +533,7 @@ class CURBrick( Core.BaseBrick ):
 
         tableWidget = self.tableWidget
 
-        plateInfos = self.__parent.plateInfos
+        plateInfos = self.collectBrickObject.plateInfos
 
         # enable
         tableWidget.cellWidget( index, self.ENABLE_COLUMN ).setChecked( sample.enable )
@@ -777,7 +771,6 @@ class CURBrick( Core.BaseBrick ):
 
     @Qt.pyqtSlot( int )
     def deletePushButtonClicked( self, sampleID ):
-
         self.removeSampleRow( sampleID )
 
     def clearConfigurationPushButtonClicked( self ):
@@ -808,6 +801,10 @@ class CURBrick( Core.BaseBrick ):
     def closePushButtonClicked( self ):
         self.accept()
 
+    def grayOutParameters( self, pValue ):
+        self.groupBox.setEnabled( pValue )
+
+
     def loadCalibrationTemplate( self, pValue ):
         if str( pValue ) == "User defined" :
             # activate load new button
@@ -819,12 +816,10 @@ class CURBrick( Core.BaseBrick ):
             # gray out "Load new" 
             self.savePushButton.setEnabled ( 0 )
             self.loadPushButton.setEnabled ( 0 )
-            templateDirectory = self.__parent.getTemplateDirectory()
+            templateDirectory = self.collectBrickObject.getTemplateDirectory()
             filename = str( templateDirectory + "/" + str( pValue ).split( " " )[0] + ".xml" )
             self.loadFile( filename )
 
-    def robotCheckBoxToggled( self, pValue, fromBrick = False ):
-      self.__parent.robotCheckBoxToggled( pValue, fromCUR = True )
-      if fromBrick:
-          self.robotCheckBox.setChecked( pValue )
-
+    def __robotCheckBoxToggled( self, pValue ):
+      print pValue
+      self.collectBrickObject.robotCheckBoxToggled( pValue )

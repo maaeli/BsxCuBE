@@ -549,6 +549,10 @@
   </connections>
 
   <connections id="CURBrick1">
+    <connection role="login">
+      <signal name="loggedIn"/>
+      <peer name="LoginBrick1"/>
+    </connection>
     <connection role="display">
       <signal name="displayResetChanged"/>
       <signal name="displayItemChanged"/>
@@ -673,7 +677,6 @@
       <peer name="LoginBrick1"/>
     </connection>
     <connection role="robot">
-      <slot name="setParentObject"/>
       <peer name="CURBrick1"/>
     </connection>
     <connection role="image_proxy">

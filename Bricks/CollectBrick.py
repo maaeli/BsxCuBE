@@ -1,4 +1,5 @@
 import os, logging, time, re
+import CURBrick
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
@@ -81,7 +82,7 @@ class CollectBrick( Core.BaseBrick ):
 
                    "robot": Connection( "Collect using Robot object",
                                         [],
-                                        [Slot( "setParentObject" )],
+                                        [],
                                         "connectedToCUR" ),
 
                    "motoralignment": Connection( "MotorAlignment object",
@@ -1366,30 +1367,23 @@ class CollectBrick( Core.BaseBrick ):
                 self.__energy = float( self.energyControlObject.getEnergy() )
                 self.energyControlObject.setEnergy( self.__energy )
 
-    def robotCheckBoxToggled( self, pValue, fromCUR = False ):
+    def robotCheckBoxToggled( self, pValue ):
         if pValue:
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok )
                 self.robotCheckBox.setChecked( False )
-                # synchronize the two checkboxes
                 if self.CURObject is not None:
-                    if not fromCUR:
-                        self.CURObject.robotCheckBoxToggled( False, fromBrick = True )
-                    self.CURObject.groupBox.setDisabled( True )
+                    self.CURObject.robotCheckBox.setChecked( False )
                 return
+
             self._ispybCollect = False
-            if self.CURObject is not None:
-                if not fromCUR:
-                    self.CURObject.robotCheckBoxToggled( True, fromBrick = True )
-                self.CURObject.groupBox.setDisabled( False )
-        else:
-            if self.CURObject is not None:
-                if not fromCUR:
-                    self.CURObject.robotCheckBoxToggled( False, fromBrick = True )
-                self.CURObject.groupBox.setDisabled( False )
-        if fromCUR:
-            self.robotCheckBox.setChecked( pValue )
+
+        self.CURObject.groupBox.setDisabled( not pValue )
+        self.robotCheckBox.setChecked( pValue )
+
+        # setChecked is used to avoid infinite loop (the checkBox in the CURObject is not using toggle signal but stateChanged) 
+        self.CURObject.robotCheckBox.setChecked( pValue )
 
     def CheckBoxToggledHPLC( self, pValue ):
         v = bool( pValue )
@@ -1408,12 +1402,11 @@ class CollectBrick( Core.BaseBrick ):
         self.collectObj.setHPLC( v )
 
     def connectedToCUR( self, pPeer ):
+        print "Connecting to CUR Object "
         if pPeer is not None:
             self.CURObject = pPeer
-            # now set the parent since they are connected
-            #TODO: DEBUG
-            print "calling self.CURObject"
-#            self.CURObject.setParentObject( self )
+            self.CURObject.collectBrickObject = self
+
 
     def checkBeamBoxToggled( self, pValue ):
         self.collectObj.setCheckBeam( pValue )
