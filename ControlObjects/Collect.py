@@ -32,7 +32,6 @@ class Collect( CObjectBase ):
                Signal( "collectRunNumberChanged" ),
                Signal( "collectNumberFramesChanged" ),
                Signal( "collectTimePerFrameChanged" ),
-               Signal( "collectTimePerFrameChanged" ),
                Signal( "collectConcentrationChanged" ),
                Signal( "collectCommentsChanged" ),
                Signal( "collectCodeChanged" ),
@@ -62,7 +61,8 @@ class Collect( CObjectBase ):
              Slot( "collectAbort" ),
              Slot( "setCheckBeam" ),
              Slot( "triggerEDNA" ),
-             Slot( "blockEnergyAdjust" )]
+             Slot( "blockEnergyAdjust" )
+             ]
 
     def __init__( self, *args, **kwargs ):
         # username and password from login Brick

@@ -16,18 +16,27 @@ logger = logging.getLogger( "CURBrick" )
 rowletters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
 class CURBrick( Core.BaseBrick ):
 
+#  ,
+#                   "login": Connection( "Login object",
+#                                        [Signal( "loggedIn", "loggedIn" )],
+#                                        [],
+#                                        "connectionToLogin" )
+    connections = {"display": Connection( "Display object",
+                                    [Signal( "displayResetChanged", "displayResetChanged" ),
+                                    Signal( "displayItemChanged", "displayItemChanged" ),
+                                    Signal( "transmissionChanged", "transmissionChanged" ),
+                                    Signal( "grayOut", "grayOut" )],
+                                    [] )
 
-    connections = {"login": Connection( "Login object",
-                                        [Signal( "loggedIn", "loggedIn" )],
-                                        [],
-                                        "connectionToLogin" )}
+                   }
 
     signals = []
-    slots = []
+    slots = [Slot( "setParentObject" )]
 
 
     def __init__( self, *args, **kargs ):
         Core.BaseBrick.__init__( self, *args, **kargs )
+        self.__parent = None
 
     def init( self ):
         # Setting configuration for columns in the samples table Widget
@@ -210,6 +219,12 @@ class CURBrick( Core.BaseBrick ):
                                 "Transmission", "Volume", "SEU Temp", "Flow", "Recup.", \
                                 "Wait Time", "Del"]
 
+    # getting a handle to the parent = CollectBrick
+    def setParentObject( self, pParent ):
+        #TODO: DEBUG
+        print "Got parent handle in CURBrick"
+        if pParent is not None:
+            self.__parent = pParent
 
    # When connected to Login, then block the brick
     def connectionToLogin( self, pPeer ):
@@ -219,6 +234,25 @@ class CURBrick( Core.BaseBrick ):
     # Logged In : True or False 
     def loggedIn( self, pValue ):
         self.brick_widget.setEnabled( pValue )
+
+
+    # Connect to display 
+
+    def grayOut( self, grayout ):
+        if grayout is not None:
+            if grayout:
+                self.brick_widget.setEnabled( False )
+            else:
+                self.brick_widget.setEnabled( True )
+
+    def displayResetChanged( self ):
+        pass
+
+    def displayItemChanged( self, __ ):
+        pass
+
+    def transmissionChanged( self, __ ):
+        pass
 
 #---------------#
 # CALLBACKS     #
@@ -789,6 +823,8 @@ class CURBrick( Core.BaseBrick ):
             filename = str( templateDirectory + "/" + str( pValue ).split( " " )[0] + ".xml" )
             self.loadFile( filename )
 
-    def robotCheckBoxToggled( self, pValue ):
-      self.groupBox.setDisabled( not pValue )
+    def robotCheckBoxToggled( self, pValue, fromBrick = False ):
+      self.__parent.robotCheckBoxToggled( pValue, fromCUR = True )
+      if fromBrick:
+          self.robotCheckBox.setChecked( pValue )
 

@@ -2,7 +2,6 @@ import os, logging, time, re
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
-from CollectRobotDialog  import CollectRobotDialog
 from ISPyBCollectRobotDialog import ISPyBCollectRobotDialog
 
 from PyQt4               import QtCore, QtGui, Qt
@@ -76,10 +75,16 @@ class CollectBrick( Core.BaseBrick ):
                                              Slot( "collectAbort" ),
                                              Slot( "setCheckBeam" ),
                                              Slot( "triggerEDNA" ),
-                                             Slot( "blockEnergyAdjust" )],
+                                             Slot( "blockEnergyAdjust" )
+                                             ],
                                             "collectObjectConnected" ),
 
-                    "motoralignment": Connection( "MotorAlignment object",
+                   "robot": Connection( "Collect using Robot object",
+                                        [],
+                                        [Slot( "setParentObject" )],
+                                        "connectedToCUR" ),
+
+                   "motoralignment": Connection( "MotorAlignment object",
                                             [Signal( "executeTestCollect", "executeTestCollect" )],
                                             [] ),
 
@@ -106,15 +111,15 @@ class CollectBrick( Core.BaseBrick ):
                                             "connectedToLogin" ),
 
                     "BiosaxsClient": Connection( "BiosaxsClient object",
-                                            [
-                                             Signal( "onSuccess", "onISPYBWebServiceSuccess" )
-                                             ],
-                                            [Slot( "getRobotXML" ),
-                                             Slot( "getExperimentNamesByProposalCodeNumber" ),
-                                             Slot( "setUser" ),
-                                             Slot( "getRobotXMLByExperimentId" )],
+                                                [
+                                                 Signal( "onSuccess" ),
+                                                 Signal( "onError" )],
+                                                [
+                                                  Slot( "getExperimentNamesByProposalCodeNumber" ),
+                                                  Slot( "setUser" ),
+                                                  Slot( "getRobotXMLByExperimentId" )
+                                                 ],
                                             "connectedToBiosaxsClient" ),
-
                     "WebSAS": Connection( "Web SAS Browser object",
                                             [],
                                             [Slot( "setURL" )],
@@ -150,7 +155,7 @@ class CollectBrick( Core.BaseBrick ):
         self._currentCurve = 0
         self._robotFileStr = "/tmp/robot.xml"
         self._waveLengthStr = "0.0"
-        self._collectRobotDialog = None
+        self.CURObject = None
         self._ispybCollect = False
         self.__lastFrame = None
         self.__currentConcentration = None
@@ -487,6 +492,7 @@ class CollectBrick( Core.BaseBrick ):
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient( self, pPeer ):
         # if None, then we lost contact
+        print "connecting to BiosaxsClient"
         if pPeer is not None:
             self.biosaxsClientObject = pPeer
 
@@ -525,10 +531,10 @@ class CollectBrick( Core.BaseBrick ):
     def onISPYBWebServiceSuccess( self, methodName, response ):
         #print "------------------->" + methodName
         if methodName == "getExperimentNamesByProposalCodeNumber":
-            self._collectRobotDialog.onExperimentNamesRetrieved( response )
+            self.CURObject.onExperimentNamesRetrieved( response )
 
         if methodName == "getRobotXMLByPlateGroupId":
-            self._collectRobotDialog.loadXML( response )
+            self.CURObject.loadXML( response )
 
     def isInhouseUser( self, username ):
         if ( username == "opd29" ):
@@ -572,8 +578,6 @@ class CollectBrick( Core.BaseBrick ):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo( self.__username, self.__password )
                         self.getDefaultDirectoryByUsername( self.__username )
-                #TODO: DEBUG
-                print "Now we are logged in as %s with pwd %s " % ( self.__username, self.__password )
                 if self.getObject( "BiosaxsClient" ) is not None:
                     self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password, self.__enteredPropType, self.__enteredPropNumber )
                 else:
@@ -722,8 +726,8 @@ class CollectBrick( Core.BaseBrick ):
         if notify:
             self.messageDialog( level, logmsg )
 
-        if self._collectRobotDialog is not None:
-            self._collectRobotDialog.addHistory( level, logmsg )
+        if self.CURObject is not None:
+            self.CURObject.addHistory( level, logmsg )
 
 
     def clearCurve( self ):
@@ -743,7 +747,7 @@ class CollectBrick( Core.BaseBrick ):
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
                 if self.robotCheckBox.isChecked():
-                    self._collectRobotDialog.addHistory( 0, message )
+                    self.CURObject.addHistory( 0, message )
 
                 self._currentFrame += 1
 
@@ -893,6 +897,7 @@ class CollectBrick( Core.BaseBrick ):
                         self.grayOut( False )
                         self.emit( "grayOut", False )
                     else:
+                        feedBackFlag = self._feedBackFlag
                         if self.robotCheckBox.isChecked():
                             self.setCollectionStatus( "done" )
                             self._feedBackFlag = False
@@ -903,7 +908,7 @@ class CollectBrick( Core.BaseBrick ):
                         else:
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
-                        if self._feedBackFlag:
+                        if feedBackFlag:
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
 
@@ -1084,13 +1089,13 @@ class CollectBrick( Core.BaseBrick ):
                             "radiationAbsolute": self.getRadiationAbsoluteLinear(),
                             "SEUTemperature": self.seuTemperature}
 
-            robotpars = { "sampleType": str( self._collectRobotDialog.sampleTypeComboBox.currentText() ),
-                          "storageTemperature": float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() ),
-                          "extraFlowTime": int( self._collectRobotDialog.extraFlowTimeSpinBox.value() ),
-                          "optimization": str( self._collectRobotDialog.optimizationComboBox.currentIndex() ),
-                          "optimizationText": str( self._collectRobotDialog.optimizationComboBox.currentText() ),
-                          "initialCleaning": self._collectRobotDialog.initialCleaningCheckBox.isChecked(),
-                          "bufferMode": str( self._collectRobotDialog.bufferModeComboBox.currentIndex() ),
+            robotpars = { "sampleType": str( self.CURObject.sampleTypeComboBox.currentText() ),
+                          "storageTemperature": float( self.CURObject.storageTemperatureDoubleSpinBox.value() ),
+                          "extraFlowTime": int( self.CURObject.extraFlowTimeSpinBox.value() ),
+                          "optimization": str( self.CURObject.optimizationComboBox.currentIndex() ),
+                          "optimizationText": str( self.CURObject.optimizationComboBox.currentText() ),
+                          "initialCleaning": self.CURObject.initialCleaningCheckBox.isChecked(),
+                          "bufferMode": str( self.CURObject.bufferModeComboBox.currentIndex() ),
                           "bufferFirst": False,
                           "bufferBefore": False,
                           "bufferAfter": False,
@@ -1118,8 +1123,8 @@ class CollectBrick( Core.BaseBrick ):
             sampleList = []
             robotpars.update( { "bufferList": bufferList, "sampleList": sampleList } )
 
-            for i in range( 0, self._collectRobotDialog.tableWidget.rowCount() ):
-                sample = self._collectRobotDialog.getSampleRow( i )
+            for i in range( 0, self.CURObject.tableWidget.rowCount() ):
+                sample = self.CURObject.getSampleRow( i )
 
                 if sample.enable:
                     if sample.isBuffer():
@@ -1361,25 +1366,30 @@ class CollectBrick( Core.BaseBrick ):
                 self.__energy = float( self.energyControlObject.getEnergy() )
                 self.energyControlObject.setEnergy( self.__energy )
 
-    def robotCheckBoxToggled( self, pValue ):
+    def robotCheckBoxToggled( self, pValue, fromCUR = False ):
         if pValue:
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok )
                 self.robotCheckBox.setChecked( False )
+                # synchronize the two checkboxes
+                if self.CURObject is not None:
+                    if not fromCUR:
+                        self.CURObject.robotCheckBoxToggled( False, fromBrick = True )
+                    self.CURObject.groupBox.setDisabled( True )
                 return
             self._ispybCollect = False
-            self._collectRobotDialog = CollectRobotDialog( self )
-            if self._collectRobotDialog.isVisible():
-                self._collectRobotDialog.activateWindow()
-                self._collectRobotDialog.raise_()
-            else:
-                self._collectRobotDialog.show()
+            if self.CURObject is not None:
+                if not fromCUR:
+                    self.CURObject.robotCheckBoxToggled( True, fromBrick = True )
+                self.CURObject.groupBox.setDisabled( False )
         else:
-            if not self._collectRobotDialog is None:
-                self._collectRobotDialog.hide()
-            self._collectRobotDialog = None
-
+            if self.CURObject is not None:
+                if not fromCUR:
+                    self.CURObject.robotCheckBoxToggled( False, fromBrick = True )
+                self.CURObject.groupBox.setDisabled( False )
+        if fromCUR:
+            self.robotCheckBox.setChecked( pValue )
 
     def CheckBoxToggledHPLC( self, pValue ):
         v = bool( pValue )
@@ -1397,6 +1407,13 @@ class CollectBrick( Core.BaseBrick ):
                 return
         self.collectObj.setHPLC( v )
 
+    def connectedToCUR( self, pPeer ):
+        if pPeer is not None:
+            self.CURObject = pPeer
+            # now set the parent since they are connected
+            #TODO: DEBUG
+            print "calling self.CURObject"
+#            self.CURObject.setParentObject( self )
 
     def checkBeamBoxToggled( self, pValue ):
         self.collectObj.setCheckBeam( pValue )
@@ -1451,7 +1468,6 @@ class CollectBrick( Core.BaseBrick ):
 
         self.startCollection( mode = 'test' )
 
-        print "We have already started data collection"
         self._feedBackFlag = False
         self._abortFlag = False
         self._frameNumber = 1
@@ -1473,7 +1489,6 @@ class CollectBrick( Core.BaseBrick ):
                                                self.normalisationDoubleSpinBox.value() )
 
 
-
     def collectPushButtonClicked( self ):
         if not self.checkPilatusReady():
             print "Pilatus seems not to be ready"
@@ -1488,7 +1503,7 @@ class CollectBrick( Core.BaseBrick ):
                 oldTemp = float( self.scObject.getSampleStorageTemperature() )
             else:
                 logger.warning( "Can not get current Storage temperature from Sample Changer" )
-            newTemp = float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() )
+            newTemp = float( self.CURObject.storageTemperatureDoubleSpinBox.value() )
             if newTemp > ( oldTemp + 1.0 ) :
                 answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
                              "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
@@ -1597,7 +1612,7 @@ class CollectBrick( Core.BaseBrick ):
         self.emit( "grayOut", True )
         self._abortFlag = False
         self.startCollection( mode = "with robot" )
-        self._collectRobotDialog.clearHistory()
+        self.CURObject.clearHistory()
         self.getObject( "collect" ).collectWithRobot( self.getCollectPars(), oneway = True )
 
 
@@ -1627,7 +1642,7 @@ class CollectBrick( Core.BaseBrick ):
         if self.sasWebObject is not None:
             #TODO: DEBUG
             print "set URL on object"
-            self.sasWebObject.setUrl( url )
+            self.emit( "setUrl", url )
 
     def transmissionChanged( self, percentage ):
         pass
@@ -1756,8 +1771,8 @@ class CollectBrick( Core.BaseBrick ):
             logging.warning( pMessage )
         elif pLevel == 2:
             logging.error( pMessage )
-        if self._collectRobotDialog is not None:
-            self._collectRobotDialog.addHistory( pLevel, pMessage )
+        if self.CURObject is not None:
+            self.CURObject.addHistory( pLevel, pMessage )
 
         if notify:
             self.messageDialog( pLevel, pMessage )
@@ -1870,8 +1885,6 @@ class CollectBrick( Core.BaseBrick ):
         self.__isTesting = False
         self.grayOut( False )
         self.emit( "grayOut", False )
-
-        print "%s -- %s  -- %s -- %s" % ( str( self._abortFlag ), str( self._currentFrame ), str( self._frameNumber ), str( self.__isTesting ) )
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
             logger.warning( "The frame was not collected or didn't appear on time! (%d,%d)" % \

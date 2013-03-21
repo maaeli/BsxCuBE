@@ -133,10 +133,10 @@ class BsxShutterBrick( Core.BaseBrick ):
     def displayResetChanged( self ):
         pass
 
-    def displayItemChanged( self, _ ):
+    def displayItemChanged( self, __ ):
         pass
 
-    def transmissionChanged( self, _ ):
+    def transmissionChanged( self, __ ):
         pass
 
     def set_icons( self, icons ):

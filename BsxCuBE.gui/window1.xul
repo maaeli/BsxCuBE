@@ -56,7 +56,7 @@
 <tab label='2D raw'/>
 <tab label='Robot'/>
 <tab label='SAS'/>
-<tab label='Collect/Robot'/>
+<tab label='Collect using SC'/>
     </tabs>
     <tabpanels>
       <tabpanel id='tab_EH'><vbox id="EH" orient="vertical">

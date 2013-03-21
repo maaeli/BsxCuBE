@@ -278,7 +278,7 @@
      <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
-     <property name="caption" value="Collect/Robot"/>
+     <property name="caption" value="Collect using SC"/>
   </properties>
   <properties id="EnergyWaveLengthBrick1">
      <property name="flex" value="0"/>
@@ -549,9 +549,12 @@
   </connections>
 
   <connections id="CURBrick1">
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
+    <connection role="display">
+      <signal name="displayResetChanged"/>
+      <signal name="displayItemChanged"/>
+      <signal name="transmissionChanged"/>
+      <signal name="grayOut"/>
+      <peer name="CollectBrick1"/>
     </connection>
   </connections>
 
@@ -602,7 +605,7 @@
     </connection>
     <connection role="BiosaxsClient">
       <signal name="onSuccess"/>
-      <slot name="getRobotXML"/>
+      <signal name="onError"/>
       <slot name="getExperimentNamesByProposalCodeNumber"/>
       <slot name="setUser"/>
       <slot name="getRobotXMLByExperimentId"/>
@@ -668,6 +671,10 @@
     <connection role="login">
       <signal name="loggedIn"/>
       <peer name="LoginBrick1"/>
+    </connection>
+    <connection role="robot">
+      <slot name="setParentObject"/>
+      <peer name="CURBrick1"/>
     </connection>
     <connection role="image_proxy">
       <signal name="new_curves_data"/>
