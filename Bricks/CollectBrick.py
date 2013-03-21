@@ -1408,6 +1408,7 @@ class CollectBrick( Core.BaseBrick ):
             self.CURObject.collectBrickObject = self
 
 
+
     def checkBeamBoxToggled( self, pValue ):
         self.collectObj.setCheckBeam( pValue )
 

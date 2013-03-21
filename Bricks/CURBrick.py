@@ -39,11 +39,41 @@ class CURBrick( Core.BaseBrick ):
         self.collectBrickObject = None
 
     def init( self ):
+        self.__copyLine = []
+        self.__history = []
+
+
+        # To map samples with rows each time we create a sample we give a unique number
+        #   the position of a sample in the map should correspond with the row of the sample in the table
+        #   throught the operations
+        self.sampleIDs = []
+        self.sampleIDCount = 0
+        self.CBblock = 0     # during swapping callbacks on table rows will be deactivated
+        self.filename = ""
+
+
+
+        self.bufferNames = []
+        self.copiedSample = None
+
+
         # Setting configuration for columns in the samples table Widget
         self.column_headers = self.getColumns()
         self.PARAMLABEL_WIDTH = 130
         self.PARAMETERS_WIDTH = 220
 
+
+        upfile = os.path.join( os.path.dirname( __file__ ), "images/up.jpg" )
+        downfile = os.path.join( os.path.dirname( __file__ ), "images/down.jpg" )
+        delfile = os.path.join( os.path.dirname( __file__ ), "images/delete.jpg" )
+
+        uppix = Qt.QPixmap( upfile ).scaled( 14, 14 )
+        downpix = Qt.QPixmap( downfile ).scaled( 15, 15 )
+        delpix = Qt.QPixmap( delfile ).scaled( 10, 10 )
+
+        self.upIcon = Qt.QIcon( uppix )
+        self.downIcon = Qt.QIcon( downpix )
+        self.deleteIcon = Qt.QIcon( delpix )
 
         self.brick_widget.setLayout( Qt.QVBoxLayout() )
         mainLayout = self.brick_widget.layout()
@@ -161,6 +191,16 @@ class CURBrick( Core.BaseBrick ):
         self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.addPushButton, self.copyPushButton, self.pastePushButton, self.clearPushButton ] ) )
 
 
+        #
+        # Style Sheet
+        #
+        self.brick_widget.setStyleSheet( "*[valid=\"true\"]  {background-color: white}\
+                            *[valid=\"false\"] {background-color: #f99}\
+                            *[sampletype=\"Buffer\"] {background-color: #eec}\
+                            *[sampletype=\"Sample\"] {background-color: #cce}" )
+
+
+
     def getFirstButtonsRowLayout ( self ):
         self.fileLabel = Qt.QLabel( "File", self.brick_widget )
         self.fileLabel.setFixedWidth( self.PARAMLABEL_WIDTH )
@@ -230,6 +270,18 @@ class CURBrick( Core.BaseBrick ):
     # Logged In : True or False 
     def loggedIn( self, pValue ):
         self.brick_widget.setEnabled( pValue )
+        # add automatically the robot from CollectBrick
+        robotFileName = self.collectBrickObject.getRobotFileName()
+        self.fileLineEdit.setText( robotFileName )
+        if not os.path.exists( robotFileName ):
+            if robotFileName != "":
+                Qt.QMessageBox.critical( self.brick_widget, "Error", "Robot file %r does not exist anymore. I will start with an empty one" % robotFileName, Qt.QMessageBox.Ok )
+            self.fileLineEdit.setText( "" )
+            self.collectBrickObject.setRobotFileName( "" )
+
+        if os.path.exists( robotFileName ):
+            filename = str( robotFileName )
+            self.loadFile( filename )
 
     # Connect to display 
     def grayOut( self, grayout ):
@@ -266,7 +318,7 @@ class CURBrick( Core.BaseBrick ):
             except Exception, e:
                 print "Ignored Exception 5: " + str( e )
 
-        filename = Qt.QFileDialog.getOpenFileName( self, "Choose a new file to load", dirname, "XML File (*.xml)" )
+        filename = Qt.QFileDialog.getOpenFileName( self.brick_widget, "Choose a new file to load", dirname, "XML File (*.xml)" )
 
         if not filename:
             return
@@ -321,7 +373,7 @@ class CURBrick( Core.BaseBrick ):
 
     def saveAsPushButtonClicked( self ):
         self.filename = str( self.fileLineEdit.text() )
-        filename = Qt.QFileDialog.getSaveFileName( self, "Choose a file to save", self.filename, "XML File (*.xml)" )
+        filename = Qt.QFileDialog.getSaveFileName( self.brick_widget, "Choose a file to save", self.filename, "XML File (*.xml)" )
         if not filename:
             return
 
@@ -428,7 +480,7 @@ class CURBrick( Core.BaseBrick ):
         if self.CBblock:
               return
 
-        plateInfos = self.collectBrickObject.plateInfos
+        plateInfos = self.getPlatesInfos()
 
         try:
             index = self.sampleIDs.index( sampleID )
@@ -512,6 +564,8 @@ class CURBrick( Core.BaseBrick ):
         if index == -1:
             index = self.tableWidget.rowCount()
 
+        #TODO: debug
+        print ">>>> " + str( index )
         self.createSampleRow( index )
         self.setSampleRow( index, samp )
 
@@ -533,7 +587,7 @@ class CURBrick( Core.BaseBrick ):
 
         tableWidget = self.tableWidget
 
-        plateInfos = self.collectBrickObject.plateInfos
+        plateInfos = self.getPlatesInfos()
 
         # enable
         tableWidget.cellWidget( index, self.ENABLE_COLUMN ).setChecked( sample.enable )
@@ -678,7 +732,7 @@ class CURBrick( Core.BaseBrick ):
         for i in range( len( self.column_headers ) ):
             self.tableWidget.cellWidget( index, i ).setProperty( "sampletype", well_type )
 
-        self.setStyleSheet( self.styleSheet() )
+        self.brick_widget.setStyleSheet( self.brick_widget.styleSheet() )
 
     def getBufferNames( self ):
         bufferNames = []
@@ -821,5 +875,170 @@ class CURBrick( Core.BaseBrick ):
             self.loadFile( filename )
 
     def __robotCheckBoxToggled( self, pValue ):
-      print pValue
-      self.collectBrickObject.robotCheckBoxToggled( pValue )
+       self.collectBrickObject.robotCheckBoxToggled( pValue )
+
+    def getPlatesNumber ( self ):
+        if self.collectBrickObject is not None:
+            return self.collectBrickObject.nbPlates
+        return 0
+
+    def getPlatesInfos ( self ):
+        if self.collectBrickObject is not None:
+            return self.collectBrickObject.plateInfos
+        return []
+    #------------------
+    #  createSampleRow.  Creates GUI for each row in sample table
+    #-------------------
+    def createSampleRow( self, row ):
+
+        sampleID = self.sampleIDCount
+        self.sampleIDCount += 1
+
+        self.sampleIDs.insert( row, sampleID )
+
+        tableWidget = self.tableWidget
+
+        tableWidget.insertRow( row )
+
+        # buttons
+        upButton = Qt.QPushButton( self.upIcon, "", tableWidget )
+        upButton.setFlat( True )
+        downButton = Qt.QPushButton( self.downIcon, "", tableWidget )
+        downButton.setFlat( True )
+        deleteButton = Qt.QPushButton( self.deleteIcon, "", tableWidget )
+        deleteButton.setFlat( True )
+        tableWidget.setCellWidget( row, self.UP_COLUMN, upButton )
+        tableWidget.setCellWidget( row, self.DOWN_COLUMN, downButton )
+        tableWidget.setCellWidget( row, self.DELETE_COLUMN, deleteButton )
+
+        # TODO.  Signal mapppers keep row at the moment of creation...but row number changes with these actions.
+        #    we have to imagine another parameter
+        upSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        upSignalMapper.setMapping( upButton, sampleID )
+        upButton.clicked.connect( upSignalMapper.map )
+        upSignalMapper.mapped[int].connect( self.upPushButtonClicked )
+
+        downSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        downSignalMapper.setMapping( downButton, sampleID )
+        downButton.clicked.connect( downSignalMapper.map )
+        downSignalMapper.mapped[int].connect( self.downPushButtonClicked )
+
+        deleteSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        deleteSignalMapper.setMapping( deleteButton, sampleID )
+        deleteButton.clicked.connect( deleteSignalMapper.map )
+        deleteSignalMapper.mapped[int].connect( self.deletePushButtonClicked )
+
+
+        # enable 
+        enableCheckBox = Qt.QCheckBox( tableWidget )
+        tableWidget.setCellWidget( row, self.ENABLE_COLUMN, enableCheckBox )
+
+        eSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        eSignalMapper.setMapping( enableCheckBox, sampleID )
+        enableCheckBox.toggled.connect( eSignalMapper.map )
+        eSignalMapper.mapped[int].connect( self.enableCheckBoxToggled )
+
+        # type
+        typeComboBox = Qt.QComboBox( tableWidget )
+        typeComboBox.addItems( ["Buffer", "Sample"] )
+        tableWidget.setCellWidget( row, self.SAMPLETYPE_COLUMN, typeComboBox )
+
+        # use QSignalMapper to pass row as argument to the event handler
+        tSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        tSignalMapper.setMapping( typeComboBox, sampleID )
+        typeComboBox.currentIndexChanged.connect( tSignalMapper.map )
+        tSignalMapper.mapped[int].connect( self.typeComboBoxChanged )
+
+        # plate
+        plateComboBox = Qt.QComboBox( tableWidget )
+        tableWidget.setCellWidget( row, self.PLATE_COLUMN, plateComboBox )
+
+        # use QSignalMapper to pass row as argument to the event handler
+        pSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        pSignalMapper.setMapping( plateComboBox, sampleID )
+        plateComboBox.currentIndexChanged.connect( pSignalMapper.map )
+        pSignalMapper.mapped[int].connect( self.plateComboBoxChanged )
+
+
+        # row
+        rowComboBox = Qt.QComboBox( tableWidget )
+        tableWidget.setCellWidget( row, self.ROW_COLUMN, rowComboBox )
+
+        # well
+        wellComboBox = Qt.QComboBox( tableWidget )
+        tableWidget.setCellWidget( row, self.WELL_COLUMN, wellComboBox )
+
+        # concentration
+        concentrationDoubleSpinBox = Qt.QDoubleSpinBox( tableWidget )
+        concentrationDoubleSpinBox.setSuffix( " mg/ml" )
+        concentrationDoubleSpinBox.setDecimals( 2 )
+        concentrationDoubleSpinBox.setRange( 0, 100 )
+        tableWidget.setCellWidget( row, self.CONCENTRATION_COLUMN, concentrationDoubleSpinBox )
+
+        # comments
+        commentsLineEdit = Qt.QLineEdit( tableWidget )
+        commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), commentsLineEdit ) )
+        tableWidget.setCellWidget( row, self.COMMENTS_COLUMN, commentsLineEdit )
+
+
+        # macromolecule
+        macromoleculeLineEdit = Qt.QLineEdit( tableWidget )
+        macromoleculeLineEdit.setMaxLength( 30 )
+        macromoleculeLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "^[a-zA-Z][a-zA-Z0-9_]*" ), macromoleculeLineEdit ) )
+        tableWidget.setCellWidget( row, self.MACROMOLECULE_COLUMN, macromoleculeLineEdit )
+
+        # code
+        codeLineEdit = Qt.QLineEdit( tableWidget )
+        codeLineEdit.setMaxLength( 30 )
+        codeLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "^[a-zA-Z][a-zA-Z0-9_]*" ), codeLineEdit ) )
+        tableWidget.setCellWidget( row, self.CODE_COLUMN, codeLineEdit )
+
+        # viscosity
+        viscosityComboBox = Qt.QComboBox( tableWidget )
+        viscosityComboBox.addItems( ["Low", "Medium", "High"] )
+        tableWidget.setCellWidget( row, self.VISCOSITY_COLUMN, viscosityComboBox )
+
+        # buffername
+        bufferComboBox = Qt.QComboBox( tableWidget )
+        bufferComboBox.setEditable( True )
+        tableWidget.setCellWidget( row, self.BUFFERNAME_COLUMN, bufferComboBox )
+
+        bSignalMapper = Qt.QSignalMapper( self.brick_widget )
+        bSignalMapper.setMapping( bufferComboBox, sampleID )
+        bufferComboBox.editTextChanged.connect( bSignalMapper.map )
+        bSignalMapper.mapped[int].connect( self.bufferComboBoxChanged )
+
+        # transmission
+        transmissionDoubleSpinBox = Qt.QDoubleSpinBox( tableWidget )
+        transmissionDoubleSpinBox.setSuffix( " %" )
+        transmissionDoubleSpinBox.setDecimals( 1 )
+        transmissionDoubleSpinBox.setRange( 0, 100 )
+        tableWidget.setCellWidget( row, self.TRANSMISSION_COLUMN, transmissionDoubleSpinBox )
+
+        # volume
+        volumeSpinBox = Qt.QSpinBox( tableWidget )
+        volumeSpinBox.setSuffix( " u/l" )
+        volumeSpinBox.setRange( 5, 150 )
+        tableWidget.setCellWidget( row, self.VOLUME_COLUMN, volumeSpinBox )
+
+        # temperature
+        temperatureSEUDoubleSpinBox = Qt.QDoubleSpinBox( tableWidget )
+        temperatureSEUDoubleSpinBox.setSuffix( " C" )
+        temperatureSEUDoubleSpinBox.setDecimals( 2 )
+        temperatureSEUDoubleSpinBox.setRange( 4, 60 )
+        tableWidget.setCellWidget( row, self.TEMPERATURE_COLUMN, temperatureSEUDoubleSpinBox )
+
+        # flow
+        flowCheckBox = Qt.QCheckBox( tableWidget )
+        tableWidget.setCellWidget( row, self.FLOW_COLUMN, flowCheckBox )
+        recuperateCheckBox = Qt.QCheckBox( tableWidget )
+        tableWidget.setCellWidget( row, self.RECUPERATE_COLUMN, recuperateCheckBox )
+
+        # waittime
+        waittimeSpinBox = Qt.QDoubleSpinBox( tableWidget )
+        waittimeSpinBox.setSuffix( " sec" )
+        waittimeSpinBox.setDecimals( 0 )
+        waittimeSpinBox.setRange( 0, 10000 )
+        tableWidget.setCellWidget( row, self.WAITTIME_COLUMN, waittimeSpinBox )
+
+        return sampleID
