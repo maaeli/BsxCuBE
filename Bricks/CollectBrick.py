@@ -393,14 +393,18 @@ class CollectBrick( Core.BaseBrick ):
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
-        self.robotCheckBox = Qt.QCheckBox( "Collect using robot", self.brick_widget )
+        self.robotCheckBox = Qt.QCheckBox( "Collect using SC", self.brick_widget )
         Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.robotCheckBoxToggled )
         self.hBoxLayout16.addWidget( self.robotCheckBox )
+        self.xmlFileLoaded = Qt.QLabel( "XML: " )
+        # make the font a bit special
+        italicFont = QtGui.QFont( 'Courier New', 9 )
+        italicFont.setItalic( True )
+        self.xmlFileLoaded.setFont( italicFont )
+        self.hBoxLayout16.addWidget( self.xmlFileLoaded )
         self.hplcCheckBox = Qt.QCheckBox( "Collect using HPLC", self.brick_widget )
         Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.CheckBoxToggledHPLC )
         self.hBoxLayout16.addWidget( self.hplcCheckBox )
-        self.fillspace = Qt.QLabel( "" )
-        self.hBoxLayout16.addWidget( self.fillspace )
         self.brick_widget.layout().addLayout( self.hBoxLayout16 )
 
         self.hBoxLayout17 = Qt.QHBoxLayout()
@@ -496,6 +500,16 @@ class CollectBrick( Core.BaseBrick ):
         print "connecting to BiosaxsClient"
         if pPeer is not None:
             self.biosaxsClientObject = pPeer
+
+
+    def changexmlLabel( self, pValue ):
+        if pValue is not None:
+            xmlLabel = str( pValue )
+            # total needs to be 15 chars
+            if len( xmlLabel ) > 11:
+                self.xmlFileLoaded.setText( "XML: " + xmlLabel[:9] + ".." )
+            else:
+                self.xmlFileLoaded.setText( "XML: " + xmlLabel )
 
 
     #Deprecated
@@ -688,6 +702,14 @@ class CollectBrick( Core.BaseBrick ):
             self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
 
     def collectProcessingDone( self, dat_filename ):
+        self.collectStatusLabel = Qt.QLabel( "Collection status:" )
+        self.collectStatusLabel.setAlignment( QtCore.Qt.AlignRight )
+        self.collectStatus = Qt.QLabel( "" )
+        self.collectStatus.setAlignment( QtCore.Qt.AlignCenter )
+        self.collectStatus.setObjectName( "collect" )
+        self.hBoxLayout20.addWidget( self.collectStatusLabel )
+        self.hBoxLayout20.addWidget( self.collectStatus )
+        self.brick_widget.layout().addLayout( self.hBoxLayout20 )
         logger.info( "processing done, file is %s", dat_filename )
         # Only display 1d images like XXXX/1d/<at least on char>.dat
         if re.match( r".*/1d/[^/]+\.dat$", dat_filename ):
@@ -727,8 +749,9 @@ class CollectBrick( Core.BaseBrick ):
         if notify:
             self.messageDialog( level, logmsg )
 
-        if self.CURObject is not None:
-            self.CURObject.addHistory( level, logmsg )
+        #TODO: Staffan's note: take it away
+#        if self.CURObject is not None:
+#            self.CURObject.addHistory( level, logmsg )
 
 
     def clearCurve( self ):
@@ -747,8 +770,9 @@ class CollectBrick( Core.BaseBrick ):
             if self._isCollecting:
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
-                if self.robotCheckBox.isChecked():
-                    self.CURObject.addHistory( 0, message )
+                #TODO: Staffan's note: take it away
+#                if self.robotCheckBox.isChecked():
+#                    self.CURObject.addHistory( 0, message )
 
                 self._currentFrame += 1
 
@@ -1402,7 +1426,6 @@ class CollectBrick( Core.BaseBrick ):
         self.collectObj.setHPLC( v )
 
     def connectedToCUR( self, pPeer ):
-        print "Connecting to CUR Object "
         if pPeer is not None:
             self.CURObject = pPeer
             self.CURObject.collectBrickObject = self
@@ -1606,7 +1629,8 @@ class CollectBrick( Core.BaseBrick ):
         self.emit( "grayOut", True )
         self._abortFlag = False
         self.startCollection( mode = "with robot" )
-        self.CURObject.clearHistory()
+        #TODO: Staffan's note: take it away
+        #self.CURObject.clearHistory()
         self.getObject( "collect" ).collectWithRobot( self.getCollectPars(), oneway = True )
 
 
@@ -1765,8 +1789,9 @@ class CollectBrick( Core.BaseBrick ):
             logging.warning( pMessage )
         elif pLevel == 2:
             logging.error( pMessage )
-        if self.CURObject is not None:
-            self.CURObject.addHistory( pLevel, pMessage )
+        #TODO: Staffan's note: take it away
+#        if self.CURObject is not None:
+#            self.CURObject.addHistory( pLevel, pMessage )
 
         if notify:
             self.messageDialog( pLevel, pMessage )

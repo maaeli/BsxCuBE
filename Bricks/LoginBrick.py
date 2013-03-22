@@ -40,7 +40,7 @@ class LoginBrick( Core.BaseBrick ):
         if self.brick_widget.layout() is not None:
             self.infoBox.setParent( None )
         self.brick_widget.layout().addLayout( self.infoBox )
-        self.infoLabel = Qt.QLabel( "<h2>You must log in to use BsxCuBE</h2>", self.brick_widget )
+        self.infoLabel = Qt.QLabel( self.getLoginText() , self.brick_widget )
         self.infoLabel.setStyleSheet( 'QLabel {color: red}' )
         self.infoBox.addWidget( self.infoLabel )
         #
@@ -76,15 +76,17 @@ class LoginBrick( Core.BaseBrick ):
         # Password and acknowledge on next row
         self.passwordBox = Qt.QHBoxLayout()
         self.brick_widget.layout().addLayout( self.passwordBox )
-        self.passwordLabel = Qt.QLabel( "Password:", self.brick_widget )
+        self.passwordLabel = Qt.QLabel( "Pwd: ", self.brick_widget )
         self.passwordBox.addWidget( self.passwordLabel )
         self.propPassword = Qt.QLineEdit( self.brick_widget )
         self.propPassword.setEchoMode( Qt.QLineEdit.Password )
         self.passwordBox.addWidget( self.propPassword )
         Qt.QObject.connect( self.propPassword, Qt.SIGNAL( 'returnPressed()' ), self.login )
 
+        self.loginBox = Qt.QHBoxLayout()
         self.loginButton = Qt.QPushButton( "Login" )
-        self.passwordBox.addWidget( self.loginButton )
+        self.loginBox.addWidget( self.loginButton )
+        self.brick_widget.layout().addLayout( self.loginBox )
         Qt.QObject.connect( self.loginButton, Qt.SIGNAL( 'clicked()' ), self.login )
 
         self.logoutButton = Qt.QPushButton( "Logout" )
@@ -120,7 +122,7 @@ class LoginBrick( Core.BaseBrick ):
             self.logoutButton.show()
             self.brick_widget.setEnabled( True )
             self.infoLabel.setStyleSheet( 'QLabel {color: gray}' )
-            infoLabelText = "<h2>Logged in as %s to BsxCUBE</h2>" % self.__username
+            infoLabelText = "<h2>Logged in as " + "&nbsp;"*10 + "<br/>%s</h2> " % self.__username
             self.infoLabel.setText( infoLabelText )
             self.codeLabel.hide()
             self.propType.hide()
@@ -208,13 +210,15 @@ class LoginBrick( Core.BaseBrick ):
     def getUserInfo( self ):
         return ( self.__username, self.__password, self.enteredPropType, self.enteredPropNumber )
 
+    def getLoginText( self ):
+        return  "<h2><center>Please login:</center></h2>"
 
     # Logout the user; reset the brick; changes from logout mode to login mode
     def logout( self ):
         self.logoutButton.hide()
         self.loginButton.show()
         self.infoLabel.setStyleSheet( 'QLabel {color: red}' )
-        self.infoLabel.setText( "<h2>You must log in to use BsxCuBE</h2>" )
+        self.infoLabel.setText( self.getLoginText() )
         self.codeLabel.show()
         self.propType.show()
         self.dashLabel.show()

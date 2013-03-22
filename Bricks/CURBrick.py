@@ -7,6 +7,7 @@ import cStringIO
 import logging
 import os.path, time
 import pprint
+from compiler.ast import For
 
 
 __category__ = "BsxCuBE"
@@ -61,6 +62,14 @@ class CURBrick( Core.BaseBrick ):
         self.column_headers = self.getColumns()
         self.PARAMLABEL_WIDTH = 130
         self.PARAMETERS_WIDTH = 220
+        #
+        # Style Sheet
+        #
+        self.brick_widget.setStyleSheet( "*[table=\"true\"] {font-size: 11px} \
+                            *[valid=\"true\"]  {background-color: white}\
+                            *[valid=\"false\"] {background-color: #f99}\
+                            *[sampletype=\"Buffer\"] {background-color: #eec}\
+                            *[sampletype=\"Sample\"] {background-color: #cce}" )
 
 
         upfile = os.path.join( os.path.dirname( __file__ ), "images/up.jpg" )
@@ -78,7 +87,7 @@ class CURBrick( Core.BaseBrick ):
         self.brick_widget.setLayout( Qt.QVBoxLayout() )
         mainLayout = self.brick_widget.layout()
 
-        self.robotCheckBox = Qt.QCheckBox( "Collect using robot", self.brick_widget )
+        self.robotCheckBox = Qt.QCheckBox( "Collect using SC", self.brick_widget )
 
         # Note: We use stateChange instead of toggle to avoid infinite loop between CollectBrick and CURBrick
         Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "stateChanged(int)" ), self.__robotCheckBoxToggled )
@@ -91,7 +100,7 @@ class CURBrick( Core.BaseBrick ):
         self.VerticalParametersLayout = Qt.QVBoxLayout( self.groupBox )
         mainLayout.addWidget( self.groupBox )
 
-
+        # File row layout
         self.hBoxLayout0 = self.getFirstButtonsRowLayout()
         self.VerticalParametersLayout.addLayout( self.hBoxLayout0 )
 
@@ -100,15 +109,12 @@ class CURBrick( Core.BaseBrick ):
         self.optimizationComboBox = Qt.QComboBox( self.brick_widget )
         self.optimizationComboBox.addItems( ["User defined", "BSA Calibration", "Water Calibration" ] )
         Qt.QObject.connect( self.optimizationComboBox, Qt.SIGNAL( "currentIndexChanged(QString)" ), self.loadCalibrationTemplate )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.optimizationLabel, self.optimizationComboBox] ) )
-
-
         # Sample Type
         self.sampleTypeLabel = Qt.QLabel( "Sample type", self.brick_widget )
         self.sampleTypeComboBox = Qt.QComboBox( self.brick_widget )
         self.sampleTypeComboBox.addItems( ["Green", "Yellow", "Red"] )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.sampleTypeLabel, self.sampleTypeComboBox] ) )
-
+        # put all four together
+        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.optimizationLabel, self.optimizationComboBox, self.sampleTypeLabel, self.sampleTypeComboBox] ) )
 
         # Storage Temperature
         self.storageTemperatureLabel = Qt.QLabel( "Storage temperature", self.brick_widget )
@@ -117,20 +123,24 @@ class CURBrick( Core.BaseBrick ):
         self.storageTemperatureDoubleSpinBox.setDecimals( 2 )
         self.storageTemperatureDoubleSpinBox.setRange( 4, 40 )
         self.storageTemperatureDoubleSpinBox.setValue( 4 )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.storageTemperatureLabel, self.storageTemperatureDoubleSpinBox] ) )
 
         # Ex. Flow Time
         self.extraFlowTimeLabel = Qt.QLabel( "Extra flow time", self.brick_widget )
         self.extraFlowTimeSpinBox = Qt.QSpinBox( self.brick_widget )
         self.extraFlowTimeSpinBox.setSuffix( " s" )
         self.extraFlowTimeSpinBox.setRange( 0, 900 )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.extraFlowTimeLabel, self.extraFlowTimeSpinBox] ) )
+        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.storageTemperatureLabel, self.storageTemperatureDoubleSpinBox, self.extraFlowTimeLabel, self.extraFlowTimeSpinBox, ] ) )
 
         # Optimization
         self.optimizationLabel = Qt.QLabel( "Optimization", self.brick_widget )
         self.optimizationComboBox = Qt.QComboBox( self.brick_widget )
         self.optimizationComboBox.addItems( ["None", "Sample SEU temperature", "Sample code and SEU temperature"] )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.optimizationLabel, self.optimizationComboBox] ) )
+
+        # Buffer mode
+        self.bufferModeLabel = Qt.QLabel( "Buffer mode", self.brick_widget )
+        self.bufferModeComboBox = Qt.QComboBox( self.brick_widget )
+        self.bufferModeComboBox.addItems( ["First and After", "Before", "After", "None"] )
+        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.optimizationLabel, self.optimizationComboBox, self.bufferModeLabel, self.bufferModeComboBox] ) )
 
         # Initial cleaning
         self.initialCleaningLabel = Qt.QLabel( "Initial Cleaning", self.brick_widget )
@@ -138,28 +148,25 @@ class CURBrick( Core.BaseBrick ):
         self.initialCleaningCheckBox.setChecked( 1 )
         self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.initialCleaningLabel, self.initialCleaningCheckBox] ) )
 
-        # Buffer mode
-        self.bufferModeLabel = Qt.QLabel( "Buffer mode", self.brick_widget )
-        self.bufferModeComboBox = Qt.QComboBox( self.brick_widget )
-        self.bufferModeComboBox.addItems( ["First and After", "Before", "After", "None"] )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLabelValueLayoutFactory( [self.bufferModeLabel, self.bufferModeComboBox] ) )
-
         # History
-        self.historyLabel = Qt.QLabel( "History", self.brick_widget )
-        self.historyLabel.setFixedWidth( self.PARAMLABEL_WIDTH )
-        self.historyText = Qt.QTextEdit( self.brick_widget )
-        self.historyText.setReadOnly( True )
-        self.historyText.setFixedWidth( 600 )
-        self.historyText.setFixedHeight( 80 )
-        self.clearHistoryPushButton = Qt.QPushButton( "Clear", self.brick_widget )
-        self.clearHistoryPushButton.setFixedWidth( 50 )
-        Qt.QObject.connect( self.clearHistoryPushButton, Qt.SIGNAL( "clicked()" ), self.clearHistoryPushButtonClicked )
-        self.historyLabel.setAlignment( QtCore.Qt.AlignTop )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.historyLabel, self.historyText, self.clearHistoryPushButton] ) )
+#        self.historyLabel = Qt.QLabel( "History", self.brick_widget )
+#        self.historyLabel.setFixedWidth( self.PARAMLABEL_WIDTH )
+#        self.historyText = Qt.QTextEdit( self.brick_widget )
+#        self.historyText.setReadOnly( True )
+#        self.historyText.setFixedWidth( 600 )
+#        self.historyText.setFixedHeight( 80 )
+#        self.clearHistoryPushButton = Qt.QPushButton( "Clear", self.brick_widget )
+#        self.clearHistoryPushButton.setFixedWidth( 50 )
+#        Qt.QObject.connect( self.clearHistoryPushButton, Qt.SIGNAL( "clicked()" ), self.clearHistoryPushButtonClicked )
+#        self.historyLabel.setAlignment( QtCore.Qt.AlignTop )
+#        self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.historyLabel, self.historyText, self.clearHistoryPushButton] ) )
 
         # Sample Table
         self.tableWidget = Qt.QTableWidget( 0, len( self.column_headers ), self.brick_widget )
         self.tableWidget.setHorizontalHeaderLabels( self.column_headers )
+        #Set entire table to 11px (see Style Sheet above)
+        self.tableWidget.setProperty( "table", "true" )
+        self.tableWidget.setFixedHeight( 420 )
         self.tableWidget.resizeColumnsToContents()
         self.tableWidget.setColumnWidth( self.SAMPLETYPE_COLUMN, 70 )
         self.tableWidget.setColumnWidth( self.PLATE_COLUMN, 45 )
@@ -171,8 +178,8 @@ class CURBrick( Core.BaseBrick ):
         self.tableWidget.setColumnWidth( self.VOLUME_COLUMN, 60 )
         self.tableWidget.setSelectionBehavior( Qt.QAbstractItemView.SelectRows )
         self.tableWidget.setSelectionMode( Qt.QAbstractItemView.SingleSelection )
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.tableWidget] ) )
 
+        self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.tableWidget] ) )
         # Buttons at the end
         self.addPushButton = Qt.QPushButton( "Add Sample", self.brick_widget )
         Qt.QObject.connect( self.addPushButton, Qt.SIGNAL( "clicked()" ), self.addPushButtonClicked )
@@ -188,16 +195,9 @@ class CURBrick( Core.BaseBrick ):
         self.clearPushButton = Qt.QPushButton( "Clear Configuration", self.brick_widget )
         Qt.QObject.connect( self.clearPushButton, Qt.SIGNAL( "clicked()" ), self.clearConfigurationPushButtonClicked )
 
-        self.VerticalParametersLayout.addLayout( self.getHorizontalLayoutFactory( [self.addPushButton, self.copyPushButton, self.pastePushButton, self.clearPushButton ] ) )
+        self.VerticalParametersLayout.addLayout( self.getGridLayoutFactory( [self.addPushButton, self.copyPushButton, self.pastePushButton, Qt.QLabel( "" ), Qt.QLabel( "" ), Qt.QLabel( "" ), self.clearPushButton ] ) )
 
 
-        #
-        # Style Sheet
-        #
-        self.brick_widget.setStyleSheet( "*[valid=\"true\"]  {background-color: white}\
-                            *[valid=\"false\"] {background-color: #f99}\
-                            *[sampletype=\"Buffer\"] {background-color: #eec}\
-                            *[sampletype=\"Sample\"] {background-color: #cce}" )
 
 
 
@@ -223,10 +223,36 @@ class CURBrick( Core.BaseBrick ):
         return self.getHorizontalLayoutFactory( [self.fileLabel, self.fileLineEdit, self.loadPushButton, self.savePushButton, self.saveAsPushButton] )
 
 
+
+#        self.fillspace = Qt.QLabel( "" )
+#        self.hBoxLayout16.addWidget( self.fillspace )
+
+
+
     def getHorizontalLabelValueLayoutFactory ( self, widgets ):
-        widgets[0].setFixedWidth( self.PARAMLABEL_WIDTH )
-        widgets[1].setFixedWidth( self.PARAMETERS_WIDTH )
-        return self.getHorizontalLayoutFactory( [widgets[0], widgets[1]] )
+        # only works with 2 or 4
+        if len( widgets ) == 2:
+            widgets[0].setFixedWidth( self.PARAMLABEL_WIDTH )
+            widgets[1].setFixedWidth( self.PARAMETERS_WIDTH )
+            return self.getHorizontalLayoutFactory( [widgets[0], widgets[1]] )
+        if len( widgets ) == 4:
+            widgets[0].setFixedWidth( self.PARAMLABEL_WIDTH )
+            widgets[1].setFixedWidth( self.PARAMETERS_WIDTH )
+            widgets[2].setFixedWidth( self.PARAMLABEL_WIDTH )
+            widgets[3].setFixedWidth( self.PARAMETERS_WIDTH )
+            # we add a QLabel to make sure we have two rows not too close together
+            return self.getHorizontalLayoutFactory( [widgets[0], widgets[1], Qt.QLabel( " "*10 ), widgets[2], widgets[3]] )
+
+        return self.getHorizontalLayoutFactory( [] )
+
+
+    def getGridLayoutFactory ( self, widgets ):
+        gridBoxLayout = QtGui.QGridLayout()
+        count = 0
+        for widget in widgets:
+            gridBoxLayout.addWidget( widget, 0, count )
+            count = count + 1
+        return gridBoxLayout
 
     def getHorizontalLayoutFactory ( self, widgets ):
         hBoxLayout = Qt.QHBoxLayout()
@@ -257,9 +283,9 @@ class CURBrick( Core.BaseBrick ):
         self.WAITTIME_COLUMN = 18
         self.DELETE_COLUMN = 19
         return [ "", "", "Use", "Type", "Plate", "Row", "Well", \
-                                "Concentration", "Comments", "Macromolecule", "Code", "Viscosity", "Buffername", \
+                                "Concentration", "Comments", "Macromol.", "Code", "Viscosity", "Buffername", \
                                 "Transmission", "Volume", "SEU Temp", "Flow", "Recup.", \
-                                "Wait Time", "Del"]
+                                "Wait in s", "Del"]
 
 
    # When connected to Login, then block the brick
@@ -300,13 +326,93 @@ class CURBrick( Core.BaseBrick ):
     def transmissionChanged( self, __ ):
         pass
 
-#---------------#
-# CALLBACKS     #
-#---------------#
 
-    #------------------------------------------------------------------------
-    #  loadPushButton -  Load file with collection parameters and history
-    #------------------------------------------------------------------------
+#TODO: Staffan's note: take it away
+#    def clearHistory( self ):
+#        self.historyText.clear()
+#TODO: Staffan's note: take it away
+#    def addHistory( self, pLevel, pMessage ):
+#        strLevel = ['INFO', 'WARNING', 'ERROR']
+#        message = "<i>[%s] %s:</i> <b>%s</b>" % ( time.strftime( "%Y/%m/%d %H:%M:%S" ), strLevel[ pLevel] , pMessage )
+#
+#        self.historyText.append( message )
+
+    def getCollectRobotPars( self, isAll = 0 ):
+        params = CollectPars()
+        sampleList = SampleList()
+        bufferList = SampleList()
+
+        params.sampleType = self.sampleTypeComboBox.currentText()
+        params.storageTemperature = self.storageTemperatureDoubleSpinBox.value()
+        params.extraFlowTime = self.extraFlowTimeSpinBox.value()
+        params.optimization = self.optimizationComboBox.currentIndex()
+        params.optimizationText = self.optimizationComboBox.currentText()
+        params.initialCleaning = self.initialCleaningCheckBox.isChecked()
+        params.bufferMode = self.bufferModeComboBox.currentIndex()
+
+
+        #=================================================
+        #  myBuffer mode
+        #=================================================
+        params.bufferFirst = False
+        params.bufferBefore = False
+        params.bufferAfter = False
+
+        if params.bufferMode == 0:
+            params.bufferFirst = True
+            params.bufferAfter = True
+        elif params.bufferMode == 1:
+            params.bufferBefore = True
+        elif params.bufferMode == 2:
+            params.bufferAfter = True
+
+        #=================================================
+        # optimization mode
+        #=================================================
+        params.optimSEUtemp = False
+        params.optimCodeAndSEU = False
+
+        if params.optimization == 1:
+            params.optimSEUtemp = True
+        elif params.optimization == 2:
+            params.optimCodeAndSEU = True
+
+
+        # add alll samples into bufferList and sampleList
+        for i in range( 0, self.tableWidget.rowCount() ):
+            sample = self.getSampleRow( i )
+
+            if isAll or sample.enable:
+                if sample.isBuffer():
+                    bufferList.append( sample )
+                else:
+                    sampleList.append( sample )
+
+        #=================================================
+        #  assign myBuffer to sample
+        #  TODO:  allow to assign more than one myBuffer. isAll with same name
+        #=================================================
+        for sample in sampleList:
+            sample.buffer = []
+            if len( bufferList ) == 1:   # if there is one and only one myBuffer defined dont look at name. assign
+                sample.buffer.append( bufferList[0] )
+            else:
+                for myBuffer in bufferList:
+                    if myBuffer.buffername == sample.buffername:
+                        sample.buffer.append( myBuffer )
+
+
+        # Optimize data collection procedure (if requested)
+        if params.optimSEUtemp:
+            sampleList.sortSEUtemp()
+        elif params.optimCodeAndSEU:
+            sampleList.sortCodeAndSEU()
+
+        params.sampleList = sampleList
+        params.bufferList = bufferList
+
+        return params
+
     def loadPushButtonClicked( self ):
         dirname = ""
         self.filename = str( self.fileLineEdit.text() )
@@ -355,8 +461,9 @@ class CURBrick( Core.BaseBrick ):
             self.optimizationComboBox.setCurrentIndex( myPars.optimization )
             self.bufferModeComboBox.setCurrentIndex( myPars.bufferMode )
 
-            self.historyText.clear()
-            self.historyText.setText( myPars.history.strip() )
+            #TODO: Staffan's note: take it away
+#            self.historyText.clear()
+#            self.historyText.setText( myPars.history.strip() )
 
             for myBuffer in  myPars.bufferList:
                 self.addSampleRow( myBuffer )
@@ -366,10 +473,12 @@ class CURBrick( Core.BaseBrick ):
             self.CBblock = 0
             self.filename = filename
             self.collectBrickObject.setRobotFileName( filename )
+            # strip all but the last part for label 
+            self.collectBrickObject.changexmlLabel( os.path.basename( filename ) )
 
-        except Exception, e:
+        except Exception:
             logger.exception( 'Cannot load collection parameters file. \n' )
-            Qt.QMessageBox.critical( self, "Error", "Error when trying to read file '%s'!" % filename )
+            Qt.QMessageBox.critical( self.brick_widget, "Error", "Error when trying to read file '%s'!" % filename )
 
     def saveAsPushButtonClicked( self ):
         self.filename = str( self.fileLineEdit.text() )
@@ -389,9 +498,8 @@ class CURBrick( Core.BaseBrick ):
 
         # Update robot file
         self.collectBrickObject.setRobotFileName( filename )
-
-
-
+        # strip all but the last part for label 
+        self.collectBrickObject.changexmlLabel( os.path.basename( filename ) )
 
     def savePushButtonClicked( self ):
         if self.filename == "" or not os.path.isfile( self.filename ):
@@ -402,26 +510,30 @@ class CURBrick( Core.BaseBrick ):
     def saveFile( self, filename, askrewrite = True ):
 
         if os.path.exists( filename ):
-            quitsave = Qt.QMessageBox.question( self, "Warning", "The file '%s' already exists. Overwrite it?" % filename, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) != Qt.QMessageBox.Yes
+            quitsave = Qt.QMessageBox.question( self.brick_widget, "Warning", "The file '%s' already exists. Overwrite it?" % filename, Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) != Qt.QMessageBox.Yes
             if quitsave:
                 return
 
         myPars = self.getCollectRobotPars( isAll = 1 )
-        history = self.historyText.toPlainText()
+        #TODO: Staffan's note: take it away 
+        #history = self.historyText.toPlainText()
+        #TODO: remove if going back on history
+        history = "No History in this version"
 
         try:
             if os.path.exists( filename ):
+                #TODO: Staffan's note: take it away
                 myPars.save( filename , history )
-                Qt.QMessageBox.information( self, "Info", "The new version of the file '%s' was successfully saved!" % filename )
+                Qt.QMessageBox.information( self.brick_widget, "Info", "The new version of the file '%s' was successfully saved!" % filename )
             else:
                 myPars.save( filename , history )
-                Qt.QMessageBox.information( self, "Info", "A new version of the file '%s' was successfully saved!" % filename )
+                Qt.QMessageBox.information( self.brick_widget, "Info", "A new version of the file '%s' was successfully saved!" % filename )
         except Exception, e:
             import traceback
             traceback.print_exc()
             logger.exception( 'Cannot save collection parameters file.\n' )
             logger.error( "Full Exception: " + str( e ) )
-            Qt.QMessageBox.critical( self, "Error", "Error when trying to save file '%s'!" % filename )
+            Qt.QMessageBox.critical( self.brick_widget, "Error", "Error when trying to save file '%s'!" % filename )
 
 
     #
@@ -505,10 +617,6 @@ class CURBrick( Core.BaseBrick ):
         except AttributeError:
             pass
 
-#-------------------------------------------
-#  Internal functions
-#-------------------------------------------
-
 
     def setComboBox( self, combo, value ):
         for i in range( combo.count() ):
@@ -564,8 +672,6 @@ class CURBrick( Core.BaseBrick ):
         if index == -1:
             index = self.tableWidget.rowCount()
 
-        #TODO: debug
-        print ">>>> " + str( index )
         self.createSampleRow( index )
         self.setSampleRow( index, samp )
 
@@ -721,6 +827,7 @@ class CURBrick( Core.BaseBrick ):
             waittimeSpinBox.setSuffix( " sec" )
             waittimeSpinBox.setDecimals( 0 )
             waittimeSpinBox.setRange( 0, 10000 )
+
             self.tableWidget.setCellWidget( index, self.WAITTIME_COLUMN, waittimeSpinBox )
 
             bufcombo.setEditable( False )
@@ -828,7 +935,7 @@ class CURBrick( Core.BaseBrick ):
         self.removeSampleRow( sampleID )
 
     def clearConfigurationPushButtonClicked( self ):
-        if Qt.QMessageBox.question( self, "Warning", "Do you really want to clear the current configuration?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes:
+        if Qt.QMessageBox.question( self.brick_widget, "Warning", "Do you really want to clear the current configuration?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes:
             self.fileLineEdit.setText( "" )
             self.clearConfiguration()
 
@@ -841,16 +948,16 @@ class CURBrick( Core.BaseBrick ):
         self.bufferModeComboBox.setCurrentIndex( 0 )
         self.copyPushButton.setEnabled( 0 )
         self.pastePushButton.setEnabled( 0 )
-
-        self.historyText.clear()
+        #TODO: Staffan's note: take it away
+        #self.historyText.clear()
 
         while self.tableWidget.rowCount() > 0:
             self.tableWidget.removeRow( 0 )
 
 
-    def clearHistoryPushButtonClicked( self ):
-        if Qt.QMessageBox.question( self, "Warning", "Do you really want to clear the current history?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes:
-            self.historyText.clear()
+#    def clearHistoryPushButtonClicked( self ):
+#        if Qt.QMessageBox.question( self.brick_widget, "Warning", "Do you really want to clear the current history?", Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes:
+#            self.historyText.clear()
 
     def closePushButtonClicked( self ):
         self.accept()
@@ -886,9 +993,8 @@ class CURBrick( Core.BaseBrick ):
         if self.collectBrickObject is not None:
             return self.collectBrickObject.plateInfos
         return []
-    #------------------
-    #  createSampleRow.  Creates GUI for each row in sample table
-    #-------------------
+
+    # This one creates a gui for each row
     def createSampleRow( self, row ):
 
         sampleID = self.sampleIDCount
