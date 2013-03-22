@@ -65,7 +65,7 @@
      <property name="caption" value="Reprocess"/>
   </properties>
   <properties id="Display">
-     <property name="flex" value="2"/>
+     <property name="flex" value="6"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Display"/>
@@ -307,7 +307,7 @@
      <property name="flex" value="0"/>
   </properties>
   <properties id="Operation">
-     <property name="flex" value="1"/>
+     <property name="flex" value="2"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Operation"/>
@@ -346,7 +346,7 @@
      <property name="fontSize" value="24"/>
   </properties>
   <properties id="Misc">
-     <property name="flex" value="0"/>
+     <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value="Misc"/>

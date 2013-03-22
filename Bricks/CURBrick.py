@@ -284,8 +284,8 @@ class CURBrick( Core.BaseBrick ):
         self.DELETE_COLUMN = 19
         return [ "", "", "Use", "Type", "Plate", "Row", "Well", \
                                 "Concentration", "Comments", "Macromol.", "Code", "Viscosity", "Buffername", \
-                                "Transmission", "Volume", "SEU Temp", "Flow", "Recup.", \
-                                "Wait in s", "Del"]
+                                "Transmission", "Volume", "SEU Temp", "Flow", "Recup", \
+                                "Wait", "Del"]
 
 
    # When connected to Login, then block the brick
@@ -824,7 +824,7 @@ class CURBrick( Core.BaseBrick ):
             self.tableWidget.setCellWidget( index, self.TEMPERATURE_COLUMN, temperatureSEUDoubleSpinBox )
 
             waittimeSpinBox = Qt.QDoubleSpinBox( self.tableWidget )
-            waittimeSpinBox.setSuffix( " sec" )
+            waittimeSpinBox.setSuffix( " s" )
             waittimeSpinBox.setDecimals( 0 )
             waittimeSpinBox.setRange( 0, 10000 )
 
@@ -1142,7 +1142,7 @@ class CURBrick( Core.BaseBrick ):
 
         # waittime
         waittimeSpinBox = Qt.QDoubleSpinBox( tableWidget )
-        waittimeSpinBox.setSuffix( " sec" )
+        waittimeSpinBox.setSuffix( " s" )
         waittimeSpinBox.setDecimals( 0 )
         waittimeSpinBox.setRange( 0, 10000 )
         tableWidget.setCellWidget( row, self.WAITTIME_COLUMN, waittimeSpinBox )
