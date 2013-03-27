@@ -319,14 +319,14 @@ class Collect( CObjectBase ):
         # Sending ISPyBs information to EDNA
         if self.isISPyB:
             try:
-                user = self.objects["biosaxs_client"].user
-                password = self.objects["biosaxs_client"].password
+                user = self.objects["biosaxs_client"].proposalType
+                password = self.objects["biosaxs_client"].proposalNumber
 
                 print "[ISPyB] Sending to EDNA login %s,%s, %s" % ( user,
                                                                        self.measurementId,
                                                                        pCode )
                 #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
-                pyarchDestination = "/data/pyarch/bm29/mx1438/%s" % ( self.objects["biosaxs_client"].selectedExperimentId )
+                pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                 print "[ISPyB] Copying into " + pyarchDestination
                 sample = XSDataBioSaxsSample( 
                                          login = XSDataString( user ),
@@ -867,6 +867,8 @@ class Collect( CObjectBase ):
                                                     measurementId
                                                     )
 
+    def setXMLRobotFilePath( self, path ):
+        self.xmlRobotFilePath = path
 
     def _collectWithRobot( self, pars ):
 
@@ -902,14 +904,22 @@ class Collect( CObjectBase ):
                         ispyBuffers.append( sampleWithNoBufferAttribute )
                         idCounter = idCounter + 1
 
-                self.objects["biosaxs_client"].createExperiment( "mx", 1438,
+                fileNamePath = "Unknown"
+                filePath = "Unknown"
+                if ( self.xmlRobotFilePath is not None ):
+                    fileNamePath = os.path.basename( self.xmlRobotFilePath )
+                    filePath = self.xmlRobotFilePath
+
+
+                self.objects["biosaxs_client"].createExperiment( 
+#                                                                "mx", 1438,
                                                                  ispyBuffers,
                                                                  pars["storageTemperature"],
                                                                  "BeforeAndAfter",
                                                                  "10",
                                                                  "STATIC",
-                                                                 "filePath",
-                                                                 "name" )
+                                                                 filePath,
+                                                                 fileNamePath )
                 self.isISPyB = True #Tobe replaced by self.isISPyB
                 print "[ISPyB] isISPyB set to True"
         except Exception:

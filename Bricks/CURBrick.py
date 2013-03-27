@@ -499,7 +499,7 @@ class CURBrick( Core.BaseBrick ):
         # Update robot file
         self.collectBrickObject.setRobotFileName( filename )
         # strip all but the last part for label 
-        self.collectBrickObject.changexmlLabel( os.path.basename( filename ) )
+        self.collectBrickObject.changexmlLabel( filename )
 
     def savePushButtonClicked( self ):
         if self.filename == "" or not os.path.isfile( self.filename ):

@@ -503,7 +503,7 @@ class CollectBrick( Core.BaseBrick ):
 
 
     def changexmlLabel( self, pValue ):
-        self.xmlFilePath = pValue
+        self.collectObj.setXMLRobotFilePath( pValue )
         if pValue is not None:
             xmlLabel = str( os.path.basename( pValue ) )
             # total needs to be 15 chars
