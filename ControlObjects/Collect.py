@@ -902,7 +902,14 @@ class Collect( CObjectBase ):
                         ispyBuffers.append( sampleWithNoBufferAttribute )
                         idCounter = idCounter + 1
 
-                self.objects["biosaxs_client"].createExperiment( "mx", 1438, ispyBuffers, pars["storageTemperature"], "BeforeAndAfter", "10" )
+                self.objects["biosaxs_client"].createExperiment( "mx", 1438,
+                                                                 ispyBuffers,
+                                                                 pars["storageTemperature"],
+                                                                 "BeforeAndAfter",
+                                                                 "10",
+                                                                 "STATIC",
+                                                                 "filePath",
+                                                                 "name" )
                 self.isISPyB = True #Tobe replaced by self.isISPyB
                 print "[ISPyB] isISPyB set to True"
         except Exception:

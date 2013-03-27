@@ -256,7 +256,7 @@ class BiosaxsClient( CObjectBase ):
             traceback.print_exc()
             raise Exception
 
-    def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime ):
+    def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime, type, sourceFile, name ):
         try:
             if ( self.client is None ):
                 self.__initWebservice()
@@ -267,7 +267,7 @@ class BiosaxsClient( CObjectBase ):
             self.experiment = None
             self.selectedExperimentId = None
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( proposalCode ) + str( proposalNumber )
-            experiment = self.client.service.createExperiment( proposalCode, proposalNumber, str( samples ), storageTemperature, mode, extraflowTime )
+            experiment = self.client.service.createExperiment( proposalCode, proposalNumber, str( samples ), storageTemperature, mode, extraflowTime, type, sourceFile, name )
             if ( experiment is None ):
                 print "[ISPyB] ISPyB could not create the experiment from robot file"
                 raise Exception
