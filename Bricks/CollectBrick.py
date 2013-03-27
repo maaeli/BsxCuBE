@@ -503,8 +503,9 @@ class CollectBrick( Core.BaseBrick ):
 
 
     def changexmlLabel( self, pValue ):
+        self.xmlFilePath = pValue
         if pValue is not None:
-            xmlLabel = str( pValue )
+            xmlLabel = str( os.path.basename( pValue ) )
             # total needs to be 15 chars
             if len( xmlLabel ) > 11:
                 self.xmlFileLoaded.setText( "XML: " + xmlLabel[:9] + ".." )
@@ -702,14 +703,6 @@ class CollectBrick( Core.BaseBrick ):
             self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
 
     def collectProcessingDone( self, dat_filename ):
-        self.collectStatusLabel = Qt.QLabel( "Collection status:" )
-        self.collectStatusLabel.setAlignment( QtCore.Qt.AlignRight )
-        self.collectStatus = Qt.QLabel( "" )
-        self.collectStatus.setAlignment( QtCore.Qt.AlignCenter )
-        self.collectStatus.setObjectName( "collect" )
-        self.hBoxLayout20.addWidget( self.collectStatusLabel )
-        self.hBoxLayout20.addWidget( self.collectStatus )
-        self.brick_widget.layout().addLayout( self.hBoxLayout20 )
         logger.info( "processing done, file is %s", dat_filename )
         # Only display 1d images like XXXX/1d/<at least on char>.dat
         if re.match( r".*/1d/[^/]+\.dat$", dat_filename ):

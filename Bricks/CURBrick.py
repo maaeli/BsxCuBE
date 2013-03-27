@@ -474,7 +474,7 @@ class CURBrick( Core.BaseBrick ):
             self.filename = filename
             self.collectBrickObject.setRobotFileName( filename )
             # strip all but the last part for label 
-            self.collectBrickObject.changexmlLabel( os.path.basename( filename ) )
+            self.collectBrickObject.changexmlLabel( filename )
 
         except Exception:
             logger.exception( 'Cannot load collection parameters file. \n' )
