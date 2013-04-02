@@ -19,8 +19,11 @@ class BiosaxsClient( CObjectBase ):
 
     def init( self ):
         self.client = None
-        self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
-        #self.URL = 'http://pydevcz.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+
+        #Test machine
+        self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #Alejandro's local machine
+        #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
 
         #Login information
