@@ -22,6 +22,7 @@ class BiosaxsClient( CObjectBase ):
 
         #Test machine
         self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        print "ISPyB Server: " + self.URL
         #Alejandro's local machine
         #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         self.selectedExperimentId = None
