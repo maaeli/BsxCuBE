@@ -32,7 +32,6 @@ class Collect( CObjectBase ):
                Signal( "collectRunNumberChanged" ),
                Signal( "collectNumberFramesChanged" ),
                Signal( "collectTimePerFrameChanged" ),
-               Signal( "collectTimePerFrameChanged" ),
                Signal( "collectConcentrationChanged" ),
                Signal( "collectCommentsChanged" ),
                Signal( "collectCodeChanged" ),
@@ -62,7 +61,8 @@ class Collect( CObjectBase ):
              Slot( "collectAbort" ),
              Slot( "setCheckBeam" ),
              Slot( "triggerEDNA" ),
-             Slot( "blockEnergyAdjust" )]
+             Slot( "blockEnergyAdjust" )
+             ]
 
     def __init__( self, *args, **kwargs ):
         # username and password from login Brick
@@ -111,8 +111,6 @@ class Collect( CObjectBase ):
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
         self.machDevName = str( self.config["/object/data[@name='uri']/@value"][0] )
-
-
 
     def __getattr__( self, attr ):
         if not attr.startswith( "__" ):
@@ -268,10 +266,11 @@ class Collect( CObjectBase ):
         self.collectBeamCenterY.set_value( pBeamCenterY )
         self.collectNormalisation.set_value( pNormalisation )
         # note that pTimePerFrame is 1.0 s and number of frames is 1
-        pNumberFrames = 1
-        pTimePerFrame = 1.0
-        self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
+        #pNumberFrames = 1
+        #pTimePerFrame = 1.0
+        #self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
         self.commands["testCollect"]()
+
 
 
     def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
@@ -320,14 +319,14 @@ class Collect( CObjectBase ):
         # Sending ISPyBs information to EDNA
         if self.isISPyB:
             try:
-                user = self.objects["biosaxs_client"].user
-                password = self.objects["biosaxs_client"].password
+                user = self.objects["biosaxs_client"].proposalType
+                password = self.objects["biosaxs_client"].proposalNumber
 
                 print "[ISPyB] Sending to EDNA login %s,%s, %s" % ( user,
                                                                        self.measurementId,
                                                                        pCode )
                 #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
-                pyarchDestination = "/data/pyarch/bm29/mx1438/%s" % ( self.objects["biosaxs_client"].selectedExperimentId )
+                pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                 print "[ISPyB] Copying into " + pyarchDestination
                 sample = XSDataBioSaxsSample( 
                                          login = XSDataString( user ),
@@ -623,14 +622,16 @@ class Collect( CObjectBase ):
 
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
         self.commands["collect"].abort()
-
-
         self._abortCollectWithRobot()
 
+        logger.info( "Sending abort to ISPyB" )
+        try:
+            self.objects["biosaxs_client"].setExperimentAborted()
+        except Exception, errMsg:
+            self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
 
     def testCollectAbort( self ):
         logger.info( "sending abort to stop spec test collection" )
-        #self.commands["testCollect"].abort()
 
     def setHPLC( self, pValue ):
         self.isHPLC = bool( pValue )
@@ -866,6 +867,8 @@ class Collect( CObjectBase ):
                                                     measurementId
                                                     )
 
+    def setXMLRobotFilePath( self, path ):
+        self.xmlRobotFilePath = path
 
     def _collectWithRobot( self, pars ):
 
@@ -901,7 +904,22 @@ class Collect( CObjectBase ):
                         ispyBuffers.append( sampleWithNoBufferAttribute )
                         idCounter = idCounter + 1
 
-                self.objects["biosaxs_client"].createExperiment( "mx", 1438, ispyBuffers, pars["storageTemperature"], "BeforeAndAfter", "10" )
+                fileNamePath = "Unknown"
+                filePath = "Unknown"
+                if ( self.xmlRobotFilePath is not None ):
+                    fileNamePath = os.path.basename( self.xmlRobotFilePath )
+                    filePath = self.xmlRobotFilePath
+
+
+                self.objects["biosaxs_client"].createExperiment( 
+#                                                                "mx", 1438,
+                                                                 ispyBuffers,
+                                                                 pars["storageTemperature"],
+                                                                 "BeforeAndAfter",
+                                                                 "10",
+                                                                 "STATIC",
+                                                                 filePath,
+                                                                 fileNamePath )
                 self.isISPyB = True #Tobe replaced by self.isISPyB
                 print "[ISPyB] isISPyB set to True"
         except Exception:

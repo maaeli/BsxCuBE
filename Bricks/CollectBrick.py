@@ -1,8 +1,8 @@
 import os, logging, time, re
+import CURBrick
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
 
-from CollectRobotDialog  import CollectRobotDialog
 from ISPyBCollectRobotDialog import ISPyBCollectRobotDialog
 
 from PyQt4               import QtCore, QtGui, Qt
@@ -76,10 +76,16 @@ class CollectBrick( Core.BaseBrick ):
                                              Slot( "collectAbort" ),
                                              Slot( "setCheckBeam" ),
                                              Slot( "triggerEDNA" ),
-                                             Slot( "blockEnergyAdjust" )],
+                                             Slot( "blockEnergyAdjust" )
+                                             ],
                                             "collectObjectConnected" ),
 
-                    "motoralignment": Connection( "MotorAlignment object",
+                   "robot": Connection( "Collect using Robot object",
+                                        [],
+                                        [],
+                                        "connectedToCUR" ),
+
+                   "motoralignment": Connection( "MotorAlignment object",
                                             [Signal( "executeTestCollect", "executeTestCollect" )],
                                             [] ),
 
@@ -106,15 +112,15 @@ class CollectBrick( Core.BaseBrick ):
                                             "connectedToLogin" ),
 
                     "BiosaxsClient": Connection( "BiosaxsClient object",
-                                            [
-                                             Signal( "onSuccess", "onISPYBWebServiceSuccess" )
-                                             ],
-                                            [Slot( "getRobotXML" ),
-                                             Slot( "getExperimentNamesByProposalCodeNumber" ),
-                                             Slot( "setUser" ),
-                                             Slot( "getRobotXMLByExperimentId" )],
+                                                [
+                                                 Signal( "onSuccess" ),
+                                                 Signal( "onError" )],
+                                                [
+                                                  Slot( "getExperimentNamesByProposalCodeNumber" ),
+                                                  Slot( "setUser" ),
+                                                  Slot( "getRobotXMLByExperimentId" )
+                                                 ],
                                             "connectedToBiosaxsClient" ),
-
                     "WebSAS": Connection( "Web SAS Browser object",
                                             [],
                                             [Slot( "setURL" )],
@@ -150,7 +156,7 @@ class CollectBrick( Core.BaseBrick ):
         self._currentCurve = 0
         self._robotFileStr = "/tmp/robot.xml"
         self._waveLengthStr = "0.0"
-        self._collectRobotDialog = None
+        self.CURObject = None
         self._ispybCollect = False
         self.__lastFrame = None
         self.__currentConcentration = None
@@ -387,14 +393,18 @@ class CollectBrick( Core.BaseBrick ):
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
-        self.robotCheckBox = Qt.QCheckBox( "Collect using robot", self.brick_widget )
+        self.robotCheckBox = Qt.QCheckBox( "Collect using SC", self.brick_widget )
         Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.robotCheckBoxToggled )
         self.hBoxLayout16.addWidget( self.robotCheckBox )
+        self.xmlFileLoaded = Qt.QLabel( "XML: " )
+        # make the font a bit special
+        italicFont = QtGui.QFont( 'Courier New', 9 )
+        italicFont.setItalic( True )
+        self.xmlFileLoaded.setFont( italicFont )
+        self.hBoxLayout16.addWidget( self.xmlFileLoaded )
         self.hplcCheckBox = Qt.QCheckBox( "Collect using HPLC", self.brick_widget )
         Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.CheckBoxToggledHPLC )
         self.hBoxLayout16.addWidget( self.hplcCheckBox )
-        self.fillspace = Qt.QLabel( "" )
-        self.hBoxLayout16.addWidget( self.fillspace )
         self.brick_widget.layout().addLayout( self.hBoxLayout16 )
 
         self.hBoxLayout17 = Qt.QHBoxLayout()
@@ -487,8 +497,20 @@ class CollectBrick( Core.BaseBrick ):
     # When connected to the BiosaxsClient
     def connectedToBiosaxsClient( self, pPeer ):
         # if None, then we lost contact
+        print "connecting to BiosaxsClient"
         if pPeer is not None:
             self.biosaxsClientObject = pPeer
+
+
+    def changexmlLabel( self, pValue ):
+        self.collectObj.setXMLRobotFilePath( pValue )
+        if pValue is not None:
+            xmlLabel = str( os.path.basename( pValue ) )
+            # total needs to be 15 chars
+            if len( xmlLabel ) > 11:
+                self.xmlFileLoaded.setText( "XML: " + xmlLabel[:9] + ".." )
+            else:
+                self.xmlFileLoaded.setText( "XML: " + xmlLabel )
 
 
     #Deprecated
@@ -525,10 +547,10 @@ class CollectBrick( Core.BaseBrick ):
     def onISPYBWebServiceSuccess( self, methodName, response ):
         #print "------------------->" + methodName
         if methodName == "getExperimentNamesByProposalCodeNumber":
-            self._collectRobotDialog.onExperimentNamesRetrieved( response )
+            self.CURObject.onExperimentNamesRetrieved( response )
 
         if methodName == "getRobotXMLByPlateGroupId":
-            self._collectRobotDialog.loadXML( response )
+            self.CURObject.loadXML( response )
 
     def isInhouseUser( self, username ):
         if ( username == "opd29" ):
@@ -572,8 +594,6 @@ class CollectBrick( Core.BaseBrick ):
                     if self.collectObj is not None:
                         self.collectObj.putUserInfo( self.__username, self.__password )
                         self.getDefaultDirectoryByUsername( self.__username )
-                #TODO: DEBUG
-                print "Now we are logged in as %s with pwd %s " % ( self.__username, self.__password )
                 if self.getObject( "BiosaxsClient" ) is not None:
                     self.getObject( "BiosaxsClient" ).setUser( self.__username, self.__password, self.__enteredPropType, self.__enteredPropNumber )
                 else:
@@ -722,8 +742,9 @@ class CollectBrick( Core.BaseBrick ):
         if notify:
             self.messageDialog( level, logmsg )
 
-        if self._collectRobotDialog is not None:
-            self._collectRobotDialog.addHistory( level, logmsg )
+        #TODO: Staffan's note: take it away
+#        if self.CURObject is not None:
+#            self.CURObject.addHistory( level, logmsg )
 
 
     def clearCurve( self ):
@@ -742,8 +763,9 @@ class CollectBrick( Core.BaseBrick ):
             if self._isCollecting:
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
-                if self.robotCheckBox.isChecked():
-                    self._collectRobotDialog.addHistory( 0, message )
+                #TODO: Staffan's note: take it away
+#                if self.robotCheckBox.isChecked():
+#                    self.CURObject.addHistory( 0, message )
 
                 self._currentFrame += 1
 
@@ -834,7 +856,7 @@ class CollectBrick( Core.BaseBrick ):
                             print "display2D raw: %r" % filename0
                             self.emit( "displayItemChanged", filename0 )
 
-                if self._currentFrame == self._frameNumber:
+                if self._currentFrame == self._frameNumber and ( self.__isTesting is not True ):
                     splitList = os.path.basename( filename0 ).split( "_" )
                     # Take away last _ piece
                     filename1 = "_".join( splitList[:-1] )
@@ -869,7 +891,6 @@ class CollectBrick( Core.BaseBrick ):
                             timestr = str( time.time() - t0 )
                             print ">>> No file 4 %s seen after %s seconds. We do not display it " % ( ave_filename, timestr )
             else:
-
                 if os.path.exists( filename0 ):
                     if not filename0.endswith( ".dat" ):
                         self.emit( "displayItemChanged", filename0 )
@@ -890,7 +911,7 @@ class CollectBrick( Core.BaseBrick ):
                     if self.__isTesting:
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
-                        logger.info( "The data collection is done!" )
+                        logger.info( "Test frame is done!" )
                         self.grayOut( False )
                         self.emit( "grayOut", False )
                     else:
@@ -1086,13 +1107,13 @@ class CollectBrick( Core.BaseBrick ):
                             "radiationAbsolute": self.getRadiationAbsoluteLinear(),
                             "SEUTemperature": self.seuTemperature}
 
-            robotpars = { "sampleType": str( self._collectRobotDialog.sampleTypeComboBox.currentText() ),
-                          "storageTemperature": float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() ),
-                          "extraFlowTime": int( self._collectRobotDialog.extraFlowTimeSpinBox.value() ),
-                          "optimization": str( self._collectRobotDialog.optimizationComboBox.currentIndex() ),
-                          "optimizationText": str( self._collectRobotDialog.optimizationComboBox.currentText() ),
-                          "initialCleaning": self._collectRobotDialog.initialCleaningCheckBox.isChecked(),
-                          "bufferMode": str( self._collectRobotDialog.bufferModeComboBox.currentIndex() ),
+            robotpars = { "sampleType": str( self.CURObject.sampleTypeComboBox.currentText() ),
+                          "storageTemperature": float( self.CURObject.storageTemperatureDoubleSpinBox.value() ),
+                          "extraFlowTime": int( self.CURObject.extraFlowTimeSpinBox.value() ),
+                          "optimization": str( self.CURObject.optimizationComboBox.currentIndex() ),
+                          "optimizationText": str( self.CURObject.optimizationComboBox.currentText() ),
+                          "initialCleaning": self.CURObject.initialCleaningCheckBox.isChecked(),
+                          "bufferMode": str( self.CURObject.bufferModeComboBox.currentIndex() ),
                           "bufferFirst": False,
                           "bufferBefore": False,
                           "bufferAfter": False,
@@ -1120,8 +1141,8 @@ class CollectBrick( Core.BaseBrick ):
             sampleList = []
             robotpars.update( { "bufferList": bufferList, "sampleList": sampleList } )
 
-            for i in range( 0, self._collectRobotDialog.tableWidget.rowCount() ):
-                sample = self._collectRobotDialog.getSampleRow( i )
+            for i in range( 0, self.CURObject.tableWidget.rowCount() ):
+                sample = self.CURObject.getSampleRow( i )
 
                 if sample.enable:
                     if sample.isBuffer():
@@ -1364,25 +1385,22 @@ class CollectBrick( Core.BaseBrick ):
                 self.energyControlObject.setEnergy( self.__energy )
 
     def robotCheckBoxToggled( self, pValue ):
-
         if pValue:
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok )
                 self.robotCheckBox.setChecked( False )
+                if self.CURObject is not None:
+                    self.CURObject.robotCheckBox.setChecked( False )
                 return
-            self._ispybCollect = False
-            self._collectRobotDialog = CollectRobotDialog( self )
-            if self._collectRobotDialog.isVisible():
-                self._collectRobotDialog.activateWindow()
-                self._collectRobotDialog.raise_()
-            else:
-                self._collectRobotDialog.show()
-        else:
-            if not self._collectRobotDialog is None:
-                self._collectRobotDialog.hide()
-            self._collectRobotDialog = None
 
+            self._ispybCollect = False
+
+        self.CURObject.groupBox.setDisabled( not pValue )
+        self.robotCheckBox.setChecked( pValue )
+
+        # setChecked is used to avoid infinite loop (the checkBox in the CURObject is not using toggle signal but stateChanged) 
+        self.CURObject.robotCheckBox.setChecked( pValue )
 
     def CheckBoxToggledHPLC( self, pValue ):
         v = bool( pValue )
@@ -1399,6 +1417,12 @@ class CollectBrick( Core.BaseBrick ):
                 self.isHPLC = False
                 return
         self.collectObj.setHPLC( v )
+
+    def connectedToCUR( self, pPeer ):
+        if pPeer is not None:
+            self.CURObject = pPeer
+            self.CURObject.collectBrickObject = self
+
 
 
     def checkBeamBoxToggled( self, pValue ):
@@ -1429,7 +1453,7 @@ class CollectBrick( Core.BaseBrick ):
                 # We had contact with Pilatus and it replied once with error.
                 # Try first a reset and try again
                 self.energyControlObject.pilatusReset()
-                logger.warning( "Pliatus not ready - doing reset - Please be patient" )
+                logger.warning( "Pilatus not ready - doing reset - Please be patient" )
                 # wait 0.2*10 = 2s to recover after reset
                 # Note __ = No interest
                 for __ in range( 0, 10 ):
@@ -1476,105 +1500,103 @@ class CollectBrick( Core.BaseBrick ):
 
 
     def collectPushButtonClicked( self ):
-
-
         if not self.checkPilatusReady():
-            print "It seems not to be ready"
+            print "Pilatus seems not to be ready"
             return
         self.robotCollect = self.robotCheckBox.isChecked()
-        if not self.robotCollect or self.validParameters():
-            # Check Temperature changes are not too big when doing robot collection
-            if self.robotCollect:
-                # check temperature moving upwards - Storage temperature first - 1 degree move ...
-                oldTemp = 100.0
-                if self.scObject.getSampleStorageTemperature() != "":
-                    oldTemp = float( self.scObject.getSampleStorageTemperature() )
-                else:
-                    logger.warning( "Can not get current Storage temperature from Sample Changer" )
-                newTemp = float( self._collectRobotDialog.storageTemperatureDoubleSpinBox.value() )
-                if newTemp > ( oldTemp + 1.0 ) :
-                    answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
-                                 "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
-                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
-                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
-                    if answer == Qt.QMessageBox.No:
-                        return
-                # Check SEU Temperatures (max) - 4 degree move max...
-                oldTemp = 100.0
-                if self.scObject.getSEUTemperature() != "":
-                    oldTemp = float( self.scObject.getSEUTemperature() )
-                else:
-                    logger.warning( "Can not get current SEU temperature from Sample Changer" )
-                newTemp = 0.0
-                for checkSample in self.robotParams["sampleList"]:
-                    if newTemp < checkSample["SEUtemperature"]:
-                        newTemp = checkSample["SEUtemperature"]
-                if newTemp > ( oldTemp + 4.0 ):
-                    answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
-                                 "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
-                                 " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
-                                 Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
-                    if answer == Qt.QMessageBox.No:
-                        return
-            self.displayReset()
-            directory = str( self.directoryLineEdit.text() ) + "/raw"
-            runNumber = "%03d" % self.runNumberSpinBox.value()
 
-            flag = True
-
-            if os.path.isdir( directory ):
-                for filename in os.listdir( directory ):
-                    if os.path.isfile( os.path.join( directory, filename ) ):
-                        if filename.startswith( str( self.prefixLineEdit.text() ) ) \
-                           and ( filename.split( "_" )[-1] != "00000.edf" ) \
-                           and ( filename.split( "_" )[-1] != "00000.xml" ) \
-                           and ( filename.split( "." )[-1] != "h5" ) \
-                           and ( filename.split( "." )[-1] != "json" ) \
-                           and ( filename.split( "." )[-1] != "svg" ) \
-                           and ( filename.split( "." )[-1] != "png" ):
-                            # Check if we have a run number higher than the requested run number:
-                            try:
-                                existingRunNumber = filename.split( "_" )[-2]
-                                if int( existingRunNumber ) >= int( runNumber ):
-                                    logger.info( "Existing run number %r is higher than requested run number %r" % ( existingRunNumber, runNumber ) )
-                                    flag = False
-                                    break
-                            except IndexError:
-                                #TODO: DEBUG
-                                print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory Unexpected file %s in directory " % filename , Qt.QMessageBox.Ok )
-                                raise RuntimeError, "Creating of filename from info not possible"
-                            except ValueError:
-                                #TODO: DEBUG
-                                print ">>> got totally unexpected filename %s " % filename
-                                Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok )
-                                raise RuntimeError, "Creating of filename from info not possible"
-
-            if not flag:
-                flag = ( Qt.QMessageBox.question( self.brick_widget, "Warning", \
-                                "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % \
-                                ( runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text() ), \
-                                Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
-
-            if not flag:
-                return
-
-            if self.robotCollect:
-                self.startCollectWithRobot()
+        # Check Temperature changes are not too big when doing robot collection
+        if ( self.robotCollect and self.validParameters() ):
+            # check temperature moving upwards - Storage temperature first - 1 degree move ...
+            oldTemp = 100.0
+            if self.scObject.getSampleStorageTemperature() != "":
+                oldTemp = float( self.scObject.getSampleStorageTemperature() )
             else:
-                if not ( not self.__expertModeOnly or self.__expertMode ):
+                logger.warning( "Can not get current Storage temperature from Sample Changer" )
+            newTemp = float( self.CURObject.storageTemperatureDoubleSpinBox.value() )
+            if newTemp > ( oldTemp + 1.0 ) :
+                answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
+                             "Do you want to increase the Storage Temp from " + "%.1f C" % oldTemp + \
+                             " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                             Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
+                if answer == Qt.QMessageBox.No:
+                    return
+            # Check SEU Temperatures (max) - 4 degree move max...
+            oldTemp = 100.0
+            if self.scObject.getSEUTemperature() != "":
+                oldTemp = float( self.scObject.getSEUTemperature() )
+            else:
+                logger.warning( "Can not get current SEU temperature from Sample Changer" )
+            newTemp = 0.0
+            for checkSample in self.robotParams["sampleList"]:
+                if newTemp < checkSample["SEUtemperature"]:
+                    newTemp = checkSample["SEUtemperature"]
+            if newTemp > ( oldTemp + 4.0 ):
+                answer = Qt.QMessageBox.question( self.brick_widget, "Question", \
+                             "Do you want to increase the SEU Temp from " + "%.1f C" % oldTemp + \
+                             " to " + "%.1f C" % newTemp + "?\nIt will take time to cool down later.", \
+                             Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
+                if answer == Qt.QMessageBox.No:
+                    return
+        self.displayReset()
+        directory = str( self.directoryLineEdit.text() ) + "/raw"
+        runNumber = "%03d" % self.runNumberSpinBox.value()
 
-                    if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
-                        flag = ( Qt.QMessageBox.question( self.brick_widget, \
-                                    "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
-                                                  self.concentrationDoubleSpinBox.value(), \
-                                                  Qt.QMessageBox.Yes, \
-                                                  Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+        flag = True
 
-                if flag:
-                    #When collect without robot there is no log on ISPyB
-                    self.getObject( "collect" ).isISPyB = False
-                    self.startCollectWithoutRobot()
+        if os.path.isdir( directory ):
+            for filename in os.listdir( directory ):
+                if os.path.isfile( os.path.join( directory, filename ) ):
+                    if filename.startswith( str( self.prefixLineEdit.text() ) ) \
+                       and ( filename.split( "_" )[-1] != "00000.edf" ) \
+                       and ( filename.split( "_" )[-1] != "00000.xml" ) \
+                       and ( filename.split( "." )[-1] != "h5" ) \
+                       and ( filename.split( "." )[-1] != "json" ) \
+                       and ( filename.split( "." )[-1] != "svg" ) \
+                       and ( filename.split( "." )[-1] != "png" ):
+                        # Check if we have a run number higher than the requested run number:
+                        try:
+                            existingRunNumber = filename.split( "_" )[-2]
+                            if int( existingRunNumber ) >= int( runNumber ):
+                                logger.info( "Existing run number %r is higher than requested run number %r" % ( existingRunNumber, runNumber ) )
+                                flag = False
+                                break
+                        except IndexError:
+                            #TODO: DEBUG
+                            print ">>> got totally unexpected filename %s " % filename
+                            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory Unexpected file %s in directory " % filename , Qt.QMessageBox.Ok )
+                            raise RuntimeError, "Creating of filename from info not possible"
+                        except ValueError:
+                            #TODO: DEBUG
+                            print ">>> got totally unexpected filename %s " % filename
+                            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok )
+                            raise RuntimeError, "Creating of filename from info not possible"
+
+        if not flag:
+            flag = ( Qt.QMessageBox.question( self.brick_widget, "Warning", \
+                            "The run '%s' with prefix '%s' has run numbers already existing in the directory '%s' that might be overwritten. Proceed?" % \
+                            ( runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text() ), \
+                            Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+
+        if not flag:
+            return
+
+        if self.robotCollect:
+            self.startCollectWithRobot()
+        else:
+            if not ( not self.__expertModeOnly or self.__expertMode ):
+
+                if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
+                    flag = ( Qt.QMessageBox.question( self.brick_widget, \
+                                "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
+                                              self.concentrationDoubleSpinBox.value(), \
+                                              Qt.QMessageBox.Yes, \
+                                              Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
+
+            if flag:
+                #When collect without robot there is no log on ISPyB
+                self.getObject( "collect" ).isISPyB = False
+                self.startCollectWithoutRobot()
 
     def setCollectionStatus( self, status ):
         self.collectionStatus = status
@@ -1600,7 +1622,8 @@ class CollectBrick( Core.BaseBrick ):
         self.emit( "grayOut", True )
         self._abortFlag = False
         self.startCollection( mode = "with robot" )
-        self._collectRobotDialog.clearHistory()
+        #TODO: Staffan's note: take it away
+        #self.CURObject.clearHistory()
         self.getObject( "collect" ).collectWithRobot( self.getCollectPars(), oneway = True )
 
 
@@ -1630,7 +1653,7 @@ class CollectBrick( Core.BaseBrick ):
         if self.sasWebObject is not None:
             #TODO: DEBUG
             print "set URL on object"
-            self.sasWebObject.setUrl( url )
+            self.emit( "setUrl", url )
 
     def transmissionChanged( self, percentage ):
         pass
@@ -1680,8 +1703,11 @@ class CollectBrick( Core.BaseBrick ):
 
         self.setCollectionStatus( "running" )
 
+        self.__isTesting = False
         if mode == "test":
             self.__isTesting = True
+            #Since we collect the same frame over and over again we reset last frame
+            self.__lastFrame = None
 
         logger.info( "   - collection started (mode: %s)" % mode )
 
@@ -1756,8 +1782,9 @@ class CollectBrick( Core.BaseBrick ):
             logging.warning( pMessage )
         elif pLevel == 2:
             logging.error( pMessage )
-        if self._collectRobotDialog is not None:
-            self._collectRobotDialog.addHistory( pLevel, pMessage )
+        #TODO: Staffan's note: take it away
+#        if self.CURObject is not None:
+#            self.CURObject.addHistory( pLevel, pMessage )
 
         if notify:
             self.messageDialog( pLevel, pMessage )

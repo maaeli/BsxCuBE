@@ -3,7 +3,7 @@ from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 import traceback
 import sys
-
+import os, shutil
 
 
 class BiosaxsClient( CObjectBase ):
@@ -20,7 +20,7 @@ class BiosaxsClient( CObjectBase ):
     def init( self ):
         self.client = None
 
-          #Prod machine
+        #Prod machine
         self.URL = 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
 
         #Test machine
@@ -28,6 +28,8 @@ class BiosaxsClient( CObjectBase ):
         #Alejandro's local machine
         #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         print "ISPyB Server: " + self.URL
+
+        self.selectedExperimentId = None
 
         #Login information
         self.user = None
@@ -61,6 +63,7 @@ class BiosaxsClient( CObjectBase ):
             experimentNames.append( [experiment.experiment.name, experiment.experiment.experimentId] )
         return experimentNames
 
+
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
             self.__initWebservice()
@@ -72,18 +75,8 @@ class BiosaxsClient( CObjectBase ):
         self.emit( "onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames )
         #self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
 
-
-
-#    def getExperimentsByProposalId(self, proposalId):
-#        if (self.client is None):
-#            self.__initWebservice()
-#
-#        response = self.client.service.findExperimentByPosposalId(3124)
-#        self.experiments = []
-#        for experiment in response:
-#            self.experiments.append(Experiment(experiment))
-#        return self.getExperimentNames()
-
+    def getPyarchDestination( self ):
+        return "/data/pyarch/bm29/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
 
 
     def getSpecimenIdBySampleCode( self, sampleCode ):
@@ -171,7 +164,6 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
         print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
         return -1
-#Testing git hub
 
     ### Mode: before, after, sample    
     def saveFrameSet( self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId ):
@@ -260,7 +252,7 @@ class BiosaxsClient( CObjectBase ):
         xml = self.client.service.getRobotXMLByPlateIds( experimentId, str( ids ) )
         self.emit( "onSuccess", "getRobotXMLByPlateGroupId", xml )
 
-    def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime ):
+    def setExperimentAborted( self ):
         try:
             if ( self.client is None ):
                 self.__initWebservice()
@@ -268,10 +260,49 @@ class BiosaxsClient( CObjectBase ):
             print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
             raise Exception
         try:
+            if ( self.selectedExperimentId is not None ):
+                self.client.service.setExperimentAborted( self.selectedExperimentId )
+        except Exception:
+            traceback.print_exc()
+            raise Exception
+
+    def copyfile( self, afile, pyarch ):
+        try:
+            print "[ISPyB] Copying %s to pyarch: %s " % ( afile, pyarch )
+            if not os.path.isdir( pyarch ):
+                print "[ISPyB] Creating directory %s " % ( pyarch )
+                os.makedirs( pyarch )
+            shutil.copy( afile, pyarch )
+        except IOError as error:
+            print "[ISPyB] Handled error while directory creation in pyarch: %s " % error
+
+
+    #def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime, experimentType, sourceFile, name ):
+    def createExperiment( self, samples, storageTemperature, mode, extraflowTime, experimentType, sourceFile, name ):
+        try:
+            if ( self.client is None ):
+                self.__initWebservice()
+        except Exception:
+            print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
+            raise Exception
+
+        try:
+            expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             self.experiment = None
             self.selectedExperimentId = None
-            print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( proposalCode ) + str( proposalNumber )
-            experiment = self.client.service.createExperiment( proposalCode, proposalNumber, str( samples ), storageTemperature, mode, extraflowTime )
+            print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( self.proposalType ) + str( self.proposalNumber )
+            experiment = self.client.service.createExperiment( 
+#                                                               proposalCode,
+#                                                               proposalNumber,
+                                                               self.proposalType,
+                                                               self.proposalNumber,
+                                                               str( samples ),
+                                                               storageTemperature,
+                                                               mode,
+                                                               extraflowTime,
+                                                               experimentType,
+                                                               expectedXMLFilePath,
+                                                               name )
             if ( experiment is None ):
                 print "[ISPyB] ISPyB could not create the experiment from robot file"
                 raise Exception
@@ -281,12 +312,13 @@ class BiosaxsClient( CObjectBase ):
             self.experiment = Experiment( experiment )
             self.experiments.append( Experiment( experiment ) )
             print "[ISPyB] selectedExperimentId: " + str( self.selectedExperimentId )
-            #print experiment
         except Exception:
             print "[ISPyB] handled error"
             traceback.print_exc()
             raise Exception
-            #traceback.print_exc()
+
+        # Copying xml file to pyarch. It doesnt raise an exception
+        self.copyfile( sourceFile, self.getPyarchDestination() )
 
 class Experiment:
     def __init__( self, experiment ):

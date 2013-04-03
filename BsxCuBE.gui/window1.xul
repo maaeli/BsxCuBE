@@ -50,7 +50,8 @@
   <caption label="Display"/>
   <tabbox id="tabbox2">
     <tabs>
-      <tab label='EH Scan'/>
+      <tab label='Collect using SC'/>
+<tab label='EH Scan'/>
 <tab label='OH Scan'/>
 <tab label='1D'/>
 <tab label='2D raw'/>
@@ -58,7 +59,11 @@
 <tab label='SAS'/>
     </tabs>
     <tabpanels>
-      <tabpanel id='tab_EH'><vbox id="EH" orient="vertical">
+      <tabpanel id='tab_Collect'><vbox id="Collect" orient="vertical">
+  <hbox qwidget="true" id="CURBrick1" brick="true"><script src="CURBrick" tau="false"/></hbox>
+</vbox>
+  </tabpanel>
+<tabpanel id='tab_EH'><vbox id="EH" orient="vertical">
   <hbox qwidget="true" id="EH Scan" brick="true"><script src="BsxGraphBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
