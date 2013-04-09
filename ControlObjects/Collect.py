@@ -202,7 +202,6 @@ class Collect( CObjectBase ):
         self.emit( "machineCurrentChanged", current )
 
     def getTemplateDirectory( self ):
-        # get Template directory
         return str ( self.config["/object/data[@name='templateDirectory']/@value"][0] )
 
     def sasWebDisplay( self, url ):

@@ -8,7 +8,7 @@ import logging
 import os.path, time
 import pprint
 from compiler.ast import For
-
+import traceback
 
 __category__ = "BsxCuBE"
 
@@ -422,7 +422,8 @@ class CURBrick( Core.BaseBrick ):
             try:
                 dirname = os.path.split( self.collectBrickObject.collectpars.directory )
             except Exception, e:
-                print "Ignored Exception 5: " + str( e )
+                print "Ignored Exception 6: " + str( e )
+                traceback.print_exc()
 
         filename = Qt.QFileDialog.getOpenFileName( self.brick_widget, "Choose a new file to load", dirname, "XML File (*.xml)" )
 

@@ -4,6 +4,7 @@ import cStringIO
 import logging
 import os.path, time
 import pprint
+import traceback
 
 logger = logging.getLogger( "CollectRobotDialog" )
 
@@ -563,6 +564,7 @@ class CollectRobotDialog( Qt.QDialog ):
                 dirname = os.path.split( self.__parent.collectpars.directory )
             except Exception, e:
                 print "Ignored Exception 5: " + str( e )
+                traceback.print_exc()
 
         filename = Qt.QFileDialog.getOpenFileName( self, "Choose a new file to load", dirname, "XML File (*.xml)" )
 

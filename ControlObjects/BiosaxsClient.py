@@ -5,7 +5,6 @@ import traceback
 import sys
 import os, shutil
 
-
 class BiosaxsClient( CObjectBase ):
     signals = [
                Signal( "onSuccess" ),
