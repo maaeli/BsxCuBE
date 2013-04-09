@@ -979,7 +979,7 @@ class CURBrick( Core.BaseBrick ):
             self.savePushButton.setEnabled ( 0 )
             self.loadPushButton.setEnabled ( 0 )
             templateDirectory = self.collectBrickObject.getTemplateDirectory()
-            filename = str( templateDirectory + "/" + str( pValue ).split( " " )[0] + ".xml" )
+            filename = str( str( templateDirectory ) + "/" + str( pValue ).split( " " )[0] + ".xml" )
             self.loadFile( filename )
 
     def __robotCheckBoxToggled( self, pValue ):
