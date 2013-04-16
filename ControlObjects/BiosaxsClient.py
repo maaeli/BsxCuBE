@@ -24,9 +24,9 @@ class BiosaxsClient( CObjectBase ):
         #self.URL = 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
 
         #Test machine
-        #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Alejandro's local machine
-        self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         print "ISPyB Server: " + self.URL
 
         self.selectedExperimentId = None
@@ -76,6 +76,11 @@ class BiosaxsClient( CObjectBase ):
         #self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
 
     def getPyarchDestination( self ):
+        # This happens because I need the experiment ID but because the experiment has not been created yet I have to replace it in the server side
+        # so I will replace /data/pyarch/bm29/%s%s/__ID__ by the good ID
+        if ( self.selectedExperimentId is None ):
+            self.selectedExperimentId = "__ID__"
+
         if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
             return "/data/pyarch/bm29/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
         return "/data/pyarch/bm29/testing/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
@@ -288,9 +293,9 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
 
         try:
-            expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             self.experiment = None
             self.selectedExperimentId = None
+            expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( self.proposalType ) + str( self.proposalNumber )
             experiment = self.client.service.createExperiment( 
 #                                                               proposalCode,
