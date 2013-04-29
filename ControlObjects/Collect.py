@@ -268,6 +268,10 @@ class Collect( CObjectBase ):
 
 
     def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
+        if self.objects["sample_changer"].channels["WasteFull"].value():
+            logger.error("WasteFull: cannot collect, please empty waste canister below the experimental table")
+            return
+    
         #TODO: DEBUG
         logger.info( "Starting collection now" )
         try:
@@ -859,12 +863,14 @@ class Collect( CObjectBase ):
         self.xmlRobotFilePath = path
 
     def _collectWithRobot( self, pars ):
+        if self.objects["sample_changer"].channels["WasteFull"].value():
+            logger.error("WasteFull: cannot collect, please empty waste canister below the experimental table")    
+            return
 
         lastBuffer = ""
         # Setting sample type
         # Synchronous - no exception handling
         self.objects["sample_changer"].setSampleType( pars["sampleType"].lower() )
-
 
         # ===========================================
         #  Silent creation of the experiment in ISPyB
