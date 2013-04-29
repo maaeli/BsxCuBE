@@ -403,7 +403,7 @@ class CollectBrick( Core.BaseBrick ):
         self.xmlFileLoaded.setFont( italicFont )
         self.hBoxLayout16.addWidget( self.xmlFileLoaded )
         self.hplcCheckBox = Qt.QCheckBox( "Collect using HPLC", self.brick_widget )
-        Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.CheckBoxToggledHPLC )
+        Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.hplcCheckBoxToggled)
         self.hBoxLayout16.addWidget( self.hplcCheckBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout16 )
 
@@ -692,7 +692,8 @@ class CollectBrick( Core.BaseBrick ):
 
     def collectRadiationDamageChanged( self, pValue ):
         if pValue is not None:
-            self.radiationCheckBox.setChecked( pValue == "1" )
+            doRadDam = pValue == "1" and not self.isHPLC
+            self.radiationCheckBox.setChecked(doRadDam)
 
     def collectAbsoluteRadiationDamageChanged( self, pValue ):
         if pValue is not None:
@@ -992,6 +993,10 @@ class CollectBrick( Core.BaseBrick ):
             self.brick_widget.setEnabled( self.loginDone )
             self.collectObj = collect_obj
             self.collectObj.updateChannels( oneway = True )
+            if self.collectObj.isHPLC():
+                self.robotCheckBox.setChecked(False)
+                self.radiationCheckBox.setChecked(False) 
+                self.hplcCheckBox.setChecked(True)
             # and force the Check Beam
 
     def connectedToEnergy( self, pPeer ):
@@ -1402,28 +1407,33 @@ class CollectBrick( Core.BaseBrick ):
         # setChecked is used to avoid infinite loop (the checkBox in the CURObject is not using toggle signal but stateChanged) 
         self.CURObject.robotCheckBox.setChecked( pValue )
 
-    def CheckBoxToggledHPLC( self, pValue ):
-        v = bool( pValue )
-        self.isHPLC = v
-        if v:
-            if self.robotCheckBox.isChecked():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
-                self.hplcCheckBox.setChecked( False )
-                self.isHPLC = False
-                return
-            if self.radiationCheckBox.isChecked():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Radiation damage is selected", Qt.QMessageBox.Ok )
-                self.hplcCheckBox.setChecked( False )
-                self.isHPLC = False
-                return
-        self.collectObj.setHPLC( v )
+    def hplcCheckBoxToggled( self, pValue ):
+        try:
+            self.isHPLC = self.collectObj.isHPLC()
+
+            doHPLC = bool(pValue)
+            if doHPLC:
+                if self.robotCheckBox.isChecked():
+                    doHPLC = False
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
+                if self.radiationCheckBox.isChecked():
+                    doHPLC = False
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Radiation damage is selected", Qt.QMessageBox.Ok )
+
+            if doHPLC != self.isHPLC:
+                if self.collectObj.setHPLC(doHPLC):
+                    self.isHPLC = doHPLC
+                else:
+                    Qt.QMessageBox.critical(self.brick_widget, "Error", "Could not put SC in desired HPLC mode. Please, check its state", Qt.QMessageBox.Ok)
+        finally:
+            self.hplcCheckBox.blockSignals(True) #this is to prevent re-entering in this method
+            self.hplcCheckBox.setChecked(self.isHPLC)
+            self.hplcCheckBox.blockSignals(False)
 
     def connectedToCUR( self, pPeer ):
         if pPeer is not None:
             self.CURObject = pPeer
             self.CURObject.collectBrickObject = self
-
-
 
     def checkBeamBoxToggled( self, pValue ):
         self.collectObj.setCheckBeam( pValue )

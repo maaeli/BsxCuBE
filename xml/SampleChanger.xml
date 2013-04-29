@@ -11,7 +11,8 @@
   <channel type="tango" name="CommandException" polling="1000"/>
   <channel type="tango" name="CommandOutput"    polling="1000"/>
   <channel type="tango" name="CurrentLiquidPosition"    slot="getCurrentLiquidPosition"/>
-  <channel type="tango" name="LiquidPositionFixed" />
+  <channel type="tango" name="LiquidPositionFixed"/>
+  <channel type="tango" name="ModeHPLC"/>
   <command type="tango" name="abort"                    slot="abort"/>
   <command type="tango" name="clean"/>
   <command type="tango" name="dry"                      slot="dry" />

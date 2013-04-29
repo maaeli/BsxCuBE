@@ -69,10 +69,6 @@ class Collect( CObjectBase ):
         self.__username = None
         self.__password = None
 
-        #
-        # HPCL or not
-        self.isHPLC = False
-
         # ----------------------------
         # ISPyB Parameters
         self.isISPyB = False
@@ -81,7 +77,6 @@ class Collect( CObjectBase ):
         #Measurement Id of the sample
         self.measurementId = None
         # ----------------------------
-
 
         CObjectBase.__init__( self, *args, **kwargs )
         self.__collectWithRobotProcedure = None
@@ -389,15 +384,6 @@ class Collect( CObjectBase ):
         base = os.path.splitext( os.path.basename( raw_filename ) )[0]
         directory = os.path.dirname( os.path.dirname( raw_filename ) )
         frame = base.split( "_" )[-1]
-        #tmp, _ = os.path.splitext( raw_filename )
-        #tmp, base = os.path.split( tmp )
-        #directory, _ = os.path.split( tmp )
-        #frame = ""
-        #for c in base[-1::-1]:
-        #    if c.isdigit():
-        #        frame = c + frame
-        #    else:
-        #        break
 
         self.xsdin.experimentSetup.storageTemperature = XSDataDouble( self.storageTemperature )
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble( self.exposureTemperature )
@@ -415,7 +401,7 @@ class Collect( CObjectBase ):
         logger.info( "Saving XML data to %s", xmlFilename )
         self.xsdin.exportToFile( xmlFilename )
         # Run EDNA
-        if self.isHPLC:
+        if self.isHPLC():
             try:#HPLC mode on slavia
                 jobId = self.commands["startJob_edna1"]( [self.pluginHPLC, self.xsdin.marshal()] )
                 self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
@@ -438,7 +424,7 @@ class Collect( CObjectBase ):
     def specCollectDone( self, returnValue ):
         self.collecting = False
         # start EDNA to calculate average at the end
-        if not self.isHPLC:
+        if not self.isHPLC():
             try:
                 jobId = self.commands["startJob_edna2"]( [self.pluginMerge, self.xsdAverage.marshal()] )
                 self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
@@ -589,7 +575,6 @@ class Collect( CObjectBase ):
                         self.showMessage( 0, log )
 
 
-
     def _abortCollectWithRobot( self ):
         #TODO: See if we actually come here
         print "---- Aborting Collection with Robot"
@@ -599,11 +584,11 @@ class Collect( CObjectBase ):
             self.__collectWithRobotProcedure.kill()
 
 
-
     def collectFailed( self, error ):
         """Callback when collect is aborted in spec (CTRL-C or error)"""
         self.collecting = False
         self._abortCollectWithRobot()
+
 
     def flushHPLC( self ):
         try:
@@ -616,7 +601,7 @@ class Collect( CObjectBase ):
 
     def collectAbort( self ):
         logger.info( "sending abort to stop spec collection" )
-        if self.isHPLC:# If HPLC we can now dump data
+        if self.isHPLC():# If HPLC we can now dump data
             self.flushHPLC()
 
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
@@ -633,7 +618,11 @@ class Collect( CObjectBase ):
         logger.info( "sending abort to stop spec test collection" )
 
     def setHPLC( self, pValue ):
-        self.isHPLC = bool( pValue )
+        doHPLC = bool(pValue)
+        return self.objects["sample_changer"].setHPLCMode(doHPLC)
+
+    def isHPLC(self):
+        return self.objects["sample_changer"].channels["ModeHPLC"].value()
 
     def setCheckBeam( self, flag ):
         if flag:
