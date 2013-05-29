@@ -90,7 +90,7 @@ class Collect( CObjectBase ):
         self.jobSubmitted = False
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_3"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
-        self.pluginSAS = "EDPluginBioSaxsToSASv1_0"
+        self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
         self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_0"
 
