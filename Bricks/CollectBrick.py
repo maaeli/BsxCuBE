@@ -1,4 +1,5 @@
 import os, logging, time, re
+import gevent
 import CURBrick
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
@@ -136,11 +137,12 @@ class CollectBrick( Core.BaseBrick ):
 
     def __init__( self, *args, **kargs ):
         Core.BaseBrick.__init__( self, *args, **kargs )
+
+    def init(self):
         self._curveList = []
         self.__energy = None
         self.isHPLC = False
 
-    def init( self ):
         # The keV to Angstrom calc
         self.hcOverE = 12.3984
         self.deltaPilatus = 0.1
@@ -263,7 +265,6 @@ class CollectBrick( Core.BaseBrick ):
         self.commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), self.commentsLineEdit ) )
         self.hBoxLayout6.addWidget( self.commentsLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout6 )
-
 
         self.hBoxLayout7 = Qt.QHBoxLayout()
         self.codeLabel = Qt.QLabel( "Code", self.brick_widget )
@@ -992,12 +993,12 @@ class CollectBrick( Core.BaseBrick ):
             self.setButtonState( 0 )
             self.brick_widget.setEnabled( self.loginDone )
             self.collectObj = collect_obj
-            self.collectObj.updateChannels( oneway = True )
             if self.collectObj.isHPLC():
                 self.robotCheckBox.setChecked(False)
                 self.radiationCheckBox.setChecked(False) 
                 self.hplcCheckBox.setChecked(True)
-            # and force the Check Beam
+            gevent.spawn_later(1, self.collectObj.updateChannels, oneway=True)
+            #self.collectObj.updateChannels( oneway = True )
 
     def connectedToEnergy( self, pPeer ):
         #TODO: Matias says: If None => lost connection to peer
