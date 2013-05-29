@@ -1082,6 +1082,13 @@ class Collect( CObjectBase ):
         self.commands["guillclose"]()
         self.commands["shclose"]()
         self.showMessage( 0, "The data collection is done!" )
+        ## Sending status to ISPyB
+        if ( self.isISPyB ):
+            try:
+                self.measurementId = self.objects["biosaxs_client"].updateStatus( "FINISHED" )
+            except Exception:
+                traceback.print_exc()
+
         self.emit( "collectDone" )
 
 
