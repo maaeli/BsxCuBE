@@ -109,7 +109,6 @@
   
 </hbox>
   
-<splitter id="splitter1"/>
 <tabbox id="tabbox3">
     <tabs>
       <tab label='Log'/>
