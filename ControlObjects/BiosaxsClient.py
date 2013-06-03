@@ -4,6 +4,8 @@ from suds.transport.http import HttpAuthenticated
 import traceback
 import sys
 import os, shutil
+from contextlib import closing
+import zipfile
 
 class BiosaxsClient( CObjectBase ):
     signals = [
@@ -259,6 +261,13 @@ class BiosaxsClient( CObjectBase ):
 
     def setExperimentAborted( self ):
         try:
+            self.updateStatus( "ABORTED" )
+        except Exception:
+            traceback.print_exc()
+            raise Exception
+
+    def updateStatus( self, status ):
+        try:
             if ( self.client is None ):
                 self.__initWebservice()
         except Exception:
@@ -266,10 +275,42 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
         try:
             if ( self.selectedExperimentId is not None ):
-                self.client.service.setExperimentAborted( self.selectedExperimentId )
+                self.client.service.updateStatus( self.selectedExperimentId, status )
+
+                #If status is inished we compress the folder
+                if  status == "FINISHED" :
+                    #Zipping file
+                    zipFilePath = self.getPyarchDestination() + "/" + str( self.selectedExperimentId ) + ".zip"
+                    temporalPath = "/tmp/" + str( self.selectedExperimentId ) + ".zip"
+                    self.zipFolder( self.getPyarchDestination(), temporalPath )
+                    self.movefile( temporalPath, self.getPyarchDestination() )
+                    self.client.service.setDataAcquisitionFilePath( self.selectedExperimentId, zipFilePath )
         except Exception:
             traceback.print_exc()
             raise Exception
+
+
+    def zipFolder( self, path, archivename ):
+        print "ISPyB: zipping " + path + " on " + archivename
+        myZipFile = zipfile.ZipFile( archivename, 'w' )
+        rootlen = len( path ) + 1
+        assert os.path.isdir( path )
+        for base, dirs, files in os.walk( path ):
+            for file in files:
+                fn = os.path.join( base, file )
+                myZipFile.write( fn, fn[rootlen:] )
+        myZipFile.close()
+
+    def movefile( self, afile, destination ):
+        try:
+            print "[ISPyB] Moving %s to : %s " % ( afile, destination )
+            if not os.path.isdir( destination ):
+                print "[ISPyB] Creating directory %s " % ( destination )
+                os.makedirs( destination )
+            shutil.move( afile, destination )
+        except IOError as error:
+            print "[ISPyB] Handled error while directory creation in pyarch: %s " % error
+
 
     def copyfile( self, afile, pyarch ):
         try:
