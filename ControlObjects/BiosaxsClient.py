@@ -284,7 +284,7 @@ class BiosaxsClient( CObjectBase ):
                     zipFilePath = self.getPyarchDestination() + "/" + str( self.selectedExperimentId ) + ".zip"
                     temporalPath = "/tmp/" + str( self.selectedExperimentId ) + ".zip"
                     self.zipFolder( self.getPyarchDestination(), temporalPath )
-                    self.copyfile( temporalPath, self.getPyarchDestination() )
+                    self.movefile( temporalPath, self.getPyarchDestination() )
                     self.client.service.setDataAcquisitionFilePath( self.selectedExperimentId, zipFilePath )
         except Exception:
             traceback.print_exc()
@@ -301,6 +301,16 @@ class BiosaxsClient( CObjectBase ):
                 fn = os.path.join( base, file )
                 myZipFile.write( fn, fn[rootlen:] )
         myZipFile.close()
+
+    def movefile( self, afile, destination ):
+        try:
+            print "[ISPyB] Moving %s to : %s " % ( afile, destination )
+            if not os.path.isdir( destination ):
+                print "[ISPyB] Creating directory %s " % ( destination )
+                os.makedirs( destination )
+            shutil.move( afile, destination )
+        except IOError as error:
+            print "[ISPyB] Handled error while directory creation in pyarch: %s " % error
 
 
     def copyfile( self, afile, pyarch ):
