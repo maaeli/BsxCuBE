@@ -559,6 +559,9 @@ class CollectBrick( Core.BaseBrick ):
         return False
 
     def getDefaultDirectoryByUsername ( self, username ):
+        if username.startswith("ifx"):
+            username = "fx"+username[3:]
+
         user_category = 'visitor'
         if ( self.isInhouseUser( username ) ):
             user_category = 'inhouse'
