@@ -147,6 +147,7 @@ class CollectBrick( Core.BaseBrick ):
         self.hcOverE = 12.3984
         self.deltaPilatus = 0.1
         self.nbPlates = 0
+        self.frame_count = 0
         self.platesIDs = []
         self.plateInfos = []
         self._machineCurrent = float( 0.0 )
@@ -708,6 +709,14 @@ class CollectBrick( Core.BaseBrick ):
             self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
 
     def collectProcessingDone( self, dat_filename ):
+        if self.isHPLC:
+           self.frame_count += 1
+           if self.frame_count >= 10 and self.frame_count % 10 != 0:
+             if self.frame_count != self._frameNumber:
+               # only display first 10 frames, then one every 10 frames
+               # the last one is always displayed 
+               logger.info( "processing done, file is %s (curve not displayed)", dat_filename )
+               return 
         logger.info( "processing done, file is %s", dat_filename )
         # Only display 1d images like XXXX/1d/<at least on char>.dat
         if re.match( r".*/1d/[^/]+\.dat$", dat_filename ):
@@ -763,12 +772,6 @@ class CollectBrick( Core.BaseBrick ):
             directoryRaw = False
             directory = os.path.join( os.path.dirname( filename0 ), "1d" )
 
-            if self._isCollecting and self.isHPLC:
-               self.frame_count += 1
-               if self.frame_count >= 10 and self.frame_count % 10 != 0:
-                 # only display first 10 frames, then one every 10 frames
-                 # the last one is supposed to be always displayed (self._isCollecting = False, presumably)
-                 return 
 
         if self.__lastFrame != filename0:
             self.__lastFrame = filename0
@@ -982,7 +985,6 @@ class CollectBrick( Core.BaseBrick ):
         self.testPushButtonClicked()
 
     def display1D( self, pValue ):
-
         if self.imageProxy is None:
             return
         try:
