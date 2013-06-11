@@ -604,7 +604,6 @@
     </connection>
     <connection role="WebSAS">
       <slot name="setURL"/>
-      <peer name="WebBrowseBrick2"/>
     </connection>
     <connection role="collect">
       <signal name="collectBeamStopDiodeChanged"/>
