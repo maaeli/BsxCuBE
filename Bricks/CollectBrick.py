@@ -755,13 +755,20 @@ class CollectBrick( Core.BaseBrick ):
     def clearCurve( self ):
         self.displayReset()
 
-    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
+    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp):
         if os.path.dirname( filename0 ).endswith( "/raw" ) and filename0.endswith( '.edf' ):
             directoryRaw = True
             directory = os.path.dirname( filename0 )
         else:
             directoryRaw = False
             directory = os.path.join( os.path.dirname( filename0 ), "1d" )
+
+            if self._isCollecting and self.isHPLC:
+               self.frame_count += 1
+               if self.frame_count >= 10 and self.frame_count % 10 != 0:
+                 # only display first 10 frames, then one every 10 frames
+                 # the last one is supposed to be always displayed (self._isCollecting = False, presumably)
+                 return 
 
         if self.__lastFrame != filename0:
             self.__lastFrame = filename0
@@ -1714,7 +1721,7 @@ class CollectBrick( Core.BaseBrick ):
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
     def startCollection( self, mode = "normal" ):
-
+        self.frame_count = 0
         self.setCollectionStatus( "running" )
 
         self.__isTesting = False
