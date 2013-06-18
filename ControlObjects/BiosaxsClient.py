@@ -26,9 +26,9 @@ class BiosaxsClient( CObjectBase ):
         #self.URL = 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
 
         #Test machine
-        self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Alejandro's local machine
-        #self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        self.URL = 'http://pcantolinos:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         print "ISPyB Server: " + self.URL
 
         self.selectedExperimentId = None
@@ -99,7 +99,8 @@ class BiosaxsClient( CObjectBase ):
             #print experiment.experiment.experimentId
             if experiment.experiment.experimentId == self.selectedExperimentId:
                 for sample in experiment.experiment.samples:
-                    for specimen in sample.specimen3VOs:
+                    #for specimen in sample.specimen3VOs:
+                    for specimen in sample.measurements:
                         if specimen.code == sampleCode:
                             return specimen.specimenId
         return None
@@ -138,7 +139,8 @@ class BiosaxsClient( CObjectBase ):
             for experiment in self.experiments:
                 if experiment.experiment.experimentId == self.selectedExperimentId:
                     for sample in experiment.experiment.samples:
-                        for specimen in sample.specimen3VOs:
+                        #for specimen in sample.specimen3VOs:
+                        for specimen in sample.measurements:
                             if str( specimen.comment ).find( "[" + str( commentId ) + "]" ) != -1:
                                 return specimen.specimenId
         except:
@@ -163,7 +165,8 @@ class BiosaxsClient( CObjectBase ):
                     samples = self.getSpecimensByConcentration( concentration )
                     for sample in samples:
                         if sample.bufferId == bufferId:
-                            for specimen in sample.specimen3VOs:
+                            #for specimen in sample.specimen3VOs:
+                            for specimen in sample.measurements:
                                 if ( float( specimen.exposureTemperature ) == float( seu ) and ( str( specimen.code ) == str( sampleCode ) ) ):
                                     return specimen.specimenId
         except Exception:
@@ -210,6 +213,33 @@ class BiosaxsClient( CObjectBase ):
                                           pars["normalisation"],
                                           tocollect["transmission"]
                                           )
+            print ( "self.client.service.saveFrame(%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s,%s,%s" %
+                                          ( mode,
+                                          self.selectedExperimentId,
+                                          specimenId,
+                                          sampleCode,
+                                          exposureTemperature,
+                                          storageTemperature,
+                                          timePerFrame,
+                                          timeStart,
+                                          timeEnd,
+                                          energy,
+                                          detectorDistance,
+                                          fileArray,
+                                          snapshotCapillary,
+                                          currentMachine,
+                                          str( tocollect ),
+                                          str( pars ),
+                                          pars["beamCenterX"],
+                                          pars["beamCenterY"],
+                                          pars["radiationRelative"],
+                                          pars["radiationAbsolute"],
+                                          pars["pixelSizeX"],
+                                          pars["pixelSizeY"],
+                                          pars["normalisation"],
+                                          tocollect["transmission"] )
+
+                   )
         except Exception:
             print "[ISPyB] error", sys.exc_info()[0]
             #traceback.print_exc()
@@ -338,9 +368,18 @@ class BiosaxsClient( CObjectBase ):
             self.selectedExperimentId = None
             expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( self.proposalType ) + str( self.proposalNumber )
+            print ( "self.client.service.createExperiment( %s, %s, %s, %s, %s, %s, %s, %s, %s" % ( 
+                                                               self.proposalType,
+                                                               self.proposalNumber,
+                                                               str( samples ),
+                                                               storageTemperature,
+                                                               mode,
+                                                               extraflowTime,
+                                                               experimentType,
+                                                               expectedXMLFilePath,
+                                                               name
+                                                                                                 ) )
             experiment = self.client.service.createExperiment( 
-#                                                               proposalCode,
-#                                                               proposalNumber,
                                                                self.proposalType,
                                                                self.proposalNumber,
                                                                str( samples ),
@@ -350,6 +389,7 @@ class BiosaxsClient( CObjectBase ):
                                                                experimentType,
                                                                expectedXMLFilePath,
                                                                name )
+
             if ( experiment is None ):
                 print "[ISPyB] ISPyB could not create the experiment from robot file"
                 raise Exception

@@ -612,6 +612,7 @@ class Collect( CObjectBase ):
             self.edna1Dead = False
             self.jobSubmitted = True
         except Exception:
+            print "FLUSH ERROR"
             self.showMessageEdnaDead( 1 )
 
 
