@@ -1743,8 +1743,8 @@ class CollectBrick( Core.BaseBrick ):
             self.grayOut( False )
             self.emit( "grayOut", False )
             if self.notifyCheckBox.isChecked():
-                #TODO: Can we "spawn this"  to avoid stopping updating the 
-                Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
+                msgbox = Qt.QMessageBox(Qt.QMessageBox.Information, "Info", "\n                       The data collection is done!                                       \n", Qt.QMessageBox.Ok) 
+                msgbox.show()
 
 
     def collect( self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , \
