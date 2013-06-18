@@ -213,33 +213,32 @@ class BiosaxsClient( CObjectBase ):
                                           pars["normalisation"],
                                           tocollect["transmission"]
                                           )
-            print ( "self.client.service.saveFrame(%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s,%s,%s" %
-                                          ( mode,
-                                          self.selectedExperimentId,
-                                          specimenId,
-                                          sampleCode,
-                                          exposureTemperature,
-                                          storageTemperature,
-                                          timePerFrame,
-                                          timeStart,
-                                          timeEnd,
-                                          energy,
-                                          detectorDistance,
-                                          fileArray,
-                                          snapshotCapillary,
-                                          currentMachine,
-                                          str( tocollect ),
-                                          str( pars ),
-                                          pars["beamCenterX"],
-                                          pars["beamCenterY"],
-                                          pars["radiationRelative"],
-                                          pars["radiationAbsolute"],
-                                          pars["pixelSizeX"],
-                                          pars["pixelSizeY"],
-                                          pars["normalisation"],
-                                          tocollect["transmission"] )
-
-                   )
+#            print ( "self.client.service.saveFrame(%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s,%s,%s" %
+#                                          ( mode,
+#                                          self.selectedExperimentId,
+#                                          specimenId,
+#                                          sampleCode,
+#                                          exposureTemperature,
+#                                          storageTemperature,
+#                                          timePerFrame,
+#                                          timeStart,
+#                                          timeEnd,
+#                                          energy,
+#                                          detectorDistance,
+#                                          fileArray,
+#                                          snapshotCapillary,
+#                                          currentMachine,
+#                                          str( tocollect ),
+#                                          str( pars ),
+#                                          pars["beamCenterX"],
+#                                          pars["beamCenterY"],
+#                                          pars["radiationRelative"],
+#                                          pars["radiationAbsolute"],
+#                                          pars["pixelSizeX"],
+#                                          pars["pixelSizeY"],
+#                                          pars["normalisation"],
+#                                          tocollect["transmission"] )
+#                   )
         except Exception:
             print "[ISPyB] error", sys.exc_info()[0]
             #traceback.print_exc()
@@ -368,17 +367,17 @@ class BiosaxsClient( CObjectBase ):
             self.selectedExperimentId = None
             expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( self.proposalType ) + str( self.proposalNumber )
-            print ( "self.client.service.createExperiment( %s, %s, %s, %s, %s, %s, %s, %s, %s" % ( 
-                                                               self.proposalType,
-                                                               self.proposalNumber,
-                                                               str( samples ),
-                                                               storageTemperature,
-                                                               mode,
-                                                               extraflowTime,
-                                                               experimentType,
-                                                               expectedXMLFilePath,
-                                                               name
-                                                                                                 ) )
+#            print ( "self.client.service.createExperiment( %s, %s, %s, %s, %s, %s, %s, %s, %s" % ( 
+#                                                               self.proposalType,
+#                                                               self.proposalNumber,
+#                                                               str( samples ),
+#                                                               storageTemperature,
+#                                                               mode,
+#                                                               extraflowTime,
+#                                                               experimentType,
+#                                                               expectedXMLFilePath,
+#                                                               name
+#                                                                                                 ) )
             experiment = self.client.service.createExperiment( 
                                                                self.proposalType,
                                                                self.proposalNumber,
