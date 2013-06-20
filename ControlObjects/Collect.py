@@ -334,11 +334,11 @@ class Collect( CObjectBase ):
                                          passwd = XSDataString( password ),
                                          measurementID = XSDataInteger( self.measurementId ),
                                          ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
-                                         #,
-                                         #ispybURL = XSDataString( ispybURL )
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                         ispybURL = XSDataString( ispybURL )
                                          )
             except Exception:
+                traceback.print_exc()
                 print "[ISPyB] Error: setting ISPyB to False"
                 self.isISPyB = False
 
