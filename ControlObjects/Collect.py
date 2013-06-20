@@ -327,13 +327,15 @@ class Collect( CObjectBase ):
                                                                        pCode )
                 #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
                 pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+                ispybURL = self.objects["biosaxs_client"].URL
                 print "[ISPyB] Copying into " + pyarchDestination
                 sample = XSDataBioSaxsSample( 
                                          login = XSDataString( user ),
                                          passwd = XSDataString( password ),
                                          measurementID = XSDataInteger( self.measurementId ),
                                          ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                         ispybURL = XSDataString( ispybURL )
                                          )
             except Exception:
                 print "[ISPyB] Error: setting ISPyB to False"
@@ -516,8 +518,48 @@ class Collect( CObjectBase ):
                     if not os.path.isdir( dest ):
                         os.makedirs( dest )
                     logger.info( "filename as input for SAS %s", filename )
+
+
                     xsdin = XSDataInputBioSaxsToSASv1_0( subtractedCurve = rgOut.filename,
                                                         destinationDirectory = XSDataFile( XSDataString( dest ) ) )
+
+                     # Sending ISPyBs information to EDNA
+                    if self.isISPyB:
+                        try:
+                            user = self.objects["biosaxs_client"].proposalType
+                            password = self.objects["biosaxs_client"].proposalNumber
+                            measurementID = self.measurementId
+                            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+                            collectionOrder = self.dataCollectionOrder
+                            ispybURL = self.objects["biosaxs_client"].URL
+
+                            print "[ISPyB] Sending to EDNA SaxsToSas"
+                            print "[ISPyB] subtractedCurve " % str( rgOut.filename )
+                            print "[ISPyB] destinationDirectory " % str( dest )
+
+                            print "[ISPyB] login " % str( user )
+                            print "[ISPyB] passwd " % str( password )
+                            print "[ISPyB] measurementID " % str( measurementID )
+                            print "[ISPyB] ispybDestination " % str( pyarchDestination )
+                            print "[ISPyB] collectionOrder " % str( collectionOrder )
+                            print "[ISPyB] ispybURL " % str( ispybURL )
+
+
+                            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+                            sample = XSDataInputBioSaxsToSASv1_0( 
+                                                     subtractedCurve = rgOut.filename,
+                                                     destinationDirectory = XSDataFile( XSDataString( dest ) ),
+                                                     login = XSDataString( user ),
+                                                     passwd = XSDataString( password ),
+                                                     measurementID = XSDataInteger( self.measurementId ),
+                                                     ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
+                                                     collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                                     ispybURL = XSDataString( ispybURL )
+                                                     )
+                        except Exception:
+                            print "[ISPyB] Error: setting ISPyB to False"
+                            self.isISPyB = False
+
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
