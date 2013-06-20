@@ -334,8 +334,9 @@ class Collect( CObjectBase ):
                                          passwd = XSDataString( password ),
                                          measurementID = XSDataInteger( self.measurementId ),
                                          ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
-                                         ispybURL = XSDataString( ispybURL )
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
+                                         #,
+                                         #ispybURL = XSDataString( ispybURL )
                                          )
             except Exception:
                 print "[ISPyB] Error: setting ISPyB to False"
@@ -533,6 +534,7 @@ class Collect( CObjectBase ):
                             collectionOrder = self.dataCollectionOrder
                             ispybURL = self.objects["biosaxs_client"].URL
 
+                            print "----------------------------------------"
                             print "[ISPyB] Sending to EDNA SaxsToSas"
                             print "[ISPyB] subtractedCurve " % str( rgOut.filename )
                             print "[ISPyB] destinationDirectory " % str( dest )
@@ -546,15 +548,21 @@ class Collect( CObjectBase ):
 
 
                             pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+
+                            sample = XSDataBioSaxsSample( 
+                                         login = XSDataString( user ),
+                                         passwd = XSDataString( password ),
+                                         measurementID = XSDataInteger( self.measurementId ),
+                                         ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
+                                         #,
+                                         #ispybURL = XSDataString( ispybURL )
+                                         )
+
                             sample = XSDataInputBioSaxsToSASv1_0( 
                                                      subtractedCurve = rgOut.filename,
                                                      destinationDirectory = XSDataFile( XSDataString( dest ) ),
-                                                     login = XSDataString( user ),
-                                                     passwd = XSDataString( password ),
-                                                     measurementID = XSDataInteger( self.measurementId ),
-                                                     ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                                     collectionOrder = XSDataInteger( self.dataCollectionOrder ),
-                                                     ispybURL = XSDataString( ispybURL )
+                                                     sample = XSDataBioSaxsSample( sample )
                                                      )
                         except Exception:
                             print "[ISPyB] Error: setting ISPyB to False"
