@@ -142,7 +142,7 @@ class BiosaxsClient( CObjectBase ):
                         #for specimen in sample.specimen3VOs:
                         for specimen in sample.measurements:
                             if str( specimen.comment ).find( "[" + str( commentId ) + "]" ) != -1:
-                                return specimen.specimenId
+                                return specimen.measurementId
         except:
             traceback.print_exc()
             raise Exception
