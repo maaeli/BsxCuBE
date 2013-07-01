@@ -93,6 +93,16 @@ class BSSampleChanger(CObjectBase):
     def setViscosityLevel(self, level):
         self.channels["ViscosityLevel"].set_value(level)
 
+    def setHPLCMode(self, hplc_mode):
+        try:
+            self.channels["ModeHPLC"].set_value(bool(hplc_mode))
+        except:
+            return False
+        else:
+            if not str(self.getState()) in ("STANDBY", "ON"):
+              return False
+            return True
+
     def fill(self, plate, row, column, volume):
         print ">>> fill ", plate, row, column, volume
         self.commands['fill'](map(str, (plate, row, column, volume)))

@@ -90,7 +90,7 @@ class LoginBrick( Core.BaseBrick ):
         Qt.QObject.connect( self.loginButton, Qt.SIGNAL( 'clicked()' ), self.login )
 
         self.logoutButton = Qt.QPushButton( "Logout" )
-        Qt.QObject.connect( self.logoutButton, Qt.SIGNAL( 'clicked()' ), self.openLogoutDialog )
+        Qt.QObject.connect( self.logoutButton, Qt.SIGNAL( 'clicked()' ), self.logout )
         self.logoutButton.hide()
         self.passwordBox.addWidget( self.logoutButton )
 
@@ -201,11 +201,6 @@ class LoginBrick( Core.BaseBrick ):
         if message is not None:
             self.errorBox = Qt.QMessageBox.critical( self.brick_widget, "Error", message, Qt.QMessageBox.Ok )
             self.brick_widget.setEnabled( True )
-
-    # Opens the logout dialog (modal); if the answer is OK then logout the user
-    def openLogoutDialog( self ):
-        self.logoutDialog = Qt.QMessageBox.critical( self.brick_widget, "Confirm logout", "Press OK to logout.", Qt.QMessageBox.Ok )
-        self.logout()
 
     def getUserInfo( self ):
         return ( self.__username, self.__password, self.enteredPropType, self.enteredPropNumber )

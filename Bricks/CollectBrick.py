@@ -1,4 +1,5 @@
 import os, logging, time, re
+import gevent
 import CURBrick
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Property, Connection, Signal, Slot
@@ -136,15 +137,17 @@ class CollectBrick( Core.BaseBrick ):
 
     def __init__( self, *args, **kargs ):
         Core.BaseBrick.__init__( self, *args, **kargs )
+
+    def init(self):
         self._curveList = []
         self.__energy = None
         self.isHPLC = False
 
-    def init( self ):
         # The keV to Angstrom calc
         self.hcOverE = 12.3984
         self.deltaPilatus = 0.1
         self.nbPlates = 0
+        self.frame_count = 0
         self.platesIDs = []
         self.plateInfos = []
         self._machineCurrent = float( 0.0 )
@@ -263,7 +266,6 @@ class CollectBrick( Core.BaseBrick ):
         self.commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), self.commentsLineEdit ) )
         self.hBoxLayout6.addWidget( self.commentsLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout6 )
-
 
         self.hBoxLayout7 = Qt.QHBoxLayout()
         self.codeLabel = Qt.QLabel( "Code", self.brick_widget )
@@ -403,7 +405,7 @@ class CollectBrick( Core.BaseBrick ):
         self.xmlFileLoaded.setFont( italicFont )
         self.hBoxLayout16.addWidget( self.xmlFileLoaded )
         self.hplcCheckBox = Qt.QCheckBox( "Collect using HPLC", self.brick_widget )
-        Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.CheckBoxToggledHPLC )
+        Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.hplcCheckBoxToggled)
         self.hBoxLayout16.addWidget( self.hplcCheckBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout16 )
 
@@ -558,6 +560,9 @@ class CollectBrick( Core.BaseBrick ):
         return False
 
     def getDefaultDirectoryByUsername ( self, username ):
+        if username.startswith("ifx"):
+            username = "fx"+username[3:]
+
         user_category = 'visitor'
         if ( self.isInhouseUser( username ) ):
             user_category = 'inhouse'
@@ -692,7 +697,8 @@ class CollectBrick( Core.BaseBrick ):
 
     def collectRadiationDamageChanged( self, pValue ):
         if pValue is not None:
-            self.radiationCheckBox.setChecked( pValue == "1" )
+            doRadDam = pValue == "1" and not self.isHPLC
+            self.radiationCheckBox.setChecked(doRadDam)
 
     def collectAbsoluteRadiationDamageChanged( self, pValue ):
         if pValue is not None:
@@ -703,6 +709,14 @@ class CollectBrick( Core.BaseBrick ):
             self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
 
     def collectProcessingDone( self, dat_filename ):
+        if self.isHPLC:
+           self.frame_count += 1
+           if self.frame_count >= 10 and self.frame_count % 10 != 0:
+             if self.frame_count != self._frameNumber:
+               # only display first 10 frames, then one every 10 frames
+               # the last one is always displayed 
+               logger.info( "processing done, file is %s (curve not displayed)", dat_filename )
+               return 
         logger.info( "processing done, file is %s", dat_filename )
         # Only display 1d images like XXXX/1d/<at least on char>.dat
         if re.match( r".*/1d/[^/]+\.dat$", dat_filename ):
@@ -750,13 +764,14 @@ class CollectBrick( Core.BaseBrick ):
     def clearCurve( self ):
         self.displayReset()
 
-    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
+    def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp):
         if os.path.dirname( filename0 ).endswith( "/raw" ) and filename0.endswith( '.edf' ):
             directoryRaw = True
             directory = os.path.dirname( filename0 )
         else:
             directoryRaw = False
             directory = os.path.join( os.path.dirname( filename0 ), "1d" )
+
 
         if self.__lastFrame != filename0:
             self.__lastFrame = filename0
@@ -970,7 +985,6 @@ class CollectBrick( Core.BaseBrick ):
         self.testPushButtonClicked()
 
     def display1D( self, pValue ):
-
         if self.imageProxy is None:
             return
         try:
@@ -991,8 +1005,12 @@ class CollectBrick( Core.BaseBrick ):
             self.setButtonState( 0 )
             self.brick_widget.setEnabled( self.loginDone )
             self.collectObj = collect_obj
-            self.collectObj.updateChannels( oneway = True )
-            # and force the Check Beam
+            if self.collectObj.isHPLC():
+                self.robotCheckBox.setChecked(False)
+                self.radiationCheckBox.setChecked(False) 
+                self.hplcCheckBox.setChecked(True)
+            gevent.spawn_later(1, self.collectObj.updateChannels, oneway=True)
+            #self.collectObj.updateChannels( oneway = True )
 
     def connectedToEnergy( self, pPeer ):
         #TODO: Matias says: If None => lost connection to peer
@@ -1402,28 +1420,33 @@ class CollectBrick( Core.BaseBrick ):
         # setChecked is used to avoid infinite loop (the checkBox in the CURObject is not using toggle signal but stateChanged) 
         self.CURObject.robotCheckBox.setChecked( pValue )
 
-    def CheckBoxToggledHPLC( self, pValue ):
-        v = bool( pValue )
-        self.isHPLC = v
-        if v:
-            if self.robotCheckBox.isChecked():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
-                self.hplcCheckBox.setChecked( False )
-                self.isHPLC = False
-                return
-            if self.radiationCheckBox.isChecked():
-                Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Radiation damage is selected", Qt.QMessageBox.Ok )
-                self.hplcCheckBox.setChecked( False )
-                self.isHPLC = False
-                return
-        self.collectObj.setHPLC( v )
+    def hplcCheckBoxToggled( self, pValue ):
+        try:
+            self.isHPLC = self.collectObj.isHPLC()
+
+            doHPLC = bool(pValue)
+            if doHPLC:
+                if self.robotCheckBox.isChecked():
+                    doHPLC = False
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
+                if self.radiationCheckBox.isChecked():
+                    doHPLC = False
+                    Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Radiation damage is selected", Qt.QMessageBox.Ok )
+
+            if doHPLC != self.isHPLC:
+                if self.collectObj.setHPLC(doHPLC):
+                    self.isHPLC = doHPLC
+                else:
+                    Qt.QMessageBox.critical(self.brick_widget, "Error", "Could not put SC in desired HPLC mode. Please, check its state", Qt.QMessageBox.Ok)
+        finally:
+            self.hplcCheckBox.blockSignals(True) #this is to prevent re-entering in this method
+            self.hplcCheckBox.setChecked(self.isHPLC)
+            self.hplcCheckBox.blockSignals(False)
 
     def connectedToCUR( self, pPeer ):
         if pPeer is not None:
             self.CURObject = pPeer
             self.CURObject.collectBrickObject = self
-
-
 
     def checkBeamBoxToggled( self, pValue ):
         self.collectObj.setCheckBeam( pValue )
@@ -1700,7 +1723,7 @@ class CollectBrick( Core.BaseBrick ):
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
     def startCollection( self, mode = "normal" ):
-
+        self.frame_count = 0
         self.setCollectionStatus( "running" )
 
         self.__isTesting = False
@@ -1720,8 +1743,8 @@ class CollectBrick( Core.BaseBrick ):
             self.grayOut( False )
             self.emit( "grayOut", False )
             if self.notifyCheckBox.isChecked():
-                #TODO: Can we "spawn this"  to avoid stopping updating the 
-                Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
+                msgbox = Qt.QMessageBox(Qt.QMessageBox.Information, "Info", "\n                       The data collection is done!                                       \n", Qt.QMessageBox.Ok) 
+                msgbox.show()
 
 
     def collect( self, pFeedBackFlag, pDirectory, pPrefix, pRunNumber, pFrameNumber , \

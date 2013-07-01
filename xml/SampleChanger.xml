@@ -11,20 +11,22 @@
   <channel type="tango" name="CommandException" polling="1000"/>
   <channel type="tango" name="CommandOutput"    polling="1000"/>
   <channel type="tango" name="CurrentLiquidPosition"    slot="getCurrentLiquidPosition"/>
-  <channel type="tango" name="LiquidPositionFixed" />
+  <channel type="tango" name="LiquidPositionFixed"/>
+  <channel type="tango" name="ModeHPLC"/>
+  <channel type="tango" name="WasteFull"/>
   <command type="tango" name="abort"                    slot="abort"/>
   <command type="tango" name="clean"/>
-  <command type="tango" name="dry"                      slot="dry" />
+  <command type="tango" name="dry"                      slot="dry"/>
   <command type="tango" name="fill"/>
   <command type="tango" name="flow"/>
-  <command type="tango" name="flowAll"                  slot="flowAll" />
-  <command type="tango" name="getImageJPG"              slot="getImageJPG" />
-  <command type="tango" name="getPlateInfo"             slot="getPlateInfo" />
-  <command type="tango" name="moveSyringeBackward"      slot="moveSyringeBackward" />
-  <command type="tango" name="moveSyringeForward"       slot="moveSyringeForward" />
-  <command type="tango" name="stopSyringe"              slot="stopSyringe" />
-  <command type="tango" name="pull"                     slot="pull" />
-  <command type="tango" name="push"                     slot="push" />
+  <command type="tango" name="flowAll"                  slot="flowAll"/>
+  <command type="tango" name="getImageJPG"              slot="getImageJPG"/>
+  <command type="tango" name="getPlateInfo"             slot="getPlateInfo"/>
+  <command type="tango" name="moveSyringeBackward"      slot="moveSyringeBackward"/>
+  <command type="tango" name="moveSyringeForward"       slot="moveSyringeForward"/>
+  <command type="tango" name="stopSyringe"              slot="stopSyringe"/>
+  <command type="tango" name="pull"                     slot="pull"/>
+  <command type="tango" name="push"                     slot="push"/>
   <command type="tango" name="recuperate"/>
   <command type="tango" name="mix"/>
   <command type="tango" name="transfer"/>

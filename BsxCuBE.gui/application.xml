@@ -154,7 +154,7 @@
      <property name="showPrintButton" value="True"/>
   </properties>
   <properties id="hbox1">
-     <property name="flex" value="0"/>
+     <property name="flex" value="4"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value=""/>
@@ -179,7 +179,7 @@
      <property name="title" value="BsxCuBE"/>
   </properties>
   <properties id="vbox1">
-     <property name="flex" value="0"/>
+     <property name="flex" value="1"/>
      <property name="align" value="stretch"/>
      <property name="pack" value="start"/>
      <property name="caption" value=""/>
@@ -224,12 +224,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Login Box"/>
   </properties>
-  <properties id="SAS">
-     <property name="flex" value="1"/>
-     <property name="align" value="stretch"/>
-     <property name="pack" value="start"/>
-     <property name="caption" value="SAS"/>
-  </properties>
   <properties id="BsxAttenuatorsBrick1">
      <property name="flex" value="0"/>
      <property name="maskFormat" value="%3.5f"/>
@@ -238,9 +232,6 @@
      <property name="maximumHistory" value="10"/>
      <property name="minimumValue" value="0.0"/>
      <property name="orientation" value="Landscape"/>
-  </properties>
-  <properties id="splitter1">
-     <property name="flex" value="0"/>
   </properties>
   <properties id="EH">
      <property name="flex" value="1"/>
@@ -301,10 +292,6 @@
      <property name="showScaleButton" value="True"/>
      <property name="y2AxisLabel" value=""/>
      <property name="showPrintButton" value="True"/>
-  </properties>
-  <properties id="WebBrowseBrick2">
-     <property name="url" value="about::blank"/>
-     <property name="flex" value="0"/>
   </properties>
   <properties id="Operation">
      <property name="flex" value="2"/>
@@ -617,7 +604,6 @@
     </connection>
     <connection role="WebSAS">
       <slot name="setURL"/>
-      <peer name="WebBrowseBrick2"/>
     </connection>
     <connection role="collect">
       <signal name="collectBeamStopDiodeChanged"/>
@@ -701,9 +687,6 @@
   <connections id="vgroupbox1">
   </connections>
 
-  <connections id="SAS">
-  </connections>
-
   <connections id="BsxAttenuatorsBrick1">
     <connection role="login">
       <signal name="loggedIn"/>
@@ -721,9 +704,6 @@
       <signal name="grayOut"/>
       <peer name="CollectBrick1"/>
     </connection>
-  </connections>
-
-  <connections id="splitter1">
   </connections>
 
   <connections id="EH">
@@ -820,13 +800,6 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-    </connection>
-  </connections>
-
-  <connections id="WebBrowseBrick2">
-    <connection role="login">
-      <signal name="loggedIn"/>
-      <peer name="LoginBrick1"/>
     </connection>
   </connections>
 

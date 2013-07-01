@@ -7,7 +7,6 @@ import os, shutil
 from contextlib import closing
 import zipfile
 
-
 class BiosaxsClient( CObjectBase ):
     signals = [
                Signal( "onSuccess" ),
@@ -40,7 +39,7 @@ class BiosaxsClient( CObjectBase ):
         self.proposalNumber = None
 
 
-        self.timeout = 5
+        self.timeout = 15
         self.experiments = None
 
     def __initWebservice( self ):

@@ -271,7 +271,6 @@ class Collect( CObjectBase ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
-
         #TODO: DEBUG
         logger.info( "Starting collection now" )
         try:
@@ -323,6 +322,8 @@ class Collect( CObjectBase ):
                 print "[ISPyB] Sending to EDNA login %s,%s, %s" % ( user,
                                                                        self.measurementId,
                                                                        pCode )
+                ispybURL = self.objects["biosaxs_client"].URL
+
                 #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
                 pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                 print "[ISPyB] Copying into " + pyarchDestination
@@ -331,7 +332,8 @@ class Collect( CObjectBase ):
                                          passwd = XSDataString( password ),
                                          measurementID = XSDataInteger( self.measurementId ),
                                          ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                         ispybURL = XSDataString( ispybURL )
                                          )
             except Exception:
                 print "[ISPyB] Error: setting ISPyB to False"
@@ -541,6 +543,7 @@ class Collect( CObjectBase ):
                             xsdin.subtractedCurve = rgOut.filename
                             xsdin.destinationDirectory = XSDataFile( XSDataString( dest ) )
                             xsdin.sample = sample
+                            print xsdin.marshal()
                         except Exception:
                             print "[ISPyB] Error: setting ISPyB to False"
                             self.isISPyB = False
@@ -550,6 +553,7 @@ class Collect( CObjectBase ):
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
+                        print xsdin.marshal()
                         jobId = self.commands["startJob_edna1"]( [self.pluginSAS, xsdin.marshal()] )
                         self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna1Dead = False
