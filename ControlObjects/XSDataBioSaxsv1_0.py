@@ -705,6 +705,12 @@ class XSDataBioSaxsSample( XSData ):
         elif ispybURL.__class__.__name__ == "XSDataString":
             self._ispybURL = ispybURL
         else:
+            self._ispybURL = ispybURL
+            print __file__
+            print ispybURL
+            print ispybURL.__class__
+            print ispybURL.__class__.__name__
+            print "ERROR! XSDataBioSaxsSample constructor argument 'ispybURL' is not XSDataString but %s" % self._ispybURL.__class__.__name__
             strMessage = "ERROR! XSDataBioSaxsSample constructor argument 'ispybURL' is not XSDataString but %s" % self._ispybURL.__class__.__name__
             raise BaseException( strMessage )
     # Methods and properties for the 'concentration' attribute
