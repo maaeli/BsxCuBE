@@ -548,7 +548,8 @@ class CollectBrick( Core.BaseBrick ):
             logger.warning( "No connection to BiosaxsClient" )
 
     def onISPYBWebServiceSuccess( self, methodName, response ):
-        #print "------------------->" + methodName
+        print "------------------->" + methodName
+        print response
         if methodName == "getExperimentNamesByProposalCodeNumber":
             self.CURObject.onExperimentNamesRetrieved( response )
 

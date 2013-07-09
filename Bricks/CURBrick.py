@@ -236,8 +236,7 @@ class CURBrick( Core.BaseBrick ):
 
     def loadFromISPyBPushButtonClicked( self ):
         print "load from ISPyB"
-#        print ( self.collectBrickObject.getObject( "BiosaxsClient" ).getRobotXMLByExperimentId( 5 ) )
-        print ( self.collectBrickObject.getObject( "BiosaxsClient" ).URL )
+        print ( self.collectBrickObject.getExperimentNamesByProposalCodeNumber() )
 
     def getHorizontalLabelValueLayoutFactory ( self, widgets ):
         # only works with 2 or 4
