@@ -63,7 +63,7 @@ class LoginBrick( Core.BaseBrick ):
         self.propType.setSizePolicy( Qt.QSizePolicy.Fixed, Qt.QSizePolicy.MinimumExpanding )
 
         #TODO: read from XML
-        self.choices = ['opd', 'fx', 'ifx', 'ih', 'im', 'is', 'mx', 'mxihr']
+        self.choices = ['opd', 'fx', 'ifx', 'ih', 'im', 'is', 'mx', 'mxihr', "sc"]
         self.propType.addItems( self.choices )
         self.userBox.addWidget( self.propType )
         self.dashLabel = Qt.QLabel( " - ", self.brick_widget )
