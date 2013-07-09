@@ -220,7 +220,12 @@ class CURBrick( Core.BaseBrick ):
         self.saveAsPushButton = Qt.QPushButton( "Save as", self.brick_widget )
         self.saveAsPushButton.setFixedWidth( 70 )
         Qt.QObject.connect( self.saveAsPushButton, Qt.SIGNAL( "clicked()" ), self.saveAsPushButtonClicked )
-        return self.getHorizontalLayoutFactory( [self.fileLabel, self.fileLineEdit, self.loadPushButton, self.savePushButton, self.saveAsPushButton] )
+
+        self.loadFromISPyBPushButton = Qt.QPushButton( "Load from ISPyB", self.brick_widget )
+        self.loadFromISPyBPushButton.setFixedWidth( 100 )
+        Qt.QObject.connect( self.loadFromISPyBPushButton, Qt.SIGNAL( "clicked()" ), self.loadFromISPyBPushButtonClicked )
+
+        return self.getHorizontalLayoutFactory( [self.fileLabel, self.fileLineEdit, self.loadPushButton, self.savePushButton, self.saveAsPushButton, self.loadFromISPyBPushButton] )
 
 
 
@@ -228,6 +233,11 @@ class CURBrick( Core.BaseBrick ):
 #        self.hBoxLayout16.addWidget( self.fillspace )
 
 
+
+    def loadFromISPyBPushButtonClicked( self ):
+        print "load from ISPyB"
+#        print ( self.collectBrickObject.getObject( "BiosaxsClient" ).getRobotXMLByExperimentId( 5 ) )
+        print ( self.collectBrickObject.getObject( "BiosaxsClient" ).URL )
 
     def getHorizontalLabelValueLayoutFactory ( self, widgets ):
         # only works with 2 or 4

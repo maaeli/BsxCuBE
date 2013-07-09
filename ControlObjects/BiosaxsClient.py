@@ -257,14 +257,15 @@ class BiosaxsClient( CObjectBase ):
         self.selectedExperimentId = experimentId
         if ( self.client is None ):
             self.__initWebservice()
-        for experiment in self.experiments:
-            plates = []
-            if experiment.experiment.experimentId is experimentId:
-                self.selectedExperimentId = experimentId
-                for plate in experiment.getPlates():
-                    plates.append( plate.samplePlateId )
-                return self.client.service.getRobotXMLByPlateIds( experimentId, plates )
-        return None
+        return self.client.service.getRobotByExperimentId( experimentId )
+#        for experiment in self.experiments:
+#            plates = []
+#            if experiment.experiment.experimentId is experimentId:
+#                self.selectedExperimentId = experimentId
+#                for plate in experiment.getPlates():
+#                    plates.append( plate.samplePlateId )
+#                return self.client.service.getRobotXMLByPlateIds( experimentId, plates )
+#        return None
 
     def getPlateGroupByExperimentId( self, experimentId ):
         self.selectedExperimentId = experimentId
