@@ -1,3 +1,4 @@
+import json
 from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
@@ -57,24 +58,19 @@ class BiosaxsClient( CObjectBase ):
         self.proposalNumber = proposalNumber
 
     #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
-    def getExperimentNames( self ):
-#        print "------------ Getting experiment Names"
-        experimentNames = []
-        for experiment in self.experiments:
-            experimentNames.append( [experiment.experiment.name, experiment.experiment.experimentId] )
-        return experimentNames
+#    def getExperimentNames( self ):
+##        print "------------ Getting experiment Names"
+#        experimentNames = []
+#        for experiment in self.experiments:
+#            experimentNames.append( [experiment.experiment.name, experiment.experiment.experimentId] )
+#        return experimentNames
 
 
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
             self.__initWebservice()
-        response = self.client.service.findExperimentByProposalCode( code, number )
-        self.experiments = []
-        for experiment in response:
-            self.experiments.append( Experiment( experiment ) )
-        experimentNames = self.getExperimentNames()
-        self.emit( "onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames )
-        #self.emit("onSuccess", "getExperimentNamesByProposalCodeNumber", experimentNames)
+        return self.client.service.findExperimentByProposalCode( code, number )
+#        self.emit( "onSuccess", "getExperimentNamesByProposalCodeNumber", json.loads( response ) )
 
     def getPyarchDestination( self ):
         # This happens because I need the experiment ID but because the experiment has not been created yet I have to replace it in the server side
@@ -129,7 +125,7 @@ class BiosaxsClient( CObjectBase ):
                 return myBuffer.bufferId
         return None
 
-    #It looks for a code in the comments that identifies the measurments
+    #It looks for a code in the comments that identifies the measurements
     # [1] This is a comment
     # ---
     #  |_ Id
@@ -149,7 +145,7 @@ class BiosaxsClient( CObjectBase ):
 
     def getMeasurementIdBySampleCodeConcentrationAndSEU( self, sampleCode, concentration, seu, bufferName ):
         try:
-            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str( sampleCode ) + " " + str( concentration ) + " " + str( seu ) + " " + str( bufferName )
+#            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str( sampleCode ) + " " + str( concentration ) + " " + str( seu ) + " " + str( bufferName )
             if self.experiment is None:
                 print "[ISPyB] Experiment is None"
                 return None
@@ -157,7 +153,7 @@ class BiosaxsClient( CObjectBase ):
                 print "[ISPyB] Experiment is None"
                 return None
             bufferId = self.getBufferIdByAcronym( bufferName )
-            print "[ISPyB] bufferId " + str( bufferId )
+#            print "[ISPyB] bufferId " + str( bufferId )
             for experiment in self.experiments:
                 #print experiment.experiment.experimentId
                 if experiment.experiment.experimentId == self.selectedExperimentId:
@@ -183,7 +179,6 @@ class BiosaxsClient( CObjectBase ):
                 self.__initWebservice()
 
             #specimenId = self.getMeasurementIdBySampleCodeConcentrationAndSEU(sampleCode, concentration, ispybSEUtemperature, bufferName)
-            print "[ISPyB] Specimen: " + str( specimenId )
             if specimenId is None:
                 specimenId = -1
 
@@ -242,16 +237,16 @@ class BiosaxsClient( CObjectBase ):
             print "[ISPyB] error", sys.exc_info()[0]
             #traceback.print_exc()
 
-    def getPlatesByPlateGroupId( self, plateGroupId, experimentId ):
-        plates = []
-        for experiment in self.experiments:
-            if experiment.experiment.experimentId == experimentId:
-                experimentPlates = experiment.getPlates()
-                for plate in experimentPlates:
-                    if plate.plategroup3VO is not None:
-                        if plate.plategroup3VO.plateGroupId == plateGroupId:
-                            plates.append( plate )
-        return plates
+#    def getPlatesByPlateGroupId( self, plateGroupId, experimentId ):
+#        plates = []
+#        for experiment in self.experiments:
+#            if experiment.experiment.experimentId == experimentId:
+#                experimentPlates = experiment.getPlates()
+#                for plate in experimentPlates:
+#                    if plate.plategroup3VO is not None:
+#                        if plate.plategroup3VO.plateGroupId == plateGroupId:
+#                            plates.append( plate )
+#        return plates
 
     def getRobotXMLByExperimentId( self, experimentId ):
         self.selectedExperimentId = experimentId
@@ -267,27 +262,27 @@ class BiosaxsClient( CObjectBase ):
 #                return self.client.service.getRobotXMLByPlateIds( experimentId, plates )
 #        return None
 
-    def getPlateGroupByExperimentId( self, experimentId ):
-        self.selectedExperimentId = experimentId
-        for experiment in self.experiments:
-            if experiment.experiment.experimentId == experimentId:
-                print experiment.experiment.experimentId
-                #It works but I don't know how to deserialize in bricks side
-                #return str(experiment.getPlateGroups())
-                groups = experiment.getPlateGroups()
-                names = []
-                for group in groups:
-                    names.append( [group.name, group.plateGroupId] )
-                return names
-        return []
+#    def getPlateGroupByExperimentId( self, experimentId ):
+#        self.selectedExperimentId = experimentId
+#        for experiment in self.experiments:
+#            if experiment.experiment.experimentId == experimentId:
+#                print experiment.experiment.experimentId
+#                #It works but I don't know how to deserialize in bricks side
+#                #return str(experiment.getPlateGroups())
+#                groups = experiment.getPlateGroups()
+#                names = []
+#                for group in groups:
+#                    names.append( [group.name, group.plateGroupId] )
+#                return names
+#        return []
 
-    def getRobotXMLByPlateGroupId( self, plateGroupId, experimentId ):
-        plates = self.getPlatesByPlateGroupId( plateGroupId, experimentId )
-        ids = []
-        for plate in plates:
-            ids.append( plate.samplePlateId )
-        xml = self.client.service.getRobotXMLByPlateIds( experimentId, str( ids ) )
-        self.emit( "onSuccess", "getRobotXMLByPlateGroupId", xml )
+#    def getRobotXMLByPlateGroupId( self, plateGroupId, experimentId ):
+#        plates = self.getPlatesByPlateGroupId( plateGroupId, experimentId )
+#        ids = []
+#        for plate in plates:
+#            ids.append( plate.samplePlateId )
+#        xml = self.client.service.getRobotXMLByPlateIds( experimentId, str( ids ) )
+#        self.emit( "onSuccess", "getRobotXMLByPlateGroupId", xml )
 
     def setExperimentAborted( self ):
         try:

@@ -53,4 +53,4 @@ def getTime( title = None ):
 
 if __name__ == '__main__':
     app = Qt.QApplication( sys.argv )
-    print getTime()
+    print getTime( "title" )

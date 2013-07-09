@@ -516,45 +516,17 @@ class CollectBrick( Core.BaseBrick ):
                 self.xmlFileLoaded.setText( "XML: " + xmlLabel )
 
 
-    #Deprecated
-    def getRobotXMLByExperimentId( self, experimentId ):
+    def getExperimentNamesByProposalCodeNumber( self ):
+        if self.getObject( "BiosaxsClient" ) is not None:
+            return self.getObject( "BiosaxsClient" ).getExperimentNamesByProposalCodeNumber( self.__enteredPropType, self.__enteredPropNumber )
+        else:
+            logger.warning( "No connection to BiosaxsClient" )
+
+    def getRobotXMLByExperimentId( self , experimentId ):
         if self.getObject( "BiosaxsClient" ) is not None:
             return self.getObject( "BiosaxsClient" ).getRobotXMLByExperimentId( experimentId )
         else:
             logger.warning( "No connection to BiosaxsClient" )
-            return None
-
-
-    def getRobotXMLByPlateGroupId( self, plateGroupId, experimentId ):
-        if self.getObject( "BiosaxsClient" ) is not None:
-            self.getObject( "BiosaxsClient" ).getRobotXMLByPlateGroupId( plateGroupId, experimentId )
-        else:
-            logger.warning( "No connection to BiosaxsClient" )
-            return None
-
-    def getPlateGroupByExperimentId( self, experimentId ):
-        if self.getObject( "BiosaxsClient" ) is not None:
-            return self.getObject( "BiosaxsClient" ).getPlateGroupByExperimentId( experimentId )
-        else:
-            logger.warning( "No connection to BiosaxsClient" )
-            return None
-
-
-    def getExperimentNamesByProposalCodeNumber( self ):
-        if self.getObject( "BiosaxsClient" ) is not None:
-            print "Getting experiments from Control object for type: " + str( self.__enteredPropType ) + " Number: " + str( self.__enteredPropNumber )
-            self.getObject( "BiosaxsClient" ).getExperimentNamesByProposalCodeNumber( self.__enteredPropType, self.__enteredPropNumber, oneway = True )
-        else:
-            logger.warning( "No connection to BiosaxsClient" )
-
-    def onISPYBWebServiceSuccess( self, methodName, response ):
-        print "------------------->" + methodName
-        print response
-        if methodName == "getExperimentNamesByProposalCodeNumber":
-            self.CURObject.onExperimentNamesRetrieved( response )
-
-        if methodName == "getRobotXMLByPlateGroupId":
-            self.CURObject.loadXML( response )
 
     def isInhouseUser( self, username ):
         if ( username == "opd29" ):

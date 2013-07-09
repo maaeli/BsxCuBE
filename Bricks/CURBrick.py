@@ -4,6 +4,8 @@ from Framework4.GUI.Core import Property, Connection, Signal, Slot
 from PyQt4 import QtCore, QtGui, Qt
 from Samples import Sample, CollectPars, SampleList
 import cStringIO
+from ISPyBExperimentExplorerWidget import ISPyBExperimentExplorerWidget
+from TimeDialog import TimeDialog
 import logging
 import os.path, time
 import pprint
@@ -236,7 +238,20 @@ class CURBrick( Core.BaseBrick ):
 
     def loadFromISPyBPushButtonClicked( self ):
         print "load from ISPyB"
-        print ( self.collectBrickObject.getExperimentNamesByProposalCodeNumber() )
+        dialog = ISPyBExperimentExplorerWidget( "ISPyBExperimentExplorerWidget" )
+        experiments = self.collectBrickObject.getExperimentNamesByProposalCodeNumber()
+        dialog.loadExperiments( experiments )
+        if dialog.exec_() == Qt.QDialog.Accepted:
+            xmlContent = self.collectBrickObject.getRobotXMLByExperimentId( dialog.getSelectedExperimentId() )
+            collectPars = CollectPars( None )
+            collectPars.searchXML( xmlContent )
+            self.loadPars( collectPars )
+        else:
+           return None
+
+
+#    def setISPyBExperiments( self, experiments ):
+#        print experiments
 
     def getHorizontalLabelValueLayoutFactory ( self, widgets ):
         # only works with 2 or 4
@@ -444,48 +459,50 @@ class CURBrick( Core.BaseBrick ):
         filename = str( filename )
         self.loadFile( filename )
 
-    def loadFile( self, filename ):
-        try:
-            myPars = CollectPars( filename )
-            self.clearConfiguration()
+    def loadPars( self, myPars ):
+        self.clearConfiguration()
+        #  Clear first if load was succesful
+        # 
+        for sampleID in self.sampleIDs:
+            index = self.sampleIDs.index( sampleID )
+            self.tableWidget.removeRow( index )
+            self.sampleIDs.remove( sampleID )
 
-            #  Clear first if load was succesful
-            # 
-            for sampleID in self.sampleIDs:
-                index = self.sampleIDs.index( sampleID )
-                self.tableWidget.removeRow( index )
-                self.sampleIDs.remove( sampleID )
+        # 
+        # General parameters
+        # 
+        self.CBblock = 1
+        self.setComboBox( self.sampleTypeComboBox, myPars.sampleType )
 
-            # 
-            # General parameters
-            # 
-            self.CBblock = 1
-            self.setComboBox( self.sampleTypeComboBox, myPars.sampleType )
+        self.storageTemperatureDoubleSpinBox.setValue( float( myPars.storageTemperature ) )
+        self.extraFlowTimeSpinBox.setValue( float( myPars.extraFlowTime ) )
 
-            self.storageTemperatureDoubleSpinBox.setValue( float( myPars.storageTemperature ) )
-            self.extraFlowTimeSpinBox.setValue( float( myPars.extraFlowTime ) )
+        self.initialCleaningCheckBox.setChecked( myPars.initialCleaning )
 
-            self.initialCleaningCheckBox.setChecked( myPars.initialCleaning )
+        # These are saved by index
+        self.optimizationComboBox.setCurrentIndex( myPars.optimization )
+        self.bufferModeComboBox.setCurrentIndex( myPars.bufferMode )
 
-            # These are saved by index
-            self.optimizationComboBox.setCurrentIndex( myPars.optimization )
-            self.bufferModeComboBox.setCurrentIndex( myPars.bufferMode )
-
-            #TODO: Staffan's note: take it away
+        #TODO: Staffan's note: take it away
 #            self.historyText.clear()
 #            self.historyText.setText( myPars.history.strip() )
 
-            for myBuffer in  myPars.bufferList:
-                self.addSampleRow( myBuffer )
-            for sample in  myPars.sampleList:
-                self.addSampleRow( sample )
+        for myBuffer in  myPars.bufferList:
+            self.addSampleRow( myBuffer )
+        for sample in  myPars.sampleList:
+            self.addSampleRow( sample )
 
-            self.CBblock = 0
+        self.CBblock = 0
+
+
+    def loadFile( self, filename ):
+        try:
+            myPars = CollectPars( filename )
+            self.loadPars( myPars )
             self.filename = filename
             self.collectBrickObject.setRobotFileName( filename )
             # strip all but the last part for label 
             self.collectBrickObject.changexmlLabel( filename )
-
         except Exception:
             logger.exception( 'Cannot load collection parameters file. \n' )
             Qt.QMessageBox.critical( self.brick_widget, "Error", "Error when trying to read file '%s'!" % filename )
