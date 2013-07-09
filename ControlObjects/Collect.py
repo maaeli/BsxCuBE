@@ -269,9 +269,8 @@ class Collect( CObjectBase ):
 
     def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
-            logger.error("WasteFull: cannot collect, please empty waste canister below the experimental table")
+            logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
-    
         #TODO: DEBUG
         logger.info( "Starting collection now" )
         try:
@@ -323,6 +322,8 @@ class Collect( CObjectBase ):
                 print "[ISPyB] Sending to EDNA login %s,%s, %s" % ( user,
                                                                        self.measurementId,
                                                                        pCode )
+                ispybURL = self.objects["biosaxs_client"].URL
+
                 #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
                 pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                 print "[ISPyB] Copying into " + pyarchDestination
@@ -331,7 +332,8 @@ class Collect( CObjectBase ):
                                          passwd = XSDataString( password ),
                                          measurementID = XSDataInteger( self.measurementId ),
                                          ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
-                                         collectionOrder = XSDataInteger( self.dataCollectionOrder )
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                         ispybURL = XSDataString( ispybURL )
                                          )
             except Exception:
                 print "[ISPyB] Error: setting ISPyB to False"
@@ -507,9 +509,51 @@ class Collect( CObjectBase ):
                     logger.info( "filename as input for SAS %s", filename )
                     xsdin = XSDataInputBioSaxsToSASv1_0( subtractedCurve = rgOut.filename,
                                                         destinationDirectory = XSDataFile( XSDataString( dest ) ) )
+
+                    if self.isISPyB:
+                        try:
+                            user = self.objects["biosaxs_client"].proposalType
+                            password = self.objects["biosaxs_client"].proposalNumber
+                            measurementID = self.measurementId
+                            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+                            collectionOrder = self.dataCollectionOrder
+                            ispybURL = self.objects["biosaxs_client"].URL
+
+                            print "----------------------------------------"
+                            print "[ISPyB] Sending to EDNA SaxsToSas"
+                            print "[ISPyB] subtractedCurve %s" % str( rgOut.filename )
+                            print "[ISPyB] destinationDirectory %s " % str( dest )
+
+                            print "[ISPyB] login %s" % str( user )
+                            print "[ISPyB] passwd %s" % str( password )
+                            print "[ISPyB] measurementID %s" % str( measurementID )
+                            print "[ISPyB] ispybDestination %s" % str( pyarchDestination )
+                            print "[ISPyB] collectionOrder %s" % str( collectionOrder )
+                            print "[ISPyB] ispybURL %s" % str( ispybURL )
+                            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
+
+                            sample = XSDataBioSaxsSample( 
+                                         login = XSDataString( user ),
+                                         passwd = XSDataString( password ),
+                                         measurementID = XSDataInteger( self.measurementId ),
+                                         ispybDestination = XSDataFile( XSDataString( pyarchDestination ) ),
+                                         collectionOrder = XSDataInteger( self.dataCollectionOrder ),
+                                         ispybURL = XSDataString( ispybURL )
+                                         )
+                            xsdin.subtractedCurve = rgOut.filename
+                            xsdin.destinationDirectory = XSDataFile( XSDataString( dest ) )
+                            xsdin.sample = sample
+                            print xsdin.marshal()
+                        except Exception:
+                            print "[ISPyB] Error: setting ISPyB to False"
+                            self.isISPyB = False
+
+
+
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
+                        print xsdin.marshal()
                         jobId = self.commands["startJob_edna1"]( [self.pluginSAS, xsdin.marshal()] )
                         self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna1Dead = False
@@ -546,7 +590,7 @@ class Collect( CObjectBase ):
                 try:
                     webPage = xsd.htmlPage.path.value
                 except:
-                    self.showMessage( 1, "No web page provided by plugin SAS !!!" )
+                    self.showMessage( 1, "No web page provided by  SAS !!!" )
                     return
                 #TODO: need to be done automatically
                 self.showMessage( 0, "Please display this web page: %s" % webPage )
@@ -622,10 +666,10 @@ class Collect( CObjectBase ):
         logger.info( "sending abort to stop spec test collection" )
 
     def setHPLC( self, pValue ):
-        doHPLC = bool(pValue)
-        return self.objects["sample_changer"].setHPLCMode(doHPLC)
+        doHPLC = bool( pValue )
+        return self.objects["sample_changer"].setHPLCMode( doHPLC )
 
-    def isHPLC(self):
+    def isHPLC( self ):
         return self.objects["sample_changer"].channels["ModeHPLC"].value()
 
     def setCheckBeam( self, flag ):
@@ -864,7 +908,7 @@ class Collect( CObjectBase ):
 
     def _collectWithRobot( self, pars ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
-            logger.error("WasteFull: cannot collect, please empty waste canister below the experimental table")    
+            logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
 
         lastBuffer = ""
