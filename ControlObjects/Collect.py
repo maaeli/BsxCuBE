@@ -510,6 +510,7 @@ class Collect( CObjectBase ):
                     xsdin = XSDataInputBioSaxsToSASv1_0( subtractedCurve = rgOut.filename,
                                                         destinationDirectory = XSDataFile( XSDataString( dest ) ) )
 
+                    #Sending to EDNA ISPyB info
                     if self.isISPyB:
                         try:
                             user = self.objects["biosaxs_client"].proposalType
