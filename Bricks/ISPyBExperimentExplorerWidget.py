@@ -74,7 +74,6 @@ class ISPyBExperimentExplorerWidget( Qt.QDialog ):
         i = 0
         self.tableWidget.setRowCount( len( self.experiments ) )
         for experiment in self.experiments:
-            print experiment
             name = QtGui.QTableWidgetItem( experiment["name"] )
             type = QtGui.QTableWidgetItem( experiment["experimentType"] )
             self.tableWidget.setItem( i, 0, name )
