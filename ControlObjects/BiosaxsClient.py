@@ -362,6 +362,10 @@ class BiosaxsClient( CObjectBase ):
             self.selectedExperimentId = None
             expectedXMLFilePath = self.getPyarchDestination() + '/' + name
             print "[ISPyB] Request to ISPyB: create new experiment for proposal " + str( self.proposalType ) + str( self.proposalNumber )
+            print "[ISPyB] Name " + str( name )
+            if ( ( str ( name ) == "BSA.xml" ) | ( str ( name ) == "Water.xml" ) ):
+                experimentType = "CALIBRATION"
+
 #            print ( "self.client.service.createExperiment( %s, %s, %s, %s, %s, %s, %s, %s, %s" % ( 
 #                                                               self.proposalType,
 #                                                               self.proposalNumber,
