@@ -225,7 +225,7 @@ class CURBrick( Core.BaseBrick ):
 
         self.loadFromISPyBPushButton = Qt.QPushButton( "Load from ISPyB", self.brick_widget )
         self.loadFromISPyBPushButton.setFixedWidth( 100 )
-        self.loadFromISPyBPushButton.setEnabled( False )
+        self.loadFromISPyBPushButton.setEnabled( True )
         Qt.QObject.connect( self.loadFromISPyBPushButton, Qt.SIGNAL( "clicked()" ), self.loadFromISPyBPushButtonClicked )
 
         return self.getHorizontalLayoutFactory( [self.fileLabel, self.fileLineEdit, self.loadPushButton, self.savePushButton, self.saveAsPushButton, self.loadFromISPyBPushButton] )
