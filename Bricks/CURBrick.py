@@ -245,7 +245,6 @@ class CURBrick( Core.BaseBrick ):
         if dialog.exec_() == Qt.QDialog.Accepted:
             xmlContent = self.collectBrickObject.getRobotXMLByExperimentId( dialog.getSelectedExperimentId() )
             collectPars = CollectPars( None )
-            print xmlContent
             collectPars.searchXML( xmlContent )
             #Loading from ISPyB
             collectPars.sampleType = self.sampleTypeComboBox.currentText()
