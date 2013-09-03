@@ -57,15 +57,6 @@ class BiosaxsClient( CObjectBase ):
         self.proposalType = proposalType
         self.proposalNumber = proposalNumber
 
-    #Return list containing [["ExperimentName1", "experimentId1"], ["ExperimentName2", "experimentId2"]]
-#    def getExperimentNames( self ):
-##        print "------------ Getting experiment Names"
-#        experimentNames = []
-#        for experiment in self.experiments:
-#            experimentNames.append( [experiment.experiment.name, experiment.experiment.experimentId] )
-#        return experimentNames
-
-
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
             self.__initWebservice()
@@ -207,82 +198,15 @@ class BiosaxsClient( CObjectBase ):
                                           pars["normalisation"],
                                           tocollect["transmission"]
                                           )
-#            print ( "self.client.service.saveFrame(%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s, %s, %s,%s,%s,%s" %
-#                                          ( mode,
-#                                          self.selectedExperimentId,
-#                                          specimenId,
-#                                          sampleCode,
-#                                          exposureTemperature,
-#                                          storageTemperature,
-#                                          timePerFrame,
-#                                          timeStart,
-#                                          timeEnd,
-#                                          energy,
-#                                          detectorDistance,
-#                                          fileArray,
-#                                          snapshotCapillary,
-#                                          currentMachine,
-#                                          str( tocollect ),
-#                                          str( pars ),
-#                                          pars["beamCenterX"],
-#                                          pars["beamCenterY"],
-#                                          pars["radiationRelative"],
-#                                          pars["radiationAbsolute"],
-#                                          pars["pixelSizeX"],
-#                                          pars["pixelSizeY"],
-#                                          pars["normalisation"],
-#                                          tocollect["transmission"] )
-#                   )
         except Exception:
             print "[ISPyB] error", sys.exc_info()[0]
             #traceback.print_exc()
-
-#    def getPlatesByPlateGroupId( self, plateGroupId, experimentId ):
-#        plates = []
-#        for experiment in self.experiments:
-#            if experiment.experiment.experimentId == experimentId:
-#                experimentPlates = experiment.getPlates()
-#                for plate in experimentPlates:
-#                    if plate.plategroup3VO is not None:
-#                        if plate.plategroup3VO.plateGroupId == plateGroupId:
-#                            plates.append( plate )
-#        return plates
 
     def getRobotXMLByExperimentId( self, experimentId ):
         self.selectedExperimentId = experimentId
         if ( self.client is None ):
             self.__initWebservice()
         return self.client.service.getRobotByExperimentId( experimentId )
-#        for experiment in self.experiments:
-#            plates = []
-#            if experiment.experiment.experimentId is experimentId:
-#                self.selectedExperimentId = experimentId
-#                for plate in experiment.getPlates():
-#                    plates.append( plate.samplePlateId )
-#                return self.client.service.getRobotXMLByPlateIds( experimentId, plates )
-#        return None
-
-#    def getPlateGroupByExperimentId( self, experimentId ):
-#        self.selectedExperimentId = experimentId
-#        for experiment in self.experiments:
-#            if experiment.experiment.experimentId == experimentId:
-#                print experiment.experiment.experimentId
-#                #It works but I don't know how to deserialize in bricks side
-#                #return str(experiment.getPlateGroups())
-#                groups = experiment.getPlateGroups()
-#                names = []
-#                for group in groups:
-#                    names.append( [group.name, group.plateGroupId] )
-#                return names
-#        return []
-
-#    def getRobotXMLByPlateGroupId( self, plateGroupId, experimentId ):
-#        plates = self.getPlatesByPlateGroupId( plateGroupId, experimentId )
-#        ids = []
-#        for plate in plates:
-#            ids.append( plate.samplePlateId )
-#        xml = self.client.service.getRobotXMLByPlateIds( experimentId, str( ids ) )
-#        self.emit( "onSuccess", "getRobotXMLByPlateGroupId", xml )
 
     def setExperimentAborted( self ):
         try:
@@ -314,7 +238,7 @@ class BiosaxsClient( CObjectBase ):
             traceback.print_exc()
             raise Exception
 
-
+    # This method should be removed as zip files are created dynamically on server side
     def zipFolder( self, path, archivename ):
         print "ISPyB: zipping " + path + " on " + archivename
         myZipFile = zipfile.ZipFile( archivename, 'w' )

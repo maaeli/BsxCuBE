@@ -657,11 +657,14 @@ class Collect( CObjectBase ):
         self.commands["collect"].abort()
         self._abortCollectWithRobot()
 
-        logger.info( "Sending abort to ISPyB" )
-        try:
-            self.objects["biosaxs_client"].setExperimentAborted()
-        except Exception, errMsg:
-            self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
+        # if ISPyB 
+        if ( self.isISPyB ):
+            logger.info( "Sending abort to ISPyB" )
+            try:
+                self.isISPyB = False;
+                self.objects["biosaxs_client"].setExperimentAborted()
+            except Exception, errMsg:
+                self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
 
     def testCollectAbort( self ):
         logger.info( "sending abort to stop spec test collection" )
@@ -889,20 +892,26 @@ class Collect( CObjectBase ):
         ispybMode = None
         if mode is "buffer_before":
             ispybMode = "before"
-            #self.objects["biosaxs_client"].saveFrameSet("before", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
         if mode is "buffer_after":
             ispybMode = "after"
-            #self.objects["biosaxs_client"].saveFrameSet("after", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
         if mode is "sample":
             ispybMode = "sample"
-            #self.objects["biosaxs_client"].saveFrameSet("sample", sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str(files), snapshotCapillary, currentMachine, str(tocollect), str(pars))
 
-        self.objects["biosaxs_client"].saveFrameSet( ispybMode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, str( files ), snapshotCapillary,
-                                                    currentMachine,
-                                                    tocollect,
-                                                    pars,
-                                                    measurementId
-                                                    )
+        self.objects["biosaxs_client"].saveFrameSet( ispybMode,
+                                                     sampleCode,
+                                                     exposureTemperature,
+                                                     storageTemperature,
+                                                     timePerFrame,
+                                                     timeStart,
+                                                     timeEnd,
+                                                     energy,
+                                                     detectorDistance,
+                                                     str( files ),
+                                                     snapshotCapillary,
+                                                     currentMachine,
+                                                     tocollect,
+                                                     pars,
+                                                     measurementId )
 
     def setXMLRobotFilePath( self, path ):
         self.xmlRobotFilePath = path
@@ -1125,6 +1134,7 @@ class Collect( CObjectBase ):
         if ( self.isISPyB ):
             try:
                 self.measurementId = self.objects["biosaxs_client"].updateStatus( "FINISHED" )
+                self.isISPyB = False
             except Exception:
                 traceback.print_exc()
 
