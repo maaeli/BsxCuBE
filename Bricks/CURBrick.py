@@ -225,6 +225,7 @@ class CURBrick( Core.BaseBrick ):
 
         self.loadFromISPyBPushButton = Qt.QPushButton( "Load from ISPyB", self.brick_widget )
         self.loadFromISPyBPushButton.setFixedWidth( 100 )
+        self.loadFromISPyBPushButton.setEnabled( False )
         Qt.QObject.connect( self.loadFromISPyBPushButton, Qt.SIGNAL( "clicked()" ), self.loadFromISPyBPushButtonClicked )
 
         return self.getHorizontalLayoutFactory( [self.fileLabel, self.fileLineEdit, self.loadPushButton, self.savePushButton, self.saveAsPushButton, self.loadFromISPyBPushButton] )
@@ -246,6 +247,16 @@ class CURBrick( Core.BaseBrick ):
             collectPars = CollectPars( None )
             print xmlContent
             collectPars.searchXML( xmlContent )
+            #Loading from ISPyB
+            collectPars.sampleType = self.sampleTypeComboBox.currentText()
+            collectPars.storageTemperature = self.storageTemperatureDoubleSpinBox.value()
+            collectPars.extraFlowTime = self.extraFlowTimeSpinBox.value()
+            collectPars.optimization = self.optimizationComboBox.currentIndex()
+            collectPars.optimizationText = self.optimizationComboBox.currentText()
+            collectPars.initialCleaning = self.initialCleaningCheckBox.isChecked()
+            collectPars.bufferMode = self.bufferModeComboBox.currentIndex()
+
+#            collectPars.bufferMode = self.bufferModeComboBox.currentIndex()
             self.loadPars( collectPars )
         else:
            return None
@@ -483,6 +494,7 @@ class CURBrick( Core.BaseBrick ):
         # These are saved by index
         self.optimizationComboBox.setCurrentIndex( myPars.optimization )
         self.bufferModeComboBox.setCurrentIndex( myPars.bufferMode )
+
 
         #TODO: Staffan's note: take it away
 #            self.historyText.clear()

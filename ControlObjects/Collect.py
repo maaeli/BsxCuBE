@@ -1032,6 +1032,7 @@ class Collect( CObjectBase ):
         self.lastSampleTime = time.time()
         prevSample = None
         runNumberSet = True
+
         # ==================================================
         #   MAIN LOOP on Samples
         # ==================================================
