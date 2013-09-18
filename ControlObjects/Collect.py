@@ -316,8 +316,8 @@ class Collect( CObjectBase ):
         # Sending ISPyBs information to EDNA
         if self.isISPyB:
             try:
-                user = self.objects["biosaxs_client"].proposalType
-                password = self.objects["biosaxs_client"].proposalNumber
+                user = self.objects["biosaxs_client"].user
+                password = self.objects["biosaxs_client"].password
 
                 print "[ISPyB] Sending to EDNA login %s,%s, %s" % ( user,
                                                                        self.measurementId,
@@ -513,8 +513,8 @@ class Collect( CObjectBase ):
                     #Sending to EDNA ISPyB info
                     if self.isISPyB:
                         try:
-                            user = self.objects["biosaxs_client"].proposalType
-                            password = self.objects["biosaxs_client"].proposalNumber
+                            user = self.objects["biosaxs_client"].user
+                            password = self.objects["biosaxs_client"].password
                             measurementID = self.measurementId
                             pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                             collectionOrder = self.dataCollectionOrder
