@@ -31,12 +31,16 @@ class BsxImageDataProxy( CObjectBase ):
             return
 
         data = numpy.loadtxt( filename )
+       
+        self.display_data(filename, data[:,0], data[:,1])
 
-        self.emit( 'erase_curve', filename )
-        #TODO: DEBUG
-        # Clean up to remove 0.0 data that cause problem in display in Logarithmic scale
-        cleanList = [x if x != 0.0 else 0.0001 for x in list( data[:, 1] )]
-        self.emit( 'new_curves_data', { filename: [list( data[:, 0] ), cleanList] } )
+    def display_data(self, name, x, y):
+        self.emit( 'erase_curve', name )
+
+        # remove negative values, for Log scale
+        mask = y>0 
+     
+        self.emit( 'new_curves_data', { name: [x[mask], y[mask]] } )
 
     def erase_curves( self ):
         self.emit( 'erase_curve', None )
