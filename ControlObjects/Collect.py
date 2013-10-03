@@ -92,7 +92,9 @@ class Collect( CObjectBase ):
                Signal( "clearCurve" ),
                Signal( "transmissionChanged" ),
                Signal( "machineCurrentChanged" ),
-               Signal( "newSASUrl" )]
+               Signal( "newSASUrl" ),
+               Signal( "new_scan" ),
+               Signal( "new_point" )]
     slots = [Slot( "testCollect" ),
              Slot( "collect" ),
              Slot( "collectAbort" ),
@@ -128,8 +130,8 @@ class Collect( CObjectBase ):
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_4"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
-        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
-        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_0"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_1"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_1"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -138,7 +140,6 @@ class Collect( CObjectBase ):
         self.hcOverE = 12.3984
 
         self.__energyAdjust = False
-
 
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
@@ -308,6 +309,7 @@ class Collect( CObjectBase ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
+        self.emit("new_scan", { "xlabel": "Time (seconds)", "ylabel": "Summed intensity", "title": "Summed intensity over time" })
         #TODO: DEBUG
         logger.info( "Starting collection now" )
         try:
@@ -624,8 +626,15 @@ class Collect( CObjectBase ):
                 self.showMessage( 0, "or look in the SAS tab" )
                 self.sasWebDisplay( "file://%s" % webPage )
             elif jobId.startswith( self.pluginHPLC ):#HPLC is on Slavia
-                time.sleep( 0.1 )
+                #time.sleep( 0.1 )
                 xsd = self._getJobResult(jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna1") 
+                if xsd.timeStamp and xsd.summedIntensity:
+                    self.emit('new_point', (xsd.timeStamp.value, xsd.summedIntensity.value))
+                
+                dataq = xsDataToArray(xsd.dataQ)
+                datai = xsDataToArray(xsd.dataI)
+                self.emit( "collectProcessingDone", filename, dataq, datai )
+
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
