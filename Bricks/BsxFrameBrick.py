@@ -26,9 +26,14 @@ class BsxFrameBrick(Core.BaseBrick):
     def __init__(self, *args, **kargs):
         Core.BaseBrick.__init__(self, *args, **kargs)
 
+        self.lastFrameToDisplay = None
+
     def init(self):
         Qt.QVBoxLayout(self.brick_widget)
         self.frameDisplay = QubDataImageDisplay(self.brick_widget, noAction = True, forcePopupSubWindow = True)
+        self.timer = QtCore.QTimer(self.brick_widget)
+        self.timer.timeout.connect(self.timerEvent)
+
         # layout
         #TODO:  Next line will always have an error in Eclipse, even if it is correct.
         self.frameDisplay.setSizePolicy(Qt.QSizePolicy.MinimumExpanding, Qt.QSizePolicy.MinimumExpanding)
@@ -64,19 +69,25 @@ class BsxFrameBrick(Core.BaseBrick):
         if pPeer is not None:
             self.brick_widget.setEnabled(False)
 
-
     # Logged In : True or False 
     def loggedIn(self, pValue):
         self.brick_widget.setEnabled(pValue)
 
+    def timerEvent(self):
+        if self.frameDisplay.isVisible():
+           self.frameDisplay.setDataSource(self.lastFrameToDisplay)
+           self.timer.stop()
+
     def displayItemChanged(self, files_string):
-        #TODO: DEBUG 
-        print ">> file_string %r " % files_string
         filesList = files_string.split(",")
         for f in filesList:
             if f.endswith('.edf'):
-                self.frameDisplay.setDataSource(f)
-
+                if self.frameDisplay.isVisible():
+                   self.frameDisplay.setDataSource(f)
+                else:
+                   self.lastFrameToDisplay = f
+                   self.timer.start(100)
+ 
     def displayResetChanged(self):
         pass
 
