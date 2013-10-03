@@ -377,7 +377,7 @@
     </connection>
     <connection role="image_proxy">
       <slot name="load_files"/>
-      <peer name="BsxCuBE/image_proxy"/>
+      <peer name="BsxCuBE/image_proxy (local)"/>
     </connection>
   </connections>
 
@@ -557,7 +557,7 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-      <peer name="BsxCuBE/image_proxy"/>
+      <peer name="BsxCuBE/image_proxy (local)"/>
     </connection>
   </connections>
 
@@ -668,7 +668,7 @@
     <connection role="image_proxy">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
-      <peer name="BsxCuBE/image_proxy"/>
+      <peer name="BsxCuBE/image_proxy (local)"/>
     </connection>
   </connections>
 
