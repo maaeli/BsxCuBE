@@ -37,6 +37,7 @@ def cmpCodeAndSEU( a, b ):
     else:
         return cmpCode( a, b )
 
+
 class CollectBrick( Core.BaseBrick ):
     properties = {"expertModeOnly": Property( "boolean", "Expert mode only", "", "expertModeOnlyChanged", False )}
 
@@ -682,38 +683,18 @@ class CollectBrick( Core.BaseBrick ):
         if pValue is not None:
             self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
 
-    def collectProcessingDone( self, dat_filename ):
-        if self.isHPLC:
-           self.frame_count += 1
-           if self.frame_count >= 10 and self.frame_count % 10 != 0:
-             if self.frame_count != self._frameNumber:
-               # only display first 10 frames, then one every 10 frames
-               # the last one is always displayed 
-               logger.info( "processing done, file is %s (curve not displayed)", dat_filename )
-               return
+    def collectProcessingDone( self, dat_filename, x=None, y=None):
+        #if self.isHPLC:
+        #   self.frame_count += 1
+        #   if self.frame_count >= 10 and self.frame_count % 10 != 0:
+        #     if self.frame_count != self._frameNumber:
+        #       # only display first 10 frames, then one every 10 frames
+        #       # the last one is always displayed 
+        #       logger.info( "processing done, file is %s (curve not displayed)", dat_filename )
+        #       return
         logger.info( "processing done, file is %s", dat_filename )
-        # Only display 1d images like XXXX/1d/<at least on char>.dat
-        if re.match( r".*/1d/[^/]+\.dat$", dat_filename ):
-            # Waiting for the file to appear
-            t0 = time.time()
-            fileFound = False
-            directory = os.path.dirname( dat_filename )
-            #small sleep
-            time.sleep( 0.4 )
-            try:
-                dummy = os.stat( directory )
-            except Exception:
-                # in case directory does not exist yet
-                pass
-            time.sleep( 0.1 )
-            if os.path.exists( dat_filename ):
-                filesize = os.path.getsize( dat_filename )
-                print ">>> File info 0 %r  %s " % ( filesize, dat_filename )
-                fileFound = True
-                self.display1D( dat_filename )
-            else:
-                timestr = str( time.time() - t0 )
-                logger.warning( "processing done but no file after %s seconds, will not display file %s" % ( timestr, dat_filename ) )
+        self.display1D( dat_filename, x, y) 
+        self.emit( "displayItemChanged", dat_filename )
 
     def collectProcessingLog( self, level, logmsg, notify ):
         # Level 0 = info, Level 1 = Warning, Level 2 = Error
@@ -739,161 +720,18 @@ class CollectBrick( Core.BaseBrick ):
         self.displayReset()
 
     def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
-        if os.path.dirname( filename0 ).endswith( "/raw" ) and filename0.endswith( '.edf' ):
-            directoryRaw = True
-            directory = os.path.dirname( filename0 )
-        else:
-            directoryRaw = False
-            directory = os.path.join( os.path.dirname( filename0 ), "1d" )
-
-
         if self.__lastFrame != filename0:
             self.__lastFrame = filename0
             if self._isCollecting:
                 message = "The frame '%s' was collected... (diode: %.3e, machine: %5.2f mA, time: %s)" % ( filename0, diode_current, machine_current, timestamp )
                 logger.info( message )
-                #TODO: Staffan's note: take it away
-#                if self.robotCheckBox.isChecked():
-#                    self.CURObject.addHistory( 0, message )
 
                 self._currentFrame += 1
 
                 self.setCollectionStatus( "running" )
 
-                # Waiting for the file to appear if not raw
-                if directoryRaw == False:
-                    t0 = time.time()
-                    fileFound = False
-                    #small sleep
-                    time.sleep( 0.1 )
-                    try:
-                        dummy = os.stat( directory )
-                    except Exception:
-                        # in case directory does not exist yet
-                        pass
-                    if os.path.exists( filename0 ):
-                        filesize = os.path.getsize( filename0 )
-                        if filesize > 4000000:
-                            time.sleep( 0.1 )
-                            # we got file
-                            fileFound = True
-                            print ">>> File info 3 %r  %s " % ( filesize, type( filesize ) )
-                            print "display: %r" % filename0
-                            self.emit( "displayItemChanged", filename0 )
-                    if not fileFound:
-                        #a bit longer sleep
-                        time.sleep( 0.2 )
-                        try:
-                            dummy = os.stat( directory )
-                        except Exception:
-                            # in case directory does not exist yet
-                            pass
-                        if os.path.exists( filename0 ):
-                            filesize = os.path.getsize( filename0 )
-                            if filesize > 4000000:
-                                time.sleep( 0.1 )
-                                # we got file
-                                fileFound = True
-                                print ">>> File info 3 %r  %s " % ( filesize, type( filesize ) )
-                                print "display: %r" % filename0
-                                self.emit( "displayItemChanged", filename0 )
-                    if not fileFound:
-                        #a bit longer again
-                        time.sleep( 0.3 )
-                        try:
-                            dummy = os.stat( directory )
-                        except Exception:
-                            # in case directory does not exist yet
-                            pass
-                        timestr = str( time.time() - t0 )
-                        print ">>> No file 3 %s seen after %s seconds after two stats and a 0.6s wait . We wait 10 seconds for it " % ( filename0, timestr )
-                        # sleep up to 10 seconds
-                        while time.time() - t0 < 10:
-                            time.sleep( 0.1 )
-                            if os.path.exists( filename0 ):
-                                filesize = os.path.getsize( filename0 )
-                                if filesize > 4000000:
-                                    time.sleep( 0.1 )
-                                    # we got file
-                                    fileFound = True
-                                    print ">>> File info 3 %r  %s " % ( filesize, type( filesize ) )
-                                    print "display: %r" % filename0
-                                    self.emit( "displayItemChanged", filename0 )
-                                    break
-                            # before getting back, let us treat Qt events
-                            QtGui.qApp.processEvents()
-                        if not fileFound:
-                            print ">>> No file 3 %s seen after %s seconds. We do not display it " % ( filename0, timestr )
-                else:
-                    # raw .edf file 2D
-                    t0 = time.time()
-                    fileFound = False
-                    #small sleep
-                    time.sleep( 0.1 )
-                    try:
-                        dummy = os.stat( directory )
-                    except Exception:
-                        # in case directory does not exist yet
-                        pass
-                    if os.path.exists( filename0 ):
-                        filesize = os.path.getsize( filename0 )
-                        if filesize > 4000000:
-                            time.sleep( 0.1 )
-                            # we got file
-                            fileFound = True
-                            print ">>> File info 3 %r  %s " % ( filesize, type( filesize ) )
-                            print "display2D raw: %r" % filename0
-                            self.emit( "displayItemChanged", filename0 )
+                self.emit( "displayItemChanged", filename0 )
 
-                if self._currentFrame == self._frameNumber and ( self.__isTesting is not True ):
-                    splitList = os.path.basename( filename0 ).split( "_" )
-                    # Take away last _ piece
-                    filename1 = "_".join( splitList[:-1] )
-                    ave_filename = os.path.join( directory, filename1 + "_ave.dat" )
-                    # Waiting for the file to appear
-                    t0 = time.time()
-                    fileFound = False
-                    #small sleep
-                    time.sleep( 0.1 )
-                    try:
-                        dummy = os.stat( directory )
-                    except Exception:
-                        # in case directory does not exist yet
-                        pass
-                    if os.path.exists( ave_filename ):
-                        filesize = os.path.getsize( ave_filename )
-                        if filesize > 40000:
-                            time.sleep( 0.1 )
-                            # we got file
-                            fileFound = True
-                            print ">>> File info 4 %r  %s " % ( filesize, ave_filename )
-                            print "display1D: %r" % ave_filename
-                            self.display1D( ave_filename )
-                    if not fileFound:
-                        time.sleep( 0.2 )
-                        if os.path.exists( ave_filename ):
-                            filesize = os.path.getsize( ave_filename )
-                            print ">>> File info 4 %r  %s " % ( filesize, ave_filename )
-                            print "display1D: %r" % ave_filename
-                            self.display1D( ave_filename )
-                        else:
-                            timestr = str( time.time() - t0 )
-                            print ">>> No file 4 %s seen after %s seconds. We do not display it " % ( ave_filename, timestr )
-            else:
-                if os.path.exists( filename0 ):
-                    if not filename0.endswith( ".dat" ):
-                        self.emit( "displayItemChanged", filename0 )
-                        fileBaseName = os.path.splitext( os.path.basename( filename0 ) )[0]
-                        filename1 = os.path.join( directory, fileBaseName + ".dat" )
-                        if os.path.exists( filename1 ):
-                            print "display1D: %r" % filename1
-                            self.display1D( filename1 )
-
-
-
-
-#           TODO: This is how put in a breakpoint 
-#           import pdb; pdb.set_trace()
             if self._currentFrame == self._frameNumber:
                 # data collection done = Last frame
                 if self._isCollecting:
@@ -918,8 +756,6 @@ class CollectBrick( Core.BaseBrick ):
                         if feedBackFlag:
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
-
-
 
     def beamLostChanged( self, pValue ):
         if pValue != None:
@@ -958,14 +794,16 @@ class CollectBrick( Core.BaseBrick ):
     def executeTestCollect( self ):
         self.testPushButtonClicked()
 
-    def display1D( self, pValue ):
+    def display1D( self, filename, x=None, y=None):
         if self.imageProxy is None:
             return
         try:
-            self.imageProxy.load_files( str( pValue ), oneway = True )
-        except Exception, e:
-            logger.error( "Could not read file " + str( pValue ) )
-            logger.error( "Full Exception: " + str( e ) )
+            if None in (x,y):
+                self.imageProxy.load_files(filename)
+            else:
+                self.imageProxy.display_data(filename, x, y) 
+        except:
+            logger.exception( "Could not display data for file %s" + str(filename) )
 
     def y_curves_data( self, pPeer ):
         pass
@@ -1000,8 +838,6 @@ class CollectBrick( Core.BaseBrick ):
                 # Set energy when connected
                 self.energyControlObject.setEnergy( self.__energy )
 
-
-
     def energyChanged( self, pValue ):
         if pValue is not None:
             self.__energy = float( pValue )
@@ -1011,13 +847,11 @@ class CollectBrick( Core.BaseBrick ):
 
 
     def validParameters( self ):
-
         # This routine checks:
         #   - that there is at least one sample defined and active
         #   - that there are not two buffers with same name
         #   - that the buffer assigned to a sample is existing
         #
-
         self.robotParams = self.getCollectPars( robot = 1 )
         valid = True
 
