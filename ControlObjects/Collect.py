@@ -1,5 +1,6 @@
 from Framework4.Control.Core.CObject import CObjectBase, Signal, Slot
 import os
+import base64
 import logging
 import numpy
 import time
@@ -21,6 +22,42 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataInputBioSaxsHPLCv1_0
 #from XSDataSAS import XSDataInputSolutionScattering
 
+def xsDataToArray(_xsdata):
+        """
+        Lightweight, EDNA-Free implementation of the same function.
+        Needed library: Numpy, base64 and sys
+        Convert a XSDataArray into either a numpy array or a list of list
+
+        @param _xsdata: XSDataArray instance
+        @return: numpy array
+        """
+        shape = tuple(_xsdata.getShape())
+        encData = _xsdata.getData()
+
+        if _xsdata.getCoding() is not None:
+            strCoding = _xsdata.getCoding().getValue()
+            if strCoding == "base64":
+                decData = base64.b64decode(encData)
+            elif strCoding == "base32":
+                decData = base64.b32decode(encData)
+            elif strCoding == "base16":
+                decData = base64.b16decode(encData)
+            else:
+                EDVerbose.WARNING("Unable to recognize the encoding of the data !!! got %s, expected base64, base32 or base16, I assume it is base64 " % strCoding)
+                decData = base64.b64decode(encData)
+        else:
+            EDVerbose.WARNING("No coding provided, I assume it is base64 ")
+            strCoding = "base64"
+            decData = base64.b64decode(encData)
+        try:
+            matIn = numpy.fromstring(decData, dtype=_xsdata.getDtype())
+        except Exception:
+            matIn = numpy.fromstring(decData, dtype=numpy.dtype(str(_xsdata.getDtype())))
+        arrayOut = matIn.reshape(shape)
+        # Enforce little Endianness
+        if sys.byteorder == "big":
+            arrayOut.byteswap(True)
+        return arrayOut
 
 
 logger = logging.getLogger( "Collect" )
@@ -88,7 +125,7 @@ class Collect( CObjectBase ):
         self.ednaJob = None
         self.dat_filenames = {}
         self.jobSubmitted = False
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_3"
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_4"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_0"
@@ -446,8 +483,27 @@ class Collect( CObjectBase ):
     def processingFailed( self, jobId ):
         self.processingDone( jobId, jobSuccess = False )
 
+    def _getJobResult(self, jobId, convert_func=None, edna="edna2"):
+        try:
+            job_result = self.commands["getJobOutput_%s" % edna](jobId)
+        except:
+            setattr(self, "%sDead" % edna, True)
+            message = "Tango/%s is not responding, could not retrieve data from job %r" % (edna.title(), jobId)
+            logger.exception( message )
+            self.showMessage( 2, message )
+        else:
+            setattr(self, "%sDead" % edna, False) 
+            if not callable(convert_func):
+                return job_result
+            try:
+                return convert_func(job_result)
+            except:
+                message = "Tango/%s failure: %s" % (edna.title(), convert_func)
+                logger.error( message )
+                self.showMessage( 2, message )
+
     def processingDone( self, jobId, jobSuccess = True ):
-        time.sleep( 0.1 ) #this is to give more priority to other tasks
+        #time.sleep( 0.1 ) #this is to give more priority to other tasks
         if not jobId in self.dat_filenames:
             # Two special "jobId" are ignored
             if jobId not in ["No job succeeded (yet)", "No job Failed (yet)"]:
@@ -461,26 +517,14 @@ class Collect( CObjectBase ):
                 logger.info( "processing Failed from EDNA: %s -> %s", jobId, filename )
                 return
             logger.info( "processing Done from EDNA: %s -> %s", jobId, filename )
-            self.emit( "collectProcessingDone", filename )
-            if jobId.startswith( self.pluginMerge ):
+            if jobId.startswith(self.pluginIntegrate):
+                xsd = self._getJobResult(jobId, XSDataResultBioSaxsProcessOneFilev1_0.parseString)
+                dataq = xsDataToArray(xsd.dataQ)
+                datai = xsDataToArray(xsd.dataI)
+                self.emit( "collectProcessingDone", filename, dataq, datai )
+            elif jobId.startswith( self.pluginMerge ):
                 time.sleep( 0.1 )
-                try:
-                    strXsdout = self.commands["getJobOutput_edna2"]( jobId )
-                except Exception:
-                    self.edna2Dead = True
-                    message = "Tango/EDNA 2 is not responding !"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    return
-                try:
-                    xsd = XSDataResultBioSaxsSmartMergev1_0.parseString( strXsdout )
-                    self.edna2Dead = False
-                except Exception:
-                    message = "Unable to parse string from Tango/EDNA 2"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    # no need to continue 
-                    return
+                xsd = self._getJobResult(jobId, XSDataResultBioSaxsSmartMergev1_0.parseString)
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
@@ -546,15 +590,11 @@ class Collect( CObjectBase ):
                             xsdin.sample = sample
                             print xsdin.marshal()
                         except Exception:
-                            print "[ISPyB] Error: setting ISPyB to False"
                             self.isISPyB = False
-
-
 
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
-                        print xsdin.marshal()
                         jobId = self.commands["startJob_edna1"]( [self.pluginSAS, xsdin.marshal()] )
                         self.dat_filenames[jobId] = rgOut.filename.path.value
                         self.edna1Dead = False
@@ -565,23 +605,9 @@ class Collect( CObjectBase ):
                         self.showMessageEdnaDead( 1 )
             elif jobId.startswith( self.pluginSAS ):
                 time.sleep( 0.1 )
-                try:
-                    strXsdout = self.commands["getJobOutput_edna1"]( jobId )
-                except Exception:
-                    self.edna1Dead = True
-                    message = "Tango/EDNA 1 (slavia) is not responding !"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    return
-                try:
-                    xsd = XSDataResultBioSaxsToSASv1_0.parseString( strXsdout )
-                    self.edna1Dead = False
-                except Exception:
-                    message = "Unable to parse string from Tango/EDNA 1 (slavia)"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    # no need to continue 
-                    return
+                xsd = self._getJobResult(jobId, XSDataResultBioSaxsToSASv1_0.parseString, "edna1")
+                if xsd is None:
+                   return
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
@@ -599,23 +625,7 @@ class Collect( CObjectBase ):
                 self.sasWebDisplay( "file://%s" % webPage )
             elif jobId.startswith( self.pluginHPLC ):#HPLC is on Slavia
                 time.sleep( 0.1 )
-                try:
-                    strXsdout = self.commands["getJobOutput_edna1"]( jobId )
-                except Exception:
-                    self.edna1Dead = True
-                    message = "Tango/EDNA 1 (Slavia) is not responding !"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    return
-                try:
-                    xsd = XSDataResultBioSaxsHPLCv1_0.parseString( strXsdout )
-                    self.edna1Dead = False
-                except Exception:
-                    message = "Unable to parse string from Tango/EDNA 1 (Slavia)"
-                    logger.error( message )
-                    self.showMessage( 2, message )
-                    # no need to continue 
-                    return
+                xsd = self._getJobResult(jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna1") 
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
