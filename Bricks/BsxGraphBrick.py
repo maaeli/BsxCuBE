@@ -210,11 +210,15 @@ class BsxGraphBrick( BaseBrick ):
             # call ourselves one time per value pair
             for curve, points in value.iteritems():
                 self.erase_curve( curve )
-                for ( x, y ) in zip( points[0], points[1] ):
-                    self.new_value( ( x, y, curve ), sender = sender, maptoy2 = maptoy2, replot = False )
-                curveData = self.curveData[curve]
+                #for ( x, y ) in zip( points[0], points[1] ):
+                #    self.new_value( ( x, y, curve ), sender = sender, maptoy2 = maptoy2, replot = False )
+                #curveData = self.curveData[curve]
                 #TODO: taking away the two next lines does a lot for speed - Need to know if hidden and see if we can unhide it
-                self.qtBlissGraph.newCurve( curve, curveData.x, curveData.y, maptoy2 = maptoy2 )
+                curve_object = CurveData(curve, maptoy2=maptoy2)
+                curve_object.x = points[0]
+                curve_object.y = points[1]
+                self.curveData[curve]=curve_object 
+                self.qtBlissGraph.newCurve(curve, curve_object.x, curve_object.y, maptoy2 = maptoy2 )
             self.qtBlissGraph.replot()
             return
 
