@@ -788,7 +788,7 @@ class CURBrick( Core.BaseBrick ):
 
         # code 
         codeLineEdit = tableWidget.cellWidget( index, self.CODE_COLUMN )
-        codeLineEdit.setText( sample.code )
+        codeLineEdit.setText( str( sample.code ) )
 
         # macromolecule 
         macromoleculeLineEdit = tableWidget.cellWidget( index, self.MACROMOLECULE_COLUMN )
