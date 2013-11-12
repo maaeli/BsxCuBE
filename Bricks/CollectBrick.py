@@ -1415,19 +1415,9 @@ class CollectBrick( Core.BaseBrick ):
         if self.robotCollect:
             self.startCollectWithRobot()
         else:
-            if not ( not self.__expertModeOnly or self.__expertMode ):
-
-                if self.__currentConcentration is not None and self.__currentConcentration == self.concentrationDoubleSpinBox.value():
-                    flag = ( Qt.QMessageBox.question( self.brick_widget, \
-                                "Warning", "The value of the concentration '%s' is the same than the previous collection. Continue?" % \
-                                              self.concentrationDoubleSpinBox.value(), \
-                                              Qt.QMessageBox.Yes, \
-                                              Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
-
-            if flag:
-                #When collect without robot there is no log on ISPyB
-                self.getObject( "collect" ).isISPyB = False
-                self.startCollectWithoutRobot()
+            #When collect without robot there is no log on ISPyB
+            self.getObject( "collect" ).isISPyB = False
+            self.startCollectWithoutRobot()
 
     def setCollectionStatus( self, status ):
         self.collectionStatus = status

@@ -1,6 +1,6 @@
 <object class = "Reading" username = "ReadingVacFlightTube">
 
-   <uri>bm29/v-pir/71</uri>
+   <uri>d29/v-pir/71</uri>
 
    <channel name="reading" type="tango" call="Pressure" polling="2000"/>
 

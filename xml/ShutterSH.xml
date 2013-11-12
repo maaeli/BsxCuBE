@@ -1,10 +1,7 @@
 <object class = "Shutter" username = "ShutterSH" local="false">
-	
-   <uri>bm29/bsh/1</uri> 
-
+   <uri>d29/bsh/1</uri>
    <command name="open" type="tango" call="Open"/>
    <command name="close" type="tango" call="Close"/>
    <channel name="state" type="tango" call="State" polling="1000"/>
    <channel name="status" type="tango" call="Status"/>
-</object>	
-
+</object>

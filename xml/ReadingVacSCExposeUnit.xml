@@ -1,6 +1,6 @@
 <object class = "Reading" username = "ReadingVacSCExposeUnit">
 
-   <uri>bm29/v-pir/61</uri>
+   <uri>d29/v-pir/61</uri>
 
    <channel name="reading" type="tango" call="Pressure" polling="2000"/>
 

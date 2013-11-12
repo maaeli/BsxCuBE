@@ -18,9 +18,9 @@
    <channel name="ftTimeout" type="spec" call="BSX_GLOBAL/vacuum/ftTimeout"/>
    <channel name="scTimeout" type="spec" call="BSX_GLOBAL/vacuum/scTimeout"/>
    
-   <channel name="FTVacuum" type="tango" uri="bm29/v-pir/71" call="Pressure"/>
-   <channel name="SCVacuum" type="tango" uri="bm29/v-pir/61" call="Pressure"/>
-   <channel name="USVacuum" type="tango" uri="bm29/v-pir/51" call="Pressure"/>
+   <channel name="FTVacuum" type="tango" uri="d29/v-pir/71" call="Pressure"/>
+   <channel name="SCVacuum" type="tango" uri="d29/v-pir/61" call="Pressure"/>
+   <channel name="USVacuum" type="tango" uri="d29/v-pir/51" call="Pressure"/>
    
    
 </object>

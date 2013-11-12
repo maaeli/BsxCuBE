@@ -1,5 +1,5 @@
 <object class="BSSampleChanger" username="BioSax Sample Changer">
-  <uri>bm29/bssc/1</uri>
+  <uri>d29/bssc/1</uri>
   <channel type="tango" name="State"  polling="1000"/>
   <channel type="tango" name="Status" polling="1000"/>
   <channel type="tango" name="TemperatureSampleStorage"/>
