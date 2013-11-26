@@ -45,7 +45,8 @@ class BsxGraphBrick( BaseBrick ):
                                          , [Signal( 'new_scan', 'new_scan' ),
                                             Signal( 'new_point', 'new_value' )]
                                          , []
-                                         , 'y_scan_provider_connected' )
+                                         , 'y_scan_provider_connected' ),
+                    "clearGraph": Connection('Clear graph', [Signal('clearGraph', 'clear')],[])
                     }
 
 
@@ -369,6 +370,11 @@ class BsxGraphBrick( BaseBrick ):
             curveData.clear()
             self.qtBlissGraph.newCurve( str( curveData.objectName() ), x = [], y = [], maptoy2 = curveData.maptoy2 )
         self.setXAxisScale()
+
+    def clear(self):
+        for curveName in self.curveData.keys():
+          self.removeCurve(curveName)
+        self.curveData = {}
 
     def setXAxisScale( self ):
         if self.timeAxisX:

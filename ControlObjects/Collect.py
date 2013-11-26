@@ -89,7 +89,7 @@ class Collect( CObjectBase ):
                Signal( "collectProcessingDone" ),
                Signal( "collectProcessingLog" ),
                Signal( "collectDone" ),
-               Signal( "clearCurve" ),
+               Signal( "clearGraph" ),
                Signal( "transmissionChanged" ),
                Signal( "machineCurrentChanged" ),
                Signal( "newSASUrl" ),
@@ -808,9 +808,8 @@ class Collect( CObjectBase ):
         #  PERFORM COLLECT
         # ==================================================
         self.showMessage( 0, "  - Start collecting (%s) '%s'..." % ( mode, pars["prefix"] ) )
-        # Clear 1D curve
-        # Commented out 26/6 2012 on order by Petra Pernot (SO)
-        #self.emit("clearCurve")
+        # Clear 1D curves
+        self.emit("clearGraph")
 
         self.collect( pars["directory"],
                      pars["prefix"], pars["runNumber"],
