@@ -130,8 +130,8 @@ class Collect( CObjectBase ):
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_4"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
-        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_1"
-        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_1"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_2"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_2"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
