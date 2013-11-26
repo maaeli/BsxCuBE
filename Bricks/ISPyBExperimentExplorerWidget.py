@@ -97,7 +97,7 @@ class ISPyBExperimentExplorerWidget( Qt.QDialog ):
             #print str( self.getWSClient().service.getRobotByExperimentId( experimentId ) )
             self.experimentId = experimentId
             self.accept()
-you know
+
     def onCancel( self ):
         self.close()
 
