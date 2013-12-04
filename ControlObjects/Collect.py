@@ -665,7 +665,15 @@ class Collect( CObjectBase ):
             self.jobSubmitted = True
         except Exception:
             self.showMessageEdnaDead( 1 )
-
+ 
+        # clean capillary
+        logger.info("Cleaning capillary")
+        self.setHPLC(False)
+        try:
+          self.objects["sample_changer"].doCleanProcedure() 
+        except:
+          pass
+        self.setHPLC(True)
 
     def collectAbort( self ):
         logger.info( "sending abort to stop spec collection" )
