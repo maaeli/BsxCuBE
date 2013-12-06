@@ -38,6 +38,8 @@ class VacPumpBrick( Core.BaseBrick ):
         self.ftvacuum = 0.0
         self.scvacuum = 0.0
         self.usvacuum = 0.0
+        # time to wait in s for primary pump to start up and empty tube to SC or FT
+        self.waitPrimaryPump = 10.0
 
     def init( self ):
 
@@ -105,7 +107,7 @@ class VacPumpBrick( Core.BaseBrick ):
         self.ftvacuum = float( self.pumpingObject.getFTVacuum() )
         self.scvacuum = float( self.pumpingObject.getSCVacuum() )
         self.usvacuum = float( self.pumpingObject.getUSVacuum() )
-        # error on pir61 and pir71 (sometimes 0.0f)
+        # error on pir61 and pir71 (sometimes it reads 0.0 when it is in air)
         if ( self.ftvacuum == 0 ):
             self.ftvacuum = 2000.0
         if ( self.scvacuum == 0 ):
@@ -120,10 +122,6 @@ class VacPumpBrick( Core.BaseBrick ):
                 return
         if ( ( self.scvacuum < self.valveThreshold ) and ( self.ftvacuum < self.valveThreshold ) ):
             # SC and FT vacuum OK
-            #TODO: DEBUG
-            print "sc vacuum %r " % self.scvacuum
-            print "ft vacuum %r " % self.ftvacuum
-            print "valve Threshold %r " % self.valveThreshold
             logger.info( "Vacuum already OK in Sample Changer" )
             logger.info( "Vacuum already OK in Flight Tube" )
             self.pumpingObject.rv5open()
@@ -134,6 +132,8 @@ class VacPumpBrick( Core.BaseBrick ):
             self.pumpingObject.rv5open()
             self.pumpingObject.exftclose()
             self.pumpingObject.ppumpopen()
+            # leave time for the tube to be empty before opening
+            time.sleep( self.waitPrimaryPump )
             self.pumpingObject.vacftopen()
             # wait for vacuum
             if self.waitForFtVacuum() :
@@ -166,8 +166,10 @@ class VacPumpBrick( Core.BaseBrick ):
             # FT OK and SC good but not air
             logger.info( "Vacuum already OK in Flight Tube" )
             self.pumpingObject.exscclose()
-            self.pumpingObject.vacscopen()
             self.pumpingObject.ppumpopen()
+            # leave time for the tube to be empty before opening
+            time.sleep( self.waitPrimaryPump )
+            self.pumpingObject.vacscopen()
             # Now wait for vacuum
             if self.waitForScVacuum() :
                 logger.info( "Vacuum achieved in Sample Changer" )
@@ -200,8 +202,8 @@ class VacPumpBrick( Core.BaseBrick ):
             # FT OK and in SC is air - SC vacuum value from Logic - If we came here, SC in air
             logger.info( "Vacuum already OK in Flight Tube" )
             self.pumpingObject.exscclose()
-            self.pumpingObject.vacscopen()
             self.pumpingObject.ppumpopen()
+            self.pumpingObject.vacscopen()
             # Now wait for vacuum
             if self.waitForScVacuum():
                 logger.info( "Vacuum achieved in Sample Changer" )
@@ -230,14 +232,12 @@ class VacPumpBrick( Core.BaseBrick ):
                 self.pumpingObject.vacscclose()
                 self.pumpingObject.ppumpclose()
         elif ( ( self.ftvacuum < self.pumpThreshold ) and ( self.scvacuum < self.pumpThreshold ) ):
-            #TODO: DEBUG
-            print "sc vacuum %r " % self.scvacuum
-            print "ft vacuum %r " % self.ftvacuum
-            print "pump Threshold %r " % self.pumpThreshold
             # FT and SC both good and not air
             self.pumpingObject.exftclose()
             self.pumpingObject.exscclose()
             self.pumpingObject.ppumpopen()
+            # leave time for the tube to be empty before opening
+            time.sleep( self.waitPrimaryPump )
             self.pumpingObject.vacscopen()
             self.pumpingObject.vacftopen()
             # Now wait for vacuum in SC first
@@ -268,6 +268,8 @@ class VacPumpBrick( Core.BaseBrick ):
             self.pumpingObject.exscclose()
             self.pumpingObject.vacscopen()
             self.pumpingObject.ppumpopen()
+            # leave time for the tube to be empty before opening
+            time.sleep( self.waitPrimaryPump )
             self.pumpingObject.vacftopen()
             # Now wait for vacuum in SC first
             if self.waitForScVacuum() :
@@ -297,6 +299,8 @@ class VacPumpBrick( Core.BaseBrick ):
             self.pumpingObject.exscclose()
             self.pumpingObject.vacftopen()
             self.pumpingObject.ppumpopen()
+            # leave time for the tube to be empty before opening
+            time.sleep( self.waitPrimaryPump )
             self.pumpingObject.vacscopen()
             # Now wait for vacuum in SC first
             if self.waitForScVacuum() :
