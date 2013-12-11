@@ -72,48 +72,48 @@ class BiosaxsClient( CObjectBase ):
             return "/data/pyarch/bm29/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
         return "/data/pyarch/bm29/testing/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
 
-    def getSpecimenIdBySampleCode( self, sampleCode ):
-        print "[ISPyB] getSpecimenIdBySampleCode " + str( sampleCode )
-        if self.experiment is None:
-            print "[ISPyB] Experiment is None"
-            return None
-        if self.selectedExperimentId is None:
-            print "[ISPyB] Experiment is None"
-            return None
-        for experiment in self.experiments:
-            #print experiment.experiment.experimentId
-            if experiment.experiment.experimentId == self.selectedExperimentId:
-                for sample in experiment.experiment.samples:
-                    #for specimen in sample.specimen3VOs:
-                    for specimen in sample.measurements:
-                        if specimen.code == sampleCode:
-                            return specimen.specimenId
-        return None
+#    def getSpecimenIdBySampleCode( self, sampleCode ):
+#        print "[ISPyB] getSpecimenIdBySampleCode " + str( sampleCode )
+#        if self.experiment is None:
+#            print "[ISPyB] Experiment is None"
+#            return None
+#        if self.selectedExperimentId is None:
+#            print "[ISPyB] Experiment is None"
+#            return None
+#        for experiment in self.experiments:
+#            #print experiment.experiment.experimentId
+#            if experiment.experiment.experimentId == self.selectedExperimentId:
+#                for sample in experiment.experiment.samples:
+#                    #for specimen in sample.specimen3VOs:
+#                    for specimen in sample.measurements:
+#                        if specimen.code == sampleCode:
+#                            return specimen.specimenId
+#        return None
 
     # Return an array of samples which a given concentration
-    def getSpecimensByConcentration( self, concentration ):
-        print "[ISPyB] getSpecimenByConcentration: " + str( concentration )
-        if self.experiment is None:
-            print "[ISPyB] Experiment is None"
-            return None
-        if self.selectedExperimentId is None:
-            print "[ISPyB] Experiment is None"
-            return None
+#    def getSpecimensByConcentration( self, concentration ):
+#        print "[ISPyB] getSpecimenByConcentration: " + str( concentration )
+#        if self.experiment is None:
+#            print "[ISPyB] Experiment is None"
+#            return None
+#        if self.selectedExperimentId is None:
+#            print "[ISPyB] Experiment is None"
+#            return None
+#
+#        samples = []
+#        for experiment in self.experiments:
+#            if experiment.experiment.experimentId == self.selectedExperimentId:
+#                for sample in experiment.experiment.samples:
+#                    if ( float( sample.concentration ) ) == ( float( concentration ) ):
+#                        samples.append( sample )
+#        return samples
 
-        samples = []
-        for experiment in self.experiments:
-            if experiment.experiment.experimentId == self.selectedExperimentId:
-                for sample in experiment.experiment.samples:
-                    if ( float( sample.concentration ) ) == ( float( concentration ) ):
-                        samples.append( sample )
-        return samples
 
-
-    def getBufferIdByAcronym( self, bufferName ):
-        for myBuffer in self.experiment.getBuffers():
-            if bufferName == myBuffer.acronym:
-                return myBuffer.bufferId
-        return None
+#    def getBufferIdByAcronym( self, bufferName ):
+#        for myBuffer in self.experiment.getBuffers():
+#            if bufferName == myBuffer.acronym:
+#                return myBuffer.bufferId
+#        return None
 
     #It looks for a code in the comments that identifies the measurements
     # [1] This is a comment
@@ -133,33 +133,33 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
         return -1
 
-    def getMeasurementIdBySampleCodeConcentrationAndSEU( self, sampleCode, concentration, seu, bufferName ):
-        try:
-#            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str( sampleCode ) + " " + str( concentration ) + " " + str( seu ) + " " + str( bufferName )
-            if self.experiment is None:
-                print "[ISPyB] Experiment is None"
-                return None
-            if self.selectedExperimentId is None:
-                print "[ISPyB] Experiment is None"
-                return None
-            bufferId = self.getBufferIdByAcronym( bufferName )
-#            print "[ISPyB] bufferId " + str( bufferId )
-            for experiment in self.experiments:
-                #print experiment.experiment.experimentId
-                if experiment.experiment.experimentId == self.selectedExperimentId:
-                    samples = self.getSpecimensByConcentration( concentration )
-                    for sample in samples:
-                        if sample.bufferId == bufferId:
-                            #for specimen in sample.specimen3VOs:
-                            for specimen in sample.measurements:
-                                if ( float( specimen.exposureTemperature ) == float( seu ) and ( str( specimen.code ) == str( sampleCode ) ) ):
-                                    return specimen.specimenId
-        except Exception:
-            print "[ISPyB] error"
-            traceback.print_exc()
-            raise Exception
-        print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
-        return -1
+#    def getMeasurementIdBySampleCodeConcentrationAndSEU( self, sampleCode, concentration, seu, bufferName ):
+#        try:
+##            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str( sampleCode ) + " " + str( concentration ) + " " + str( seu ) + " " + str( bufferName )
+#            if self.experiment is None:
+#                print "[ISPyB] Experiment is None"
+#                return None
+#            if self.selectedExperimentId is None:
+#                print "[ISPyB] Experiment is None"
+#                return None
+#            bufferId = self.getBufferIdByAcronym( bufferName )
+##            print "[ISPyB] bufferId " + str( bufferId )
+#            for experiment in self.experiments:
+#                #print experiment.experiment.experimentId
+#                if experiment.experiment.experimentId == self.selectedExperimentId:
+#                    samples = self.getSpecimensByConcentration( concentration )
+#                    for sample in samples:
+#                        if sample.bufferId == bufferId:
+#                            #for specimen in sample.specimen3VOs:
+#                            for specimen in sample.measurements:
+#                                if ( float( specimen.exposureTemperature ) == float( seu ) and ( str( specimen.code ) == str( sampleCode ) ) ):
+#                                    return specimen.specimenId
+#        except Exception:
+#            print "[ISPyB] error"
+#            traceback.print_exc()
+#            raise Exception
+#        print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
+#        return -1
 
     ### Mode: before, after, sample    
     def saveFrameSet( self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId ):
@@ -225,29 +225,30 @@ class BiosaxsClient( CObjectBase ):
             if ( self.selectedExperimentId is not None ):
                 self.client.service.updateStatus( self.selectedExperimentId, status )
 
-                #If status is inished we compress the folder
-                if  status == "FINISHED" :
+                #This FUNCTIONALITY IS DISABLED BECAUSE ISPyB creates now the zip file dynamically
+                #If status is finished we compress the folder
+#                if  status == "FINISHED" :
                     #Zipping file
-                    zipFilePath = self.getPyarchDestination() + "/" + str( self.selectedExperimentId ) + ".zip"
-                    temporalPath = "/tmp/" + str( self.selectedExperimentId ) + ".zip"
-                    self.zipFolder( self.getPyarchDestination(), temporalPath )
-                    self.movefile( temporalPath, self.getPyarchDestination() )
-                    self.client.service.setDataAcquisitionFilePath( self.selectedExperimentId, zipFilePath )
+#                    zipFilePath = self.getPyarchDestination() + "/" + str( self.selectedExperimentId ) + ".zip"
+#                    temporalPath = "/tmp/" + str( self.selectedExperimentId ) + ".zip"
+#                    self.zipFolder( self.getPyarchDestination(), temporalPath )
+#                    self.movefile( temporalPath, self.getPyarchDestination() )
+#                    self.client.service.setDataAcquisitionFilePath( self.selectedExperimentId, zipFilePath )
         except Exception:
             traceback.print_exc()
             raise Exception
 
     # This method should be removed as zip files are created dynamically on server side
-    def zipFolder( self, path, archivename ):
-        print "ISPyB: zipping " + path + " on " + archivename
-        myZipFile = zipfile.ZipFile( archivename, 'w' )
-        rootlen = len( path ) + 1
-        assert os.path.isdir( path )
-        for base, dirs, files in os.walk( path ):
-            for file in files:
-                fn = os.path.join( base, file )
-                myZipFile.write( fn, fn[rootlen:] )
-        myZipFile.close()
+#    def zipFolder( self, path, archivename ):
+#        print "ISPyB: zipping " + path + " on " + archivename
+#        myZipFile = zipfile.ZipFile( archivename, 'w' )
+#        rootlen = len( path ) + 1
+#        assert os.path.isdir( path )
+#        for base, dirs, files in os.walk( path ):
+#            for file in files:
+#                fn = os.path.join( base, file )
+#                myZipFile.write( fn, fn[rootlen:] )
+#        myZipFile.close()
 
     def movefile( self, afile, destination ):
         try:
@@ -359,5 +360,5 @@ if __name__ == "__main__":
     biosaxs.getExperimentNamesByProposalCodeNumber( "mx", "1438" )
     #experiment = biosaxs.getExperimentById(345)
     biosaxs.selectedExperimentId = 345
-    print biosaxs.getSpecimenIdBySampleCode( "bsa_25C" )
+    #print biosaxs.getSpecimenIdBySampleCode( "bsa_25C" )
 

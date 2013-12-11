@@ -254,6 +254,7 @@ class CURBrick( Core.BaseBrick ):
             collectPars.optimizationText = self.optimizationComboBox.currentText()
             collectPars.initialCleaning = self.initialCleaningCheckBox.isChecked()
             collectPars.bufferMode = self.bufferModeComboBox.currentIndex()
+            self.bufferNames = []
 
 #            collectPars.bufferMode = self.bufferModeComboBox.currentIndex()
             self.loadPars( collectPars )
@@ -318,7 +319,7 @@ class CURBrick( Core.BaseBrick ):
         self.WAITTIME_COLUMN = 18
         self.DELETE_COLUMN = 19
         return [ "", "", "Use", "Type", "Plate", "Row", "Well", \
-                                "Concentration", "Comments", "Macromol.", "Code", "Viscosity", "Buffername", \
+                                "Concentration", "Comments", "Name", "Code", "Viscosity", "Background Id", \
                                 "Transmission", "Volume", "SEU Temp", "Flow", "Recup", \
                                 "Wait", "Del"]
 
@@ -796,15 +797,16 @@ class CURBrick( Core.BaseBrick ):
 
         # viscosity
         viscosityComboBox = tableWidget.cellWidget( index, self.VISCOSITY_COLUMN )
-        self.setComboBox( viscosityComboBox, sample.viscosity )
+        #Capitalize first Letter
+        self.setComboBox( viscosityComboBox, sample.viscosity.title() )
 
         # buffername
         bufferComboBox = tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN )
 
         if sample.type == "Buffer":
             if sample.buffername not in self.bufferNames:
-                self.bufferNames.append( sample.buffername )
-        self.assignOneBufferName( index, sample.buffername )
+                self.bufferNames.append( str( sample.buffername ) )
+        self.assignOneBufferName( index, str( sample.buffername ) )
 
         # transmission
         transmissionDoubleSpinBox = tableWidget.cellWidget( index, self.TRANSMISSION_COLUMN )
@@ -888,7 +890,7 @@ class CURBrick( Core.BaseBrick ):
             if well_type == "Buffer":
                 bufferName = str( self.tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN ).currentText() )
                 if bufferName not in bufferNames:
-                    bufferNames.append( bufferName )
+                    bufferNames.append( str( bufferName ) )
         return bufferNames
 
 
@@ -903,6 +905,7 @@ class CURBrick( Core.BaseBrick ):
     def assignOneBufferName( self, index, value ):
         try:
             self.tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN ).clear()
+            print "SAMPLE:  " + str( self.bufferNames )
             self.tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN ).addItems( self.bufferNames )
             idx = self.bufferNames.index( value )
             if idx != -1:
