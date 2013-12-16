@@ -22,7 +22,7 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataInputBioSaxsHPLCv1_0
 #from XSDataSAS import XSDataInputSolutionScattering
 
-def xsDataToArray(_xsdata):
+def xsDataToArray( _xsdata ):
         """
         Lightweight, EDNA-Free implementation of the same function.
         Needed library: Numpy, base64 and sys
@@ -31,32 +31,32 @@ def xsDataToArray(_xsdata):
         @param _xsdata: XSDataArray instance
         @return: numpy array
         """
-        shape = tuple(_xsdata.getShape())
+        shape = tuple( _xsdata.getShape() )
         encData = _xsdata.getData()
 
         if _xsdata.getCoding() is not None:
             strCoding = _xsdata.getCoding().getValue()
             if strCoding == "base64":
-                decData = base64.b64decode(encData)
+                decData = base64.b64decode( encData )
             elif strCoding == "base32":
-                decData = base64.b32decode(encData)
+                decData = base64.b32decode( encData )
             elif strCoding == "base16":
-                decData = base64.b16decode(encData)
+                decData = base64.b16decode( encData )
             else:
-                EDVerbose.WARNING("Unable to recognize the encoding of the data !!! got %s, expected base64, base32 or base16, I assume it is base64 " % strCoding)
-                decData = base64.b64decode(encData)
+                EDVerbose.WARNING( "Unable to recognize the encoding of the data !!! got %s, expected base64, base32 or base16, I assume it is base64 " % strCoding )
+                decData = base64.b64decode( encData )
         else:
-            EDVerbose.WARNING("No coding provided, I assume it is base64 ")
+            EDVerbose.WARNING( "No coding provided, I assume it is base64 " )
             strCoding = "base64"
-            decData = base64.b64decode(encData)
+            decData = base64.b64decode( encData )
         try:
-            matIn = numpy.fromstring(decData, dtype=_xsdata.getDtype())
+            matIn = numpy.fromstring( decData, dtype = _xsdata.getDtype() )
         except Exception:
-            matIn = numpy.fromstring(decData, dtype=numpy.dtype(str(_xsdata.getDtype())))
-        arrayOut = matIn.reshape(shape)
+            matIn = numpy.fromstring( decData, dtype = numpy.dtype( str( _xsdata.getDtype() ) ) )
+        arrayOut = matIn.reshape( shape )
         # Enforce little Endianness
         if sys.byteorder == "big":
-            arrayOut.byteswap(True)
+            arrayOut.byteswap( True )
         return arrayOut
 
 
@@ -309,7 +309,7 @@ class Collect( CObjectBase ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
-        self.emit("new_scan", { "xlabel": "Time (seconds)", "ylabel": "Summed intensity", "title": "Summed intensity over time" })
+        self.emit( "new_scan", { "xlabel": "Time (seconds)", "ylabel": "Summed intensity", "title": "Summed intensity over time" } )
         #TODO: DEBUG
         logger.info( "Starting collection now" )
         try:
@@ -485,22 +485,22 @@ class Collect( CObjectBase ):
     def processingFailed( self, jobId ):
         self.processingDone( jobId, jobSuccess = False )
 
-    def _getJobResult(self, jobId, convert_func=None, edna="edna2"):
+    def _getJobResult( self, jobId, convert_func = None, edna = "edna2" ):
         try:
-            job_result = self.commands["getJobOutput_%s" % edna](jobId)
+            job_result = self.commands["getJobOutput_%s" % edna]( jobId )
         except:
-            setattr(self, "%sDead" % edna, True)
-            message = "Tango/%s is not responding, could not retrieve data from job %r" % (edna.title(), jobId)
+            setattr( self, "%sDead" % edna, True )
+            message = "Tango/%s is not responding, could not retrieve data from job %r" % ( edna.title(), jobId )
             logger.exception( message )
             self.showMessage( 2, message )
         else:
-            setattr(self, "%sDead" % edna, False) 
-            if not callable(convert_func):
+            setattr( self, "%sDead" % edna, False )
+            if not callable( convert_func ):
                 return job_result
             try:
-                return convert_func(job_result)
+                return convert_func( job_result )
             except:
-                message = "Tango/%s failure: %s" % (edna.title(), convert_func)
+                message = "Tango/%s failure: %s" % ( edna.title(), convert_func )
                 logger.error( message )
                 self.showMessage( 2, message )
 
@@ -519,14 +519,14 @@ class Collect( CObjectBase ):
                 logger.info( "processing Failed from EDNA: %s -> %s", jobId, filename )
                 return
             logger.info( "processing Done from EDNA: %s -> %s", jobId, filename )
-            if jobId.startswith(self.pluginIntegrate):
-                xsd = self._getJobResult(jobId, XSDataResultBioSaxsProcessOneFilev1_0.parseString)
-                dataq = xsDataToArray(xsd.dataQ)
-                datai = xsDataToArray(xsd.dataI)
+            if jobId.startswith( self.pluginIntegrate ):
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsProcessOneFilev1_0.parseString )
+                dataq = xsDataToArray( xsd.dataQ )
+                datai = xsDataToArray( xsd.dataI )
                 self.emit( "collectProcessingDone", filename, dataq, datai )
             elif jobId.startswith( self.pluginMerge ):
                 time.sleep( 0.1 )
-                xsd = self._getJobResult(jobId, XSDataResultBioSaxsSmartMergev1_0.parseString)
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsSmartMergev1_0.parseString )
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
@@ -607,7 +607,7 @@ class Collect( CObjectBase ):
                         self.showMessageEdnaDead( 1 )
             elif jobId.startswith( self.pluginSAS ):
                 time.sleep( 0.1 )
-                xsd = self._getJobResult(jobId, XSDataResultBioSaxsToSASv1_0.parseString, "edna1")
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsToSASv1_0.parseString, "edna1" )
                 if xsd is None:
                    return
                 if xsd.status is not None:
@@ -627,12 +627,12 @@ class Collect( CObjectBase ):
                 self.sasWebDisplay( "file://%s" % webPage )
             elif jobId.startswith( self.pluginHPLC ):#HPLC is on Slavia
                 #time.sleep( 0.1 )
-                xsd = self._getJobResult(jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna1") 
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna1" )
                 if xsd.timeStamp and xsd.summedIntensity:
-                    self.emit('new_point', (xsd.timeStamp.value, xsd.summedIntensity.value))
-                
-                dataq = xsDataToArray(xsd.dataQ)
-                datai = xsDataToArray(xsd.dataI)
+                    self.emit( 'new_point', ( xsd.timeStamp.value, xsd.summedIntensity.value ) )
+
+                dataq = xsDataToArray( xsd.dataQ )
+                datai = xsDataToArray( xsd.dataI )
                 self.emit( "collectProcessingDone", filename, dataq, datai )
 
                 if xsd.status is not None:
@@ -659,21 +659,39 @@ class Collect( CObjectBase ):
 
 
     def flushHPLC( self ):
+#        try:
+#            user = self.objects["biosaxs_client"].user
+#            password = self.objects["biosaxs_client"].password
+#            ispybURL = self.objects["biosaxs_client"].URL
+#            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestinationForHPLC()
+
+#           self.xsdin.sample.login = user
+#           self.xsdin.sample.passwd = password
+#          self.xsdin.sample.ispybURL = ispybURL
+#           self.xsdin.sample.ispybDestination = XSDataFile( XSDataString( pyarchDestination ) )
+
+#          print "Setting sample to %s, %s, %s, %s" % ( str( user ), str( password ), str( ispybURL ), str( pyarchDestination ) )
+#       except Exception as error:
+#           traceback.print_exc()
+            #In case of exception we create a new sample
+#           sample = XSDataBioSaxsSample()
+
         try:
+
             jobId = self.commands["startJob_edna1"]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
             self.edna1Dead = False
             self.jobSubmitted = True
         except Exception:
             self.showMessageEdnaDead( 1 )
- 
+
         # clean capillary
-        logger.info("Cleaning capillary")
-        self.setHPLC(False)
+        logger.info( "Cleaning capillary" )
+        self.setHPLC( False )
         try:
-          self.objects["sample_changer"].doCleanProcedure() 
+          self.objects["sample_changer"].doCleanProcedure()
         except:
           pass
-        self.setHPLC(True)
+        self.setHPLC( True )
 
     def collectAbort( self ):
         logger.info( "sending abort to stop spec collection" )
@@ -817,7 +835,7 @@ class Collect( CObjectBase ):
         # ==================================================
         self.showMessage( 0, "  - Start collecting (%s) '%s'..." % ( mode, pars["prefix"] ) )
         # Clear 1D curves
-        self.emit("clearGraph")
+        self.emit( "clearGraph" )
 
         self.collect( pars["directory"],
                      pars["prefix"], pars["runNumber"],
