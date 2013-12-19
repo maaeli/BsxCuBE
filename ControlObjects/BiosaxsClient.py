@@ -64,8 +64,8 @@ class BiosaxsClient( CObjectBase ):
 
     #Without ExperimentId
     def getPyarchDestinationForHPLC( self ):
-        if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
-            return "/data/pyarch/bm29/%s%s" % ( self.proposalType, self.proposalNumber )
+        #if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
+        #    return "/data/pyarch/bm29/%s%s" % ( self.proposalType, self.proposalNumber )
         return "/data/pyarch/bm29/testing/%s%s" % ( self.proposalType, self.proposalNumber )
 
 

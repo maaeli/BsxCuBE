@@ -659,25 +659,25 @@ class Collect( CObjectBase ):
 
 
     def flushHPLC( self ):
-#        try:
-#            user = self.objects["biosaxs_client"].user
-#            password = self.objects["biosaxs_client"].password
-#            ispybURL = self.objects["biosaxs_client"].URL
-#            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestinationForHPLC()
-
-#           self.xsdin.sample.login = user
-#           self.xsdin.sample.passwd = password
-#          self.xsdin.sample.ispybURL = ispybURL
-#           self.xsdin.sample.ispybDestination = XSDataFile( XSDataString( pyarchDestination ) )
-
-#          print "Setting sample to %s, %s, %s, %s" % ( str( user ), str( password ), str( ispybURL ), str( pyarchDestination ) )
-#       except Exception as error:
-#           traceback.print_exc()
+        try:
+            user = self.objects["biosaxs_client"].user
+            password = self.objects["biosaxs_client"].password
+            ispybURL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+            pyarchDestination = self.objects["biosaxs_client"].getPyarchDestinationForHPLC()
+            self.xsdin.sample.login = XSDataString( user )
+            self.xsdin.sample.passwd = XSDataString( password )
+            self.xsdin.sample.ispybURL = XSDataString( ispybURL )
+            self.xsdin.sample.ispybDestination = XSDataFile( XSDataString( pyarchDestination ) )
+            print "Setting sample to %s, %s, %s, %s" % ( str( user ), str( password ), str( ispybURL ), str( pyarchDestination ) )
+        except:
+            print "----------------->> Error"
+            traceback.print_exc()
             #In case of exception we create a new sample
-#           sample = XSDataBioSaxsSample()
+            sample = XSDataBioSaxsSample()
+
 
         try:
-
+            print "------------------------------------>> Sent to EDNA"
             jobId = self.commands["startJob_edna1"]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
             self.edna1Dead = False
             self.jobSubmitted = True
