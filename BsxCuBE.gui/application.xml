@@ -118,6 +118,25 @@
      <property name="emailAddresses" value="guijarro@esrf.fr"/>
      <property name="minimum_level" value="INFO"/>
   </properties>
+  <properties id="HPLC Graph">
+     <property name="flex" value="1"/>
+     <property name="enableGrid" value="False"/>
+     <property name="xAxisLabel" value=""/>
+     <property name="title" value="untitled"/>
+     <property name="timeOnXAxis" value="False"/>
+     <property name="windowSize" value="3600"/>
+     <property name="yAxisLabel" value=""/>
+     <property name="timeElapsedTime" value="True"/>
+     <property name="defaultScale" value="linear"/>
+     <property name="showGridButton" value="True"/>
+     <property name="lineWidth" value="1"/>
+     <property name="titleFontSize" value="14"/>
+     <property name="enableZoom" value="False"/>
+     <property name="axisFontSize" value="8"/>
+     <property name="showScaleButton" value="True"/>
+     <property name="y2AxisLabel" value=""/>
+     <property name="showPrintButton" value="True"/>
+  </properties>
   <properties id="CommandBrick5">
      <property name="flex" value="0"/>
      <property name="caption" value="Flight tube air"/>
@@ -344,25 +363,6 @@
      <property name="pack" value="start"/>
      <property name="caption" value="Misc"/>
   </properties>
-  <properties id="HPLC Graph">
-     <property name="flex" value="1"/>
-     <property name="enableGrid" value="False"/>
-     <property name="xAxisLabel" value=""/>
-     <property name="title" value="untitled"/>
-     <property name="timeOnXAxis" value="False"/>
-     <property name="windowSize" value="3600"/>
-     <property name="yAxisLabel" value=""/>
-     <property name="timeElapsedTime" value="True"/>
-     <property name="defaultScale" value="linear"/>
-     <property name="showGridButton" value="True"/>
-     <property name="lineWidth" value="1"/>
-     <property name="titleFontSize" value="14"/>
-     <property name="enableZoom" value="False"/>
-     <property name="axisFontSize" value="8"/>
-     <property name="showScaleButton" value="True"/>
-     <property name="y2AxisLabel" value=""/>
-     <property name="showPrintButton" value="True"/>
-  </properties>
   <properties id="BsxVideoBrick1">
      <property name="flex" value="1"/>
   </properties>
@@ -377,7 +377,7 @@
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
-     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr, svensson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr , svensson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr"/>
      <property name="send_icon" value=""/>
   </properties>
   <properties id="1D">
@@ -549,6 +549,22 @@
   <connections id="LogBrick1">
   </connections>
 
+  <connections id="HPLC Graph">
+    <connection role="y_scan">
+      <signal name="new_scan"/>
+      <signal name="new_point"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
+    <connection role="y_curves">
+      <signal name="new_curves_data"/>
+      <signal name="erase_curve"/>
+    </connection>
+    <connection role="clearGraph">
+      <signal name="clearGraph"/>
+      <peer name="BsxCuBE/Collect"/>
+    </connection>
+  </connections>
+
   <connections id="CommandBrick5">
     <connection role="command">
       <signal name="commandStatusChanged"/>
@@ -583,6 +599,10 @@
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
       <peer name="BsxCuBE/image_proxy (local)"/>
+    </connection>
+    <connection role="clearGraph">
+      <signal name="clearGraph"/>
+      <peer name="BsxCuBE/Collect"/>
     </connection>
   </connections>
 
@@ -662,7 +682,6 @@
       <signal name="transmissionChanged"/>
       <signal name="machineCurrentChanged"/>
       <signal name="newSASUrl"/>
-      <signal name="hplcPoint"/>
       <slot name="testCollect"/>
       <slot name="collect"/>
       <slot name="collectAbort"/>
@@ -707,6 +726,9 @@
     <connection role="y_curves">
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
+    </connection>
+    <connection role="clearGraph">
+      <signal name="clearGraph"/>
     </connection>
   </connections>
 
@@ -756,6 +778,8 @@
 
   <connections id="VacPumpBrick1">
     <connection role="pumping">
+      <slot name="ppumpopen"/>
+      <slot name="ppumpclose"/>
       <slot name="exftclose"/>
       <slot name="exscclose"/>
       <slot name="vacftclose"/>
@@ -830,6 +854,9 @@
       <signal name="new_curves_data"/>
       <signal name="erase_curve"/>
     </connection>
+    <connection role="clearGraph">
+      <signal name="clearGraph"/>
+    </connection>
   </connections>
 
   <connections id="Operation">
@@ -863,32 +890,6 @@
   </connections>
 
   <connections id="Misc">
-  </connections>
-
-  <connections id="HPLC Graph">
-    <connection role="y2_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-    </connection>
-    <connection role="y_scan">
-      <signal name="new_scan"/>
-      <signal name="new_point"/>
-      <peer name="BsxCuBE/Collect"/>
-    </connection>
-    <connection role="y_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="y2_curves">
-      <signal name="new_curves_data"/>
-      <signal name="erase_curve"/>
-    </connection>
-    <connection role="Y">
-      <signal name="update"/>
-    </connection>
-    <connection role="Y2">
-      <signal name="update"/>
-    </connection>
   </connections>
 
   <connections id="BsxVideoBrick1">

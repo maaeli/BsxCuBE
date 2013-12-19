@@ -1,6 +1,8 @@
 <object class="VacPump" username="VacPump" >
    <uri>nela:exp</uri> 
 
+   <command name="ppumpopen" type="spec" call="ppumpopen"/>
+   <command name="ppumpclose" type="spec" call="ppumpclose"/>
    <command name="exftclose" type="spec" call="exftclose"/>
    <command name="exscclose" type="spec" call="exscclose"/>
    <command name="vacftclose" type="spec" call="vacftclose"/>

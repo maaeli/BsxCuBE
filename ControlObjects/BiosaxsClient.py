@@ -62,6 +62,13 @@ class BiosaxsClient( CObjectBase ):
         return self.client.service.findExperimentByProposalCode( code, number )
 #        self.emit( "onSuccess", "getExperimentNamesByProposalCodeNumber", json.loads( response ) )
 
+    #Without ExperimentId
+    def getPyarchDestinationForHPLC( self ):
+        #if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
+        #    return "/data/pyarch/bm29/%s%s" % ( self.proposalType, self.proposalNumber )
+        return "/data/pyarch/bm29/testing/%s%s" % ( self.proposalType, self.proposalNumber )
+
+
     def getPyarchDestination( self ):
         # This happens because I need the experiment ID but because the experiment has not been created yet I have to replace it in the server side
         # so I will replace /data/pyarch/bm29/%s%s/__ID__ by the good ID

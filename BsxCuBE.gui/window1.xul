@@ -76,7 +76,7 @@
 </vbox>
   </tabpanel>
 <tabpanel id='tab_HPLC'><vbox id="HPLC" orient="vertical">
-  <hbox qwidget="true" id="HPLC Graph" brick="true"><script src="GraphBrick" tau="false"/></hbox>
+  <hbox qwidget="true" id="HPLC Graph" brick="true"><script src="BsxGraphBrick" tau="false"/></hbox>
 </vbox>
   </tabpanel>
 <tabpanel id='tab_2D'><vbox id="2D" orient="vertical">

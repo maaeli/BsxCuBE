@@ -72,9 +72,15 @@ class ISPyBExperimentExplorerWidget( Qt.QDialog ):
     def loadExperiments( self, response ):
         self.experiments = json.loads( response )
         i = 0
+
         self.tableWidget.setRowCount( len( self.experiments ) )
         for experiment in self.experiments:
-            name = QtGui.QTableWidgetItem( experiment["name"] )
+            #print experiment
+            if experiment["experimentType"] == "HPLC":
+                experimentName = 'HPLC'
+            else:
+                experimentName = experiment["name"]
+            name = QtGui.QTableWidgetItem( experimentName )
             type = QtGui.QTableWidgetItem( experiment["experimentType"] )
             self.tableWidget.setItem( i, 0, name )
             self.tableWidget.setItem( i, 1, type )
