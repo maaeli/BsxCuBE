@@ -662,7 +662,7 @@ class Collect( CObjectBase ):
         try:
             user = self.objects["biosaxs_client"].user
             password = self.objects["biosaxs_client"].password
-            ispybURL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+            ispybURL = str( self.objects["biosaxs_client"].URL )
             pyarchDestination = self.objects["biosaxs_client"].getPyarchDestinationForHPLC()
             self.xsdin.sample.login = XSDataString( user )
             #self.xsdin.sample.code = XSDataString( "MacromoleculeName" )
