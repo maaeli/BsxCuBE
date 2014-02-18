@@ -530,7 +530,7 @@ class CollectBrick( Core.BaseBrick ):
             logger.warning( "No connection to BiosaxsClient" )
 
     def isInhouseUser( self, username ):
-        if ( username == "opd29" ):
+        if username == "opd29" or username.startswith("mxihr"):
             return True
         return False
 
