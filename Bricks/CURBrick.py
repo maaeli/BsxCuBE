@@ -781,7 +781,7 @@ class CURBrick( Core.BaseBrick ):
 
         # concentration
         concentrationDoubleSpinBox = tableWidget.cellWidget( index, self.CONCENTRATION_COLUMN )
-        concentrationDoubleSpinBox.setValue( sample.concentration )
+        concentrationDoubleSpinBox.setValue( float( sample.concentration ) )
 
         # comments
         commentsLineEdit = tableWidget.cellWidget( index, self.COMMENTS_COLUMN )
@@ -793,12 +793,12 @@ class CURBrick( Core.BaseBrick ):
 
         # macromolecule 
         macromoleculeLineEdit = tableWidget.cellWidget( index, self.MACROMOLECULE_COLUMN )
-        macromoleculeLineEdit.setText( sample.macromolecule )
+        macromoleculeLineEdit.setText( str( sample.macromolecule ) )
 
         # viscosity
         viscosityComboBox = tableWidget.cellWidget( index, self.VISCOSITY_COLUMN )
         #Capitalize first Letter
-        self.setComboBox( viscosityComboBox, sample.viscosity.title() )
+        self.setComboBox( viscosityComboBox, str( sample.viscosity ).title() )
 
         # buffername
         bufferComboBox = tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN )
@@ -905,7 +905,6 @@ class CURBrick( Core.BaseBrick ):
     def assignOneBufferName( self, index, value ):
         try:
             self.tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN ).clear()
-            print "SAMPLE:  " + str( self.bufferNames )
             self.tableWidget.cellWidget( index, self.BUFFERNAME_COLUMN ).addItems( self.bufferNames )
             idx = self.bufferNames.index( value )
             if idx != -1:
