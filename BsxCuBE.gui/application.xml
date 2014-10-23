@@ -377,7 +377,7 @@
   </properties>
   <properties id="FeedbackBrick1">
      <property name="flex" value="0"/>
-     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr , svensson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr"/>
+     <property name="emailAddresses" value="bsxcube-feedback@esrf.fr , svensson@esrf.fr, daniele.de_sanctis@esrf.fr, flot@esrf.fr martha.brennich@esrf.fr, rejma@esrf.fr, around@embl.fr"/>
      <property name="send_icon" value=""/>
   </properties>
   <properties id="1D">
@@ -746,7 +746,7 @@
     <connection role="attenuators">
       <signal name="attenuatorsStateChanged"/>
       <signal name="attenuatorsFactorChanged"/>
-      <peer name="BsxCuBE/BsxAttenuators"/>
+      <peer name="BsxCuBE/BsxAttenuators (local)"/>
     </connection>
     <connection role="display">
       <signal name="displayResetChanged"/>

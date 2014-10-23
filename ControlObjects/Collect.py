@@ -168,8 +168,10 @@ class Collect( CObjectBase ):
             self.channels["jobFailure_edna1"].connect( "update", self.processingFailed )
             self.commands["initPlugin_edna1"]( self.pluginSAS )
             self.commands["initPlugin_edna1"]( self.pluginHPLC )
+
             self.edna1Dead = False
-        except Exception:
+        except Exception as e:
+	    logger.error( str( e ) )
             self.showMessageEdnaDead( 1 )
 
         try:

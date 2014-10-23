@@ -133,6 +133,7 @@ class BsxAttenuatorsBrick( Core.BaseBrick ):
 
 
     def attenuatorsStateChanged( self, pValue ):
+        print "------------->", pValue
         if self.__filtersDialog is not None:
             self.__filtersDialog.filtersChanged( pValue )
         # Need to take the new value for Transmission

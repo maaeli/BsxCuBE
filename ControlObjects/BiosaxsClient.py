@@ -22,6 +22,7 @@ class BiosaxsClient( CObjectBase ):
     def init( self ):
         self.client = None
 
+        #Prod machine
         self.URL = 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Test machine
         #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
