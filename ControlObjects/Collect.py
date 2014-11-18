@@ -22,6 +22,7 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
         XSDataInputBioSaxsHPLCv1_0
 #from XSDataSAS import XSDataInputSolutionScattering
 
+
 def xsDataToArray( _xsdata ):
         """
         Lightweight, EDNA-Free implementation of the same function.
@@ -130,8 +131,8 @@ class Collect( CObjectBase ):
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_4"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_5"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
-        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_2"
-        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_2"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_3"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_3"
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -649,14 +650,19 @@ class Collect( CObjectBase ):
         #TODO: See if we actually come here
         print "---- Aborting Collection with Robot"
         # And stop the run
-        self.emit( "collectDone" )
         if  self.__collectWithRobotProcedure is not None:
             self.__collectWithRobotProcedure.kill()
+
+
+    def _abortCollectWithExtTrigger( self ):
+        if  self.__extTriggeredCollectProcedure is not None:
+            self.__extTriggeredCollectProcedure.kill()
 
 
     def collectFailed( self, error ):
         """Callback when collect is aborted in spec (CTRL-C or error)"""
         self.collecting = False
+        self.emit( "collectDone" )
         self._abortCollectWithRobot()
 
 
@@ -676,7 +682,6 @@ class Collect( CObjectBase ):
             traceback.print_exc()
             #In case of exception we create a new sample
             sample = XSDataBioSaxsSample()
-
 
         try:
             jobId = self.commands["startJob_edna1"]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
@@ -702,6 +707,9 @@ class Collect( CObjectBase ):
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
         self.commands["collect"].abort()
         self._abortCollectWithRobot()
+        self._abortCollectWithExtTrigger()
+
+        self.emit( "collectDone" )
 
         # if ISPyB 
         if ( self.isISPyB ):
@@ -735,7 +743,6 @@ class Collect( CObjectBase ):
     # overwrite connectNotify ; first values will be read by brick
     def connectNotify( self, signal_name ):
         pass
-
 
     def updateChannels( self ):
         for channel_name, channel in self.channels.iteritems():
@@ -1195,3 +1202,89 @@ class Collect( CObjectBase ):
             message = "EDNA server 2 is dead, please restart EDNA 2"
             self.showMessage( 2, message, notify = 1 )
 
+
+    def _externallyTriggeredCollect( self, nb_iterations, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
+        self.collectDirectory.set_value( pDirectory )
+        self.collectPrefix.set_value( pPrefix )
+        self.collectRunNumber.set_value( pRunNumber )
+        self.collectNumberFrames.set_value( pNumberFrames )
+        self.collectTimePerFrame.set_value( pTimePerFrame )
+        self.collectConcentration.set_value( pConcentration )
+        self.collectComments.set_value( pComments )
+        self.collectCode.set_value( pCode )
+        self.collectMaskFile.set_value( pMaskFile )
+        self.collectDetectorDistance.set_value( pDetectorDistance )
+        self.collectWaveLength.set_value( pWaveLength )
+        self.collectPixelSizeX.set_value( pPixelSizeX )
+        self.collectPixelSizeY.set_value( pPixelSizeY )
+        self.collectBeamCenterX.set_value( pBeamCenterX )
+        self.collectBeamCenterY.set_value( pBeamCenterY )
+        self.collectNormalisation.set_value( pNormalisation )
+        self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
+
+        #
+        # set the energy if needed
+        #
+        self.__energy = self.objects["energyWaveLength"].getEnergy()
+        self.__currentPilatusThreshold = self.objects["energyWaveLength"].getPilatusThreshold()
+        if math.fabs( self.__energy - self.__currentPilatusThreshold ) > self.deltaPilatus:
+            if self.__energyAdjust:
+                self.objects["energyWaveLength"].setEnergy( self.__energy )
+                while not self.objects["energyWaveLength"].pilatusReady() :
+                    time.sleep( 0.5 )
+        #
+        # SET gapfill on the Pilatus (Even if not needed)
+        #
+        self.channels["fill_mode"].set_value( "ON" )
+
+        # set shutter in trigger mode
+        try:
+            self.commands["set_fast_shutter_trigger_mode"]._spec_command( wait = True )
+            self.commands["shopen"]()
+            self.commands["guillopen"]._spec_command( wait = True )
+            self.commands["safetyshutter_open"]._spec_command( wait = True )
+
+            i = 0
+            while nb_iterations == 0 or i < nb_iterations:
+                filename = "%s_%03d_%03d_" % ( pPrefix, pRunNumber, i + 1 )
+                full_path = os.path.join( pDirectory, "raw", filename + ".edf" )
+
+                self.objects["detector"].set_detector_filenames( full_path, pNumberFrames )
+
+                # read beamstop diode
+                bs_diode_value = self.commands["read_beamstop_diode"]._spec_command( pTimePerFrame, wait = True ) * pTimePerFrame
+
+                # prepare and start acquisition
+	        try:
+		    self.objects["detector"].prepare_acquisition( pTimePerFrame, pNumberFrames, pComments, None, bs_diode_value ) #self.__energy, bs_diode_value)
+		    self.objects["detector"].start_acquisition()
+
+                    old_current_frame = 0
+                    while True:
+                      current_frame = self.objects["detector"].last_image_saved()
+
+                      for j in range( current_frame - old_current_frame ):
+                          raw_filename = os.path.join( pDirectory, "raw", filename + "%05d.edf" % ( j + 1 + old_current_frame ) )
+                          self.emit( "collectNewFrameChanged", raw_filename, bs_diode_value, float( self.machineCurrent ), time.asctime() )
+                          self.triggerEDNA( raw_filename, bs_diode_value )
+
+                      old_current_frame = current_frame
+                      if current_frame == pNumberFrames:
+                        break
+                      time.sleep( pTimePerFrame )
+                except:
+		    self.objects["detector"].stop()
+		    sys.excepthook( *sys.exc_info() )
+                    raise
+                else:
+                    i += 1
+        finally:
+            self.__extTriggeredCollectProcedure = None
+            self.commands["set_fast_shutter_normal_mode"]._spec_command( wait = True )
+            self.commands["shclose"]()
+            self.commands["guillclose"]._spec_command( wait = True )
+            self.commands["safetyshutter_close"]._spec_command( wait = True )
+            self.emit( "collectDone" )
+
+    def collectWithExtTrigger( self, *args ):
+        self.__extTriggeredCollectProcedure = gevent.spawn( self._externallyTriggeredCollect, *args )

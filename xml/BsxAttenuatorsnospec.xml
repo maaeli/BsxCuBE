@@ -1,0 +1,14 @@
+<object class = "BsxAttenuators" username = "BsxAttenuators">
+   <data name="wago_ip" value="wcd29c"/>
+   <data name="type" value="0"/>
+   <data name="alternate" value=False"/>
+   <data name="status_module" value="750-402"/>
+   <data name="control_module" value="750-504"/>
+   <data name="nb_filter" value="8"/>
+   <data name="Aluminium 50 um" bits="0"/>
+   <data name="Aluminium 100 um" bits="1"/>
+   <data name="Aluminium 150 um" bits="2 3"/>
+   <data name="Aluminium 500 um" bits="4"/>
+   <data name="Aluminium 1 mm" bits="5 6 7"/>
+   <object href="BsxCuBE/energy" role="getEnergy"/>
+</object>	

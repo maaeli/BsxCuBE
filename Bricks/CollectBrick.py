@@ -396,18 +396,29 @@ class CollectBrick( Core.BaseBrick ):
 
 
         self.hBoxLayout16 = Qt.QHBoxLayout()
+        robotLayout = Qt.QVBoxLayout()
         self.robotCheckBox = Qt.QCheckBox( "Collect using SC", self.brick_widget )
         Qt.QObject.connect( self.robotCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.robotCheckBoxToggled )
-        self.hBoxLayout16.addWidget( self.robotCheckBox )
-        self.xmlFileLoaded = Qt.QLabel( "XML: " )
+        self.xmlFileLoaded = Qt.QLabel( "XML: ",self.brick_widget )
         # make the font a bit special
         italicFont = QtGui.QFont( 'Courier New', 9 )
         italicFont.setItalic( True )
         self.xmlFileLoaded.setFont( italicFont )
-        self.hBoxLayout16.addWidget( self.xmlFileLoaded )
+        robotLayout.addWidget( self.robotCheckBox )
+        robotLayout.addWidget( self.xmlFileLoaded )
+        self.hBoxLayout16.addLayout( robotLayout )
         self.hplcCheckBox = Qt.QCheckBox( "Collect using HPLC", self.brick_widget )
         Qt.QObject.connect( self.hplcCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.hplcCheckBoxToggled )
         self.hBoxLayout16.addWidget( self.hplcCheckBox )
+        # externally triggered data collection
+        self.vBoxLayoutTriggeredCollect = Qt.QVBoxLayout()
+        self.extTriggeredCheckBox = Qt.QCheckBox( "Ext. triggered; iterations no. (0=infinite)", self.brick_widget )
+        Qt.QObject.connect( self.extTriggeredCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.externallyTriggeredToggled )
+        self.nbIterationsSpinbox = Qt.QSpinBox(self.brick_widget)
+        self.nbIterationsSpinbox.setMinimum(0)  
+        self.vBoxLayoutTriggeredCollect.addWidget(self.extTriggeredCheckBox)
+        self.vBoxLayoutTriggeredCollect.addWidget(self.nbIterationsSpinbox)
+        self.hBoxLayout16.addLayout( self.vBoxLayoutTriggeredCollect )
         self.brick_widget.layout().addLayout( self.hBoxLayout16 )
 
         self.hBoxLayout17 = Qt.QHBoxLayout()
@@ -1212,6 +1223,7 @@ class CollectBrick( Core.BaseBrick ):
 
     def robotCheckBoxToggled( self, pValue ):
         if pValue:
+            self.externallyTriggeredToggled(False)
             # We put it on.. Inform user that Collect with Robot is incompatible with HPLC
             if self.isHPLC:
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a Robot Collect when HPLC is selected", Qt.QMessageBox.Ok )
@@ -1234,6 +1246,7 @@ class CollectBrick( Core.BaseBrick ):
 
             doHPLC = bool( pValue )
             if doHPLC:
+                self.externallyTriggeredToggled(False)
                 if self.robotCheckBox.isChecked():
                     doHPLC = False
                     Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
@@ -1250,6 +1263,13 @@ class CollectBrick( Core.BaseBrick ):
             self.hplcCheckBox.blockSignals( True ) #this is to prevent re-entering in this method
             self.hplcCheckBox.setChecked( self.isHPLC )
             self.hplcCheckBox.blockSignals( False )
+
+    def externallyTriggeredToggled(self, pValue):
+        self.extTriggeredCheckBox.setChecked(pValue)
+        if pValue:
+            self.hplcCheckBoxToggled(False)
+            self.robotCheckBoxToggled(False)
+        #self.collectObj.setExternallyTriggered(bool(pValue), self.nbIterationsSpinbox.value())
 
     def connectedToCUR( self, pPeer ):
         if pPeer is not None:
@@ -1412,7 +1432,9 @@ class CollectBrick( Core.BaseBrick ):
         if not flag:
             return
 
-        if self.robotCollect:
+        if self.extTriggeredCheckBox.isChecked():
+            self.startExtTriggeredCollect()
+        elif self.robotCollect:
             self.startCollectWithRobot()
         else:
             #When collect without robot there is no log on ISPyB
@@ -1435,6 +1457,48 @@ class CollectBrick( Core.BaseBrick ):
         self.collectStatus.setProperty( "status", status )
 
         self.brick_widget.setStyleSheet( self.brick_widget.styleSheet() )
+
+    def startExtTriggeredCollect(self):
+        # starts a series of individual collections
+        #  blocks widget or whatever during the time of the collection
+        pFrameNumber = self.frameNumberSpinBox.value()
+        niterations = self.nbIterationsSpinbox.value()
+        self.__isTesting = False
+        self._feedBackFlag = 1
+        self._frameNumber = pFrameNumber*niterations
+        self._currentFrame = 0
+        self._currentCurve = 0
+
+        self.grayOut( True )
+        self.emit( "grayOut", True )
+        self._abortFlag = False
+        self.startCollection( mode = "externally triggered" )
+
+        self.getObject("collect").collectWithExtTrigger(niterations, str( self.directoryLineEdit.text() ),
+                      str( self.prefixLineEdit.text() ),
+                      self.runNumberSpinBox.value(),
+                      pFrameNumber,
+                      self.timePerFrameSpinBox.value(),
+                      self.concentrationDoubleSpinBox.value(),
+                      str( self.commentsLineEdit.text() ),
+                      str( self.codeLineEdit.text() ),
+                      str( self.maskLineEdit.text() ),
+                      self.detectorDistanceDoubleSpinBox.value(),
+                      self._waveLengthStr,
+                      self.pixelSizeXDoubleSpinBox.value(),
+                      self.pixelSizeYDoubleSpinBox.value(),
+                      self.beamCenterXSpinBox.value(),
+                      self.beamCenterYSpinBox.value(),
+                      self.normalisationDoubleSpinBox.value(),
+                      self.radiationCheckBox.isChecked(),
+                      self.getRadiationAbsoluteLinear(),
+                      self.getRadiationRelativeLinear(),
+                      1, #process data
+                      self.seuTemperature,
+                      self.storageTemperature )
+
+        self.__currentConcentration = self.concentrationDoubleSpinBox.value()
+
 
     def startCollectWithRobot( self ):
         # starts a series of individual collections
@@ -1681,7 +1745,9 @@ class CollectBrick( Core.BaseBrick ):
                    self.robotCheckBox, \
                    self.hplcCheckBox, \
                    self.testPushButton, \
-                   self.abortPushButton )
+                   self.abortPushButton,
+                   self.extTriggeredCheckBox,
+                   self.nbIterationsSpinbox )
 
         def enable_widgets( *args ):
             if len( args ) == 1:
