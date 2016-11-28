@@ -268,7 +268,7 @@
      <property name="flex" value="0"/>
   </properties>
   <properties id="BsxCuBE">
-     <property name="splash_screen" value="/users/blissadm/applications/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
+     <property name="splash_screen" value="/users/blissadm/local/BsxCuBE/BsxCuBE.gui/bsxcube.jpg"/>
      <property name="objects_server" value="localhost:6667"/>
      <property name="expert_password" value="tonic92"/>
   </properties>

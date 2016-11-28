@@ -1,9 +1,9 @@
 from Framework4.GUI import Core
 from Framework4.GUI.Core import Connection, Signal
-from Qub.qt4.Widget.DataDisplay import QubDataImageDisplay
-from Qub.qt4.Widget.QubDialog import QubMaskToolsDialog
-from Qub.qt4.Widget.QubActionSet import QubOpenDialogAction
-from Qub.qt4.Widget.DataDisplay.QubDataImageDisplay import QubDataImageDisplay
+from Qub.Widget.DataDisplay import QubDataImageDisplay
+from Qub.Widget.QubDialog import QubMaskToolsDialog
+from Qub.Widget.QubActionSet import QubOpenDialogAction
+from Qub.Widget.DataDisplay.QubDataImageDisplay import QubDataImageDisplay
 from PyQt4 import QtCore, QtGui, Qt
 
 __category__ = "BsxCuBE"

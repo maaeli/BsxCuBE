@@ -1119,7 +1119,7 @@ class CURBrick( Core.BaseBrick ):
         concentrationDoubleSpinBox = Qt.QDoubleSpinBox( tableWidget )
         concentrationDoubleSpinBox.setSuffix( " mg/ml" )
         concentrationDoubleSpinBox.setDecimals( 2 )
-        concentrationDoubleSpinBox.setRange( 0, 100 )
+        concentrationDoubleSpinBox.setRange( 0, 999 )
         tableWidget.setCellWidget( row, self.CONCENTRATION_COLUMN, concentrationDoubleSpinBox )
 
         # comments

@@ -1,11 +1,12 @@
 import logging
 import sys, time
-
+from Framework4.GUI.Core import BaseBrick, Property, PropertyGroup, Connection, Signal, Slot
 from PyQt4 import QtCore, Qt
 
 __category__ = "BsxCuBE"
 
 class BsxVideoWidget( Qt.QWidget ):
+    #connections = {"clearGraph": Connection( 'Clear graph', [Signal( 'clearGraph', 'clear' )], [] )}
 
     def __init__( self, *args, **kargs ):
 
@@ -111,14 +112,23 @@ class BsxVideoWidget( Qt.QWidget ):
 
         fileName = str( qFileDialog.selectedFiles()[0] )
 
-        if not fileName.upper().endswith( "." + format ):
+        if not fileName.upper().endswith( "." + imgFormat ):
             fileName += "." + imgFormat
         if Qt.QPixmap.grabWidget( self.imageLabel ).save( fileName, imgFormat ):
             Qt.QMessageBox.information( self, "Info", "Image was successfully saved in file '" + fileName + "'!" )
         else:
             Qt.QMessageBox.critical( self, "Error", "Error when trying to save image to file '" + fileName + "'!" )
 
+    def saveSnapshot ( self, fileName, imgFormat ):
+        try:
+            Qt.QPixmap.grabWidget( self.imageLabel ).save( fileName, imgFormat )
+        except Exception:
+            logging.warning( "Not possible to get the snapshot" )
+
     def update( self ):
+        if not self.isVisible():
+            return
+
         # update all
         self.updateDate = time.strftime( "%Y/%m/%d" )
         self.updateTime = time.strftime( "%H:%M:%S" )
@@ -157,10 +167,6 @@ class BsxVideoWidget( Qt.QWidget ):
         self.updateFrame()
 
     def updateFrame( self ):
-        #TODO: Need to clean this - Should not appear since 22/8 2012 SO
-        if type( self.image ).__name__ == "list":
-            logging.error( "Got a list instead of a numpy.ndarray as image" + str( self.image ) )
-            return
         self.imagePixmap = Qt.QPixmap()
         self.imagePixmap.loadFromData( self.image, self.imageFormat )
 
@@ -282,15 +288,13 @@ class BsxVideoWidget( Qt.QWidget ):
             self.unsetCursor()
 
     def mouseMoveEvent( self, pEvent ):
-
+        return
         x = pEvent.x()
         y = pEvent.y()
 
         if self.tempBeamLocation:
             self.tempBeamLocation = [self.tempBeamLocation[0], self.tempBeamLocation[1], x, y]
             self.updateFrame()
-        #TODO: Why is there a return here??? SO 9/3
-        return
 
         if self.__isDefining:
             self.tempBeamLocation = [self.tempBeamLocation[0], self.tempBeamLocation[1], x, y]
@@ -349,7 +353,7 @@ class BsxVideoWidget( Qt.QWidget ):
                 self.unsetCursor()
 
     def mouseReleaseEvent( self, pEvent ):
-
+        return
         if self.tempBeamLocation:
             tbeam = self.tempBeamLocation
             if tbeam[0] != tbeam[2] or tbeam[1] != tbeam[3]:
@@ -370,8 +374,6 @@ class BsxVideoWidget( Qt.QWidget ):
             self.__endDrawing()
 
             self.updateFrame()
-        #TODO: what is going on?
-        return
 
         if self.__isDefining or self.__isMovingAll or self.__isMovingHorizontalUp or self.__isMovingHorizontalDown or self.__isMovingVerticalLeft or self.__isMovingVerticalRight:
 

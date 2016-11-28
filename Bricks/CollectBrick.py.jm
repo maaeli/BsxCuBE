@@ -415,8 +415,7 @@ class CollectBrick( Core.BaseBrick ):
         self.extTriggeredCheckBox = Qt.QCheckBox( "Ext. triggered", self.brick_widget) #; iterations no. (0=infinite)", self.brick_widget )
         Qt.QObject.connect( self.extTriggeredCheckBox, Qt.SIGNAL( "toggled(bool)" ), self.externallyTriggeredToggled )
         self.nbIterationsSpinbox = Qt.QSpinBox( self.brick_widget )
-        #self.nbIterationsSpinbox.setMinimum( 0 )
-	self.nbIterationsSpinbox.setRange( 0, 9999 )
+        self.nbIterationsSpinbox.setMinimum( 0 )
         self.vBoxLayoutTriggeredCollect.addWidget( self.extTriggeredCheckBox )
         extTriggerHBoxLayout = Qt.QHBoxLayout()
         extTriggerHBoxLayout.addWidget(Qt.QLabel("Iterations (0=inf)", self.brick_widget))
@@ -1203,6 +1202,7 @@ class CollectBrick( Core.BaseBrick ):
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do Radiation Damage when HPLC is selected", Qt.QMessageBox.Ok )
                 self.radiationCheckBox.setChecked( False )
                 return
+        self.radiationCheckBox.setChecked( pValue )
         self.radiationRelativeDoubleSpinBox.setEnabled( pValue )
         self.radiationAbsoluteDoubleSpinBox.setEnabled( pValue )
 
@@ -1253,7 +1253,7 @@ class CollectBrick( Core.BaseBrick ):
 
             doHPLC = bool( pValue )
             if doHPLC:
-                self.externallyTriggeredToggled(False)
+                self.externallyTriggeredToggled( False )
                 if self.robotCheckBox.isChecked():
                     doHPLC = False
                     Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do a HPLC Collect when Robot is selected", Qt.QMessageBox.Ok )
@@ -1465,7 +1465,7 @@ class CollectBrick( Core.BaseBrick ):
 
         self.brick_widget.setStyleSheet( self.brick_widget.styleSheet() )
 
-    def startExtTriggeredCollect(self):
+    def startExtTriggeredCollect( self ):
         # starts a series of individual collections
         #  blocks widget or whatever during the time of the collection
         pFrameNumber = self.frameNumberSpinBox.value()

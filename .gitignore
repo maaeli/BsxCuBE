@@ -4,3 +4,12 @@
 BsxCuBE.gui/windows_geometry.xml
 Process/Reprocess.txt
 Tests/*
+\#*\#
+\.\#*
+*.pyo
+.coverage
+# for eclipse users
+.settings/
+.project
+.pydevproject
+

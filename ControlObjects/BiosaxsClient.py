@@ -23,9 +23,11 @@ class BiosaxsClient( CObjectBase ):
         self.client = None
 
         #Prod machine
-        self.URL = 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        self.URL = 'http://ispyb.esrf.fr:8080/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Test machine
         #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #Local machine
+        #self.URL = 'http://pc593.embl.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
         print "ISPyB Server: " + self.URL
 
         self.selectedExperimentId = None
@@ -62,9 +64,8 @@ class BiosaxsClient( CObjectBase ):
 
     #Without ExperimentId
     def getPyarchDestinationForHPLC( self ):
-        #if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
-        #    return "/data/pyarch/bm29/%s%s" % ( self.proposalType, self.proposalNumber )
-        return "/data/pyarch/bm29/testing/%s%s" % ( self.proposalType, self.proposalNumber )
+        #return "/data/pyarch/bm29/testing/%s%s" % ( self.proposalType, self.proposalNumber )
+        return "/data/pyarch/bm29/%s%s/hplc" % ( self.proposalType, self.proposalNumber )
 
 
     def getPyarchDestination( self ):
@@ -76,49 +77,6 @@ class BiosaxsClient( CObjectBase ):
         if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
             return "/data/pyarch/bm29/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
         return "/data/pyarch/bm29/testing/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
-
-#    def getSpecimenIdBySampleCode( self, sampleCode ):
-#        print "[ISPyB] getSpecimenIdBySampleCode " + str( sampleCode )
-#        if self.experiment is None:
-#            print "[ISPyB] Experiment is None"
-#            return None
-#        if self.selectedExperimentId is None:
-#            print "[ISPyB] Experiment is None"
-#            return None
-#        for experiment in self.experiments:
-#            #print experiment.experiment.experimentId
-#            if experiment.experiment.experimentId == self.selectedExperimentId:
-#                for sample in experiment.experiment.samples:
-#                    #for specimen in sample.specimen3VOs:
-#                    for specimen in sample.measurements:
-#                        if specimen.code == sampleCode:
-#                            return specimen.specimenId
-#        return None
-
-    # Return an array of samples which a given concentration
-#    def getSpecimensByConcentration( self, concentration ):
-#        print "[ISPyB] getSpecimenByConcentration: " + str( concentration )
-#        if self.experiment is None:
-#            print "[ISPyB] Experiment is None"
-#            return None
-#        if self.selectedExperimentId is None:
-#            print "[ISPyB] Experiment is None"
-#            return None
-#
-#        samples = []
-#        for experiment in self.experiments:
-#            if experiment.experiment.experimentId == self.selectedExperimentId:
-#                for sample in experiment.experiment.samples:
-#                    if ( float( sample.concentration ) ) == ( float( concentration ) ):
-#                        samples.append( sample )
-#        return samples
-
-
-#    def getBufferIdByAcronym( self, bufferName ):
-#        for myBuffer in self.experiment.getBuffers():
-#            if bufferName == myBuffer.acronym:
-#                return myBuffer.bufferId
-#        return None
 
     #It looks for a code in the comments that identifies the measurements
     # [1] This is a comment
@@ -138,38 +96,10 @@ class BiosaxsClient( CObjectBase ):
             raise Exception
         return -1
 
-#    def getMeasurementIdBySampleCodeConcentrationAndSEU( self, sampleCode, concentration, seu, bufferName ):
-#        try:
-##            print "[ISPyB] getMeasurementIdBySampleCodeConcentrationAndSEU " + str( sampleCode ) + " " + str( concentration ) + " " + str( seu ) + " " + str( bufferName )
-#            if self.experiment is None:
-#                print "[ISPyB] Experiment is None"
-#                return None
-#            if self.selectedExperimentId is None:
-#                print "[ISPyB] Experiment is None"
-#                return None
-#            bufferId = self.getBufferIdByAcronym( bufferName )
-##            print "[ISPyB] bufferId " + str( bufferId )
-#            for experiment in self.experiments:
-#                #print experiment.experiment.experimentId
-#                if experiment.experiment.experimentId == self.selectedExperimentId:
-#                    samples = self.getSpecimensByConcentration( concentration )
-#                    for sample in samples:
-#                        if sample.bufferId == bufferId:
-#                            #for specimen in sample.specimen3VOs:
-#                            for specimen in sample.measurements:
-#                                if ( float( specimen.exposureTemperature ) == float( seu ) and ( str( specimen.code ) == str( sampleCode ) ) ):
-#                                    return specimen.specimenId
-#        except Exception:
-#            print "[ISPyB] error"
-#            traceback.print_exc()
-#            raise Exception
-#        print "[ISPyB] Measurement not found with conc: %s SEU: %s and sampleCode:%s" % ( str( concentration ), str( seu ), str( sampleCode ) )
-#        return -1
-
     ### Mode: before, after, sample    
-    def saveFrameSet( self, mode, sampleCode, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId ):
+    def saveFrameSet( self, mode, runNumber, exposureTemperature, storageTemperature, timePerFrame, timeStart, timeEnd, energy, detectorDistance, fileArray, snapshotCapillary, currentMachine, tocollect, pars, specimenId ):
         try:
-            print "[ISPyB] Request for saveFrameSet " + str( mode ) + " " + str( sampleCode )
+            print "[ISPyB] Request for saveFrameSet " + str( mode ) + " " + str( runNumber )
             if ( self.client is None ):
                 self.__initWebservice()
 
@@ -180,7 +110,7 @@ class BiosaxsClient( CObjectBase ):
             self.client.service.saveFrame( mode,
                                           self.selectedExperimentId,
                                           specimenId,
-                                          sampleCode,
+                                          runNumber,
                                           exposureTemperature,
                                           storageTemperature,
                                           timePerFrame,

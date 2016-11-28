@@ -1702,6 +1702,13 @@ class QtBlissGraph( Qwt5.QwtPlot ):
     def setActiveCurve( self, keyorindex ):
         if keyorindex is None:
             return -1
+        try:
+            tmp_int = int(keyorindex)
+        except :
+            keyorindex = str(keyorindex)
+        else:
+            keyorindex = tmp_int
+            
         if type( keyorindex ) in [type( unicode( " " ) ), type( " " ), type( str( " " ) )]:
             if keyorindex in self.curves.keys():
                 #index = self.curveslist.index(keyorindex) + 1

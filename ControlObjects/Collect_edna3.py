@@ -158,6 +158,7 @@ class Collect( CObjectBase ):
     def init( self ):
         self.edna1Dead = None
         self.edna2Dead = None
+        self.edna3Dead = None
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
@@ -185,6 +186,18 @@ class Collect( CObjectBase ):
             self.edna2Dead = False
         except Exception:
             self.showMessageEdnaDead( 2 )
+
+        try:
+            self.channels["jobSuccess_edna3"].connect( "update", self.processingDone )
+            self.channels["jobFailure_edna3"].connect( "update", self.processingFailed )
+            #??? which plugin to use ???
+            #self.commands["initPlugin_edna3"]( self.pluginIntegrate )
+            #self.commands["initPlugin_edna3"]( self.pluginMerge )
+
+            self.edna3Dead = False
+        except Exception:
+            self.showMessageEdnaDead(3)
+            
         # add a channel to read machine current (with polling)
         self.addChannel( 'tango',
                         'read_current_value',
@@ -223,6 +236,10 @@ class Collect( CObjectBase ):
             if self.edna2Dead:
                 return
             self.edna2Dead = True
+        elif _ednaServerNumber == 3:
+            if self.edna3Dead:
+                return
+            self.edna3Dead = True
         else:
             self.showMessage( 2, "ERROR! No such EDNA server: %d" % _ednaServerNumber )
         message = "Unable to connect to EDNA %d" % _ednaServerNumber
@@ -453,6 +470,7 @@ class Collect( CObjectBase ):
         logger.info( "Saving XML data to %s", xmlFilename )
         self.xsdin.exportToFile( xmlFilename )
         # Run EDNA
+        #???? here to add edna3, but in which order ???
         if self.isHPLC():
             try:#HPLC mode on slavia
                 jobId = self.commands["startJob_edna1"]( [self.pluginHPLC, self.xsdin.marshal()] )
@@ -492,7 +510,7 @@ class Collect( CObjectBase ):
     def processingFailed( self, jobId ):
         self.processingDone( jobId, jobSuccess = False )
 
-    def _getJobResult( self, jobId, convert_func = None, edna = "edna2" ):
+    def _getJobResult( self, jobId, convert_func = None, edna = "edna3" ):
         try:
             job_result = self.commands["getJobOutput_%s" % edna]( jobId )
         except:
@@ -541,7 +559,7 @@ class Collect( CObjectBase ):
                     else:
                         self.showMessage( 0, "Executive summary from EDNA: " + log )
                 else:
-                    self.showMessage( 2, "EDNA 2 has a problem - No Executive Summary - Please check" )
+                    self.showMessage( 2, "EDNA has a problem - No Executive Summary - Please check")
 
                 # If autoRG has been used, launch the SAS pipeline (very time consuming)
                 if xsd.subtractedCurve is None:
@@ -623,7 +641,6 @@ class Collect( CObjectBase ):
                         self.showMessage( 1, log )
                     else:
                         self.showMessage( 0, log )
-
                 #We no longer need the xml...
                 #try:
                 #    webPage = xsd.htmlPage.path.value
@@ -634,9 +651,9 @@ class Collect( CObjectBase ):
                 #self.showMessage( 0, "Please display this web page: %s" % webPage )
                 #self.showMessage( 0, "or look in the SAS tab" )
                 #self.sasWebDisplay( "file://%s" % webPage )
-
             elif jobId.startswith( self.pluginHPLC ):#HPLC is on Slavia
                 #time.sleep( 0.1 )
+                #??? should be edna2 if slavia???
                 xsd = self._getJobResult( jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna1" )
                 if xsd.timeStamp and xsd.summedIntensity:
                     self.emit( 'new_point', ( xsd.timeStamp.value, xsd.summedIntensity.value ) )
@@ -689,13 +706,13 @@ class Collect( CObjectBase ):
             traceback.print_exc()
             #In case of exception we create a new sample
             sample = XSDataBioSaxsSample()
-
         try:
+            #??? should it be edna2???
             jobId = self.commands["startJob_edna1"]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
             self.edna1Dead = False
             self.jobSubmitted = True
         except Exception:
-            self.showMessageEdnaDead( 1 )
+            self.showMessageEdnaDead(1)
 
         # clean capillary
         logger.info( "Cleaning capillary" )

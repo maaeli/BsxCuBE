@@ -3,9 +3,10 @@ import traceback
 import sys
 from Framework4.GUI      import Core
 from Framework4.GUI.Core import Connection, Signal
-
+import gevent
 from BsxSCWidget import BsxSCWidget
 from PyQt4 import Qt
+import types
 
 logger = logging.getLogger( "BsxSCBrick" )
 
@@ -73,8 +74,13 @@ class BsxSCBrick( Core.BaseBrick ):
             self.SCWidget.mix = self._sampleChanger.mix
             self.SCWidget.transfer = self._sampleChanger.transfer
             self.SCWidget.restart = self._sampleChanger.restart
-            self.SCWidget.setStorageTemperature = self._sampleChanger.setStorageTemperature
-            self.SCWidget.setSEUTemperature = self._sampleChanger.setSEUTemperature
+            def setSEUTemperature(self, temp, sc=self._sampleChanger):
+                self._setting_temperature_greenlet = gevent.spawn(sc.setSEUTemperature, temp)
+                #self._setting_temperature.link()
+            def setStorageTemperature(self, temp, sc=self._sampleChanger):
+                self._setting_storage_temperature_greenlet = gevent.spawn(sc.setStorageTemperature, temp)
+            self.SCWidget.setStorageTemperature = types.MethodType(setStorageTemperature, self.SCWidget.__class__) #self._sampleChanger.setStorageTemperature
+            self.SCWidget.setSEUTemperature = types.MethodType(setSEUTemperature,self.SCWidget.__class__) #self._sampleChanger.setSEUTemperature
             self.SCWidget.setState( "READY", "Connected" )
         else:
             logger.info( "Sample Changer NOT connected " )
