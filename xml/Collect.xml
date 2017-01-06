@@ -18,6 +18,10 @@
    <command name="startJob_edna2" type="tango" uri="DAU/edna/2" call="startJob"/>
    <command name="initPlugin_edna2" type="tango" uri="DAU/edna/2" call="initPlugin" />
    <command name="getJobOutput_edna2" type="tango" uri="DAU/edna/2" call="getJobOutput"/>
+
+   <command name="startJob_edna3" type="tango" uri="DAU/edna/3" call="startJob"/>
+   <command name="initPlugin_edna3" type="tango" uri="DAU/edna/3" call="initPlugin" />
+   <command name="getJobOutput_edna3" type="tango" uri="DAU/edna/3" call="getJobOutput"/>
    
    <command name="guillopen" type="spec" call="guillopen"/>
    <command name="guillclose" type="spec" call="guillclose"/>
