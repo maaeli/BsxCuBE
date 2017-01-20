@@ -195,8 +195,8 @@ class Collect( CObjectBase ):
             self.edna3Dead = False
         except Exception as err:
             logger.error(str(err))
-            self.showMessageEdnaDead(3)
-            raise err
+            #self.showMessageEdnaDead(3)
+            #raise err
             
         # add a channel to read machine current (with polling)
         self.addChannel( 'tango',

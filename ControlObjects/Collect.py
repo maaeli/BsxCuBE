@@ -388,6 +388,10 @@ class Collect( CObjectBase ):
                                 mergedCurve = XSDataFile( path = XSDataString( ave_filename ) ),
                                 subtractedCurve = XSDataFile( path = XSDataString( sub_filename ) ),
                                 sample = sample )
+
+
+
+
         if pRadiationChecked:
             self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
             self.xsdAverage.relativeFidelity = XSDataDouble( float( pRadiationRelative ) )
@@ -600,6 +604,10 @@ class Collect( CObjectBase ):
                             print xsdin.marshal()
                         except Exception:
                             self.isISPyB = False
+
+
+
+		    self.dataCollectionRunNumber = []
 
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
@@ -956,6 +964,8 @@ class Collect( CObjectBase ):
         if mode is "sample":
             ispybMode = "sample"
 
+
+	self.dataCollectionRunNumber = []
         self.objects["biosaxs_client"].saveFrameSet( ispybMode,
                                                      runNumber,
                                                      exposureTemperature,

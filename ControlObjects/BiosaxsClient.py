@@ -7,6 +7,7 @@ import sys
 import os, shutil
 from contextlib import closing
 import zipfile
+import datetime
 
 class BiosaxsClient( CObjectBase ):
     signals = [
@@ -25,9 +26,8 @@ class BiosaxsClient( CObjectBase ):
         #Prod machine
         self.URL = 'http://ispyb.esrf.fr:8080/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Test machine
-        #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
-        #Local machine
-        #self.URL = 'http://pc593.embl.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
+
         print "ISPyB Server: " + self.URL
 
         self.selectedExperimentId = None
@@ -64,19 +64,18 @@ class BiosaxsClient( CObjectBase ):
 
     #Without ExperimentId
     def getPyarchDestinationForHPLC( self ):
-        #return "/data/pyarch/bm29/testing/%s%s" % ( self.proposalType, self.proposalNumber )
-        return "/data/pyarch/bm29/%s%s/hplc" % ( self.proposalType, self.proposalNumber )
+	date = datetime.datetime.today().strftime('%Y%m%d')
+        return "/data/pyarch/2017/bm29/%s%s/%s/hplc" % ( self.proposalType, self.proposalNumber, date )
 
 
     def getPyarchDestination( self ):
+	date = datetime.datetime.today().strftime('%Y%m%d')
         # This happens because I need the experiment ID but because the experiment has not been created yet I have to replace it in the server side
         # so I will replace /data/pyarch/bm29/%s%s/__ID__ by the good ID
         if ( self.selectedExperimentId is None ):
             self.selectedExperimentId = "__ID__"
+        return "/data/pyarch/2017/bm29/%s%s/%s/%s" % ( self.proposalType, self.proposalNumber, date,self.selectedExperimentId )
 
-        if ( self.URL == 'http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl' ):
-            return "/data/pyarch/bm29/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
-        return "/data/pyarch/bm29/testing/%s%s/%s" % ( self.proposalType, self.proposalNumber, self.selectedExperimentId )
 
     #It looks for a code in the comments that identifies the measurements
     # [1] This is a comment
@@ -160,30 +159,11 @@ class BiosaxsClient( CObjectBase ):
             if ( self.selectedExperimentId is not None ):
                 self.client.service.updateStatus( self.selectedExperimentId, status )
 
-                #This FUNCTIONALITY IS DISABLED BECAUSE ISPyB creates now the zip file dynamically
-                #If status is finished we compress the folder
-#                if  status == "FINISHED" :
-                    #Zipping file
-#                    zipFilePath = self.getPyarchDestination() + "/" + str( self.selectedExperimentId ) + ".zip"
-#                    temporalPath = "/tmp/" + str( self.selectedExperimentId ) + ".zip"
-#                    self.zipFolder( self.getPyarchDestination(), temporalPath )
-#                    self.movefile( temporalPath, self.getPyarchDestination() )
-#                    self.client.service.setDataAcquisitionFilePath( self.selectedExperimentId, zipFilePath )
+
         except Exception:
             traceback.print_exc()
             raise Exception
 
-    # This method should be removed as zip files are created dynamically on server side
-#    def zipFolder( self, path, archivename ):
-#        print "ISPyB: zipping " + path + " on " + archivename
-#        myZipFile = zipfile.ZipFile( archivename, 'w' )
-#        rootlen = len( path ) + 1
-#        assert os.path.isdir( path )
-#        for base, dirs, files in os.walk( path ):
-#            for file in files:
-#                fn = os.path.join( base, file )
-#                myZipFile.write( fn, fn[rootlen:] )
-#        myZipFile.close()
 
     def movefile( self, afile, destination ):
         try:
@@ -207,7 +187,6 @@ class BiosaxsClient( CObjectBase ):
             print "[ISPyB] Handled error while directory creation in pyarch: %s " % error
 
 
-    #def createExperiment( self, proposalCode, proposalNumber, samples, storageTemperature, mode, extraflowTime, experimentType, sourceFile, name ):
     def createExperiment( self, samples, storageTemperature, mode, extraflowTime, experimentType, sourceFile, name ):
         try:
             if ( self.client is None ):
@@ -225,17 +204,7 @@ class BiosaxsClient( CObjectBase ):
             if ( ( str ( name ) == "BSA.xml" ) | ( str ( name ) == "Water.xml" ) ):
                 experimentType = "CALIBRATION"
 
-#            print ( "self.client.service.createExperiment( %s, %s, %s, %s, %s, %s, %s, %s, %s" % ( 
-#                                                               self.proposalType,
-#                                                               self.proposalNumber,
-#                                                               str( samples ),
-#                                                               storageTemperature,
-#                                                               mode,
-#                                                               extraflowTime,
-#                                                               experimentType,
-#                                                               expectedXMLFilePath,
-#                                                               name
-#                                                                                                 ) )
+
             experiment = self.client.service.createExperiment( 
                                                                self.proposalType,
                                                                self.proposalNumber,
@@ -293,7 +262,7 @@ class Experiment:
 if __name__ == "__main__":
     biosaxs = BiosaxsClient( "mx1438", "Rfo4-73" )
     biosaxs.getExperimentNamesByProposalCodeNumber( "mx", "1438" )
-    #experiment = biosaxs.getExperimentById(345)
+ 
     biosaxs.selectedExperimentId = 345
-    #print biosaxs.getSpecimenIdBySampleCode( "bsa_25C" )
+
 
