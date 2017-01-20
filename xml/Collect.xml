@@ -9,6 +9,8 @@
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    <object href="BsxCuBE/EnergyWaveLength" role="energyWaveLength"/>
    <object href="BsxCuBE/BiosaxsClient" role="biosaxs_client"/>
+ 
+
    <object href="BsxCuBE/Pilatus" role="detector"/>
    
    <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />

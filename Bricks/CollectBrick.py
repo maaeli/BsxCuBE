@@ -123,6 +123,8 @@ class CollectBrick( Core.BaseBrick ):
                                                   Slot( "getRobotXMLByExperimentId" )
                                                  ],
                                             "connectedToBiosaxsClient" ),
+		
+
                     "WebSAS": Connection( "Web SAS Browser object",
                                             [],
                                             [Slot( "setURL" )],

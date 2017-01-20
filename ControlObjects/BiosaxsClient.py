@@ -8,6 +8,7 @@ import os, shutil
 from contextlib import closing
 import zipfile
 import datetime
+import glob
 
 class BiosaxsClient( CObjectBase ):
     signals = [
@@ -126,6 +127,7 @@ class BiosaxsClient( CObjectBase ):
                                           pars["beamCenterY"],
                                           pars["radiationRelative"],
                                           pars["radiationAbsolute"],
+
                                           pars["pixelSizeX"],
                                           pars["pixelSizeY"],
                                           pars["normalisation"],
@@ -232,6 +234,31 @@ class BiosaxsClient( CObjectBase ):
 
         # Copying xml file to pyarch. It doesnt raise an exception
         self.copyfile( sourceFile, self.getPyarchDestination() )
+
+
+    # For data policy 
+    def storeDataset(self, proposal, directory, runNumber, sPrefix):
+
+	rawFiles = glob.glob("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber))
+	OnedFiles = glob.glob("%s/%s/%s_*%s_?????.dat" %(directory, '1d' , sPrefix,runNumber))
+
+
+        files = rawFiles + OnedFiles
+	
+
+        file = open("/tmp/myLogTest.txt","a") 
+
+	file.write("-----------------\n")  
+	file.write("Proposal: %s\n" % (proposal)) 
+	file.write("directory %s\n" % (directory)) 
+        file.write("RunNumber %s\n" % (runNumber)) 
+        file.write("Prefix: %s\n" % (sPrefix)) 
+        file.write("Files: %s\n" % (str(files))) 
+        file.write("rawFiles: %s\n" % (str(rawFiles))) 
+        file.write("OnedFiles: %s\n" % (str(OnedFiles))) 
+        file.write("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber)) 
+ 
+        file.close() 
 
 class Experiment:
     def __init__( self, experiment ):

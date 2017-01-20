@@ -143,6 +143,10 @@ class Collect( CObjectBase ):
 
         self.__energyAdjust = False
 
+	# Dictionary for data policy
+	self.policy = {}
+	
+
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
         self.machDevName = str( self.config["/object/data[@name='uri']/@value"][0] )
@@ -263,8 +267,6 @@ class Collect( CObjectBase ):
         self.emit( "checkBeamChanged", pValue )
 
     def prepareEdnaInput( self, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame ):
-        # fill up self.xsdinXSDataInputBioSaxsProcessOneFilev1_0
-        logger.info( "Prepare EDNA input" )
         sample = self.xsdin.sample
         sample.concentration = XSDataDouble( float( pConcentration ) )
         sample.code = XSDataString( str( pCode ) )
@@ -391,6 +393,15 @@ class Collect( CObjectBase ):
 
 
 
+	# Store the data forthe data policy client
+	try:		
+		self.policy["proposal"] = user
+		self.policy["pDirectory"] = pDirectory
+		self.policy["pRunNumber"] = pRunNumber
+		self.policy["sPrefix"] = sPrefix
+	except Exception as e:
+		logger.error( "[Data policy] Data set was not stored in Data policy")
+            
 
         if pRadiationChecked:
             self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
@@ -488,9 +499,19 @@ class Collect( CObjectBase ):
                 self.jobSubmitted = True
             except Exception:
                 self.showMessageEdnaDead( 2 )
+
+            try:		
+		self.objects["biosaxs_client"].storeDataset(self.policy["proposal"], self.policy["pDirectory"], self.policy["pRunNumber"], self.policy["sPrefix"])
+		self.showMessage( 0, "[Data policy] Data set was stored in Data policy and ready to be archived")
+	    except Exception as e:
+		logger.error( "[Data policy] Data set was not stored in Data policy")
+               
+
         else:
             # If HPLC we can now dump data
             self.flushHPLC()
+
+	
 
     # if failed, set failed flag
     def processingFailed( self, jobId ):
