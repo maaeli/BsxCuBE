@@ -4,6 +4,7 @@ from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 import traceback
 import sys
+import time
 import os, shutil
 from contextlib import closing
 import zipfile
@@ -236,29 +237,61 @@ class BiosaxsClient( CObjectBase ):
         self.copyfile( sourceFile, self.getPyarchDestination() )
 
 
-    # For data policy 
-    def storeDataset(self, proposal, directory, runNumber, sPrefix):
-
-	rawFiles = glob.glob("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber))
-	OnedFiles = glob.glob("%s/%s/%s_*%s_?????.dat" %(directory, '1d' , sPrefix,runNumber))
-
-
-        files = rawFiles + OnedFiles
-	
-
-        file = open("/tmp/myLogTest.txt","a") 
-
-	file.write("-----------------\n")  
-	file.write("Proposal: %s\n" % (proposal)) 
-	file.write("directory %s\n" % (directory)) 
-        file.write("RunNumber %s\n" % (runNumber)) 
-        file.write("Prefix: %s\n" % (sPrefix)) 
-        file.write("Files: %s\n" % (str(files))) 
-        file.write("rawFiles: %s\n" % (str(rawFiles))) 
-        file.write("OnedFiles: %s\n" % (str(OnedFiles))) 
-        file.write("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber)) 
- 
+    def logDataPolicyMessage( self, msg):
+        file = open("/tmp/datapolicy.log","a+") 
+        file.write("%s\n" % (msg)) 
         file.close() 
+
+    # For data policy 
+    def storeDataset(self, experimentType, directory, runNumber, sPrefix, pMaskFile, numberFrames, timePerFrame, concentration, comments, code, detectorDistance, waveLength, pixelSizeX, pixelSizeY, beamCenterX, beamCenterY, normalisation,diodeCurrents):
+
+        # We have to wait for 1d creation to be completed
+        if experimentType != 'TEST':
+	    for i in range(10):
+                time.sleep(1)
+                self.logDataPolicyMessage('Sleeping %s seconds'%(str(i)))
+
+ 
+	# Sample Changer experiments
+	rawFiles = glob.glob("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber))
+        xmlFiles = glob.glob("%s/%s/%s_*%s_?????.xml" %(directory, 'raw', sPrefix,runNumber))
+	onedFiles = glob.glob("%s/%s/%s_*%s_?????.dat" %(directory, '1d' , sPrefix,runNumber))
+	
+        # For HPLC it adds _buffer_aver_ and it is only four digits
+	onedFiles = onedFiles + glob.glob("%s/%s/%s_*%s_buffer_aver_????.dat" %(directory, '1d' , sPrefix,runNumber))
+	onedFiles = onedFiles + glob.glob("%s/%s/%s_*%s_?????_sub.dat" %(directory, '1d' , sPrefix,runNumber))		
+
+        files = rawFiles + onedFiles + xmlFiles
+	
+	# It removes the test image that it is always ending by 00000.edf
+        if experimentType != 'TEST':
+             files = filter(lambda x : (x.endswith('00000.edf') != True), files)
+
+	
+       
+        self.logDataPolicyMessage("\n\n-----------------\n")  
+	self.logDataPolicyMessage("Proposal: %s" % (self.proposalType + self.proposalNumber)) 
+	self.logDataPolicyMessage("directory %s" % (directory))
+        self.logDataPolicyMessage("experimentType %s" % (experimentType))  
+        self.logDataPolicyMessage("RunNumber %s" % (runNumber)) 
+        self.logDataPolicyMessage("Prefix: %s" % (sPrefix)) 
+        self.logDataPolicyMessage("pMaskFile: %s" % (str(pMaskFile)))
+        self.logDataPolicyMessage("numberFrames: %s" % (str(numberFrames))) 
+        self.logDataPolicyMessage("timePerFrame: %s" % (str(timePerFrame))) 
+        self.logDataPolicyMessage("concentration: %s" % (str(concentration))) 
+        self.logDataPolicyMessage("comments: %s" % (str(comments))) 
+        self.logDataPolicyMessage("code: %s" % (str(code))) 
+        self.logDataPolicyMessage("detectorDistance: %s" % (str(detectorDistance))) 
+        self.logDataPolicyMessage("waveLength: %s" % (str(waveLength))) 
+        self.logDataPolicyMessage("pixelSizeX: %s" % (str(pixelSizeX)))  
+        self.logDataPolicyMessage("pixelSizeY: %s" % (str(pixelSizeY)))  
+        self.logDataPolicyMessage("beamCenterX: %s" % (str(beamCenterX)))  
+        self.logDataPolicyMessage("beamCenterY: %s" % (str(beamCenterY)))  
+        self.logDataPolicyMessage("normalisation: %s" % (str(normalisation)))
+        self.logDataPolicyMessage("diodeCurrents: %s" % (str(diodeCurrents)))    
+
+        self.logDataPolicyMessage("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber)) 
+
 
 class Experiment:
     def __init__( self, experiment ):
