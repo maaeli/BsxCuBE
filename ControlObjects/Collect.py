@@ -288,7 +288,7 @@ class Collect( CObjectBase ):
         self.xsdin_HPLC.sample = sample
         self.xsdin_HPLC.experimentSetup = xsdExperiment
 
-    def prepareDataPolicyDictionoary( self, experimentType, pDirectory, sPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation ):
+    def prepareDataPolicyDictionoary( self, experimentType, pDirectory, sPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, acronym ):
 	# Store the data forthe data policy client
 	try:	
                 self.policy["diodeCurrents"] = []
@@ -309,6 +309,7 @@ class Collect( CObjectBase ):
                 self.policy["pBeamCenterX"] = pBeamCenterX
                 self.policy["pBeamCenterY"] = pBeamCenterY
                 self.policy["pNormalisation"] = pNormalisation
+		self.policy["acronym"] = acronym
 	except Exception as e:
 		logger.error( "[Data policy] Data set was not stored in Data policy")	
 
@@ -333,7 +334,7 @@ class Collect( CObjectBase ):
 
 	# Store the data forthe data policy client
 	try:	
-            self.prepareDataPolicyDictionoary('TEST', pDirectory, pPrefix, pRunNumber, 1, 1.0, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation)					
+            self.prepareDataPolicyDictionoary('TEST', pDirectory, pPrefix, pRunNumber, 1, 1.0, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pCode)					
 	except Exception as e:
 	    logger.error( "[Data policy] Data set was not stored in Data policy")	
 
@@ -353,7 +354,7 @@ class Collect( CObjectBase ):
 
 
 
-    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
+    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature, acronym ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
@@ -410,8 +411,6 @@ class Collect( CObjectBase ):
                                                                        self.measurementId,
                                                                        pCode )
                 ispybURL = self.objects["biosaxs_client"].URL
-
-                #pyarchDestination = "/data/pyarch/bm29/%s/%s" % (user, self.objects["biosaxs_client"].selectedExperimentId)
                 pyarchDestination = self.objects["biosaxs_client"].getPyarchDestination()
                 print "[ISPyB] Copying into " + pyarchDestination
                 sample = XSDataBioSaxsSample( 
@@ -436,8 +435,8 @@ class Collect( CObjectBase ):
 
 
 	# Store the data forthe data policy client
-	try:			
-            self.prepareDataPolicyDictionoary('COLLECT', pDirectory, pPrefix, pRunNumber, pNumberFrames,pTimePerFrame , pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation)					
+	try:			            
+            self.prepareDataPolicyDictionoary('COLLECT', pDirectory, pPrefix, pRunNumber, pNumberFrames,pTimePerFrame , pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, acronym)					
 	except Exception as e:
 	    logger.error( "[Data policy] Data set was not stored in Data policy")
 	
@@ -552,7 +551,7 @@ class Collect( CObjectBase ):
         try:
             self.storeDataset(self.policy["experimentType"], self.policy["pDirectory"], self.policy["pRunNumber"], self.policy["sPrefix"])
         except Exception as e:
-            self.logDataPolicyMessage(e)
+            self.objects["biosaxs_client"].logDataPolicyMessage(e)
 	
 
 	
@@ -925,6 +924,16 @@ class Collect( CObjectBase ):
         # Clear 1D curves
         self.emit( "clearGraph" )
 
+        self.objects["biosaxs_client"].logDataPolicyMessage(pars)
+        self.objects["biosaxs_client"].logDataPolicyMessage(tocollect)
+        self.objects["biosaxs_client"].logDataPolicyMessage(sample)
+
+        acronym = tocollect["macromolecule"]
+        if acronym is None or acronym == '':            
+            acronym = tocollect["code"]
+        if acronym is None or acronym == '':            
+            acronym = 'Unknown'
+
         self.collect( pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -932,7 +941,7 @@ class Collect( CObjectBase ):
                      pars["pixelSizeX"], pars["pixelSizeY"], pars["beamCenterX"], pars["beamCenterY"],
                      pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
                      pars["radiationRelative"],
-                     pars["processData"], pars["SEUTemperature"], pars["storageTemperature"] )
+                     pars["processData"], pars["SEUTemperature"], pars["storageTemperature"], acronym )
 
         while self.collecting:
             time.sleep( 1 )
@@ -1282,7 +1291,7 @@ class Collect( CObjectBase ):
     def storeDataset( self,  experimentType, pDirectory, pRunNumber, sPrefix):
         try:		
 
-            self.objects["biosaxs_client"].storeDataset(experimentType, pDirectory, pRunNumber, sPrefix, self.policy["pMaskFile"], self.policy["pNumberFrames"], self.policy["pTimePerFrame"] ,  self.policy["pConcentration"], self.policy["pComments"], self.policy["pCode"], self.policy["pDetectorDistance"], self.policy["pWaveLength"] , self.policy["pPixelSizeX"], self.policy["pPixelSizeY"] , self.policy["pBeamCenterX"], self.policy["pBeamCenterY"], self.policy["pNormalisation"], self.policy["diodeCurrents"])
+            self.objects["biosaxs_client"].storeDataset(experimentType, pDirectory, pRunNumber, sPrefix, self.policy["pMaskFile"], self.policy["pNumberFrames"], self.policy["pTimePerFrame"] ,  self.policy["pConcentration"], self.policy["pComments"], self.policy["pCode"], self.policy["pDetectorDistance"], self.policy["pWaveLength"] , self.policy["pPixelSizeX"], self.policy["pPixelSizeY"] , self.policy["pBeamCenterX"], self.policy["pBeamCenterY"], self.policy["pNormalisation"], self.policy["diodeCurrents"], self.policy["acronym"])
 	    self.showMessage( 0, "[Data policy] Data set was stored in Data policy and ready to be archived\n") 
 	except Exception as e:
             self.logDataPolicyMessage("[Data policy] Error is: %s\n" % (e)) 
