@@ -391,7 +391,7 @@ class BiosaxsClient( CObjectBase ):
 	onedFiles = onedFiles + glob.glob("%s/%s/%s_*%s_buffer_aver_????.dat" %(directory, '1d' , sPrefix,runNumber))
 	onedFiles = onedFiles + glob.glob("%s/%s/%s_*%s_?????_sub.dat" %(directory, '1d' , sPrefix,runNumber))		
 
-        files = rawFiles + onedFiles + xmlFiles
+        files = rawFiles + onedFiles + xmlFiles + [pMaskFile]
 	
 	# It removes the test image that it is always ending by 00000.edf
         if experimentType != 'TEST':
@@ -419,7 +419,8 @@ class BiosaxsClient( CObjectBase ):
         self.logDataPolicyMessage("beamCenterY: %s" % (str(beamCenterY)))  
         self.logDataPolicyMessage("normalisation: %s" % (str(normalisation)))
         self.logDataPolicyMessage("diodeCurrents: %s" % (str(diodeCurrents)))
-        self.logDataPolicyMessage("acronym: %s" % (str(acronym)))        
+        self.logDataPolicyMessage("acronym: %s" % (str(acronym)))  
+        self.logDataPolicyMessage("files: %s" % (str(files)))              
 
         self.logDataPolicyMessage("%s/%s/%s_*%s_?????.edf" %(directory, 'raw', sPrefix,runNumber)) 
 
