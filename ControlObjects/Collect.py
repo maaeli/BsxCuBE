@@ -354,7 +354,7 @@ class Collect( CObjectBase ):
 
 
 
-    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature, acronym ):
+    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature,  acronymp, StorageTemperature = 20.0):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
@@ -933,6 +933,7 @@ class Collect( CObjectBase ):
             acronym = tocollect["code"]
         if acronym is None or acronym == '':            
             acronym = 'Unknown'
+   
 
         self.collect( pars["directory"],
                      pars["prefix"], pars["runNumber"],
@@ -941,7 +942,7 @@ class Collect( CObjectBase ):
                      pars["pixelSizeX"], pars["pixelSizeY"], pars["beamCenterX"], pars["beamCenterY"],
                      pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
                      pars["radiationRelative"],
-                     pars["processData"], pars["SEUTemperature"], pars["storageTemperature"], acronym )
+                     pars["processData"], pars["SEUTemperature"], acronym, pars["storageTemperature"])
 
         while self.collecting:
             time.sleep( 1 )
