@@ -196,7 +196,8 @@ class Collect( CObjectBase ):
         except Exception as err:
             logger.error(str(err))
             #self.showMessageEdnaDead(3)
-            #raise err
+            #We receive no feedabck from EDNA3 in any case, so let's continue for testing
+            #raise err 
             
         # add a channel to read machine current (with polling)
         self.addChannel( 'tango',

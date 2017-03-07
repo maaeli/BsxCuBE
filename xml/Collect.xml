@@ -42,6 +42,10 @@
    <channel name="jobSuccess_edna2"    type="tango"   uri="DAU/edna/2"  call="jobSuccess"/> 
    <channel name="jobFailure_edna2"    type="tango"   uri="DAU/edna/2"  call="jobFailure"/> 
    <channel name="state_edna2"         type="tango"   uri="DAU/edna/2"  call="State"/> 
+
+   <channel name="jobSuccess_edna3"    type="tango"   uri="DAU/edna/3"  call="jobSuccess"/> 
+   <channel name="jobFailure_edna3"    type="tango"   uri="DAU/edna/3"  call="jobFailure"/> 
+   <channel name="state_edna3"         type="tango"   uri="DAU/edna/3"  call="State"/> 
    
    <channel name="fill_mode"  type="tango" uri="d29/pilatus/p0" call="fill_mode"/>
    
