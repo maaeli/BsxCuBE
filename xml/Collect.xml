@@ -9,8 +9,6 @@
    <object href="BsxCuBE/SampleChanger" role="sample_changer"/>
    <object href="BsxCuBE/EnergyWaveLength" role="energyWaveLength"/>
    <object href="BsxCuBE/BiosaxsClient" role="biosaxs_client"/>
- 
-
    <object href="BsxCuBE/Pilatus" role="detector"/>
    
    <command name="startJob_edna1" type="tango" uri="DAU/edna/1" call="startJob" />
@@ -31,6 +29,9 @@
    <command name="safetyshutter_close"  type="spec" call="shclose"/>
    <command name="set_fast_shutter_trigger_mode"  type="spec" call="enable_triggered_fast_shutter"/>
    <command name="set_fast_shutter_normal_mode"  type="spec" call="disable_triggered_fast_shutter"/>
+   <command name="bubble_prepare_acquisition"  type="spec" call="bubble_prepare"/>
+   <command name="bubble_run"  type="spec" call="bubble_run"/>
+   <command name="bubble_end"  type="spec" call="bubble_end"/>
    <command name="read_beamstop_diode"  type="spec" call="read_bs_diode"/>
    <command name="shopen" type="tango" uri="d29/bsh/1" call="Open"/>
    <command name="shclose" type="tango" uri="d29/bsh/1" call="Close"/>
@@ -42,7 +43,7 @@
    <channel name="jobSuccess_edna2"    type="tango"   uri="DAU/edna/2"  call="jobSuccess"/> 
    <channel name="jobFailure_edna2"    type="tango"   uri="DAU/edna/2"  call="jobFailure"/> 
    <channel name="state_edna2"         type="tango"   uri="DAU/edna/2"  call="State"/> 
-
+   
    <channel name="jobSuccess_edna3"    type="tango"   uri="DAU/edna/3"  call="jobSuccess"/> 
    <channel name="jobFailure_edna3"    type="tango"   uri="DAU/edna/3"  call="jobFailure"/> 
    <channel name="state_edna3"         type="tango"   uri="DAU/edna/3"  call="State"/> 

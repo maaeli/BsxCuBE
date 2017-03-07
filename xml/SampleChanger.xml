@@ -1,12 +1,13 @@
 <object class="BSSampleChanger" username="BioSax Sample Changer">
-  <uri>d29/bssc/1</uri>
+  <!--<uri>tango://wbm29scbio:12000/embl/bssc/1#dbase=no</uri>-->
+  <uri>tango://160.103.149.18:12000/embl/bssc/1#dbase=no</uri>
   <channel type="tango" name="State"  polling="1000"/>
   <channel type="tango" name="Status" polling="1000"/>
   <channel type="tango" name="TemperatureSampleStorage"/>
   <command type="tango" name="TemperatureSampleStorage" call="waitTemperatureSample"/>
   <channel type="tango" name="SampleType"/>
   <channel type="tango" name="ViscosityLevel"/>
-  <channel type="tango" name="BeamLocation"/>
+  <channel type="tango" name="BeamLocation" polling="1000"/>
   <channel type="tango" name="BeamShapeEllipse"/>
   <channel type="tango" name="CommandException" polling="1000"/>
   <channel type="tango" name="CommandOutput"    polling="1000"/>

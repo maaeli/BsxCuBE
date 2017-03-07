@@ -194,7 +194,7 @@ class Collect( CObjectBase ):
 
             self.edna3Dead = False
         except Exception as err:
-            logger.error(str(err))
+            logger.error("%s %s",err, type(err))
             self.showMessageEdnaDead(3)
             #We receive no feedabck from EDNA3 in any case, so let's continue for testing
             raise err 

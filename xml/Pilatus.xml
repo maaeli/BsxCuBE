@@ -1,0 +1,6 @@
+<object class = "LimaPilatus">
+	<data name="uri"  value="d29/pilatus/p0"/>
+        <data name="lima_uri" value="d29/limaccds/p0"/>
+        <data name="serial" value="# Detector: PILATUS 1M, S/N 24-0118, ESRF BM29"/>
+</object>	
+
