@@ -134,6 +134,12 @@ class Collect( CObjectBase ):
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_3"
         self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_3"
+        #edna for easier swithcing between computers 
+        self.ednaBasic = "edna2" #SC, trigerred, basic collect  data reduction sparta
+        self.ednaSAS = "edna1" #slavia
+        self.ednaHPLC = "edna3" #stanza
+        self.ednaDead = {}
+        
 
         self.storageTemperature = -374
         self.exposureTemperature = -374
@@ -156,9 +162,12 @@ class Collect( CObjectBase ):
         raise AttributeError, attr
 
     def init( self ):
-        self.edna1Dead = None     #slavia
-        self.edna2Dead = None     #sparta
-        self.edna3Dead = None     #stanza
+        #self.edna1Dead = None     #slavia
+        #self.edna2Dead = None     #sparta
+        #self.edna3Dead = None     #stanza
+        self.ednaDead[self.ednaBasic] = None  
+        self.ednaDead[self.ednaSAS] = None  
+        self.ednaDead[self.ednaHPLC] = None  
         self.collecting = False
         self.machineCurrent = 0.00
         self.nextRunNumber = -1
@@ -167,37 +176,41 @@ class Collect( CObjectBase ):
         self.channels["collectNewFrame"].connect( "update", self.collectNewFrameChanged )
 
         try:
-            self.channels["jobSuccess_edna1"].connect( "update", self.processingDone )
-            self.channels["jobFailure_edna1"].connect( "update", self.processingFailed )
-            self.commands["initPlugin_edna1"]( self.pluginSAS )
-            self.commands["initPlugin_edna1"]( self.pluginHPLC )
-
-            self.edna1Dead = False
-        except Exception as e:
-	    logger.error( str( e ) )
-            self.showMessageEdnaDead( 1 )
-
-        try:
-            self.channels["jobSuccess_edna2"].connect( "update", self.processingDone )
-            self.channels["jobFailure_edna2"].connect( "update", self.processingFailed )
-            self.commands["initPlugin_edna2"]( self.pluginIntegrate )
-            self.commands["initPlugin_edna2"]( self.pluginMerge )
-
-            self.edna2Dead = False
-        except Exception:
-            self.showMessageEdnaDead( 2 )
-
-        try:
-            self.channels["jobSuccess_edna3"].connect( "update", self.processingDone )
-            self.channels["jobFailure_edna3"].connect( "update", self.processingFailed )
-            self.commands["initPlugin_edna3"](self.pluginHPLC)
-
-            self.edna3Dead = False
+            self.channels["jobSuccess_"+self.ednaSAS].connect( "update", self.processingDone )
+            self.channels["jobFailure_"+self.ednaSAS].connect( "update", self.processingFailed )
+            self.commands["initPlugin_"+self.ednaSAS]( self.pluginSAS )     
         except Exception as err:
-            logger.error("%s %s",err, type(err))
-            self.showMessageEdnaDead(3)
-            #We receive no feedabck from EDNA3 in any case, so let's continue for testing
+	    logger.error("%s %s",err, type(err))
+            self.showMessageEdnaDead(self.ednaSAS)
             raise err 
+        else:
+            self.ednaDead[self.ednaSAS] = False
+
+        try:
+            self.channels["jobSuccess_"+self.ednaBasic].connect( "update", self.processingDone )
+            self.channels["jobFailure_"+self.ednaBasic].connect( "update", self.processingFailed )
+            self.commands["initPlugin_"+self.ednaBasic]( self.pluginIntegrate )
+            self.commands["initPlugin_"+self.ednaBasic]( self.pluginMerge)      
+        except Exception as err:
+	    logger.error("%s %s",err, type(err))
+            self.showMessageEdnaDead(self.ednaBasic)
+            raise err 
+        else:
+            self.ednaDead[self.ednaBasic] = False
+
+        try:
+            self.channels["jobSuccess_"+self.ednaHPLC].connect( "update", self.processingDone )
+            self.channels["jobFailure_"+self.ednaHPLC].connect( "update", self.processingFailed )
+            self.commands["initPlugin_"+self.ednaHPLC]( self.pluginHPLC)      
+        except Exception as err:
+	    logger.error("%s %s",err, type(err))
+            self.showMessageEdnaDead(self.ednaHPLC)
+            raise err 
+        else:
+            self.ednaDead[self.ednaHPLC] = False
+
+
+
             
         # add a channel to read machine current (with polling)
         self.addChannel( 'tango',
@@ -228,26 +241,30 @@ class Collect( CObjectBase ):
         else:
             return None
 
-    def showMessageEdnaDead( self, _ednaServerNumber ):
-        if _ednaServerNumber == 1:
-            if self.edna1Dead:
+    def showMessageEdnaDead( self, _ednaServer ):
+        #if _ednaServer == ednaSAS:
+        #    if self.ednaDead[ednaSAS]:
+        #        return
+        #    self.ednaDead[ednaSAS] = True
+        #elif _ednaServerNumber == ednaBasic:
+        #    if self.edna2Dead:
+        #        return
+        #    self.edna2Dead = True
+        #elif _ednaServerNumber == 3:
+        #    if self.edna3Dead:
+        #        return
+        #    self.edna3Dead = True
+        if _ednaServer in self.ednaDead:
+            if self.ednaDead[_ednaServer]:
                 return
-            self.edna1Dead = True
-        elif _ednaServerNumber == 2:
-            if self.edna2Dead:
-                return
-            self.edna2Dead = True
-        elif _ednaServerNumber == 3:
-            if self.edna3Dead:
-                return
-            self.edna3Dead = True
+            self.ednaDead[_ednaServer] = True
         else:
-            self.showMessage( 2, "ERROR! No such EDNA server: %d" % _ednaServerNumber )
-        message = "Unable to connect to EDNA %d" % _ednaServerNumber
+            self.showMessage( 2, "ERROR! No such EDNA server: %s" % _ednaServer )
+        message = "Unable to connect to EDNA %s" % _ednaServer
         logger.error( message )
-        message = "EDNA server %d is dead, please restart EDNA %d" % ( _ednaServerNumber, _ednaServerNumber )
+        message = "EDNA server %s is dead, please restart EDNA %s" % ( _ednaServer, _ednaServer )
         self.showMessage( 2, message, notify = 1 )
-        message = "ENDA %d is dead" % _ednaServerNumber
+        message = "ENDA %s is dead" % _ednaServer
         logger.error( message )
 
 
@@ -336,13 +353,16 @@ class Collect( CObjectBase ):
         logger.info( "Starting collection now" )
         try:
             self.storageTemperature = float( pStorageTemperature )
-        except Exception:
+        except Exception as err:
             self.storageTemperature = 4
+            logger.error("%s %s",err, type(err))
             logger.error( "Could not read storage Temperature - Check sample changer connection" )
+            
         try:
             self.exposureTemperature = float( pSEUTemperature )
-        except Exception:
+        except Exception as err:
             self.storageTemperature = 4
+            logger.error("%s %s",err, type(err))
             logger.error( "Could not read exposure Temperature - Check sample changer connection" )
         self.collecting = True
         self.collectDirectory.set_value( pDirectory )
@@ -473,22 +493,26 @@ class Collect( CObjectBase ):
         # Run EDNA
         if self.isHPLC():
            try: #HPLC mode on edna3 (stanza)
-                jobId = self.commands["startJob_edna3"]([self.pluginHPLC, self.xsdin.marshal()])
-                self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+                jobId = self.commands["startJob_" + self.ednaHPLC]([self.pluginHPLC, self.xsdin.marshal()])
+                self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value            
+           except Exception as err:
+                logger.error("%s %s",err, type(err))
+                self.showMessageEdnaDead(self.ednaHPLC)
+           else: 
                 logger.info( "Processing job %s started", jobId )
-                self.edna3Dead = False
+                self.ednaDead[self.ednaHPLC] = False
                 self.jobSubmitted = True
-           except Exception:
-                self.showMessageEdnaDead(3)
         else: #Simple integration on edna2 (sparta)
             try:
-                jobId = self.commands["startJob_edna2"]( [self.pluginIntegrate, self.xsdin.marshal()] )
+                jobId = self.commands["startJob_" + self.ednaBasic]( [self.pluginIntegrate, self.xsdin.marshal()] )
                 self.dat_filenames[jobId] = self.xsdin.integratedCurve.path.value
+            except Exception as err:
+                logger.error("%s %s",err, type(err))
+                self.showMessageEdnaDead(self.ednaBasic)
+            else:
                 logger.info( "Processing job %s started", jobId )
-                self.edna2Dead = False
+                self.ednaDead[self.ednaBasic] = False
                 self.jobSubmitted = True
-            except Exception:
-                self.showMessageEdnaDead(2)
 
 
     def specCollectDone( self, returnValue ):
@@ -496,12 +520,15 @@ class Collect( CObjectBase ):
         # start EDNA to calculate average at the end
         if not self.isHPLC():
             try:
-                jobId = self.commands["startJob_edna2"]( [self.pluginMerge, self.xsdAverage.marshal()] )
+                jobId = self.commands["startJob_" + self.ednaBasic]( [self.pluginMerge, self.xsdAverage.marshal()] )
                 self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
-                self.edna2Dead = False
+                
+            except Exception as err:
+                logger.error("%s %s",err, type(err))
+                self.showMessageEdnaDead(self.ednaBasic)
+            else:
+                self.ednaDead[self.ednaBasic] = False
                 self.jobSubmitted = True
-            except Exception:
-                self.showMessageEdnaDead( 2 )
         else:
             # If HPLC we can now dump data
             self.flushHPLC()
@@ -545,13 +572,13 @@ class Collect( CObjectBase ):
                 return
             logger.info( "processing Done from EDNA: %s -> %s", jobId, filename )
             if jobId.startswith( self.pluginIntegrate ):
-                xsd = self._getJobResult( jobId, XSDataResultBioSaxsProcessOneFilev1_0.parseString )
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsProcessOneFilev1_0.parseString, self.ednaBasic )
                 dataq = xsDataToArray( xsd.dataQ )
                 datai = xsDataToArray( xsd.dataI )
                 self.emit( "collectProcessingDone", filename, dataq, datai )
             elif jobId.startswith( self.pluginMerge ):
                 time.sleep( 0.1 )
-                xsd = self._getJobResult( jobId, XSDataResultBioSaxsSmartMergev1_0.parseString )
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsSmartMergev1_0.parseString,  self.ednaBasic )
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
@@ -616,23 +643,28 @@ class Collect( CObjectBase ):
                             xsdin.destinationDirectory = XSDataFile( XSDataString( dest ) )
                             xsdin.sample = sample
                             print xsdin.marshal()
-                        except Exception:
+                        except Exception as err:
+                            logger.error("%s %s",err, type(err))
                             self.isISPyB = False
 
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
-                        jobId = self.commands["startJob_edna1"]( [self.pluginSAS, xsdin.marshal()] )
+                        jobId = self.commands["startJob_" + self.ednaSAS]( [self.pluginSAS, xsdin.marshal()] )
                         self.dat_filenames[jobId] = rgOut.filename.path.value
-                        self.edna1Dead = False
-                        self.jobSubmitted = True
-                    except Exception, errMsg:
-                        message = "Error when trying to start EDNA 1: \n%r" % errMsg
+                        
+                    except Exception as err:
+                        logger.error("%s %s",err, type(err))
+                        message = "Error when trying to start EDNA 1: \n%s" %err
                         self.showMessage( 2, message )
-                        self.showMessageEdnaDead( 1 )
+                        self.showMessageEdnaDead(self.ednaSAS)
+                    else:
+                        self.ednaDead[self.ednaSAS] = False
+                        self.jobSubmitted = True
+
             elif jobId.startswith( self.pluginSAS ):
                 time.sleep( 0.1 )
-                xsd = self._getJobResult( jobId, XSDataResultBioSaxsToSASv1_0.parseString, "edna1" )
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsToSASv1_0.parseString, self.ednaSAS )
                 if xsd is None:
                    return
                 if xsd.status is not None:
@@ -651,9 +683,9 @@ class Collect( CObjectBase ):
                 #self.showMessage( 0, "Please display this web page: %s" % webPage )
                 #self.showMessage( 0, "or look in the SAS tab" )
                 #self.sasWebDisplay( "file://%s" % webPage )
-            elif jobId.startswith( self.pluginHPLC ): #HPLC is on edna3
+            elif jobId.startswith( self.pluginHPLC ): #HPLC is on edna3 by default
                 #time.sleep( 0.1 )
-                xsd = self._getJobResult( jobId, XSDataResultBioSaxsHPLCv1_0.parseString, "edna3" )
+                xsd = self._getJobResult( jobId, XSDataResultBioSaxsHPLCv1_0.parseString, self.ednaHPLC )
                 if xsd.timeStamp and xsd.summedIntensity:
                     self.emit( 'new_point', ( xsd.timeStamp.value, xsd.summedIntensity.value ) )
 
@@ -706,19 +738,21 @@ class Collect( CObjectBase ):
             #In case of exception we create a new sample
             sample = XSDataBioSaxsSample()
         try:
-            jobId = self.commands["startJob_edna3"]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
-            self.edna3Dead = False
+            jobId = self.commands["startJob_" + self.ednaHPLC]( [self.pluginFlushHPLC, self.xsdin.marshal()] )
+            
+        except Exception as err:
+            logger.error("%s %s",err, type(err))
+            self.showMessageEdnaDead(self.ednaHPLC)
+        else:
+            self.ednaDead[self.ednaHPLC] = False
             self.jobSubmitted = True
-        except Exception:
-            self.showMessageEdnaDead(3)
-
         # clean capillary
         logger.info( "Cleaning capillary" )
         self.setHPLC( False )
         try:
           self.objects["sample_changer"].doCleanProcedure()
-        except:
-          pass
+        except error as err:
+          logger.error("%s %s",err, type(err))
         self.setHPLC( True )
 
     def collectAbort( self ):
@@ -739,8 +773,8 @@ class Collect( CObjectBase ):
             try:
                 self.isISPyB = False;
                 self.objects["biosaxs_client"].setExperimentAborted()
-            except Exception, errMsg:
-                self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
+            except Exception as err:
+                self.showMessage( 2, "Error sending abort signal to ISPyB!" % err.message )
 
     def testCollectAbort( self ):
         logger.info( "sending abort to stop spec test collection" )
@@ -819,7 +853,8 @@ class Collect( CObjectBase ):
         self.showMessage( 0, "Filling (%s) from plate '%s', row '%s' and well '%s' with volume '%s'..." % ( mode, tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"] ) )
         try:
             self.objects["sample_changer"].doFillProcedure( tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"] )
-        except Exception, errMsg:
+        except Exception as err:
+            errMsg = err.message
             # Check if we have a standard Tango error (PyTango.DevFailed)
             msg = self.tangoErrMsgExtractDesc( errMsg )
             if msg is not None:
@@ -839,7 +874,8 @@ class Collect( CObjectBase ):
             self.showMessage( 0, "Flowing with volume '%s' during '%s' second(s)..." % ( tocollect["volume"], pars["flowTime"] ) )
             try:
                 self.objects["sample_changer"].flow( tocollect["volume"], pars["flowTime"] )
-            except Exception, errMsg:
+            except Exception as err:
+                errMsg = err.message
                 # Check if we have a standard Tango error (PyTango.DevFailed)
                 msg = self.tangoErrMsgExtractDesc( errMsg )
                 if msg is not None:
@@ -1044,7 +1080,8 @@ class Collect( CObjectBase ):
                                                                  fileNamePath )
                 self.isISPyB = True #Tobe replaced by self.isISPyB
                 print "[ISPyB] isISPyB set to True"
-        except Exception:
+        except Exception as err:
+            logger.error("%s %s",err, type(err))
             self.isISPyB = False
             traceback.print_exc()
             print "[ISPyB] Warning: isISPyB set to False"
@@ -1221,10 +1258,10 @@ class Collect( CObjectBase ):
 
     def collectWithRobot( self, *args ):
         # if EDNA 2 is dead we do not collect !
-        if not self.edna2Dead:
+        if not self.ednaDead[self.ednaBasic]:
             self.__collectWithRobotProcedure = gevent.spawn( self._collectWithRobot, *args )
         else:
-            message = "EDNA server 2 is dead, please restart EDNA 2"
+            message = "EDNA server %s is dead, please restart EDNA %s" %(self.ednaBasic,self.ednaBasic)
             self.showMessage( 2, message, notify = 1 )
 
 
