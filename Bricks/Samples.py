@@ -3,6 +3,7 @@ import types
 import copy
 from lxml import etree
 import ast
+import time
 
 logger = logging.getLogger( "Samples" )
 
@@ -126,6 +127,7 @@ class CollectPars:
         return self.__xmlformat % self.__dict__
 
     def loadFromXML( self, filename ):
+        #time.sleep(3)
         # filename can be a string, in this case the file is opened then read,
         # or 'filename' can be a file object
         if type( filename ) == types.StringType:

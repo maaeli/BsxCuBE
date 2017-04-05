@@ -6,6 +6,7 @@ import os, sys
 from suds.client import Client
 from suds.transport.http import HttpAuthenticated
 import json
+import time
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -75,7 +76,8 @@ class ISPyBExperimentExplorerWidget( Qt.QDialog ):
 
         self.tableWidget.setRowCount( len( self.experiments ) )
         for experiment in self.experiments:
-            #print experiment
+            print "DEBUG - experiment next line" 
+            print experiment
             if experiment["experimentType"] == "HPLC":
                 experimentName = 'HPLC'
             else:

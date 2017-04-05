@@ -13,6 +13,7 @@ from Samples             import CollectPars
 
 
 from pydispatch import dispatcher
+import time
 
 logger = logging.getLogger( "CollectBrick" )
 
@@ -545,7 +546,10 @@ class CollectBrick( Core.BaseBrick ):
 
     def getRobotXMLByExperimentId( self , experimentId ):
         if self.getObject( "BiosaxsClient" ) is not None:
-            return self.getObject( "BiosaxsClient" ).getRobotXMLByExperimentId( experimentId )
+            #time.sleep(3)
+            client = self.getObject("BiosaxsClient")
+            id = client.getRobotXMLByExperimentId( experimentId )
+            return id
         else:
             logger.warning( "No connection to BiosaxsClient" )
 

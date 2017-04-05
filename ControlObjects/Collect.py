@@ -135,6 +135,7 @@ class Collect( CObjectBase ):
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_3"
         self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_3"
         #edna for easier swithcing between computers 
+        #edna1 = slavia, edna2 = sparta, edna3 = stanza
         self.ednaBasic = "edna2" #SC, trigerred, basic collect  data reduction sparta
         self.ednaSAS = "edna1" #slavia
         self.ednaHPLC = "edna3" #stanza

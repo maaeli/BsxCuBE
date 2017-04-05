@@ -11,6 +11,7 @@ import os.path, time
 import pprint
 from compiler.ast import For
 import traceback
+import time
 
 __category__ = "BsxCuBE"
 
@@ -243,6 +244,7 @@ class CURBrick( Core.BaseBrick ):
         experiments = self.collectBrickObject.getExperimentNamesByProposalCodeNumber()
         dialog.loadExperiments( experiments )
         if dialog.exec_() == Qt.QDialog.Accepted:
+            #time.sleep(3)
             xmlContent = self.collectBrickObject.getRobotXMLByExperimentId( dialog.getSelectedExperimentId() )
             collectPars = CollectPars( None )
             collectPars.searchXML( xmlContent )
