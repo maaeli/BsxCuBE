@@ -150,6 +150,10 @@ class Collect( CObjectBase ):
 
         self.__energyAdjust = False
 
+	# Dictionary for data policy
+	self.policy = {}
+	
+
         # get machdevice from config file
         # <data name="uri"  value="orion:10000/FE/D/29" />
         self.machDevName = str( self.config["/object/data[@name='uri']/@value"][0] )
@@ -322,6 +326,31 @@ class Collect( CObjectBase ):
         self.xsdin_HPLC.sample = sample
         self.xsdin_HPLC.experimentSetup = xsdExperiment
 
+    def prepareDataPolicyDictionoary( self, experimentType, pDirectory, sPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, acronym ):
+	# Store the data forthe data policy client
+	try:	
+                self.policy["diodeCurrents"] = []
+		self.policy["experimentType"] = experimentType			
+		self.policy["pDirectory"] = pDirectory
+		self.policy["pRunNumber"] = pRunNumber
+		self.policy["sPrefix"] = sPrefix
+                self.policy["pMaskFile"] = pMaskFile
+                self.policy["pNumberFrames"] = 1
+                self.policy["pTimePerFrame"] = 1.0
+                self.policy["pConcentration"] = pConcentration
+                self.policy["pComments"] = pComments
+                self.policy["pCode"] = pCode
+                self.policy["pDetectorDistance"]  = pDetectorDistance
+                self.policy["pWaveLength"] = pWaveLength
+                self.policy["pPixelSizeX"] = pPixelSizeX
+                self.policy["pPixelSizeY"] = pPixelSizeY
+                self.policy["pBeamCenterX"] = pBeamCenterX
+                self.policy["pBeamCenterY"] = pBeamCenterY
+                self.policy["pNormalisation"] = pNormalisation
+		self.policy["acronym"] = acronym
+	except Exception as e:
+		logger.error( "[Data policy] Data set was not stored in Data policy")	
+
     def testCollect( self, pDirectory, pPrefix, pRunNumber, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation ):
         self.collectDirectory.set_value( pDirectory )
         self.collectPrefix.set_value( pPrefix )
@@ -340,12 +369,19 @@ class Collect( CObjectBase ):
         # note that pTimePerFrame is 1.0 s and number of frames is 1
         #pNumberFrames = 1
         #pTimePerFrame = 1.0
+
+	# Store the data forthe data policy client
+	try:	
+            self.prepareDataPolicyDictionoary('TEST', pDirectory, pPrefix, pRunNumber, 1, 1.0, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pCode)					
+	except Exception as e:
+	    logger.error( "[Data policy] Data set was not stored in Data policy")	
+
         #self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
         self.commands["testCollect"]()
 
 
 
-    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, pStorageTemperature ):
+    def collect( self, pDirectory, pPrefix, pRunNumber, pNumberFrames, pTimePerFrame, pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pRadiationChecked, pRadiationAbsolute, pRadiationRelative, pProcessData, pSEUTemperature, acronym, pStorageTemperature = 20.0 ):
         if self.objects["sample_changer"].channels["WasteFull"].value():
             logger.error( "WasteFull: cannot collect, please empty waste canister below the experimental table" )
             return
@@ -427,6 +463,17 @@ class Collect( CObjectBase ):
                                 mergedCurve = XSDataFile( path = XSDataString( ave_filename ) ),
                                 subtractedCurve = XSDataFile( path = XSDataString( sub_filename ) ),
                                 sample = sample )
+
+
+
+	# Store the data forthe data policy client
+	try:			            
+            self.prepareDataPolicyDictionoary('COLLECT', pDirectory, pPrefix, pRunNumber, pNumberFrames,pTimePerFrame , pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, acronym)					
+	except Exception as e:
+	    logger.error( "[Data policy] Data set was not stored in Data policy")
+	
+
+
         if pRadiationChecked:
             self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
             self.xsdAverage.relativeFidelity = XSDataDouble( float( pRadiationRelative ) )
@@ -461,6 +508,9 @@ class Collect( CObjectBase ):
             last["frame"] = raw_filename
             if self.collecting:
                 self.triggerEDNA( raw_filename, diode_current )
+        if self.policy is not None: 
+            if "diodeCurrents" in self.policy:
+                self.policy["diodeCurrents"].append(diode_current)
 
     def triggerEDNA( self, raw_filename, diode_current ):
         """raw_filename is a path like '/data/visitor/mx1493/bm29/raw/ARR_147_00005.edf' ;
@@ -532,7 +582,17 @@ class Collect( CObjectBase ):
                 self.jobSubmitted = True
         else:
             # If HPLC we can now dump data
+            self.policy["experimentType"] = 'HPLC'
             self.flushHPLC()
+
+       	# Stores the dataset by using BiosaxsClient	
+        try:
+            self.storeDataset(self.policy["experimentType"], self.policy["pDirectory"], self.policy["pRunNumber"], self.policy["sPrefix"])     
+        except Exception as e:
+            self.objects["biosaxs_client"].logDataPolicyMessage(e)
+	
+
+	
 
     # if failed, set failed flag
     def processingFailed( self, jobId ):
@@ -648,6 +708,10 @@ class Collect( CObjectBase ):
                             logger.error("%s %s",err, type(err))
                             self.isISPyB = False
 
+
+
+		    self.dataCollectionRunNumber = []
+
                     logger.info( "Starting SAS pipeline for file %s", filename )
                     try:
                         time.sleep( 0.1 )
@@ -671,9 +735,9 @@ class Collect( CObjectBase ):
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
-                        self.showMessage( 1, log )
+                        self.showMessage( 1, "EDNASAS error: " + log )
                     else:
-                        self.showMessage( 0, log )
+                        self.showMessage( 0, "EDNASas: " + log )
                 #We no longer need the xml...
                 #try:
                 #    webPage = xsd.htmlPage.path.value
@@ -697,9 +761,9 @@ class Collect( CObjectBase ):
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
-                        self.showMessage( 1, log )
+                        self.showMessage( 1, "EdnaFlushError: " + log )
                     else:
-                        self.showMessage( 0, log )
+                        self.showMessage( 0, "EdnaFlush: " + log )
 
 
     def _abortCollectWithRobot( self ):
@@ -774,8 +838,8 @@ class Collect( CObjectBase ):
             try:
                 self.isISPyB = False;
                 self.objects["biosaxs_client"].setExperimentAborted()
-            except Exception as err:
-                self.showMessage( 2, "Error sending abort signal to ISPyB!" % err.message )
+            except Exception, errMsg:
+                self.showMessage( 2, "Error sending abort signal to ISPyB!" % errMsg )
 
     def testCollectAbort( self ):
         logger.info( "sending abort to stop spec test collection" )
@@ -854,8 +918,7 @@ class Collect( CObjectBase ):
         self.showMessage( 0, "Filling (%s) from plate '%s', row '%s' and well '%s' with volume '%s'..." % ( mode, tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"] ) )
         try:
             self.objects["sample_changer"].doFillProcedure( tocollect["plate"], tocollect["row"], tocollect["well"], tocollect["volume"] )
-        except Exception as err:
-            errMsg = err.message
+        except Exception, errMsg:
             # Check if we have a standard Tango error (PyTango.DevFailed)
             msg = self.tangoErrMsgExtractDesc( errMsg )
             if msg is not None:
@@ -904,6 +967,17 @@ class Collect( CObjectBase ):
         # Clear 1D curves
         self.emit( "clearGraph" )
 
+        self.objects["biosaxs_client"].logDataPolicyMessage(pars)
+        self.objects["biosaxs_client"].logDataPolicyMessage(tocollect)
+        self.objects["biosaxs_client"].logDataPolicyMessage(sample)
+
+        acronym = tocollect["macromolecule"]
+        if acronym is None or acronym == '':            
+            acronym = tocollect["code"]
+        if acronym is None or acronym == '':            
+            acronym = 'Unknown'
+   
+
         self.collect( pars["directory"],
                      pars["prefix"], pars["runNumber"],
                      pars["frameNumber"], pars["timePerFrame"], tocollect["concentration"], tocollect["comments"],
@@ -911,7 +985,7 @@ class Collect( CObjectBase ):
                      pars["pixelSizeX"], pars["pixelSizeY"], pars["beamCenterX"], pars["beamCenterY"],
                      pars["normalisation"], pars["radiationChecked"], pars["radiationAbsolute"],
                      pars["radiationRelative"],
-                     pars["processData"], pars["SEUTemperature"], pars["storageTemperature"] )
+                     pars["processData"], pars["SEUTemperature"], acronym, pars["storageTemperature"])
 
         while self.collecting:
             time.sleep( 1 )
@@ -1008,6 +1082,8 @@ class Collect( CObjectBase ):
         if mode is "sample":
             ispybMode = "sample"
 
+
+	self.dataCollectionRunNumber = []
         self.objects["biosaxs_client"].saveFrameSet( ispybMode,
                                                      runNumber,
                                                      exposureTemperature,
@@ -1256,6 +1332,22 @@ class Collect( CObjectBase ):
 
         self.emit( "collectDone" )
 
+
+    def logDataPolicyMessage( self, msg):
+        self.objects["biosaxs_client"].logDataPolicyMessage(msg)
+
+    def storeDataset( self,  experimentType, pDirectory, pRunNumber, sPrefix):
+        try:		
+
+            self.objects["biosaxs_client"].storeDataset(experimentType, pDirectory, pRunNumber, sPrefix, self.policy["pMaskFile"], self.policy["pNumberFrames"], self.policy["pTimePerFrame"] ,  self.policy["pConcentration"], self.policy["pComments"], self.policy["pCode"], self.policy["pDetectorDistance"], self.policy["pWaveLength"] , self.policy["pPixelSizeX"], self.policy["pPixelSizeY"] , self.policy["pBeamCenterX"], self.policy["pBeamCenterY"], self.policy["pNormalisation"], self.policy["diodeCurrents"], self.policy["acronym"])
+	    self.showMessage( 0, "[Data policy] Data set was stored in Data policy and ready to be archived\n") 
+	except Exception as e:
+            self.logDataPolicyMessage("[Data policy] Error is: %s\n" % (e)) 
+            logger.error( "[Data policy] Data set was not stored in Data policy\n") 
+        else:
+            self.logDataPolicyMessage("\n[Data policy] It works\n") 
+
+        self.showMessage( 0, "[Data policy] --- \n") 
 
     def collectWithRobot( self, *args ):
         # if EDNA 2 is dead we do not collect !
