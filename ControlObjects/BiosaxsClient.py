@@ -429,6 +429,29 @@ class BiosaxsClient( CObjectBase ):
             datasetName = str(acronym) + "_" + str(runNumber) + "_" + str(int(round(time.time() * 1000)))
             self.metadataClient.start(directory, self.proposalType + self.proposalNumber, str(acronym), datasetName)
             # Log the parameters
+            try:
+                self.metadataClient.metadataManager.SAXS_acronym = acronym
+                self.metadataClient.metadataManager.SAXS_beamCenterX = beamCenterX
+                self.metadataClient.metadataManager.SAXS_beamCenterY = beamCenterY
+                self.metadataClient.metadataManager.SAXS_code = code
+                self.metadataClient.metadataManager.SAXS_comments = comments
+                self.metadataClient.metadataManager.SAXS_concentration = concentration
+                self.metadataClient.metadataManager.SAXS_detectorDistance = detectorDistance
+                self.metadataClient.metadataManager.SAXS_diodeCurrents = diodeCurrents
+                self.metadataClient.metadataManager.SAXS_directory = directory
+                self.metadataClient.metadataManager.SAXS_experimentType = experimentType
+                self.metadataClient.metadataManager.SAXS_maskFile = pMaskFile
+                self.metadataClient.metadataManager.SAXS_normalisation = normalisation
+                self.metadataClient.metadataManager.SAXS_numberFrames = numberFrames
+                self.metadataClient.metadataManager.SAXS_pixelSizeX = pixelSizeX
+                self.metadataClient.metadataManager.SAXS_pixelSizeY = pixelSizeY
+                self.metadataClient.metadataManager.SAXS_prefix = sPrefix
+                self.metadataClient.metadataManager.SAXS_runNumber = runNumber
+                self.metadataClient.metadataManager.SAXS_timePerFrame = timePerFrame
+                self.metadataClient.metadataManager.SAXS_waveLength = waveLength
+           except Exception as e:
+                self.logDataPolicyMessage("Error when proncessing message: %s" % (str(e)))  
+
 	    for file in files:
                 self.metadataClient.appendFile(file)
             self.metadataClient.end()
