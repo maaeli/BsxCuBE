@@ -735,9 +735,9 @@ class Collect( CObjectBase ):
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
-                        self.showMessage( 1, "EDNASAS error: " + log )
+                        self.showMessage( 1, "EDNA: " + log )
                     else:
-                        self.showMessage( 0, "EDNASas: " + log )
+                        self.showMessage( 0, "EDNA: " + log )
                 #We no longer need the xml...
                 #try:
                 #    webPage = xsd.htmlPage.path.value
@@ -761,9 +761,9 @@ class Collect( CObjectBase ):
                 if xsd.status is not None:
                     log = xsd.status.executiveSummary.value
                     if "Error" in log:
-                        self.showMessage( 1, "EdnaFlushError: " + log )
+                        self.showMessage( 1, "Edna: " + log )
                     else:
-                        self.showMessage( 0, "EdnaFlush: " + log )
+                        self.showMessage( 0, "Edna: " + log )
 
 
     def _abortCollectWithRobot( self ):
