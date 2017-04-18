@@ -428,6 +428,33 @@ class BiosaxsClient( CObjectBase ):
         try:
             datasetName = str(acronym) + "_" + str(runNumber) + "_" + str(int(round(time.time() * 1000)))
             self.metadataClient.start(directory, self.proposalType + self.proposalNumber, str(acronym), datasetName)
+
+            try:
+                self.logDataPolicyMessage("Setting params")  
+                self.metadataClient.metadataManager.SAXS_acronym = str(acronym)
+                self.metadataClient.metadataManager.SAXS_beamCenterX = str( beamCenterX)
+                self.metadataClient.metadataManager.SAXS_beamCenterY = str( beamCenterY)
+                self.metadataClient.metadataManager.SAXS_code = str( code)
+                self.metadataClient.metadataManager.SAXS_comments = str( comments)
+                self.metadataClient.metadataManager.SAXS_concentration = str( concentration)
+                self.metadataClient.metadataManager.SAXS_detectorDistance = str( detectorDistance)
+                self.metadataClient.metadataManager.SAXS_diodeCurrents = str( diodeCurrents)
+                self.metadataClient.metadataManager.SAXS_directory = str( directory)
+                self.metadataClient.metadataManager.SAXS_experimentType = str( experimentType)
+                self.metadataClient.metadataManager.SAXS_maskFile = str( pMaskFile)
+                self.metadataClient.metadataManager.SAXS_normalisation = str( normalisation)
+                self.metadataClient.metadataManager.SAXS_numberFrames = str( numberFrames)
+                self.metadataClient.metadataManager.SAXS_pixelSizeX = str( pixelSizeX)
+                self.metadataClient.metadataManager.SAXS_pixelSizeY = str( pixelSizeY)
+                self.metadataClient.metadataManager.SAXS_prefix = str( sPrefix)
+                self.metadataClient.metadataManager.SAXS_runNumber = str( runNumber)
+                self.metadataClient.metadataManager.SAXS_timePerFrame = str( timePerFrame)
+                self.metadataClient.metadataManager.SAXS_waveLength = str( waveLength)
+                self.logDataPolicyMessage("Setting params END")
+            except Exception as e:
+                self.logDataPolicyMessage("Error storing parameters: %s" % (str(e)))   
+
+
             # Log the parameters
 	    for file in files:
                 self.metadataClient.appendFile(file)
