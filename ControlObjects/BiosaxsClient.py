@@ -476,7 +476,7 @@ class BiosaxsClient( CObjectBase ):
                 self.metadataClient.metadataManager.SAXS_runNumber = runNumber
                 self.metadataClient.metadataManager.SAXS_timePerFrame = timePerFrame
                 self.metadataClient.metadataManager.SAXS_waveLength = waveLength
-           except Exception as e:
+            except Exception as e:
                 self.logDataPolicyMessage("Error when proncessing message: %s" % (str(e)))  
 
 	    for file in files:
