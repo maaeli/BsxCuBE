@@ -132,12 +132,12 @@ class Collect( CObjectBase ):
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_5"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_6"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
-        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_4"
-        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_4"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_3"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_3"
         #edna for easier swithcing between computers 
         #edna1 = slavia, edna2 = sparta, edna3 = stanza
         self.ednaBasic = "edna2" 
-        self.ednaSAS = "edna3" 
+        self.ednaSAS = "edna1" 
         self.ednaHPLC = "edna3" 
         self.ednaDead = {}
         
@@ -720,7 +720,7 @@ class Collect( CObjectBase ):
                         
                     except Exception as err:
                         logger.error("%s %s",err, type(err))
-                        message = "Error when trying to start EDNA 1: \n%s" %err
+                        message = "Error when trying to start EDNA %s: \n%s" % (self.ednaSAS,err)
                         self.showMessage( 2, message )
                         self.showMessageEdnaDead(self.ednaSAS)
                     else:
