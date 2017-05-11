@@ -132,8 +132,8 @@ class Collect( CObjectBase ):
         self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_5"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_6"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
-        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_3"
-        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_3"
+        self.pluginHPLC = "EDPluginBioSaxsHPLCv1_4"
+        self.pluginFlushHPLC = "EDPluginBioSaxsFlushHPLCv1_4"
         #edna for easier swithcing between computers 
         #edna1 = slavia, edna2 = sparta, edna3 = stanza
         self.ednaBasic = "edna2" 
