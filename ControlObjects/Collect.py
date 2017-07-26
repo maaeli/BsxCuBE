@@ -23,6 +23,7 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsProcessOneFilev1_0, \
 #from XSDataSAS import XSDataInputSolutionScattering
 
 
+
 def xsDataToArray( _xsdata ):
         """
         Lightweight, EDNA-Free implementation of the same function.

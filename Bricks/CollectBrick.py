@@ -14,6 +14,7 @@ from Samples             import CollectPars
 
 from pydispatch import dispatcher
 import time
+from FileName import testDirectory, testPrefix
 
 logger = logging.getLogger( "CollectBrick" )
 
@@ -1408,6 +1409,17 @@ class CollectBrick( Core.BaseBrick ):
 
         flag = True
 
+        if not testPrefix(str(self.prefixLineEdit.text())): 
+            print ">>> got unexpcted prefix " % self.prefixLineEdit.text()
+            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the prefix %s." % self.prefixLineEdit.text(), Qt.QMessageBox.Ok )
+            raise RuntimeError, "Creating of filename from info not possible"   
+
+        if not testDirectory(str(self.directoryLineEdit.text())): 
+            print ">>> got unexpcted prefix " % self.directoryLineEdit.text()
+            Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory %s." % self.directoryLineEdit.text(), Qt.QMessageBox.Ok )
+            raise RuntimeError, "Creating of filename from info not possible"   
+             
+
         if os.path.isdir( directory ):
             for filename in os.listdir( directory ):
                 if os.path.isfile( os.path.join( directory, filename ) ):
@@ -1434,7 +1446,7 @@ class CollectBrick( Core.BaseBrick ):
                             #TODO: DEBUG
                             print ">>> got totally unexpected filename %s " % filename
                             Qt.QMessageBox.critical( self.brick_widget, "Error", "Something wrong with the directory. Unexpected file %s in directory " % filename, Qt.QMessageBox.Ok )
-                            raise RuntimeError, "Creating of filename from info not possible"
+                            raise RuntimeError, "Creating of filename from info not possible"   
 
         if not flag:
             flag = ( Qt.QMessageBox.question( self.brick_widget, "Warning", \
