@@ -130,7 +130,7 @@ class Collect( CObjectBase ):
         self.ednaJob = None
         self.dat_filenames = {}
         self.jobSubmitted = False
-        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_5"
+        self.pluginIntegrate = "EDPluginBioSaxsProcessOneFilev1_6"
         self.pluginMerge = "EDPluginBioSaxsSmartMergev1_7"
         self.pluginSAS = "EDPluginBioSaxsToSASv1_1"
         self.pluginHPLC = "EDPluginBioSaxsHPLCv1_5"
@@ -141,6 +141,7 @@ class Collect( CObjectBase ):
         self.ednaSAS = "edna1" 
         self.ednaHPLC = "edna3" 
         self.ednaDead = {}
+        self.tooManyFrames = 500 #cut off above which SmartMerge is no loger called
         
 
         self.storageTemperature = -374
@@ -458,12 +459,17 @@ class Collect( CObjectBase ):
                 print "[ISPyB] Error: setting ISPyB to False"
                 self.isISPyB = False
 
-
-        self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0( \
+        if pNumberFrames <= self.tooManyFrames:
+            self.xsdAverage = XSDataInputBioSaxsSmartMergev1_0( \
                                 inputCurves = [XSDataFile( path = XSDataString( os.path.join( pDirectory, "1d", "%s_%03d_%05d.dat" % ( sPrefix, pRunNumber, i ) ) ) ) for i in range( 1, pNumberFrames + 1 )],
                                 mergedCurve = XSDataFile( path = XSDataString( ave_filename ) ),
                                 subtractedCurve = XSDataFile( path = XSDataString( sub_filename ) ),
                                 sample = sample )
+            if pRadiationChecked:
+                self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
+                self.xsdAverage.relativeFidelity = XSDataDouble( float( pRadiationRelative ) )
+	else: 
+	    self.xsdAverage = None	
 
 
 
@@ -475,9 +481,7 @@ class Collect( CObjectBase ):
 	
 
 
-        if pRadiationChecked:
-            self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
-            self.xsdAverage.relativeFidelity = XSDataDouble( float( pRadiationRelative ) )
+       
         prefixRun = "%s_%03d" % ( sPrefix, pRunNumber )
         if ( self.lastPrefixRun == prefixRun ):
             logger.error( "Collecting the same run again %s_%03d", sPrefix, pRunNumber )
@@ -571,16 +575,17 @@ class Collect( CObjectBase ):
         self.collecting = False
         # start EDNA to calculate average at the end
         if not self.isHPLC():
-            try:
-                jobId = self.commands["startJob_" + self.ednaBasic]( [self.pluginMerge, self.xsdAverage.marshal()] )
-                self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
-                
-            except Exception as err:
-                logger.error("%s %s",err, type(err))
-                self.showMessageEdnaDead(self.ednaBasic)
-            else:
-                self.ednaDead[self.ednaBasic] = False
-                self.jobSubmitted = True
+            if self.xsdAverage is not None: #If we have too many frames, we might not want to average
+		    try:
+		        jobId = self.commands["startJob_" + self.ednaBasic]( [self.pluginMerge, self.xsdAverage.marshal()] )
+		        self.dat_filenames[jobId] = self.xsdAverage.mergedCurve.path.value
+		        
+		    except Exception as err:
+		        logger.error("%s %s",err, type(err))
+		        self.showMessageEdnaDead(self.ednaBasic)
+		    else:
+		        self.ednaDead[self.ednaBasic] = False
+		        self.jobSubmitted = True
         else:
             # If HPLC we can now dump data
             self.policy["experimentType"] = 'HPLC'
