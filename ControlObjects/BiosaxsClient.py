@@ -1,7 +1,7 @@
 import json
 from Framework4.Control.Core.CObject import CObjectBase, Slot, Signal
 from suds.client import Client
-from suds.transport.http import HttpAuthenticated
+from suds.transport.https import HttpAuthenticated
 import traceback
 import sys
 import time
@@ -150,7 +150,7 @@ class BiosaxsClient( CObjectBase ):
         self.client = None
 
         #Prod machine
-        self.URL = 'http://ispyb.esrf.fr:8080/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
+        self.URL = 'https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
         #Test machine
         #self.URL = 'http://ispyvalid.esrf.fr:8080/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl'
 
@@ -183,8 +183,8 @@ class BiosaxsClient( CObjectBase ):
 
 
     def setUser( self, user, password, proposalType, proposalNumber ):
-        self.user = user #"mx1438"
-        self.password = password #"Rfo4-73"
+        self.user = user
+        self.password = password 
         self.proposalType = proposalType
         self.proposalNumber = proposalNumber
 
@@ -206,7 +206,7 @@ class BiosaxsClient( CObjectBase ):
         # so I will replace /data/pyarch/bm29/%s%s/__ID__ by the good ID
         if ( self.selectedExperimentId is None ):
             self.selectedExperimentId = "__ID__"
-        return "/data/pyarch/2017/bm29/%s%s/%s/%s" % ( self.proposalType, self.proposalNumber, date,self.selectedExperimentId )
+        return "/data/pyarch/2018/bm29/%s%s/%s/%s" % ( self.proposalType, self.proposalNumber, date,self.selectedExperimentId )
 
 
     #It looks for a code in the comments that identifies the measurements

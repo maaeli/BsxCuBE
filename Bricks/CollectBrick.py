@@ -1566,7 +1566,9 @@ class CollectBrick( Core.BaseBrick ):
             print "set URL on object"
             self.emit( "setUrl", url )
 
-    def transmissionChanged( self, percentage ):
+    def transmissionChanged( self, percentage):
+        print "transmission ->", percentage
+        #self.getObject("collect").setTransmission(float(percentage))
         pass
 
     def endCollectWithRobot( self ):
@@ -1716,7 +1718,7 @@ class CollectBrick( Core.BaseBrick ):
         if self.__isTesting:
             self.getObject( "collect" ).testCollectAbort( oneway = True )
         else:
-            self.getObject( "collect" ).collectAbort( oneway = True )
+            self.getObject( "collect" ).collectAbort( oneway = True)
 
         #if self.robotCheckBox.isChecked():
         #   self._collectRobot.abort()

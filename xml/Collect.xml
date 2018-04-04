@@ -22,7 +22,8 @@
    <command name="startJob_edna3" type="tango" uri="DAU/edna/3" call="startJob"/>
    <command name="initPlugin_edna3" type="tango" uri="DAU/edna/3" call="initPlugin" />
    <command name="getJobOutput_edna3" type="tango" uri="DAU/edna/3" call="getJobOutput"/>
-   
+
+   <command name="setTransmission" type="spec" uri="nela:exp" call="transmission"/>
    <command name="guillopen" type="spec" call="guillopen"/>
    <command name="guillclose" type="spec" call="guillclose"/>
    <command name="safetyshutter_open"  type="spec" call="shopen"/>

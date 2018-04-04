@@ -141,7 +141,7 @@ class Collect( CObjectBase ):
         self.ednaSAS = "edna1" 
         self.ednaHPLC = "edna3" 
         self.ednaDead = {}
-        self.tooManyFrames = 500 #cut off above which SmartMerge is no loger called
+        self.tooManyFrames = 500 #cut off above which SmartMerge is no longer called
         
 
         self.storageTemperature = -374
@@ -432,7 +432,7 @@ class Collect( CObjectBase ):
         sample = XSDataBioSaxsSample()
         user = None
         password = None
-
+        print "-------------------------->"
         # Sending ISPyBs information to EDNA
         if self.isISPyB:
             try:
@@ -473,7 +473,7 @@ class Collect( CObjectBase ):
 
 
 
-	# Store the data forthe data policy client
+	# Store the data for the data policy client
 	try:			            
             self.prepareDataPolicyDictionoary('COLLECT', pDirectory, pPrefix, pRunNumber, pNumberFrames,pTimePerFrame , pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, acronym)					
 	except Exception as e:
@@ -832,9 +832,16 @@ class Collect( CObjectBase ):
             self.flushHPLC()
 
         # abort data collection in spec (CTRL-C) ; maybe it will do nothing if spec is idle
-        self.commands["collect"].abort()
-        self._abortCollectWithRobot()
-        self._abortCollectWithExtTrigger()
+        try:
+            self.commands["collect"].abort()
+        except Exception as e:
+            print e
+            raise e
+        try:
+            self._abortCollectWithRobot()
+            self._abortCollectWithExtTrigger()
+        except Exception as e:
+            print e
 
         self.emit( "collectDone" )
 
@@ -1168,7 +1175,6 @@ class Collect( CObjectBase ):
             self.isISPyB = False
             traceback.print_exc()
             print "[ISPyB] Warning: isISPyB set to False"
-
 
         # ============================
         #  Setting storage temperature
