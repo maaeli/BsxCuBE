@@ -1,6 +1,6 @@
 <object class="BSSampleChanger" username="BioSax Sample Changer">
   <!--<uri>tango://wbm29scbio:12000/embl/bssc/1#dbase=no</uri>-->
-  <uri>tango://160.103.149.18:12000/embl/bssc/1#dbase=no</uri>
+  <uri>embl/bssc/1</uri>
   <channel type="tango" name="State"  polling="1000"/>
   <channel type="tango" name="Status" polling="1000"/>
   <channel type="tango" name="TemperatureSampleStorage"/>
