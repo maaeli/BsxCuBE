@@ -174,10 +174,10 @@ class BiosaxsClient( CObjectBase ):
         self.metaExperiment = 'bm29/metadata/experiment'
         self.metadataClient = MetadataManagerClient(self.metadataManager, self.metaExperiment)
 
-         with open("/tmp/ISPYBcom.log","a") as f:
-            f.write("Initialising Client")
-            f.write("User: " +  str(self.user))
-            f.write("proposalNumber: " +  str(self.proposalNumber))      
+        with open("/tmp/ISPYBcom.log","a") as f:
+            f.write(str(datetime.datetime.now()) + " Initialising Client"+ "\n")
+            f.write("User: " +  str(self.user)+ "\n")
+            f.write("proposalNumber: " +  str(self.proposalNumber)+ "\n")      
 
     def __initWebservice( self ):
         
@@ -186,8 +186,8 @@ class BiosaxsClient( CObjectBase ):
         self.experiments = []
         self.response = None
         with open("/tmp/ISPYBcom.log","a") as f:
-            f.write("in __initWebservice")
-            f.write("User: " + str(self.user))
+            f.write(str(datetime.datetime.now()) + " in __initWebservice"+ "\n")
+            f.write("User: " + str(self.user)+ "\n")
             
 
 
@@ -197,9 +197,9 @@ class BiosaxsClient( CObjectBase ):
         self.proposalType = proposalType
         self.proposalNumber = proposalNumber
         with open("/tmp/ISPYBcom.log","a") as f:
-            f.write("In setUser")
-            f.write("User: " + str(user))
-            f.write("proposalNumber: " + str(proposalNumber))          
+            f.write(str(datetime.datetime.now()) + " In setUser" + "\n")
+            f.write("User: " + str(user)+ "\n")
+            f.write("proposalNumber: " + str(proposalNumber)+ "\n")          
 
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
@@ -334,12 +334,18 @@ class BiosaxsClient( CObjectBase ):
 
 
     def createExperiment( self, samples, storageTemperature, mode, extraflowTime, experimentType, sourceFile, name ):
+
         try:
             if ( self.client is None ):
                 self.__initWebservice()
         except Exception:
             print "[ISPyB] It has been not possible to connect with ISPyB. No connection"
             raise Exception
+
+        #with open("/tmp/ISPYBcom.log","a") as f:
+        #    f.write(str(datetime.datetime.now()) + " In createExperiment" + "\n")
+        #    f.write("User: " + str(user)+ "\n")
+        #    f.write("proposalNumber: " + str(proposalNumber)+ "\n")       
 
         try:
             self.experiment = None
