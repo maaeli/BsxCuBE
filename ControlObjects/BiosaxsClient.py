@@ -174,12 +174,21 @@ class BiosaxsClient( CObjectBase ):
         self.metaExperiment = 'bm29/metadata/experiment'
         self.metadataClient = MetadataManagerClient(self.metadataManager, self.metaExperiment)
 
-    def __initWebservice( self ):
+         with open("/tmp/ISPYBcom.log","a") as f:
+            f.write("Initialising Client")
+            f.write("User: " +  str(self.user))
+            f.write("proposalNumber: " +  str(self.proposalNumber))      
 
+    def __initWebservice( self ):
+        
         self.httpAuthenticatedToolsForAutoprocessingWebService = HttpAuthenticated( username = self.user, password = self.password )
         self.client = Client( self.URL, transport = self.httpAuthenticatedToolsForAutoprocessingWebService, cache = None, timeout = self.timeout )
         self.experiments = []
         self.response = None
+        with open("/tmp/ISPYBcom.log","a") as f:
+            f.write("in __initWebservice")
+            f.write("User: " + str(self.user))
+            
 
 
     def setUser( self, user, password, proposalType, proposalNumber ):
@@ -187,6 +196,10 @@ class BiosaxsClient( CObjectBase ):
         self.password = password 
         self.proposalType = proposalType
         self.proposalNumber = proposalNumber
+        with open("/tmp/ISPYBcom.log","a") as f:
+            f.write("In setUser")
+            f.write("User: " + str(user))
+            f.write("proposalNumber: " + str(proposalNumber))          
 
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
