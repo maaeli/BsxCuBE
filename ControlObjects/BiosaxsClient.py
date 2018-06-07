@@ -199,7 +199,9 @@ class BiosaxsClient( CObjectBase ):
         with open("/tmp/ISPYBcom.log","a") as f:
             f.write(str(datetime.datetime.now()) + " In setUser" + "\n")
             f.write("User: " + str(user)+ "\n")
-            f.write("proposalNumber: " + str(proposalNumber)+ "\n")          
+            f.write("proposalNumber: " + str(proposalNumber)+ "\n")  
+        self.__initWebservice()
+        
 
     def getExperimentNamesByProposalCodeNumber( self, code, number ):
         if ( self.client is None ):
