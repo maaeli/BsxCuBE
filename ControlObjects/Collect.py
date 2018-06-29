@@ -432,7 +432,6 @@ class Collect( CObjectBase ):
         sample = XSDataBioSaxsSample()
         user = None
         password = None
-        print "-------------------------->"
         # Sending ISPyBs information to EDNA
         if self.isISPyB:
             try:
@@ -465,6 +464,7 @@ class Collect( CObjectBase ):
                                 mergedCurve = XSDataFile( path = XSDataString( ave_filename ) ),
                                 subtractedCurve = XSDataFile( path = XSDataString( sub_filename ) ),
                                 sample = sample )
+
             if pRadiationChecked:
                 self.xsdAverage.absoluteFidelity = XSDataDouble( float( pRadiationAbsolute ) )
                 self.xsdAverage.relativeFidelity = XSDataDouble( float( pRadiationRelative ) )
@@ -527,7 +527,6 @@ class Collect( CObjectBase ):
         base = os.path.splitext( os.path.basename( raw_filename ) )[0]
         directory = os.path.dirname( os.path.dirname( raw_filename ) )
         frame = base.split( "_" )[-1]
-
         self.xsdin.experimentSetup.storageTemperature = XSDataDouble( self.storageTemperature )
         self.xsdin.experimentSetup.exposureTemperature = XSDataDouble( self.exposureTemperature )
         self.xsdin.experimentSetup.frameNumber = XSDataInteger( int( frame ) )
@@ -543,7 +542,6 @@ class Collect( CObjectBase ):
         xmlFilename = os.path.splitext( raw_filename )[0] + ".xml"
         # TODO: get the snapshot
         self.emit( "getSnapshot" )
-
         logger.info( "Saving XML data to %s", xmlFilename )
         self.xsdin.exportToFile( xmlFilename )
         # Run EDNA
