@@ -16,6 +16,8 @@ from pydispatch import dispatcher
 import time
 from FileName import testDirectory, testPrefix
 
+#import inspect
+
 logger = logging.getLogger( "CollectBrick" )
 
 __category__ = "BsxCuBE"
@@ -696,9 +698,25 @@ class CollectBrick( Core.BaseBrick ):
         self.normalisationDoubleSpinBox.setValue( float( pValue ) )
 
     def collectRadiationDamageChanged( self, pValue ):
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectRadiationDamageChanged- 0---------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    for i in range(1,2):
+        #        fd.write("CollectRadiationDamageChanged, caller------------------------>"+ str(inspect.stack()[i]))
+        #        fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("CollectRadiationDamageChanged 0, pValue------------------------->"+ str(pValue))
+        #    fd.write("\n")
         if pValue is not None:
             doRadDam = pValue == "1" and not self.isHPLC
             self.radiationCheckBox.setChecked( doRadDam )
+            #with open("/tmp/ttt", "a") as fd:
+            #    fd.write("CollectRadiationDamageChanged 1, pValue------------------------->"+ str(pValue))
+            #    fd.write("\n")
+            #with open("/tmp/ttt", "a") as fd:
+            #    fd.write("collectRadiationDamageChanged----------------------->"+ str(self.radiationCheckBox.isChecked()))
+            #    fd.write("\n")
 
     def collectAbsoluteRadiationDamageChanged( self, pValue ):
         if pValue is not None:
@@ -745,9 +763,9 @@ class CollectBrick( Core.BaseBrick ):
         self.displayReset()
 
     def collectNewFrameChanged( self, filename0, diode_current, machine_current, timestamp ):
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collectNewFrameChanged 0----------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectNewFrameChanged 0----------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         if self.__lastFrame != filename0:
             self.__lastFrame = filename0
             if self._isCollecting:
@@ -767,13 +785,13 @@ class CollectBrick( Core.BaseBrick ):
                         if self.SPECBusyTimer.isActive():
                             self.SPECBusyTimerTimeOut()
                         logger.info( "Test frame is done!" )
-                        with open("/tmp/ttt", "a") as fd:
-                            fd.write("collectNewFrameChanged 1----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                            fd.write("\n")
+                        #with open("/tmp/ttt", "a") as fd:
+                        #    fd.write("collectNewFrameChanged 1----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                        #    fd.write("\n")
                         self.grayOut( False )
-                        with open("/tmp/ttt", "a") as fd:
-                            fd.write("collectNewFrameChanged 2----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                            fd.write("\n")
+                        #with open("/tmp/ttt", "a") as fd:
+                        #    fd.write("collectNewFrameChanged 2----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                        #    fd.write("\n")
 
                         self.emit( "grayOut", False )
                     else:
@@ -783,26 +801,26 @@ class CollectBrick( Core.BaseBrick ):
                             self._feedBackFlag = False
                             self.__isTesting = False
                             logger.info( "The data collection is done!" )
-                            with open("/tmp/ttt", "a") as fd:
-                                fd.write("collectNewFrameChanged 3----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                                fd.write("\n")
+                            #with open("/tmp/ttt", "a") as fd:
+                            #    fd.write("collectNewFrameChanged 3----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                            #    fd.write("\n")
 
                             self.grayOut( False )
-                            with open("/tmp/ttt", "a") as fd:
-                                fd.write("collectNewFrameChanged 4----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                                fd.write("\n")
+                            #with open("/tmp/ttt", "a") as fd:
+                            #    fd.write("collectNewFrameChanged 4----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                            #    fd.write("\n")
 
                             self.emit( "grayOut", False )
                         else:
-                            with open("/tmp/ttt", "a") as fd:
-                                fd.write("collectNewFrameChanged 5----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                                fd.write("\n")
+                            #with open("/tmp/ttt", "a") as fd:
+                            #    fd.write("collectNewFrameChanged 5----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                            #    fd.write("\n")
                             if self.SPECBusyTimer.isActive():
                                 self.SPECBusyTimerTimeOut()
                         if feedBackFlag:
-                            with open("/tmp/ttt", "a") as fd:
-                                fd.write("collectNewFrameChanged 6----------------------->"+ str(self.radiationCheckBox.isChecked()))
-                                fd.write("\n")                         
+                            #with open("/tmp/ttt", "a") as fd:
+                            #    fd.write("collectNewFrameChanged 6----------------------->"+ str(self.radiationCheckBox.isChecked()))
+                            #    fd.write("\n")                         
                             if self.notifyCheckBox.isChecked():
                                 Qt.QMessageBox.information( self.brick_widget, "Info", "\n                       The data collection is done!                                       \n" )
 
@@ -869,6 +887,9 @@ class CollectBrick( Core.BaseBrick ):
             if self.collectObj.isHPLC():
                 self.robotCheckBox.setChecked( False )
                 self.radiationCheckBox.setChecked( False )
+                #with open("/tmp/ttt", "a") as fd:
+                #    fd.write("collcectObjectConnected 1---------------------->"+ str(self.radiationCheckBox.isChecked()))
+                #    fd.write("\n")
                 self.hplcCheckBox.setChecked( True )
             gevent.spawn_later( 1, self.collectObj.updateChannels, oneway = True )
             #self.collectObj.updateChannels( oneway = True )
@@ -1233,6 +1254,9 @@ class CollectBrick( Core.BaseBrick ):
             if self.isHPLC:
                 Qt.QMessageBox.critical( self.brick_widget, "Error", "You can not do Radiation Damage when HPLC is selected", Qt.QMessageBox.Ok )
                 self.radiationCheckBox.setChecked( False )
+                #with open("/tmp/ttt", "a") as fd:
+                #    fd.write("radiationCheckBoxToggled-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+                #    fd.write("\n")
                 return
         self.radiationRelativeDoubleSpinBox.setEnabled( pValue )
         self.radiationAbsoluteDoubleSpinBox.setEnabled( pValue )
@@ -1392,9 +1416,9 @@ class CollectBrick( Core.BaseBrick ):
         if not self.checkPilatusReady():
             print "Pilatus seems not to be ready"
             return
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collectPushButtonClicked 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectPushButtonClicked 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
         self.robotCollect = self.robotCheckBox.isChecked()
 
@@ -1431,13 +1455,13 @@ class CollectBrick( Core.BaseBrick ):
                              Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton )
                 if answer == Qt.QMessageBox.No:
                     return
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collectPushButtonClicked 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectPushButtonClicked 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         self.displayReset()
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collectPushButtonClicked 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectPushButtonClicked 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         directory = str( self.directoryLineEdit.text() ) + "/raw"
         runNumber = "%03d" % self.runNumberSpinBox.value()
 
@@ -1488,9 +1512,9 @@ class CollectBrick( Core.BaseBrick ):
                             ( runNumber, self.prefixLineEdit.text(), self.directoryLineEdit.text() ), \
                             Qt.QMessageBox.Yes, Qt.QMessageBox.No, Qt.QMessageBox.NoButton ) == Qt.QMessageBox.Yes )
 
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collectPushButtonClicked 4-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collectPushButtonClicked 4-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         if not flag:
             return
 
@@ -1502,9 +1526,9 @@ class CollectBrick( Core.BaseBrick ):
             #When collect without robot there is no log on ISPyB
             self.getObject( "collect" ).isISPyB = False
             self.startCollectWithoutRobot()
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("end collectPushButtonClicked-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("end collectPushButtonClicked-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
 
     def setCollectionStatus( self, status ):
@@ -1581,17 +1605,17 @@ class CollectBrick( Core.BaseBrick ):
 
     def grayOut( self, pValue ):
         # if True - gray out if False - allow all buttons to be manipulated
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("grayOut 1-------------------------->"+ str(self.radiationCheckBox.isChecked()) + str(pValue))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("grayOut 1-------------------------->"+ str(self.radiationCheckBox.isChecked()) + str(pValue))
+        #    fd.write("\n")
         if pValue is not None:
             if pValue is True:
                 self.setButtonState( 1 )
             else:
                 self.setButtonState( 0 )
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("grayOut 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("grayOut 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
     def machineCurrentChanged( self, pValue ):
         # if Machine dead, do not give error messages
@@ -1631,9 +1655,9 @@ class CollectBrick( Core.BaseBrick ):
         # always process
         processData = 1
         
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("In startCollectWihoutRobot 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("In startCollectWihoutRobot 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
         self.startCollection( mode = "no robot" )
 
@@ -1664,9 +1688,9 @@ class CollectBrick( Core.BaseBrick ):
         self.__currentConcentration = self.concentrationDoubleSpinBox.value()
 
     def startCollection( self, mode = "normal" ):
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("In startCollection 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("In startCollection 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         self.frame_count = 0
         self.setCollectionStatus( "running" )
 
@@ -1675,9 +1699,9 @@ class CollectBrick( Core.BaseBrick ):
             self.__isTesting = True
             #Since we collect the same frame over and over again we reset last frame
             self.__lastFrame = None
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("In startCollection 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("In startCollection 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
         logger.info( "   - collecti    (mode: %s)" % mode )
 
@@ -1685,19 +1709,19 @@ class CollectBrick( Core.BaseBrick ):
         #TODO : DEBUG
         # Workaround for framework 4 sending collectDone signal five times...
         ##print ">>>>>>>>>>>>> in collectDone %s " % self.collectionStatus
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collection done 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collection done 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         if self.collectionStatus != "done":
             self.setCollectionStatus( "done" )
-            with open("/tmp/ttt", "a") as fd:
-                fd.write("collection done 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-                fd.write("\n")
+            #with open("/tmp/ttt", "a") as fd:
+            #    fd.write("collection done 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+            #    fd.write("\n")
 
             self.grayOut( False )
-            with open("/tmp/ttt", "a") as fd:
-                fd.write("collection done 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-                fd.write("\n")
+            #with open("/tmp/ttt", "a") as fd:
+            #    fd.write("collection done 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+            #    fd.write("\n")
 
             self.emit( "grayOut", False )
             if self.notifyCheckBox.isChecked():
@@ -1717,9 +1741,9 @@ class CollectBrick( Core.BaseBrick ):
         self._frameNumber = pFrameNumber
         self._currentFrame = 0
         self._currentCurve = 0
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collect 1-------------------------->"+ str(pRadiationChecked))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collect 1-------------------------->"+ str(pRadiationChecked))
+        #    fd.write("\n")
             
         self.getObject( "collect" ).collect( str( pDirectory ),
                                           str( pPrefix ),
@@ -1744,9 +1768,9 @@ class CollectBrick( Core.BaseBrick ):
                                           pSEUTemperature,
                                           pStorageTemperature )
         
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("collect end-------------------------->"+ str(pRadiationChecked))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("collect end-------------------------->"+ str(pRadiationChecked))
+        #    fd.write("\n")
 
     def displayReset( self ):
         self.emit( "displayResetChanged" )
@@ -1801,9 +1825,9 @@ class CollectBrick( Core.BaseBrick ):
         #
         # Stop all timers 
         #
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("abortPushButtonClicked 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("abortPushButtonClicked 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         self.SPECBusyTimerTimeOut( testBeamLost = False )
 
         for timer in self._curveList:
@@ -1855,9 +1879,9 @@ class CollectBrick( Core.BaseBrick ):
                    self.extTriggeredCheckBox,
                    self.nbIterationsSpinbox )
 
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("setButtonState 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("setButtonState 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
         def enable_widgets( *args ):
             if len( args ) == 1:
@@ -1877,14 +1901,14 @@ class CollectBrick( Core.BaseBrick ):
             self.abortPushButton.setProperty( "abortactive", "true" )
         else:
             self.abortPushButton.setProperty( "abortactive", "false" )
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("setButtonState 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("setButtonState 2.2-------------------------->"+ str(self.radiationCheckBox.isEnabled()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("setButtonState 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("setButtonState 2.2-------------------------->"+ str(self.radiationCheckBox.isEnabled()))
+        #    fd.write("\n")
         self.brick_widget.setStyleSheet( self.brick_widget.styleSheet() )
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("setButtonState 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("setButtonState 3-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
     def SPECBusyTimerTimeOut( self, testBeamLost = True ):
         #
@@ -1898,14 +1922,14 @@ class CollectBrick( Core.BaseBrick ):
 
         self._feedBackFlag = False
         self.__isTesting = False
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("SPECBusyTimerTimeOut 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("SPECBusyTimerTimeOut 1-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
 
         self.grayOut( False )
-        with open("/tmp/ttt", "a") as fd:
-            fd.write("SPECBusyTimerTimeOut 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
-            fd.write("\n")
+        #with open("/tmp/ttt", "a") as fd:
+        #    fd.write("SPECBusyTimerTimeOut 2-------------------------->"+ str(self.radiationCheckBox.isChecked()))
+        #    fd.write("\n")
         self.emit( "grayOut", False )
 
         if not self._abortFlag and self._currentFrame < self._frameNumber:
