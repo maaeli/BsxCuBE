@@ -368,6 +368,10 @@ class Collect( CObjectBase ):
         self.collectBeamCenterX.set_value( pBeamCenterX )
         self.collectBeamCenterY.set_value( pBeamCenterY )
         self.collectNormalisation.set_value( pNormalisation )
+        self.collectRadiationDamage.set_value( pRadiationChecked )
+       
+        self.collectRelativeRadiationDamage.set_value( pRadiationRelative )
+        self.collectAbsoluteRadiationDamage.set_value( pRadiationAbsolute )
         # note that pTimePerFrame is 1.0 s and number of frames is 1
         #pNumberFrames = 1
         #pTimePerFrame = 1.0
@@ -420,6 +424,10 @@ class Collect( CObjectBase ):
         self.collectBeamCenterX.set_value( pBeamCenterX )
         self.collectBeamCenterY.set_value( pBeamCenterY )
         self.collectNormalisation.set_value( pNormalisation )
+        self.collectRadiationDamage.set_value( pRadiationChecked )
+       
+        self.collectRelativeRadiationDamage.set_value( pRadiationRelative )
+        self.collectAbsoluteRadiationDamage.set_value( pRadiationAbsolute )
         self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
 
 
@@ -1385,6 +1393,10 @@ class Collect( CObjectBase ):
         self.collectBeamCenterX.set_value( pBeamCenterX )
         self.collectBeamCenterY.set_value( pBeamCenterY )
         self.collectNormalisation.set_value( pNormalisation )
+        self.collectRadiationDamage.set_value( pRadiationChecked )
+       
+        self.collectRelativeRadiationDamage.set_value( pRadiationRelative )
+        self.collectAbsoluteRadiationDamage.set_value( pRadiationAbsolute )
         self.prepareEdnaInput( pConcentration, pComments, pCode, pMaskFile, pDetectorDistance, pWaveLength, pPixelSizeX, pPixelSizeY, pBeamCenterX, pBeamCenterY, pNormalisation, pNumberFrames, pTimePerFrame )
 
         #

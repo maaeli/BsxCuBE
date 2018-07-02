@@ -15,6 +15,7 @@ from Samples             import CollectPars
 from pydispatch import dispatcher
 import time
 from FileName import testDirectory, testPrefix
+from math import log10
 
 #import inspect
 
@@ -719,12 +720,20 @@ class CollectBrick( Core.BaseBrick ):
             #    fd.write("\n")
 
     def collectAbsoluteRadiationDamageChanged( self, pValue ):
+        #We use logarithmic values in the GUI!
         if pValue is not None:
-            self.radiationAbsoluteDoubleSpinBox.setValue( float( pValue ) )
+            if float(pValue) > 0:
+                self.radiationAbsoluteDoubleSpinBox.setValue( -log10(float( pValue )) )
+            else:
+                self.radiationAbsoluteDoubleSpinBox.setValue( 0 )
 
     def collectRelativeRadiationDamageChanged( self, pValue ):
+        #We use logarithmic values in the GUI!
         if pValue is not None:
-            self.radiationRelativeDoubleSpinBox.setValue( float( pValue ) )
+            if float(pValue) > 0:
+                self.radiationRelativeDoubleSpinBox.setValue( -log10(float( pValue )) )
+            else:
+                self.radiationRelativeDoubleSpinBox.setValue( 0 )
 
     def collectProcessingDone( self, dat_filename, x = None, y = None ):
         #if self.isHPLC:
