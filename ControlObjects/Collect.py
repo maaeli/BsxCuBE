@@ -269,7 +269,7 @@ class Collect( CObjectBase ):
             self.showMessage( 2, "ERROR! No such EDNA server: %s" % _ednaServer )
         message = "Unable to connect to EDNA %s" % _ednaServer
         logger.error( message )
-        message = "EDNA server %s is dead, please restart EDNA %s" % ( _ednaServer, _ednaServer )
+        message = "EDNA server %s is slow, please restart EDNA %s before starting the next data collection" % ( _ednaServer, _ednaServer )
         self.showMessage( 2, message, notify = 1 )
         message = "ENDA %s is dead" % _ednaServer
         logger.error( message )
