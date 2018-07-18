@@ -1461,3 +1461,4 @@ class Collect( CObjectBase ):
 
     def collectWithExtTrigger( self, *args ):
         self.__extTriggeredCollectProcedure = gevent.spawn( self._externallyTriggeredCollect, *args )
+
