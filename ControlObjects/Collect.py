@@ -1462,3 +1462,5 @@ class Collect( CObjectBase ):
     def collectWithExtTrigger( self, *args ):
         self.__extTriggeredCollectProcedure = gevent.spawn( self._externallyTriggeredCollect, *args )
 
+    def setGlobal(self, parameter, value):
+        self.__getattr__(parameter).set_value(value)

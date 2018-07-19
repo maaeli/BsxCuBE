@@ -232,7 +232,7 @@ class CollectBrick( Core.BaseBrick ):
         self.hBoxLayout2.addWidget( self.runNumberLabel )
         self.runNumberSpinBox = LeadingZeroSpinBox( self.brick_widget, 3 )
         self.runNumberSpinBox.setRange( 1, 999 )
-        self.runNumberSpinBox.valueChanged.connect(self.runNumberChangedGUI)
+        self.runNumberSpinBox.editingFinished.connect(self.runNumberChangedGUI)
         self.hBoxLayout2.addWidget( self.runNumberSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout2 )
 
@@ -242,7 +242,7 @@ class CollectBrick( Core.BaseBrick ):
         self.hBoxLayout3.addWidget( self.frameNumberLabel )
         self.frameNumberSpinBox = LeadingZeroSpinBox( self.brick_widget, 5 )
         self.frameNumberSpinBox.setRange( 1, 99999 )
-        self.frameNumberSpinBox.valueChanged.connect(self.frameNumberChangedGUI)
+        self.frameNumberSpinBox.editingFinished.connect(self.frameNumberChangedGUI)
         self.hBoxLayout3.addWidget( self.frameNumberSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout3 )
 
@@ -254,7 +254,7 @@ class CollectBrick( Core.BaseBrick ):
         self.timePerFrameSpinBox.setSuffix( " s" )
         self.timePerFrameSpinBox.setRange( 0, 99 )
         self.timePerFrameSpinBox.setDecimals( 1 )
-        self.timePerFrameSpinBox.valueChanged.connect(self.timePerFrameChangedGUI)
+        self.timePerFrameSpinBox.editingFinished.connect(self.timePerFrameChangedGUI)
         self.hBoxLayout4.addWidget( self.timePerFrameSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout4 )
 
@@ -266,7 +266,7 @@ class CollectBrick( Core.BaseBrick ):
         self.concentrationDoubleSpinBox.setSuffix( " mg/ml" )
         self.concentrationDoubleSpinBox.setDecimals( 2 )
         self.concentrationDoubleSpinBox.setRange( 0, 400 )
-        self.concentrationDoubleSpinBox.valueChanged.connect(self.concentrationChangedGUI)
+        self.concentrationDoubleSpinBox.editingFinished.connect(self.concentrationChangedGUI)
         self.hBoxLayout5.addWidget( self.concentrationDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout5 )
 
@@ -277,7 +277,7 @@ class CollectBrick( Core.BaseBrick ):
         self.commentsLineEdit = Qt.QLineEdit( self.brick_widget )
         self.commentsLineEdit.setMaxLength( 100 )
         self.commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), self.commentsLineEdit ) )
-        #self.commentsLineEdit.valueChanged.connect(self.commentChangedGUI)
+        #self.commentsLineEdit.editingFinished.connect(self.commentChangedGUI)
         self.hBoxLayout6.addWidget( self.commentsLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout6 )
 
@@ -288,7 +288,7 @@ class CollectBrick( Core.BaseBrick ):
         self.codeLineEdit = Qt.QLineEdit( self.brick_widget )
         self.codeLineEdit.setMaxLength( 30 )
         self.codeLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "^[a-zA-Z][a-zA-Z0-9_]*" ), self.codeLineEdit ) )
-        #self.codeLineEdit.valueChanged.connect(self.codeChangedGUI)
+        #self.codeLineEdit.editingFinished.connect(self.codeChangedGUI)
         self.hBoxLayout7.addWidget( self.codeLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout7 )
 
@@ -306,7 +306,7 @@ class CollectBrick( Core.BaseBrick ):
         self.maskLineEdit = Qt.QLineEdit( self.brick_widget )
         self.maskLineEdit.setMaxLength( 100 )
         Qt.QObject.connect( self.maskLineEdit, Qt.SIGNAL( "textChanged(const QString &)" ), self.maskLineEditChanged )
-        #self.maskLineEdit.valueChanged.connect(self.maskChangedGUI)
+        #self.maskLineEdit.editingFinished.connect(self.maskChangedGUI)
         self.hBoxLayout8.addWidget( self.maskLineEdit )
         self.maskDirectoryPushButton = Qt.QPushButton( "...", self.brick_widget )
         self.maskDirectoryPushButton.setFixedWidth( 25 )
@@ -327,7 +327,7 @@ class CollectBrick( Core.BaseBrick ):
         self.detectorDistanceDoubleSpinBox.setDecimals( 3 )
         self.detectorDistanceDoubleSpinBox.setRange( 0.1, 10 )
 
-        self.detectorDistanceDoubleSpinBox.valueChanged.connect(self.detectorDistanceChangedGUI)
+        self.detectorDistanceDoubleSpinBox.editingFinished.connect(self.detectorDistanceChangedGUI)
         self.hBoxLayout9.addWidget( self.detectorDistanceDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout9 )
 
@@ -339,13 +339,13 @@ class CollectBrick( Core.BaseBrick ):
         self.pixelSizeXDoubleSpinBox.setSuffix( " um" )
         self.pixelSizeXDoubleSpinBox.setDecimals( 1 )
         self.pixelSizeXDoubleSpinBox.setRange( 10, 500 )
-        self.pixelSizeXDoubleSpinBox.valueChanged.connect(self.pixelSizeXChangedGUI)
+        self.pixelSizeXDoubleSpinBox.editingFinished.connect(self.pixelSizeXChangedGUI)
         self.hBoxLayout11.addWidget( self.pixelSizeXDoubleSpinBox )
         self.pixelSizeYDoubleSpinBox = Qt.QDoubleSpinBox( self.brick_widget )
         self.pixelSizeYDoubleSpinBox.setSuffix( " um" )
         self.pixelSizeYDoubleSpinBox.setDecimals( 1 )
         self.pixelSizeYDoubleSpinBox.setRange( 10, 500 )
-        self.pixelSizeYDoubleSpinBox.valueChanged.connect(self.pixelSizeYChangedGUI)
+        self.pixelSizeYDoubleSpinBox.editingFinished.connect(self.pixelSizeYChangedGUI)
         self.hBoxLayout11.addWidget( self.pixelSizeYDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout11 )
 
@@ -371,7 +371,7 @@ class CollectBrick( Core.BaseBrick ):
         self.normalisationDoubleSpinBox = Qt.QDoubleSpinBox( self.brick_widget )
         self.normalisationDoubleSpinBox.setDecimals( 10 )
         self.normalisationDoubleSpinBox.setRange( 0.0000001, 10000 )
-        self.normalisationDoubleSpinBox.valueChanged.connect(self.normalisationChangedGUI)
+        self.normalisationDoubleSpinBox.editingFinished.connect(self.normalisationChangedGUI)
         self.hBoxLayout13.addWidget( self.normalisationDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout13 )
 
@@ -390,13 +390,13 @@ class CollectBrick( Core.BaseBrick ):
         self.radiationRelativeDoubleSpinBox.setRange( 0.0, 500. )
         self.radiationRelativeDoubleSpinBox.setDecimals( 2 )
         self.radiationRelativeDoubleSpinBox.setToolTip( "Relative Similarity" )
-        self.radiationRelativeDoubleSpinBox.valueChanged.connect(self.radiationRelativeChangedGUI)
+        self.radiationRelativeDoubleSpinBox.editingFinished.connect(self.radiationRelativeChangedGUI)
         self.hBoxLayout15.addWidget( self.radiationRelativeDoubleSpinBox )
         self.radiationAbsoluteDoubleSpinBox = Qt.QDoubleSpinBox( self.brick_widget )
         self.radiationAbsoluteDoubleSpinBox.setRange( 0.0, 500. )
         self.radiationAbsoluteDoubleSpinBox.setDecimals( 2 )
         self.radiationAbsoluteDoubleSpinBox.setToolTip( "Absolute Similarity" )
-        self.radiationAbsoluteDoubleSpinBox.valueChanged.connect(self.radiationAbsoluteChangedGUI)
+        self.radiationAbsoluteDoubleSpinBox.editingFinished.connect(self.radiationAbsoluteChangedGUI)
         self.hBoxLayout15.addWidget( self.radiationAbsoluteDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout15 )
 
@@ -678,50 +678,50 @@ class CollectBrick( Core.BaseBrick ):
         self.runNumberSpinBox.setValue( int( pValue ) )
 
     def runNumberChangedGUI( self ):
-        self.getObject( "collect" ).collectRunNumber= int(self.runNumberSpinBox.value()  )
+        self.getObject( "collect" ).setGlobal("collectRunNumber",int(self.runNumberSpinBox.value()  ))
 
     def collectNumberFramesChanged( self, pValue ):
         self.frameNumberSpinBox.setValue( int( pValue ) )
 
     def frameNumberChangedGUI( self ):
-        self.getObject( "collect" ).collectNumberFrames = int(self.frameNumberSpinBox.value()  )
+        self.getObject( "collect" ).setGlobal("collectNumberFrames",int(self.frameNumberSpinBox.value()  ))
    
 
     def collectTimePerFrameChanged( self, pValue ):
         self.timePerFrameSpinBox.setValue( float( pValue ) )
 
     def timePerFrameChangedGUI( self ):
-        self.getObject( "collect" ).collectTimePerFrame = self.timePerFrameSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectTimePerFrame", self.timePerFrameSpinBox.value() )  
 
     def collectConcentrationChanged( self, pValue ):
         self.concentrationDoubleSpinBox.setValue( float( pValue ) )
 
     def concentrationChangedGUI( self ):
-        self.getObject( "collect" ).collectConcentration = self.concentrationDoubleSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectConcentration", self.concentrationDoubleSpinBox.value())  
 
     def collectCommentsChanged( self, pValue ):
         self.commentsLineEdit.setText( pValue )
 
     def commentsChangedGUI( self ):
-        self.getObject( "collect" ).collectComments = str(self.commentsLineEdit.value()  )
+        self.getObject( "collect" ).setGlobal("collectComments", str(self.commentsLineEdit.value()  ) )
 
     def collectCodeChanged( self, pValue ):
         self.codeLineEdit.setText( pValue )
 
     def codeChangedGUI( self ):
-        self.getObject( "collect" ).collectCode = str(self.codeLineEdit.value()  )
+        self.getObject( "collect" ).setGlobal("collectCode", str(self.codeLineEdit.value()  ))
 
     def collectMaskFileChanged( self, pValue ):
         self.maskLineEdit.setText( pValue )
    
     def maskChangedGUI( self ):
-        self.getObject( "collect" ).collectMaskFile = str(self.maskLineEdit.value()  )
+        self.getObject( "collect" ).setGlobal("collectMaskFile", str(self.maskLineEdit.value()  ))
 
     def collectDetectorDistanceChanged( self, pValue ):
         self.detectorDistanceDoubleSpinBox.setValue( float( pValue ) )
 
     def detectorDistanceChangedGUI( self ):
-        self.getObject( "collect" ).collectDetectorDistance = self.detectorDistanceDoubleSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectDetectorDistance",self.detectorDistanceDoubleSpinBox.value() )
 
     def collectWaveLengthChanged( self, pValue ):
         self._waveLengthStr = pValue
@@ -730,13 +730,13 @@ class CollectBrick( Core.BaseBrick ):
         self.pixelSizeXDoubleSpinBox.setValue( float( pValue ) )
   
     def pixelSizeXChangedGUI( self ):
-        self.getObject( "collect" ).collectPixelSizeX = self.pixelSizeXDoubleSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectPixelSizeX", self.pixelSizeXDoubleSpinBox.value()  )
 
     def collectPixelSizeYChanged( self, pValue ):
         self.pixelSizeYDoubleSpinBox.setValue( float( pValue ) )
 
     def pixelSizeYChangedGUI( self ):
-        self.getObject( "collect" ).collectPixelSizeY = self.pixelSizeYDoubleSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectPixelSizeY",self.pixelSizeYDoubleSpinBox.value()  )
 
     def collectBeamCenterXChanged( self, pValue ):
         self.beamCenterXSpinBox.setValue( int( pValue ) )
@@ -748,13 +748,13 @@ class CollectBrick( Core.BaseBrick ):
         self.beamCenterYSpinBox.setValue( int( pValue ) )
 
     def beamCenterYChangedGUI( self ):
-        self.getObject( "collect" ).collectbeamcenterY = self.beamCenterYSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectbeamcenterY", self.beamCenterYSpinBox.value()  )
 
     def collectNormalisationChanged( self, pValue ):
         self.normalisationDoubleSpinBox.setValue( float( pValue ) )
 
     def normalisationChangedGUI( self ):
-        self.getObject( "collect" ).collectNormalisation = self.normalisationDoubleSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectNormalisation",  self.normalisationDoubleSpinBox.value()  )
 
     def collectRadiationDamageChanged( self, pValue ):     
         if pValue is not None:
@@ -776,7 +776,7 @@ class CollectBrick( Core.BaseBrick ):
                 self.radiationAbsoluteDoubleSpinBox.setValue( 0 )
 
     def radiationAbsoluteChangedGUI( self ):
-        self.getObject( "collect" ).collectAbsoluteRadiationDamage= self.getRadiationAbsoluteLinear()
+        self.getObject( "collect" ).setGlobal("collectAbsoluteRadiationDamage",self.getRadiationAbsoluteLinear() )
 
     def collectRelativeRadiationDamageChanged( self, pValue ):
         #We use logarithmic values in the GUI!
@@ -787,7 +787,7 @@ class CollectBrick( Core.BaseBrick ):
                 self.radiationRelativeDoubleSpinBox.setValue( 0 )
 
     def radiationRelativeChangedGUI( self ):
-        self.getObject( "collect" ).collectRelativeRadiationDamage= self.getRadiationRelativeLinear()
+        self.getObject( "collect" ).setGlobal("collectRelativeRadiationDamage", self.getRadiationRelativeLinear())
 
     def collectProcessingDone( self, dat_filename, x = None, y = None ):
         #if self.isHPLC:
