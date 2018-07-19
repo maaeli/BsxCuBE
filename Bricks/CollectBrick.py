@@ -277,7 +277,7 @@ class CollectBrick( Core.BaseBrick ):
         self.commentsLineEdit = Qt.QLineEdit( self.brick_widget )
         self.commentsLineEdit.setMaxLength( 100 )
         self.commentsLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "[a-zA-Z0-9\\%/()=+*^:.\-_ ]*" ), self.commentsLineEdit ) )
-        #self.commentsLineEdit.editingFinished.connect(self.commentChangedGUI)
+        self.commentsLineEdit.editingFinished.connect(self.commentsChangedGUI)
         self.hBoxLayout6.addWidget( self.commentsLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout6 )
 
@@ -288,7 +288,7 @@ class CollectBrick( Core.BaseBrick ):
         self.codeLineEdit = Qt.QLineEdit( self.brick_widget )
         self.codeLineEdit.setMaxLength( 30 )
         self.codeLineEdit.setValidator( Qt.QRegExpValidator( Qt.QRegExp( "^[a-zA-Z][a-zA-Z0-9_]*" ), self.codeLineEdit ) )
-        #self.codeLineEdit.editingFinished.connect(self.codeChangedGUI)
+        self.codeLineEdit.editingFinished.connect(self.codeChangedGUI)
         self.hBoxLayout7.addWidget( self.codeLineEdit )
         self.brick_widget.layout().addLayout( self.hBoxLayout7 )
 
@@ -306,7 +306,7 @@ class CollectBrick( Core.BaseBrick ):
         self.maskLineEdit = Qt.QLineEdit( self.brick_widget )
         self.maskLineEdit.setMaxLength( 100 )
         Qt.QObject.connect( self.maskLineEdit, Qt.SIGNAL( "textChanged(const QString &)" ), self.maskLineEditChanged )
-        #self.maskLineEdit.editingFinished.connect(self.maskChangedGUI)
+        self.maskLineEdit.editingFinished.connect(self.maskChangedGUI)
         self.hBoxLayout8.addWidget( self.maskLineEdit )
         self.maskDirectoryPushButton = Qt.QPushButton( "...", self.brick_widget )
         self.maskDirectoryPushButton.setFixedWidth( 25 )
@@ -349,7 +349,7 @@ class CollectBrick( Core.BaseBrick ):
         self.hBoxLayout11.addWidget( self.pixelSizeYDoubleSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout11 )
 
-#Spec connection
+
         self.hBoxLayout12 = Qt.QHBoxLayout()
         self.beamCenterLabel = Qt.QLabel( "Beam center (x, y)", self.brick_widget )
         self.beamCenterLabel.setFixedWidth( 130 )
@@ -357,10 +357,12 @@ class CollectBrick( Core.BaseBrick ):
         self.beamCenterXSpinBox = Qt.QSpinBox( self.brick_widget )
         self.beamCenterXSpinBox.setSuffix( " px" )
         self.beamCenterXSpinBox.setRange( 1, 9999 )
+        self.beamCenterXSpinBox.editingFinished.connect(self.beamCenterXChangedGUI)
         self.hBoxLayout12.addWidget( self.beamCenterXSpinBox )
         self.beamCenterYSpinBox = Qt.QSpinBox( self.brick_widget )
         self.beamCenterYSpinBox.setSuffix( " px" )
         self.beamCenterYSpinBox.setRange( 1, 9999 )
+        self.beamCenterYSpinBox.editingFinished.connect(self.beamCenterYChangedGUI)
         self.hBoxLayout12.addWidget( self.beamCenterYSpinBox )
         self.brick_widget.layout().addLayout( self.hBoxLayout12 )
 
@@ -702,20 +704,20 @@ class CollectBrick( Core.BaseBrick ):
     def collectCommentsChanged( self, pValue ):
         self.commentsLineEdit.setText( pValue )
 
-    def commentsChangedGUI( self ):
-        self.getObject( "collect" ).setGlobal("collectComments", str(self.commentsLineEdit.value()  ) )
+    def commentsChangedGUI( self):
+        self.getObject( "collect" ).setGlobal("collectComments", str(self.commentsLineEdit.text()  ) )
 
     def collectCodeChanged( self, pValue ):
         self.codeLineEdit.setText( pValue )
 
     def codeChangedGUI( self ):
-        self.getObject( "collect" ).setGlobal("collectCode", str(self.codeLineEdit.value()  ))
+        self.getObject( "collect" ).setGlobal("collectCode", str(self.codeLineEdit.text()  ))
 
     def collectMaskFileChanged( self, pValue ):
         self.maskLineEdit.setText( pValue )
    
     def maskChangedGUI( self ):
-        self.getObject( "collect" ).setGlobal("collectMaskFile", str(self.maskLineEdit.value()  ))
+        self.getObject( "collect" ).setGlobal("collectMaskFile", str(self.maskLineEdit.text()  ))
 
     def collectDetectorDistanceChanged( self, pValue ):
         self.detectorDistanceDoubleSpinBox.setValue( float( pValue ) )
@@ -742,13 +744,13 @@ class CollectBrick( Core.BaseBrick ):
         self.beamCenterXSpinBox.setValue( int( pValue ) )
 
     def beamCenterXChangedGUI( self ):
-        self.getObject( "collect" ).collectbeamcenterX = self.beamCenterXSpinBox.value()  
+        self.getObject( "collect" ).setGlobal("collectBeamCenterX", self.beamCenterXSpinBox.value()  )
 
     def collectBeamCenterYChanged( self, pValue ):
         self.beamCenterYSpinBox.setValue( int( pValue ) )
 
     def beamCenterYChangedGUI( self ):
-        self.getObject( "collect" ).setGlobal("collectbeamcenterY", self.beamCenterYSpinBox.value()  )
+        self.getObject( "collect" ).setGlobal("collectBeamCenterY", self.beamCenterYSpinBox.value()  )
 
     def collectNormalisationChanged( self, pValue ):
         self.normalisationDoubleSpinBox.setValue( float( pValue ) )
